@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+/* Configure dark mode for Tailwind CSS v4 */
+@theme {
+  --color-mode: light dark;
+  
+  /* Custom colors - Tailwind v4 syntax */
+  --color-ooga: #ff6b9d;
+  
+  /* Booga color palette (100-900) */
+  --color-booga-100: #e3f2fd;
+  --color-booga-200: #bbdefb;
+  --color-booga-300: #90caf9;
+  --color-booga-400: #64b5f6;
+  --color-booga-500: #42a5f5;
+  --color-booga-600: #2196f3;
+  --color-booga-700: #1e88e5;
+  --color-booga-800: #1976d2;
+  --color-booga-900: #1565c0;
+}
+
+/* Use class-based dark mode */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --color-bg: theme('colors.white');
+  --color-text: theme('colors.gray.900');
+}
+
+.dark {
+  --color-bg: theme('colors.gray.900');
+  --color-text: theme('colors.gray.100');
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}

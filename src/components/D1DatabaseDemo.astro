@@ -1,0 +1,294 @@
+---
+// D1 Database Demo Component with HTMX
+---
+
+<!-- Load HTMX only for this component -->
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+	<h2 class="text-2xl font-semibold mb-4 text-blue-600 dark:text-blue-400">
+		🔥 CloudFlare D1 Database - Live Demo (HTMX)
+	</h2>
+	<p class="text-gray-600 dark:text-gray-300 mb-6">
+		Interactive demonstration of D1 database connectivity using HTMX. Data is fetched and updated in real-time from our CloudFlare D1 database.
+	</p>
+	
+	<div class="overflow-x-auto">
+		<div 
+			id="d1-table-container" 
+			class="min-h-[200px]"
+			hx-get="/api/test-table"
+			hx-trigger="load"
+			hx-indicator="#loading-indicator"
+		>
+			<div id="loading-indicator" class="flex items-center justify-center py-8">
+				<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+				<span class="ml-3 text-gray-600 dark:text-gray-300">Loading D1 data...</span>
+			</div>
+		</div>
+	</div>
+	
+	<div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+		<p class="text-blue-800 dark:text-blue-200 text-sm">
+			<strong>API Endpoints:</strong> 
+			<code class="bg-blue-100 dark:bg-blue-800/50 px-2 py-1 rounded">/api/test</code> (CRUD) | 
+			<code class="bg-blue-100 dark:bg-blue-800/50 px-2 py-1 rounded">/api/test-table</code> (HTMX table)
+			- Powered by HTMX for seamless interactivity
+		</p>
+	</div>
+</div>
+
+<!-- Modals -->
+<div id="user-details-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+	<div class="flex items-center justify-center min-h-screen p-4">
+		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+			<div class="p-6">
+				<div class="flex justify-between items-center mb-4">
+					<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">User Details</h3>
+					<button onclick="closeModal('user-details-modal')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+				<div id="user-details-content"></div>
+				<div class="mt-6 flex gap-3">
+					<button onclick="openUpdateModal()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+						Update
+					</button>
+					<button onclick="openDeleteModal()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
+						Delete
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="update-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+	<div class="flex items-center justify-center min-h-screen p-4">
+		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+			<div class="p-6">
+				<div class="flex justify-between items-center mb-4">
+					<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Update User</h3>
+					<button onclick="closeModal('update-modal')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+				<form 
+					id="update-form"
+					hx-put="/api/test"
+					hx-target="#d1-table-container"
+					hx-swap="innerHTML"
+					hx-on::after-request="handleUpdateResponse(event)"
+				>
+					<input type="hidden" id="update-id" name="id">
+					<div class="mb-4">
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Name</label>
+						<input type="text" id="update-name" name="name" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100">
+					</div>
+					<div class="mb-6">
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Surname</label>
+						<input type="text" id="update-surname" name="surname" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100">
+					</div>
+					<div class="flex gap-3">
+						<button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+							Update
+						</button>
+						<button type="button" onclick="closeModal('update-modal')" class="flex-1 px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">
+							Cancel
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+	<div class="flex items-center justify-center min-h-screen p-4">
+		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+			<div class="p-6">
+				<div class="flex justify-between items-center mb-4">
+					<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Confirm Delete</h3>
+					<button onclick="closeModal('delete-modal')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+				<p class="text-gray-600 dark:text-gray-300 mb-6">Are you sure you want to delete this user? This action cannot be undone.</p>
+				<div class="flex gap-3">
+					<button 
+						id="confirm-delete-btn"
+						class="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+						hx-delete="/api/test"
+						hx-target="#d1-table-container"
+						hx-swap="innerHTML"
+						hx-on::after-request="handleDeleteResponse(event)"
+					>
+						Delete
+					</button>
+					<button onclick="closeModal('delete-modal')" class="flex-1 px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">
+						Cancel
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="toast" class="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50">
+	<div class="flex items-center">
+		<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+		</svg>
+		<span id="toast-message">Success!</span>
+	</div>
+</div>
+
+<script>
+	let currentUserId = null;
+
+	// Modal functionality
+	function openModal(modalId) {
+		document.getElementById(modalId).classList.remove('hidden');
+	}
+
+	function closeModal(modalId) {
+		document.getElementById(modalId).classList.add('hidden');
+	}
+
+	async function openUserDetails(userId) {
+		try {
+			const response = await fetch(`/api/test/${userId}`);
+			const user = await response.json();
+			
+			if (response.ok) {
+				currentUserId = userId;
+				document.getElementById('user-details-content').innerHTML = `
+					<div class="space-y-3">
+						<div>
+							<span class="font-medium text-gray-700 dark:text-gray-300">ID:</span>
+							<span class="text-gray-900 dark:text-gray-100">${user.id}</span>
+						</div>
+						<div>
+							<span class="font-medium text-gray-700 dark:text-gray-300">Name:</span>
+							<span class="text-gray-900 dark:text-gray-100">${user.name}</span>
+						</div>
+						<div>
+							<span class="font-medium text-gray-700 dark:text-gray-300">Surname:</span>
+							<span class="text-gray-900 dark:text-gray-100">${user.surname}</span>
+						</div>
+						<div>
+							<span class="font-medium text-gray-700 dark:text-gray-300">Description:</span>
+							<span class="text-gray-900 dark:text-gray-100">${user.description}</span>
+						</div>
+					</div>
+				`;
+				openModal('user-details-modal');
+			} else {
+				showToast('Error loading user details', 'error');
+			}
+		} catch (error) {
+			console.error('Error fetching user details:', error);
+			showToast('Error loading user details', 'error');
+		}
+	}
+
+	function openUpdateModal() {
+		if (currentUserId) {
+			closeModal('user-details-modal');
+			
+			// Get current user data to pre-fill form
+			fetch(`/api/test/${currentUserId}`)
+				.then(response => response.json())
+				.then(user => {
+					document.getElementById('update-id').value = user.id;
+					document.getElementById('update-name').value = user.name;
+					document.getElementById('update-surname').value = user.surname;
+					openModal('update-modal');
+				})
+				.catch(error => {
+					console.error('Error fetching user data:', error);
+					showToast('Error loading user data', 'error');
+				});
+		}
+	}
+
+	function openUpdateModalDirect(userId, name, surname) {
+		currentUserId = userId;
+		document.getElementById('update-id').value = userId;
+		document.getElementById('update-name').value = name;
+		document.getElementById('update-surname').value = surname;
+		openModal('update-modal');
+	}
+
+	function openDeleteModal() {
+		closeModal('user-details-modal');
+		openModal('delete-modal');
+	}
+
+	function openDeleteModalDirect(userId) {
+		currentUserId = userId;
+		// Set the user ID for the delete button
+		document.getElementById('confirm-delete-btn').setAttribute('hx-vals', JSON.stringify({id: userId}));
+		openModal('delete-modal');
+	}
+
+	function showToast(message, type = 'success') {
+		const toast = document.getElementById('toast');
+		const toastMessage = document.getElementById('toast-message');
+		
+		toastMessage.textContent = message;
+		
+		if (type === 'error') {
+			toast.className = 'fixed top-4 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50';
+		} else {
+			toast.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50';
+		}
+		
+		// Show toast
+		setTimeout(() => {
+			toast.classList.remove('translate-x-full');
+		}, 100);
+		
+		// Hide toast after 3 seconds
+		setTimeout(() => {
+			toast.classList.add('translate-x-full');
+		}, 3000);
+	}
+
+	// HTMX event handlers
+	function handleUpdateResponse(event) {
+		const response = event.detail.xhr;
+		if (response.status === 200) {
+			closeModal('update-modal');
+			showToast('User updated successfully!', 'success');
+		} else {
+			showToast('Error updating user', 'error');
+		}
+	}
+
+	function handleDeleteResponse(event) {
+		const response = event.detail.xhr;
+		if (response.status === 200) {
+			closeModal('delete-modal');
+			showToast('User deleted successfully!', 'success');
+		} else {
+			showToast('Error deleting user', 'error');
+		}
+	}
+
+	// Make functions globally available
+	window.openUserDetails = openUserDetails;
+	window.openUpdateModalDirect = openUpdateModalDirect;
+	window.openDeleteModalDirect = openDeleteModalDirect;
+	window.openUpdateModal = openUpdateModal;
+	window.openDeleteModal = openDeleteModal;
+	window.closeModal = closeModal;
+	window.handleUpdateResponse = handleUpdateResponse;
+	window.handleDeleteResponse = handleDeleteResponse;
+</script>

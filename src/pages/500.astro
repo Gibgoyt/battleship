@@ -1,0 +1,233 @@
+---
+import Layout from 'src/layouts/Layout.astro';
+---
+
+<Layout title="500 - Internal Server Error">
+	<main>
+		<!-- Hero Section -->
+		<section class="min-h-screen flex items-center justify-center bg-gradient-to-b from-orange-50 to-red-50 dark:from-gray-900 dark:to-gray-800 py-16 lg:py-24">
+			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+				<!-- 500 Icon -->
+				<div class="mb-8">
+					<div class="w-32 h-32 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-8 animate-pulse">
+						<svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+						</svg>
+					</div>
+				</div>
+
+				<!-- 500 Text -->
+				<h1 class="text-8xl md:text-9xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+					500
+				</h1>
+				
+				<h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-200 mb-6">
+					Internal Server Error
+				</h2>
+				
+				<p class="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+					Something went wrong on our end. We're working to fix the problem. Please try again in a few moments.
+				</p>
+
+				<!-- Error Details -->
+				<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-8 max-w-2xl mx-auto">
+					<h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">What happened?</h3>
+					<div class="text-left space-y-3 text-gray-600 dark:text-gray-300">
+						<p class="flex items-start">
+							<svg class="w-5 h-5 text-orange-500 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+							</svg>
+							<span>The server encountered an unexpected condition that prevented it from fulfilling your request.</span>
+						</p>
+						<p class="flex items-start">
+							<svg class="w-5 h-5 text-blue-500 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+							</svg>
+							<span>This error has been automatically logged and our team has been notified.</span>
+						</p>
+					</div>
+				</div>
+
+				<!-- What to try -->
+				<div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-8 mb-8 max-w-2xl mx-auto">
+					<h3 class="text-xl font-semibold mb-4 text-blue-800 dark:text-blue-200">What you can try:</h3>
+					<ul class="text-left space-y-3 text-blue-700 dark:text-blue-300">
+						<li class="flex items-start">
+							<svg class="w-5 h-5 text-blue-500 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+							</svg>
+							<span>Refresh the page in a few moments</span>
+						</li>
+						<li class="flex items-start">
+							<svg class="w-5 h-5 text-blue-500 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+							</svg>
+							<span>Go back to the previous page</span>
+						</li>
+						<li class="flex items-start">
+							<svg class="w-5 h-5 text-blue-500 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+							</svg>
+							<span>Return to our homepage</span>
+						</li>
+						<li class="flex items-start">
+							<svg class="w-5 h-5 text-blue-500 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+							</svg>
+							<span>Contact support if the problem persists</span>
+						</li>
+					</ul>
+				</div>
+
+				<!-- Action Buttons -->
+				<div class="flex flex-col sm:flex-row gap-4 justify-center">
+					<button onclick="window.location.reload()" 
+						class="px-8 py-4 bg-orange-600 text-white text-lg rounded-lg hover:bg-orange-700 transition-colors shadow-lg hover:shadow-xl inline-flex items-center justify-center">
+						<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+						</svg>
+						Try Again
+					</button>
+					
+					<button onclick="history.back()" 
+						class="px-8 py-4 bg-gray-600 text-white text-lg rounded-lg hover:bg-gray-700 transition-colors shadow-lg hover:shadow-xl inline-flex items-center justify-center">
+						<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+						</svg>
+						Go Back
+					</button>
+					
+					<a href="/apps" 
+						class="px-8 py-4 bg-blue-600 text-white text-lg rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl inline-flex items-center justify-center">
+						<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 22V12h6v10"></path>
+						</svg>
+						Applications Hub
+					</a>
+					
+					<a href="/" 
+						class="px-8 py-4 bg-green-600 text-white text-lg rounded-lg hover:bg-green-700 transition-colors shadow-lg hover:shadow-xl inline-flex items-center justify-center">
+						<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+						</svg>
+						Home
+					</a>
+				</div>
+
+				<!-- Error ID (in production, this would be a real error ID) -->
+				<div class="mt-12 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg max-w-md mx-auto">
+					<h4 class="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Error Reference:</h4>
+					<code class="text-xs text-gray-600 dark:text-gray-400" id="errorId">ERR-500-{new Date().getTime()}</code>
+					<p class="text-xs text-gray-500 dark:text-gray-500 mt-2">
+						Please include this reference if contacting support
+					</p>
+				</div>
+
+				<!-- Technical Details -->
+				<details class="mt-8 max-w-2xl mx-auto text-left">
+					<summary class="cursor-pointer text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+						Show technical details
+					</summary>
+					<div class="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm">
+						<div class="space-y-2 font-mono text-gray-600 dark:text-gray-400">
+							<div><strong>Status:</strong> 500 Internal Server Error</div>
+							<div><strong>Time:</strong> <span id="errorTime"></span></div>
+							<div><strong>User Agent:</strong> <span id="userAgent"></span></div>
+							<div><strong>URL:</strong> <span id="errorUrl"></span></div>
+						</div>
+					</div>
+				</details>
+			</div>
+		</section>
+
+		<!-- Status Page Link -->
+		<section class="py-16 bg-gray-50 dark:bg-gray-900">
+			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+				<h3 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+					Service Status
+				</h3>
+				<p class="text-gray-600 dark:text-gray-400 mb-6">
+					Check our current system status and any ongoing incidents
+				</p>
+				<div class="inline-flex items-center px-6 py-3 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 rounded-lg">
+					<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+					</svg>
+					All systems operational
+				</div>
+			</div>
+		</section>
+	</main>
+</Layout>
+
+<script>
+	// Populate error details
+	document.addEventListener('DOMContentLoaded', function() {
+		// Set error time
+		const errorTimeEl = document.getElementById('errorTime');
+		if (errorTimeEl) {
+			errorTimeEl.textContent = new Date().toISOString();
+		}
+		
+		// Set user agent
+		const userAgentEl = document.getElementById('userAgent');
+		if (userAgentEl) {
+			userAgentEl.textContent = navigator.userAgent;
+		}
+		
+		// Set error URL
+		const errorUrlEl = document.getElementById('errorUrl');
+		if (errorUrlEl) {
+			errorUrlEl.textContent = window.location.href;
+		}
+		
+		// Track 500 error (you could send this to analytics/logging service)
+		console.error('500 Internal Server Error:', {
+			url: window.location.href,
+			timestamp: new Date().toISOString(),
+			userAgent: navigator.userAgent
+		});
+		
+		// Auto refresh after 30 seconds
+		setTimeout(() => {
+			const refreshNotice = document.createElement('div');
+			refreshNotice.className = 'fixed bottom-4 right-4 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg';
+			refreshNotice.innerHTML = `
+				<div class="flex items-center">
+					<svg class="w-5 h-5 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+					</svg>
+					Auto-refreshing in 5 seconds...
+				</div>
+			`;
+			document.body.appendChild(refreshNotice);
+			
+			setTimeout(() => {
+				window.location.reload();
+			}, 5000);
+		}, 30000);
+	});
+</script>
+
+<style>
+	/* Add some custom animations */
+	@keyframes fadeIn {
+		from { opacity: 0; transform: translateY(20px); }
+		to { opacity: 1; transform: translateY(0); }
+	}
+	
+	main > section {
+		animation: fadeIn 0.5s ease-out;
+	}
+	
+	/* Pulse animation for the icon */
+	@keyframes pulse {
+		0%, 100% { transform: scale(1); }
+		50% { transform: scale(1.05); }
+	}
+	
+	.animate-pulse {
+		animation: pulse 2s ease-in-out infinite;
+	}
+</style>

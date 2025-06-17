@@ -1,0 +1,32 @@
+{
+  "name": "ai-docs",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "deploy": "npm run build && wrangler pages deploy dist",
+    "deploy:preview": "npm run build && wrangler pages deploy dist --branch preview"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^12.5.4",
+    "@astrojs/mdx": "^4.3.0",
+    "@astrojs/solid-js": "^5.1.0",
+    "@astrojs/svelte": "^7.1.0",
+    "@builder.io/qwik": "^1.14.1",
+    "@qwikdev/astro": "^0.8.0",
+    "@tailwindcss/vite": "^4.1.8",
+    "astro": "^5.9.1",
+    "htmx.org": "^1.9.12",
+    "solid-devtools": "^0.30.1",
+    "solid-js": "^1.9.7",
+    "svelte": "^5.33.18",
+    "tailwindcss": "^4.1.8",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "wrangler": "^4.19.1"
+  }
+}

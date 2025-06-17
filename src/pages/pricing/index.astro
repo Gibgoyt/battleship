@@ -1,0 +1,264 @@
+---
+import Layout from 'src/layouts/Layout.astro';
+import PricingCard from 'src/components-svelte/PricingCard.svelte';
+
+const pricingPlans = [
+  {
+    name: "Starter",
+    price: "$49",
+    period: "month",
+    features: [
+      "Up to 3 repositories",
+      "100,000 lines of code",
+      "Basic AI analysis",
+      "Standard documentation",
+      "Email support",
+      "GitHub integration"
+    ],
+    highlighted: false,
+    buttonText: "Start Free Trial",
+    buttonLink: "/demo"
+  },
+  {
+    name: "Professional",
+    price: "$199",
+    period: "month",
+    features: [
+      "Up to 20 repositories",
+      "1 million lines of code",
+      "Advanced AI analysis with Claude",
+      "Premium documentation templates",
+      "Priority support",
+      "GitHub, GitLab, Bitbucket",
+      "Custom prompting",
+      "Team collaboration (5 users)"
+    ],
+    highlighted: true,
+    buttonText: "Start Free Trial",
+    buttonLink: "/demo"
+  },
+  {
+    name: "Enterprise",
+    price: "Custom",
+    period: "pricing",
+    features: [
+      "Unlimited repositories",
+      "Unlimited code analysis",
+      "Custom AI models",
+      "White-label documentation",
+      "Dedicated support",
+      "All integrations",
+      "Advanced security",
+      "Unlimited team members",
+      "On-premise deployment",
+      "SLA guarantee"
+    ],
+    highlighted: false,
+    buttonText: "Contact Sales",
+    buttonLink: "/contact"
+  }
+];
+---
+
+<Layout title="Pricing - DocForge AI">
+
+	<main>
+		<!-- Hero Section -->
+		<section class="bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 py-16 lg:py-24">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="text-center">
+					<h1 class="text-4xl lg:text-5xl font-bold mb-6">
+						Simple, Transparent Pricing
+					</h1>
+					<p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+						Choose the perfect plan for your team. All plans include a 14-day free trial.
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Pricing Cards Section -->
+		<section class="py-16 lg:py-24">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+					{pricingPlans.map((plan) => (
+						<PricingCard client:visible {...plan} />
+					))}
+				</div>
+			</div>
+		</section>
+
+		<!-- Feature Comparison Section -->
+		<section class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-900">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<h2 class="text-3xl font-bold text-center mb-12">Compare Plans</h2>
+				
+				<div class="overflow-x-auto">
+					<table class="w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+						<thead>
+							<tr class="border-b border-gray-200 dark:border-gray-700">
+								<th class="text-left p-6 font-semibold">Features</th>
+								<th class="text-center p-6 font-semibold">Starter</th>
+								<th class="text-center p-6 font-semibold bg-blue-50 dark:bg-blue-900/20">Professional</th>
+								<th class="text-center p-6 font-semibold">Enterprise</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="border-b border-gray-200 dark:border-gray-700">
+								<td class="p-6">Repositories</td>
+								<td class="text-center p-6">Up to 3</td>
+								<td class="text-center p-6 bg-blue-50 dark:bg-blue-900/20">Up to 20</td>
+								<td class="text-center p-6">Unlimited</td>
+							</tr>
+							<tr class="border-b border-gray-200 dark:border-gray-700">
+								<td class="p-6">Lines of Code</td>
+								<td class="text-center p-6">100K</td>
+								<td class="text-center p-6 bg-blue-50 dark:bg-blue-900/20">1M</td>
+								<td class="text-center p-6">Unlimited</td>
+							</tr>
+							<tr class="border-b border-gray-200 dark:border-gray-700">
+								<td class="p-6">AI Models</td>
+								<td class="text-center p-6">Basic</td>
+								<td class="text-center p-6 bg-blue-50 dark:bg-blue-900/20">Claude + Gemini</td>
+								<td class="text-center p-6">Custom</td>
+							</tr>
+							<tr class="border-b border-gray-200 dark:border-gray-700">
+								<td class="p-6">Vector Search</td>
+								<td class="text-center p-6">
+									<svg class="w-5 h-5 text-green-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+									</svg>
+								</td>
+								<td class="text-center p-6 bg-blue-50 dark:bg-blue-900/20">
+									<svg class="w-5 h-5 text-green-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+									</svg>
+								</td>
+								<td class="text-center p-6">
+									<svg class="w-5 h-5 text-green-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+									</svg>
+								</td>
+							</tr>
+							<tr class="border-b border-gray-200 dark:border-gray-700">
+								<td class="p-6">Custom Prompting</td>
+								<td class="text-center p-6">
+									<svg class="w-5 h-5 text-gray-400 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+									</svg>
+								</td>
+								<td class="text-center p-6 bg-blue-50 dark:bg-blue-900/20">
+									<svg class="w-5 h-5 text-green-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+									</svg>
+								</td>
+								<td class="text-center p-6">
+									<svg class="w-5 h-5 text-green-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+									</svg>
+								</td>
+							</tr>
+							<tr class="border-b border-gray-200 dark:border-gray-700">
+								<td class="p-6">Team Members</td>
+								<td class="text-center p-6">1</td>
+								<td class="text-center p-6 bg-blue-50 dark:bg-blue-900/20">5</td>
+								<td class="text-center p-6">Unlimited</td>
+							</tr>
+							<tr class="border-b border-gray-200 dark:border-gray-700">
+								<td class="p-6">API Access</td>
+								<td class="text-center p-6">
+									<svg class="w-5 h-5 text-gray-400 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+									</svg>
+								</td>
+								<td class="text-center p-6 bg-blue-50 dark:bg-blue-900/20">
+									<svg class="w-5 h-5 text-green-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+									</svg>
+								</td>
+								<td class="text-center p-6">
+									<svg class="w-5 h-5 text-green-500 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+									</svg>
+								</td>
+							</tr>
+							<tr>
+								<td class="p-6">Support</td>
+								<td class="text-center p-6">Email</td>
+								<td class="text-center p-6 bg-blue-50 dark:bg-blue-900/20">Priority</td>
+								<td class="text-center p-6">Dedicated</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</section>
+
+		<!-- FAQ Section -->
+		<section class="py-16 lg:py-24">
+			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+				<h2 class="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+				
+				<div class="space-y-8">
+					<div>
+						<h3 class="text-xl font-semibold mb-3">What happens after my free trial?</h3>
+						<p class="text-gray-600 dark:text-gray-300">
+							Your 14-day free trial includes full access to all features. After the trial, you'll need to choose a paid plan to continue using DocForge AI. We'll send reminders before your trial expires.
+						</p>
+					</div>
+					
+					<div>
+						<h3 class="text-xl font-semibold mb-3">Can I change my plan later?</h3>
+						<p class="text-gray-600 dark:text-gray-300">
+							Yes! You can upgrade or downgrade your plan at any time. When upgrading, you'll get immediate access to new features. When downgrading, changes take effect at the next billing cycle.
+						</p>
+					</div>
+					
+					<div>
+						<h3 class="text-xl font-semibold mb-3">How secure is my code?</h3>
+						<p class="text-gray-600 dark:text-gray-300">
+							We take security seriously. Your code is encrypted in transit and at rest. We're SOC 2 compliant and never train our AI models on your code. Enterprise plans include additional security options like on-premise deployment.
+						</p>
+					</div>
+					
+					<div>
+						<h3 class="text-xl font-semibold mb-3">What counts as a line of code?</h3>
+						<p class="text-gray-600 dark:text-gray-300">
+							We count actual lines of source code, excluding blank lines and comments. Configuration files and documentation are not counted toward your limit.
+						</p>
+					</div>
+					
+					<div>
+						<h3 class="text-xl font-semibold mb-3">Do you offer discounts for startups or education?</h3>
+						<p class="text-gray-600 dark:text-gray-300">
+							Yes! We offer 50% off for verified educational institutions and special pricing for qualified startups. Contact our sales team for more information.
+						</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- CTA Section -->
+		<section class="py-16 lg:py-24 bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+				<h2 class="text-3xl lg:text-4xl font-bold mb-4">
+					Ready to Transform Your Documentation?
+				</h2>
+				<p class="text-xl mb-8 opacity-90">
+					Start your free trial today. No credit card required.
+				</p>
+				<a href="/demo" class="inline-block px-8 py-4 bg-white text-blue-600 text-lg rounded-lg hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl font-semibold">
+					Start Your 14-Day Free Trial
+				</a>
+			</div>
+		</section>
+	</main>
+
+	<footer class="border-t border-gray-200 dark:border-gray-800 py-12">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="text-center text-gray-600 dark:text-gray-400">
+				<p>&copy; 2025 DocForge AI. All rights reserved.</p>
+			</div>
+		</div>
+	</footer>
+</Layout>

@@ -1,0 +1,122 @@
+---
+import DarkModeToggle from 'src/components-solid/DarkModeToggle';
+import 'src/styles/global.css';
+
+export interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width" />
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	<meta name="generator" content={Astro.generator} />
+	<title>{title}</title>
+	<script is:inline>
+		// Prevent flash of light mode
+		const isDarkMode = localStorage.getItem('darkMode') === 'true' ||
+			(!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+		if (isDarkMode) {
+			document.documentElement.classList.add('dark');
+		}
+	</script>
+</head>
+<body>
+<!-- Navigation -->
+<header class="border-b border-gray-200 dark:border-gray-800">
+	<nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="flex justify-between items-center h-16">
+			<div class="flex items-center">
+				<a href="/" class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+					DocForge AI
+				</a>
+			</div>
+
+			<!-- Desktop Navigation -->
+			<div class="hidden md:flex items-center space-x-8">
+				<a href="/" class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">Home</a>
+				<a href="/features" class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">Features</a>
+				<a href="/pricing" class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">Pricing</a>
+				<a href="/about" class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">About</a>
+				<a href="/app/dashboard" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+					Go To App
+				</a>
+			</div>
+
+			<!-- Mobile Menu Button -->
+			<div class="md:hidden">
+				<button
+					id="mobile-menu-button"
+					type="button"
+					class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 p-2"
+					aria-controls="mobile-menu"
+					aria-expanded="false"
+				>
+					<span class="sr-only">Open main menu</span>
+					<!-- Hamburger Icon -->
+					<svg class="h-6 w-6" id="menu-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+					</svg>
+					<!-- Close Icon (hidden by default) -->
+					<svg class="h-6 w-6 hidden" id="close-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					</svg>
+				</button>
+			</div>
+		</div>
+
+		<!-- Mobile Menu -->
+		<div class="md:hidden hidden" id="mobile-menu">
+			<div class="px-2 pt-2 pb-3 space-y-1 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+				<a href="/" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Home</a>
+				<a href="/features" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Features</a>
+				<a href="/pricing" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Pricing</a>
+				<a href="/about" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">About</a>
+				<a href="/app/dashboard" class="block mx-3 my-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center">
+					Go To App
+				</a>
+			</div>
+		</div>
+	</nav>
+</header>
+
+<slot />
+
+<!-- Dark Mode Toggle - Fixed Position at Bottom -->
+<DarkModeToggle client:load />
+
+<script>
+	// Mobile menu toggle functionality
+	const mobileMenuButton = document.getElementById('mobile-menu-button');
+	const mobileMenu = document.getElementById('mobile-menu');
+	const menuIcon = document.getElementById('menu-icon');
+	const closeIcon = document.getElementById('close-icon');
+
+	if (mobileMenuButton && mobileMenu && menuIcon && closeIcon) {
+		mobileMenuButton.addEventListener('click', () => {
+			const isOpen = !mobileMenu.classList.contains('hidden');
+
+			if (isOpen) {
+				// Close menu
+				mobileMenu.classList.add('hidden');
+				menuIcon.classList.remove('hidden');
+				closeIcon.classList.add('hidden');
+				mobileMenuButton.setAttribute('aria-expanded', 'false');
+			} else {
+				// Open menu
+				mobileMenu.classList.remove('hidden');
+				menuIcon.classList.add('hidden');
+				closeIcon.classList.remove('hidden');
+				mobileMenuButton.setAttribute('aria-expanded', 'true');
+			}
+		});
+	}
+</script>
+</body>
+</html>
