@@ -11,6 +11,7 @@ export const server = {
     }),
     handler: async ({ message }, context) => {
       // Get environment variables
+      // TODO!!: Document that when running 'import.meta.env.' on CloudFlare's server, you **need** to add it to the 'vite.define.' inside astro.config.mjs please
       const claudeApiKey = import.meta.env.CLAUDE_API_KEY
       const claudeModel = import.meta.env.CLAUDE_MODEL
       const claudeMaxTokens = import.meta.env.CLAUDE_MAX_TOKENS
@@ -23,6 +24,8 @@ export const server = {
 
       // Access D1 database through context.locals.runtime
       const runtime = context.locals.runtime
+
+      // TODO!!: Document that when CloudFlare resources are needed they need to be binded on the CF Page's project please
       const db = runtime?.env?.DB
 
       if (!db) {

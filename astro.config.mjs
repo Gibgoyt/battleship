@@ -1,8 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config'
 import cloudflare from '@astrojs/cloudflare'
-import solidJs from '@astrojs/solid-js'
-import svelte from '@astrojs/svelte'
 import qwikdev from '@qwikdev/astro'
 import mdx from '@astrojs/mdx'
 import tailwindcss from "@tailwindcss/vite"
@@ -22,17 +20,6 @@ export default defineConfig({
         '**/applications-qwik/**/*'
       ]
     }),
-    solidJs({
-      // TODO!!: https://docs.astro.build/en/guides/integrations-guide/solid-js/#configuration
-      devtools: true,
-      // all SolidJS components will be put inside 'components-solid' folder if ever other TSX frameworks are ever
-      // added to this astro project
-      include: [
-        '**/components-solid/*',
-        '**/applications-solid/**/*'
-      ]
-    }),
-    svelte()
   ],
   adapter: cloudflare({
     platformProxy: {
@@ -54,7 +41,7 @@ export default defineConfig({
       "process.env.CLAUDE_API_KEY": JSON.stringify(process.env.CLAUDE_API_KEY),
       "process.env.CLAUDE_MODEL": JSON.stringify(process.env.CLAUDE_MODEL),
       "process.env.CLAUDE_MAX_TOKENS": JSON.stringify(process.env.CLAUDE_MAX_TOKENS),
-      "process.env.ANTHROPIC_VERSION": JSON.stringify(process.env.ANTHROPIC_VERSION),
+      "process.env.ANTHROPIC_VERSION": JSON.stringify(process.env.ANTHROPIC_VERSION_the),
     },
     resolve: {
       conditions: [

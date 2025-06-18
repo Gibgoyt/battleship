@@ -1,6 +1,6 @@
 ---
 import Layout from 'src/layouts/Layout.astro';
-import PricingCard from 'src/components-svelte/PricingCard.svelte';
+import PricingCard from 'src/components-qwik/PricingCard';
 
 const pricingPlans = [
   {
@@ -17,7 +17,7 @@ const pricingPlans = [
     ],
     highlighted: false,
     buttonText: "Start Free Trial",
-    buttonLink: "/demo"
+    buttonLink: "/auth/sign-up?tier=starter"
   },
   {
     name: "Professional",
@@ -35,7 +35,7 @@ const pricingPlans = [
     ],
     highlighted: true,
     buttonText: "Start Free Trial",
-    buttonLink: "/demo"
+    buttonLink: "/auth/sign-up?tier=professional"
   },
   {
     name: "Enterprise",
@@ -55,7 +55,7 @@ const pricingPlans = [
     ],
     highlighted: false,
     buttonText: "Contact Sales",
-    buttonLink: "/contact"
+    buttonLink: "/contact?subscriptionTier=enterprise"
   }
 ];
 ---
