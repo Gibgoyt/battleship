@@ -47,9 +47,14 @@ export default defineConfig({
       tailwindcss(),
     ],
     define: {
-      "process.env.PUBLIC_TEST": JSON.stringify(process.env.PUBLIC_TEST),
-      "process.env.VITE_TEST": JSON.stringify(process.env.VITE_TEST),
-      "process.env.TEST": JSON.stringify(process.env.TEST),
+      // TOD!!: Run test on these inside './src/actions/' folder
+      // "process.env.PUBLIC_TEST": JSON.stringify(process.env.PUBLIC_TEST),
+      // "process.env.VITE_TEST": JSON.stringify(process.env.VITE_TEST),
+      // "process.env.TEST": JSON.stringify(process.env.TEST),
+      "process.env.CLAUDE_API_KEY": JSON.stringify(process.env.CLAUDE_API_KEY),
+      "process.env.CLAUDE_MODEL": JSON.stringify(process.env.CLAUDE_MODEL),
+      "process.env.CLAUDE_MAX_TOKENS": JSON.stringify(process.env.CLAUDE_MAX_TOKENS),
+      "process.env.ANTHROPIC_VERSION": JSON.stringify(process.env.ANTHROPIC_VERSION),
     },
     resolve: {
       conditions: [
