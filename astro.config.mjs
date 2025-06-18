@@ -23,6 +23,7 @@ export default defineConfig({
       ]
     }),
     solidJs({
+      // TODO!!: https://docs.astro.build/en/guides/integrations-guide/solid-js/#configuration
       devtools: true,
       // all SolidJS components will be put inside 'components-solid' folder if ever other TSX frameworks are ever
       // added to this astro project
@@ -45,6 +46,11 @@ export default defineConfig({
       // @ts-ignore
       tailwindcss(),
     ],
+    define: {
+      "process.env.PUBLIC_TEST": JSON.stringify(process.env.PUBLIC_TEST),
+      "process.env.VITE_TEST": JSON.stringify(process.env.VITE_TEST),
+      "process.env.TEST": JSON.stringify(process.env.TEST),
+    },
     resolve: {
       conditions: [
         'import',

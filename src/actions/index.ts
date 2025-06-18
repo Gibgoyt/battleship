@@ -2,133 +2,123 @@ import { defineAction } from 'astro:actions'
 import { z } from 'astro/zod'
 
 export const server = {
-  // Demo 1: Standard SSR action
-  getServerInfo: defineAction({
-    handler: async () => {
-      return {
-        message: 'This is a standard SSR action',
-        executedAt: new Date().toISOString(),
-        serverType: 'Astro SSR',
-        nodeVersion: process.version
-      }
-    }
-  }),
-
-  // Demo 2: Action that returns environment variable with timestamp
-  getEnvWithTime: defineAction({
-    handler: async () => {
-      const testEnv = import.meta.env.TEST || 'Environment variable not found'
-      
-      return {
-        environmentValue: testEnv,
-        timestamp: new Date().toISOString(),
-        unixTime: Date.now(),
-        formattedTime: new Date().toLocaleString()
-      }
-    }
-  }),
-
-  // Demo 3: Delayed action with setTimeout
-  delayedAction: defineAction({
+  // Claude API proxy action
+  claudeProxy: defineAction({
     input: z.object({
-      delay: z.number().min(100).max(5000).default(2000)
+      message: z.string()
+        .min(1, "Field 'message' cannot be empty")
+        .max(10000, "Field 'message' must be less than 10,000 characters")
     }),
-    handler: async ({ delay }) => {
+    handler: async ({ message }, context) => {
+      // Get environment variables
+      const claudeApiKey = import.meta.env.CLAUDE_API_KEY
+      const claudeModel = import.meta.env.CLAUDE_MODEL
+      const claudeMaxTokens = import.meta.env.CLAUDE_MAX_TOKENS
+      const anthropicVersion = import.meta.env.ANTHROPIC_VERSION
+
+      // Validate environment variables
+      if (!claudeApiKey || !claudeModel || !claudeMaxTokens || !anthropicVersion) {
+        throw new Error("Missing required environment variables: CLAUDE_API_KEY, CLAUDE_MODEL, CLAUDE_MAX_TOKENS, or ANTHROPIC_VERSION")
+      }
+
+      // Access D1 database through context.locals.runtime
+      const runtime = context.locals.runtime
+      const db = runtime?.env?.DB
+
+      if (!db) {
+        throw new Error("Database not configured - D1 binding not found")
+      }
+
       const startTime = Date.now()
-      
-      // Simulate processing with delay
-      await new Promise(resolve => setTimeout(resolve, delay))
-      
-      const endTime = Date.now()
-      
-      return {
-        message: 'Action completed after delay',
-        requestedDelay: delay,
-        actualDuration: endTime - startTime,
-        startedAt: new Date(startTime).toISOString(),
-        completedAt: new Date(endTime).toISOString()
-      }
-    }
-  }),
 
-  // Simple action - no input validation
-  getServerTime: defineAction({
-    handler: async () => {
-      // Server-side logic with access to server env vars
-      const serverSecret = import.meta.env.SECRET_API_KEY
+      try {
+        // Prepare Claude API request
+        const claudeRequestBody = {
+          model: claudeModel,
+          max_tokens: parseInt(claudeMaxTokens),
+          messages: [
+            {
+              role: "user",
+              content: message.trim()
+            }
+          ]
+        }
 
-      return {
-        timestamp: new Date().toISOString(),
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        hasSecret: !!serverSecret,
-        serverMessage: 'Hello from Astro Action!'
-      }
-    }
-  }),
+        // Make request to Claude API
+        const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': claudeApiKey,
+            'Content-Type': 'application/json',
+            'anthropic-version': anthropicVersion
+          },
+          body: JSON.stringify(claudeRequestBody)
+        })
 
-  // Action with input validation
-  updateUserProfile: defineAction({
-    input: z.object({
-      name: z.string().min(1),
-      email: z.string().email(),
-      age: z.number().min(18).optional()
-    }),
-    handler: async ({ name, email, age }) => {
-      // Simulate database operation
-      console.log('Updating user profile:', { name, email, age })
+        const endTime = Date.now()
+        const responseTime = endTime - startTime
+        const logMessage = `Response time: ${responseTime}ms`
 
-      // You could save to database here
-      // await db.users.update(userId, { name, email, age })
+        if (!claudeResponse.ok) {
+          const errorResponse = await claudeResponse.text()
 
-      return {
-        success: true,
-        message: `Profile updated for ${name}`,
-        userData: { name, email, age },
-        updatedAt: new Date().toISOString()
-      }
-    }
-  }),
+          // Log the failed request
+          await db.prepare(
+            "INSERT INTO `claude-testing` (input, output, log) VALUES (?, ?, ?)"
+          ).bind(
+            message.trim(),
+            `Error: ${claudeResponse.status} - ${errorResponse}`,
+            logMessage
+          ).run()
 
-  // Action that might fail
-  sendNotification: defineAction({
-    input: z.object({
-      message: z.string(),
-      type: z.enum(['info', 'warning', 'error'])
-    }),
-    handler: async ({ message, type }) => {
-      // Simulate some processing
-      await new Promise(resolve => setTimeout(resolve, 1000))
+          throw new Error(`Claude API Error: ${claudeResponse.status} - Failed to get response from Claude API`)
+        }
 
-      if (message.includes('fail')) {
-        throw new Error('Notification failed to send')
-      }
+        const claudeData = await claudeResponse.json()
 
-      return {
-        success: true,
-        notificationId: Math.random().toString(36),
-        message: `${type.toUpperCase()}: ${message}`,
-        sentAt: new Date().toISOString()
-      }
-    }
-  }),
+        // Extract the text content from Claude's response
+        const outputMessage = (claudeData as any).content
+          .filter((item: any) => item.type === "text")
+          .map((item: any) => item.text)
+          .join("")
 
-  // Action with file upload (example)
-  uploadFile: defineAction({
-    input: z.object({
-      fileName: z.string(),
-      fileContent: z.string(), // In real app, you'd handle File objects
-      fileType: z.string()
-    }),
-    handler: async ({ fileName, fileContent, fileType }) => {
-      // Simulate file processing
-      console.log(`Processing file: ${fileName} (${fileType})`)
+        // Insert into database
+        await db.prepare(
+          "INSERT INTO `claude-testing` (input, output, log) VALUES (?, ?, ?)"
+        ).bind(
+          message.trim(),
+          outputMessage,
+          logMessage
+        ).run()
 
-      return {
-        success: true,
-        fileId: Math.random().toString(36),
-        fileName,
-        fileSize: fileContent.length,
-        uploadedAt: new Date().toISOString()
+        // Return simplified response
+        return {
+          message: outputMessage,
+          responseTime: responseTime,
+          timestamp: new Date().toISOString()
+        }
+
+      } catch (error: any) {
+        const endTime = Date.now()
+        const responseTime = endTime - startTime
+        const logMessage = `Response time: ${responseTime}ms (Error)`
+        const errorMessage = error instanceof Error ? error.message : "Unknown error"
+
+        // Log the error
+        try {
+          await db.prepare(
+            "INSERT INTO `claude-testing` (input, output, log) VALUES (?, ?, ?)"
+          ).bind(
+            message.trim(),
+            `System Error: ${errorMessage}`,
+            logMessage
+          ).run()
+        } catch (dbError) {
+          console.error("Failed to log to database:", dbError)
+        }
+
+        // Re-throw the error to be handled by Astro's action error handling
+        throw new Error(`Internal Server Error: ${errorMessage}`)
       }
     }
   })
