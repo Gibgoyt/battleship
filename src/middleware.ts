@@ -19,14 +19,11 @@ export const onRequest = defineMiddleware((context, next) => {
   const isPublicPath: boolean = (
     // exact match
     pathname === '/' ||
-    pathname === '/frameworks-test' ||
-    pathname === '/apps' ||
     pathname === '/about' ||
-    pathname === '/cloudflare' ||
+    pathname === '/pricing' ||
     pathname === '/features' ||
     // starts with
-    pathname.startsWith('/api' + '/') ||
-    pathname.startsWith('/docs' + '/')
+    pathname.startsWith('/pricing' + '/')
   ) ?? false
 
   if (isPublicPath) {
@@ -34,47 +31,19 @@ export const onRequest = defineMiddleware((context, next) => {
   }
 
   if (
-    pathname === '/solid-spa' ||
-    pathname.startsWith('/solid-spa')
+    pathname === '/app' ||
+    pathname.startsWith('/app/')
   ) {
     console.log(`ASTRO MIDDLEWARE: pathname: ${pathname}`)
     return next()
   }
 
   if (
-    pathname === '/svelte-spa' ||
-    pathname.startsWith('/svelte-spa')
+    pathname === '/settings' ||
+    pathname.startsWith('/settings/')
   ) {
     console.log(`ASTRO MIDDLEWARE: pathname: ${pathname}`)
     return next()
-  }
-
-  if (
-    pathname === '/qwik-spa' ||
-    pathname.startsWith('/qwik-spa')
-  ) {
-    console.log(`ASTRO MIDDLEWARE: pathname: ${pathname}`)
-    return next()
-  }
-
-  // hardcoded Astro router rejections will look like this:
-  if (!isAuthenticated && pathname === '/demo') {
-    return Response.redirect(new URL('/', url), 302)
-  }
-
-  // Check if accessing protected app routes
-  if (!isAuthenticated && pathname.startsWith('/solid-spa/')) {
-    return Response.redirect(new URL('/', url), 302)
-  }
-
-  // Check if accessing protected app routes
-  if (!isAuthenticated && pathname.startsWith('/svelte-spa/')) {
-    return Response.redirect(new URL('/', url), 302)
-  }
-
-  // Check if accessing protected app routes
-  if (!isAuthenticated && pathname.startsWith('/qwik-spa/')) {
-    return Response.redirect(new URL('/', url), 302)
   }
 
   return next()

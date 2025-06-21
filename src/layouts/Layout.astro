@@ -2,6 +2,9 @@
 import DarkModeToggle from 'src/components-qwik/DarkModeToggle';
 import 'src/styles/global.css';
 
+// opt into SSG
+export const prerender = true
+
 export interface Props {
 	title: string;
 }

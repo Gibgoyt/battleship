@@ -1,35 +1,59 @@
 ---
 import {
   App
-} from 'src/applications-qwik/auth-app/App.tsx'
+} from 'src/applications-qwik/app/App.tsx'
 import 'src/styles/global.css'
+
+// Define valid routes for type safety
+type ValidRoute = '/' | '/dashboard' | '/counter'
+
+// Get the route from URL params
+const routeSegment = Astro.params.all || 'dashboard'
+const requestedRoute = routeSegment === '' ? '/dashboard' : `/${routeSegment}`
+
+// Validate route against known routes
+const validRoutes: ValidRoute[] = ['/', '/dashboard', '/counter']
+const initialRoute: ValidRoute = validRoutes.includes(requestedRoute as ValidRoute) 
+  ? (requestedRoute as ValidRoute)
+  : '/dashboard' // fallback to dashboard for unknown routes
+
+// Detect theme from cookies or headers
+let initialTheme: 'light' | 'dark' = 'dark' // default
+
+// Try to get theme from cookie first
+const themeCookie = Astro.cookies.get('theme')
+if (themeCookie && (themeCookie.value === 'light' || themeCookie.value === 'dark')) {
+  initialTheme = themeCookie.value
+} else {
+  // Fallback to user-agent hints or default
+  const userAgent = Astro.request.headers.get('user-agent') || ''
+  // We could add more sophisticated detection here if needed
+  // For now, keep the default of 'dark'
+}
+
+// Apply theme class to HTML element for SSR
+const htmlClass = `h-full ${initialTheme === 'dark' ? 'dark' : ''}`
+const bodyClass = `h-full ${initialTheme === 'dark' ? 'bg-zinc-900' : 'bg-gray-50'}`
 ---
 
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class={htmlClass}>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Qwik SPA</title>
-  <base href="/qwik/">
   <meta name="theme-color" content="#18181b">
   <meta name="color-scheme" content="dark light">
 </head>
-<body class="h-full bg-zinc-900"> <!-- Add dark background here -->
+<body class={bodyClass}>
 <div id="qwik-root" class="h-full">
-  <App client:load />
+  <App 
+    client:load 
+    initialRoute={initialRoute}
+    initialTheme={initialTheme}
+  />
 </div>
 
-<!-- Add this script to detect and apply dark mode before hydration -->
-<script>
-  (function() {
-    const isDarkMode = localStorage.getItem('darkMode') === 'true' ||
-      (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    }
-  })();
-</script>
+<!-- No longer need the theme detection script since we pass it as props -->
 </body>
 </html>
