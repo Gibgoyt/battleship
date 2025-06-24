@@ -10,13 +10,15 @@ type Theme = 'light' | 'dark'
 interface AppProps {
   initialRoute: ValidRoute
   initialTheme: Theme
+  initialSidebarOpen: boolean
+  initialIsMobile: boolean
 }
 
-export const App = component$<AppProps>(({ initialRoute, initialTheme }) => {
+export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSidebarOpen, initialIsMobile }) => {
   const currentPath = useSignal(initialRoute)
   const isDark = useSignal(initialTheme === 'dark')
-  const sidebarOpen = useSignal(false)
-  const isMobile = useSignal(false)
+  const sidebarOpen = useSignal(initialSidebarOpen)
+  const isMobile = useSignal(initialIsMobile)
 
   // Client-side navigation
   const navigate = $((path: string) => {
@@ -35,6 +37,20 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme }) => {
   // Toggle sidebar
   const toggleSidebar = $(() => {
     sidebarOpen.value = !sidebarOpen.value
+    // Save sidebar state to cookie (mobile and desktop behavior)
+    if (isMobile.value) {
+      // On mobile, only save 'true' if user explicitly opens it
+      // Don't save 'false' to let it default to closed on reload
+      if (sidebarOpen.value) {
+        document.cookie = `sidebarOpen=true; path=/; max-age=${60 * 60 * 24 * 365}` // 1 year
+      } else {
+        // Clear the cookie when closing on mobile
+        document.cookie = `sidebarOpen=; path=/; max-age=0`
+      }
+    } else {
+      // On desktop, save both true and false states
+      document.cookie = `sidebarOpen=${sidebarOpen.value}; path=/; max-age=${60 * 60 * 24 * 365}` // 1 year
+    }
   })
 
   // Close sidebar when clicking outside on mobile
@@ -44,23 +60,25 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme }) => {
     }
   })
 
-  // Initialize mobile detection and sidebar state
+  // Initialize responsive behavior (keep resize detection for user interactions)
   useVisibleTask$(() => {
     if (typeof window !== 'undefined') {
-      // Check if mobile
+      // Check if mobile on resize (for responsive behavior)
       const checkMobile = () => {
-        isMobile.value = window.innerWidth < 1024 // lg breakpoint
+        const newIsMobile = window.innerWidth < 1024 // lg breakpoint
+        if (isMobile.value !== newIsMobile) {
+          isMobile.value = newIsMobile
+          // If switching from desktop to mobile and sidebar is open, close it
+          if (newIsMobile && sidebarOpen.value) {
+            sidebarOpen.value = false
+          }
+        }
       }
 
+      // Run once on mount to ensure consistency
       checkMobile()
+      
       window.addEventListener('resize', checkMobile)
-
-      // Close sidebar on mobile by default
-      if (isMobile.value) {
-        sidebarOpen.value = false
-      } else {
-        sidebarOpen.value = true
-      }
 
       return () => {
         window.removeEventListener('resize', checkMobile)

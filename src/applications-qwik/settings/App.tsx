@@ -3,26 +3,26 @@ import { component$, useSignal, $, useVisibleTask$ } from '@builder.io/qwik'
 import DashboardPage from './pages/dashboard/index.tsx'
 import CounterPage from './pages/counter/index.tsx'
 
-// Function to detect dark mode (can run during SSR)
-const getInitialDarkMode = () => {
-  if (typeof document === 'undefined') {
-    return true
-  }
+// Define valid routes for type safety
+type ValidRoute = '/' | '/dashboard' | '/counter'
+type Theme = 'light' | 'dark'
 
-  return document.documentElement.classList.contains('dark') ||
-    localStorage.getItem('darkMode') === 'true' ||
-    (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+interface AppProps {
+  initialRoute: ValidRoute
+  initialTheme: Theme
+  initialSidebarOpen: boolean
+  initialIsMobile: boolean
 }
 
-export const App = component$(() => {
-  const currentPath = useSignal('/dashboard')
-  const isDark = useSignal(getInitialDarkMode())
-  const sidebarOpen = useSignal(false)
-  const isMobile = useSignal(false)
+export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSidebarOpen, initialIsMobile }) => {
+  const currentPath = useSignal(initialRoute)
+  const isDark = useSignal(initialTheme === 'dark')
+  const sidebarOpen = useSignal(initialSidebarOpen)
+  const isMobile = useSignal(initialIsMobile)
 
   // Client-side navigation
   const navigate = $((path: string) => {
-    currentPath.value = path
+    currentPath.value = path as ValidRoute
     if (typeof window !== 'undefined') {
       const fullPath = `/settings${path}`
       window.history.pushState({}, '', fullPath)
@@ -37,6 +37,20 @@ export const App = component$(() => {
   // Toggle sidebar
   const toggleSidebar = $(() => {
     sidebarOpen.value = !sidebarOpen.value
+    // Save sidebar state to cookie (mobile and desktop behavior)
+    if (isMobile.value) {
+      // On mobile, only save 'true' if user explicitly opens it
+      // Don't save 'false' to let it default to closed on reload
+      if (sidebarOpen.value) {
+        document.cookie = `sidebarOpen=true; path=/; max-age=${60 * 60 * 24 * 365}` // 1 year
+      } else {
+        // Clear the cookie when closing on mobile
+        document.cookie = `sidebarOpen=; path=/; max-age=0`
+      }
+    } else {
+      // On desktop, save both true and false states
+      document.cookie = `sidebarOpen=${sidebarOpen.value}; path=/; max-age=${60 * 60 * 24 * 365}` // 1 year
+    }
   })
 
   // Close sidebar when clicking outside on mobile
@@ -46,23 +60,15 @@ export const App = component$(() => {
     }
   })
 
-  // Initialize URL synchronization and mobile detection
+  // Initialize URL synchronization and responsive behavior
   useVisibleTask$(() => {
     if (typeof window !== 'undefined') {
-      // Check if mobile
+      // Check if mobile on resize (for responsive behavior)
       const checkMobile = () => {
         isMobile.value = window.innerWidth < 1024 // lg breakpoint
       }
 
-      checkMobile()
       window.addEventListener('resize', checkMobile)
-
-      // Close sidebar on mobile by default
-      if (isMobile.value) {
-        sidebarOpen.value = false
-      } else {
-        sidebarOpen.value = true
-      }
 
       // URL synchronization
       const currentUrl = window.location.pathname
@@ -70,7 +76,7 @@ export const App = component$(() => {
       if (currentUrl.startsWith(expectedPrefix)) {
         const urlPath = currentUrl.slice(expectedPrefix.length) || '/dashboard'
         if (urlPath !== currentPath.value) {
-          currentPath.value = urlPath
+          currentPath.value = urlPath as ValidRoute
         }
       }
 
@@ -80,24 +86,14 @@ export const App = component$(() => {
     }
   })
 
-  // Dark mode initialization
-  useVisibleTask$(() => {
-    const shouldBeDark = getInitialDarkMode()
-
-    if (isDark.value !== shouldBeDark) {
-      isDark.value = shouldBeDark
-    }
-
-    if (shouldBeDark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  })
 
   const updateTheme = $((dark: boolean) => {
     isDark.value = dark
+    
+    // Save theme preference to both localStorage and cookie
     localStorage.setItem('darkMode', dark.toString())
+    document.cookie = `theme=${dark ? 'dark' : 'light'}; path=/; max-age=${60 * 60 * 24 * 365}` // 1 year
+    
     if (dark) {
       document.documentElement.classList.add('dark')
     } else {
@@ -137,7 +133,7 @@ export const App = component$(() => {
       )}
 
       {/* Sidebar */}
-      <div class={`w-64 min-h-screen fixed left-0 top-0 z-50 transform transition-transform duration-300 ease-in-out ${
+      <div class={`w-64 min-h-screen fixed left-0 top-0 z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
         sidebarOpen.value ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0 ${
         isDark.value ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'
