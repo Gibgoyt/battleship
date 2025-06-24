@@ -20,6 +20,14 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSi
   const sidebarOpen = useSignal(initialSidebarOpen)
   const isMobile = useSignal(initialIsMobile)
 
+  console.log('🚀 [QWIK /settings] Component Init:', {
+    initialRoute,
+    initialTheme,
+    initialSidebarOpen,
+    initialIsMobile,
+    windowWidth: typeof window !== 'undefined' ? window.innerWidth : 'SSR'
+  })
+
   // Client-side navigation
   const navigate = $((path: string) => {
     currentPath.value = path as ValidRoute
@@ -60,12 +68,55 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSi
     }
   })
 
-  // Initialize URL synchronization and responsive behavior
+  // Initialize URL synchronization, responsive behavior and validate SSR detection
   useVisibleTask$(() => {
     if (typeof window !== 'undefined') {
+      const currentWindowWidth = window.innerWidth
+      const actualIsMobile = currentWindowWidth < 1024
+      
+      console.log('🔍 [QWIK /settings] Client Validation:', {
+        windowWidth: currentWindowWidth,
+        ssrMobile: initialIsMobile,
+        actualMobile: actualIsMobile,
+        mismatch: initialIsMobile !== actualIsMobile
+      })
+
+      // Fix SSR detection mismatch immediately
+      if (isMobile.value !== actualIsMobile) {
+        console.log('🚨 [QWIK /settings] SSR Mismatch Detected - Fixing!', {
+          ssrDetected: isMobile.value,
+          actualValue: actualIsMobile
+        })
+        
+        isMobile.value = actualIsMobile
+        
+        // If we're actually mobile and sidebar is open, close it
+        if (actualIsMobile && sidebarOpen.value) {
+          sidebarOpen.value = false
+          console.log('📱 [QWIK /settings] Auto-closed sidebar for corrected mobile detection')
+        }
+      }
+
       // Check if mobile on resize (for responsive behavior)
       const checkMobile = () => {
-        isMobile.value = window.innerWidth < 1024 // lg breakpoint
+        const newIsMobile = window.innerWidth < 1024 // lg breakpoint
+        console.log('📏 [QWIK /settings] Resize Event:', {
+          windowWidth: window.innerWidth,
+          oldIsMobile: isMobile.value,
+          newIsMobile,
+          sidebarOpen: sidebarOpen.value,
+          willChangeIsMobile: isMobile.value !== newIsMobile
+        })
+        
+        if (isMobile.value !== newIsMobile) {
+          isMobile.value = newIsMobile
+          // If switching from desktop to mobile and sidebar is open, close it
+          if (newIsMobile && sidebarOpen.value) {
+            sidebarOpen.value = false
+            console.log('📱 [QWIK /settings] Auto-closed sidebar for mobile')
+          }
+          console.log('🔄 [QWIK /settings] Device type changed:', { newIsMobile })
+        }
       }
 
       window.addEventListener('resize', checkMobile)
@@ -134,12 +185,12 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSi
 
       {/* Sidebar */}
       <div class={`w-64 min-h-screen fixed left-0 top-0 z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
-        sidebarOpen.value ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0 ${
+        isMobile.value 
+          ? (sidebarOpen.value ? 'translate-x-0' : '-translate-x-full')
+          : (sidebarOpen.value ? 'translate-x-0 lg:w-64' : 'translate-x-0 lg:w-16')
+      } ${
         isDark.value ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'
-      } border-r shadow-lg ${
-        !sidebarOpen.value && !isMobile.value ? 'lg:w-16' : 'lg:w-64'
-      }`}>
+      } border-r shadow-lg`}>
         {/* Header */}
         <div class={`p-6 border-b ${isDark.value ? 'border-zinc-700' : 'border-gray-200'}`}>
           <div class="flex items-center justify-between">
@@ -220,7 +271,7 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSi
 
       {/* Main Content */}
       <div class={`flex-1 transition-all duration-300 ease-in-out ${
-        sidebarOpen.value || isMobile.value ? 'lg:ml-64' : 'lg:ml-16'
+        isMobile.value ? '' : (sidebarOpen.value ? 'lg:ml-64' : 'lg:ml-16')
       }`}>
         {/* Mobile Header */}
         <div class={`lg:hidden sticky top-0 z-30 ${isDark.value ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'} border-b px-4 py-3 flex items-center justify-between`}>

@@ -26,29 +26,53 @@ if (themeCookie && (themeCookie.value === 'light' || themeCookie.value === 'dark
   initialTheme = themeCookie.value
 }
 
-// Detect if mobile device from user agent
+// Enhanced mobile detection with multiple methods
 const userAgent = Astro.request.headers.get('user-agent') || ''
-const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+const viewport = Astro.request.headers.get('sec-ch-viewport-width') || ''
+const deviceMemory = Astro.request.headers.get('device-memory') || ''
+const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+const isMobileViewport = viewport && parseInt(viewport) < 1024
+const isLowMemory = deviceMemory && parseFloat(deviceMemory) <= 4
+
+// Multiple detection strategies - be more aggressive about detecting mobile
+const isMobileDevice = isMobileUA || isMobileViewport || (userAgent.includes('Mobile') || userAgent.includes('mobile'))
+
+console.log('🔍 [ASTRO SSR /app] Enhanced Mobile Detection:', {
+  userAgent: userAgent.substring(0, 100),
+  viewport,
+  deviceMemory,
+  isMobileUA,
+  isMobileViewport,
+  isLowMemory,
+  finalResult: isMobileDevice,
+  url: Astro.url.pathname
+})
 
 // Detect sidebar state from cookies
 let initialSidebarOpen: boolean = false // default closed
+const sidebarCookie = Astro.cookies.get('sidebarOpen')
 
 if (isMobileDevice) {
   // Mobile behavior: start closed, but respect if user explicitly opened it
-  const sidebarCookie = Astro.cookies.get('sidebarOpen')
   if (sidebarCookie && sidebarCookie.value === 'true') {
     initialSidebarOpen = true // User explicitly opened it
   }
   // If cookie is 'false' or doesn't exist, keep closed (default false)
 } else {
   // Desktop behavior: respect cookie or default to open
-  const sidebarCookie = Astro.cookies.get('sidebarOpen')
   if (sidebarCookie && (sidebarCookie.value === 'true' || sidebarCookie.value === 'false')) {
     initialSidebarOpen = sidebarCookie.value === 'true'
   } else {
     initialSidebarOpen = true // default open on desktop
   }
 }
+
+console.log('🎛️ [ASTRO SSR /app] Sidebar State:', {
+  sidebarCookie: sidebarCookie?.value,
+  initialSidebarOpen,
+  isMobileDevice,
+  logic: isMobileDevice ? 'mobile' : 'desktop'
+})
 
 // Apply theme class to HTML element for SSR
 const htmlClass = `h-full ${initialTheme === 'dark' ? 'dark' : ''}`
