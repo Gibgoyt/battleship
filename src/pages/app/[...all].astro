@@ -30,12 +30,18 @@ if (themeCookie && (themeCookie.value === 'light' || themeCookie.value === 'dark
 const userAgent = Astro.request.headers.get('user-agent') || ''
 const viewport = Astro.request.headers.get('sec-ch-viewport-width') || ''
 const deviceMemory = Astro.request.headers.get('device-memory') || ''
+// Check various indicators
 const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
 const isMobileViewport = viewport && parseInt(viewport) < 1024
 const isLowMemory = deviceMemory && parseFloat(deviceMemory) <= 4
+const hasMobileKeyword = userAgent.includes('Mobile') || userAgent.includes('mobile')
 
-// Multiple detection strategies - be more aggressive about detecting mobile
-const isMobileDevice = isMobileUA || isMobileViewport || (userAgent.includes('Mobile') || userAgent.includes('mobile'))
+// Check if this looks like a narrow screen (Chrome DevTools simulation)
+// Chrome DevTools often sends desktop user agents but with mobile-like characteristics
+const isLikelyMobileSimulation = userAgent.includes('Chrome') && !userAgent.includes('Mobile') && viewport && parseInt(viewport) < 768
+
+// Be very aggressive about mobile detection - if ANY indicator suggests mobile, treat as mobile
+const isMobileDevice = isMobileUA || isMobileViewport || hasMobileKeyword || isLikelyMobileSimulation
 
 console.log('🔍 [ASTRO SSR /app] Enhanced Mobile Detection:', {
   userAgent: userAgent.substring(0, 100),
@@ -44,6 +50,8 @@ console.log('🔍 [ASTRO SSR /app] Enhanced Mobile Detection:', {
   isMobileUA,
   isMobileViewport,
   isLowMemory,
+  hasMobileKeyword,
+  isLikelyMobileSimulation,
   finalResult: isMobileDevice,
   url: Astro.url.pathname
 })
@@ -95,7 +103,7 @@ const bodyClass = `h-full ${initialTheme === 'dark' ? 'bg-zinc-900' : 'bg-gray-5
     initialRoute={initialRoute}
     initialTheme={initialTheme}
     initialSidebarOpen={initialSidebarOpen}
-    initialIsMobile={isMobileDevice}
+    initialIsMobile={!!isMobileDevice}
   />
 </div>
 
