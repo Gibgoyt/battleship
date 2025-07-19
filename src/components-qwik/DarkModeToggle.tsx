@@ -4,20 +4,20 @@ import { component$, useSignal, useVisibleTask$, $ } from '@builder.io/qwik';
 export default component$(() => {
   const isDark = useSignal(false);
 
-  useVisibleTask$(() => {
-    const isDarkMode = localStorage.getItem('darkMode') === 'true' || 
-      (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    
-    isDark.value = isDarkMode;
-    updateDarkMode(isDarkMode);
-  });
-
   const updateDarkMode = $((dark: boolean) => {
     if (dark) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
+  });
+
+  useVisibleTask$(() => {
+    const isDarkMode = localStorage.getItem('darkMode') === 'true' || 
+      (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    
+    isDark.value = isDarkMode;
+    updateDarkMode(isDarkMode);
   });
 
   const toggleDarkMode = $(() => {

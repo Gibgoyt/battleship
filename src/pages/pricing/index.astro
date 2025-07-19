@@ -2,6 +2,9 @@
 import Layout from 'src/layouts/Layout.astro';
 import PricingCard from 'src/components-qwik/PricingCard';
 
+// export static HTML
+export const prerender = true
+
 const pricingPlans = [
   {
     name: "Starter",

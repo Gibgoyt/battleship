@@ -1,3 +1,6 @@
+**/*.sh
+wrangler.sh
+
 .env
 node_modules
 .idea
