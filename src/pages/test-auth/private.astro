@@ -1,0 +1,218 @@
+---
+import Layout from 'src/layouts/Layout.astro';
+
+// This route should be protected by middleware
+export const prerender = false;
+
+// Get user info from middleware (if authenticated)
+const user = Astro.locals.user;
+---
+
+<Layout title="Private Test Route - DocForge AI">
+	<main class="min-h-screen bg-gradient-to-br from-red-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-16">
+		<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+			<!-- Header -->
+			<div class="text-center mb-12">
+				<div class="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-red-600 mb-6">
+					<svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+					</svg>
+				</div>
+				<h1 class="text-4xl font-bold bg-gradient-to-r from-red-600 to-purple-600 bg-clip-text text-transparent mb-4">
+					Protected Test Route
+				</h1>
+				<p class="text-xl text-gray-600 dark:text-gray-400">
+					🔒 This page requires authentication to access.
+				</p>
+			</div>
+
+			<!-- Success Message -->
+			<div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-6 mb-8">
+				<div class="flex items-center">
+					<svg class="h-6 w-6 text-green-600 dark:text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+					<div>
+						<h2 class="text-lg font-semibold text-green-800 dark:text-green-300">
+							✅ Authentication Successful!
+						</h2>
+						<p class="text-green-700 dark:text-green-400">
+							You have successfully accessed a protected route. The middleware verified your authentication.
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- User Information Card -->
+			{user && (
+				<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+					<h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
+						👤 User Information (from Server-side)
+					</h2>
+
+					<div class="grid md:grid-cols-2 gap-6">
+						<div class="space-y-4">
+							<h3 class="text-lg font-medium text-gray-800 dark:text-gray-200">User Details</h3>
+							<div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2">
+								<div class="flex justify-between">
+									<span class="text-gray-600 dark:text-gray-400">Email:</span>
+									<span class="text-blue-600 dark:text-blue-400 font-mono">{user.email || 'N/A'}</span>
+								</div>
+								<div class="flex justify-between">
+									<span class="text-gray-600 dark:text-gray-400">Username:</span>
+									<span class="text-gray-900 dark:text-gray-100">{user.username || 'N/A'}</span>
+								</div>
+								<div class="flex justify-between">
+									<span class="text-gray-600 dark:text-gray-400">Email Verified:</span>
+									<span class={user.emailVerified ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+										{user.emailVerified ? '✅ Yes' : '❌ No'}
+									</span>
+								</div>
+							</div>
+						</div>
+
+						<div class="space-y-4">
+							<h3 class="text-lg font-medium text-gray-800 dark:text-gray-200">Token Information</h3>
+							<div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2">
+								<div class="flex justify-between">
+									<span class="text-gray-600 dark:text-gray-400">Subject (sub):</span>
+									<span class="text-gray-900 dark:text-gray-100 font-mono text-xs">{user.sub || 'N/A'}</span>
+								</div>
+								<div class="flex justify-between">
+									<span class="text-gray-600 dark:text-gray-400">Token Use:</span>
+									<span class="text-purple-600 dark:text-purple-400">{user.tokenUse || 'N/A'}</span>
+								</div>
+								<div class="flex justify-between">
+									<span class="text-gray-600 dark:text-gray-400">Groups:</span>
+									<span class="text-gray-900 dark:text-gray-100">
+										{user.groups && user.groups.length > 0 ? user.groups.join(', ') : 'None'}
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
+
+			<!-- Middleware Test Information -->
+			<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+				<h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
+					🛡️ Middleware Protection Test
+				</h2>
+
+				<div class="grid md:grid-cols-2 gap-6">
+					<div class="space-y-4">
+						<h3 class="text-lg font-medium text-gray-800 dark:text-gray-200">Route Protection</h3>
+						<div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2">
+							<div class="flex justify-between">
+								<span class="text-gray-600 dark:text-gray-400">Path:</span>
+								<code class="text-red-600 dark:text-red-400">/test-auth/private</code>
+							</div>
+							<div class="flex justify-between">
+								<span class="text-gray-600 dark:text-gray-400">Protected:</span>
+								<span class="text-green-600 dark:text-green-400">✅ Yes</span>
+							</div>
+							<div class="flex justify-between">
+								<span class="text-gray-600 dark:text-gray-400">Auth Required:</span>
+								<span class="text-green-600 dark:text-green-400">✅ JWT Token</span>
+							</div>
+						</div>
+					</div>
+
+					<div class="space-y-4">
+						<h3 class="text-lg font-medium text-gray-800 dark:text-gray-200">Security Status</h3>
+						<div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2">
+							<div class="flex justify-between">
+								<span class="text-gray-600 dark:text-gray-400">Middleware:</span>
+								<span class="text-green-600 dark:text-green-400">✅ Validated</span>
+							</div>
+							<div class="flex justify-between">
+								<span class="text-gray-600 dark:text-gray-400">Token Verified:</span>
+								<span class="text-green-600 dark:text-green-400">✅ Valid</span>
+							</div>
+							<div class="flex justify-between">
+								<span class="text-gray-600 dark:text-gray-400">Access:</span>
+								<span class="text-green-600 dark:text-green-400">✅ Granted</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Test Actions -->
+			<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+				<h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
+					🧪 Test Actions
+				</h2>
+
+				<div class="grid md:grid-cols-3 gap-4">
+					<!-- Logout Test -->
+					<button 
+						id="logout-btn"
+						class="p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors cursor-pointer text-left"
+					>
+						<h3 class="text-lg font-medium text-red-800 dark:text-red-300 mb-2">
+							🚪 Test Logout
+						</h3>
+						<p class="text-sm text-red-600 dark:text-red-400">
+							Clear tokens and test protection.
+						</p>
+					</button>
+
+					<!-- Public Route Test -->
+					<a 
+						href="/test-auth/public"
+						class="block p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+					>
+						<h3 class="text-lg font-medium text-green-800 dark:text-green-300 mb-2">
+							🌍 Public Route
+						</h3>
+						<p class="text-sm text-green-600 dark:text-green-400">
+							Test non-protected route access.
+						</p>
+					</a>
+
+					<!-- App Dashboard Test -->
+					<a 
+						href="/app/dashboard"
+						class="block p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+					>
+						<h3 class="text-lg font-medium text-blue-800 dark:text-blue-300 mb-2">
+							📊 App Dashboard
+						</h3>
+						<p class="text-sm text-blue-600 dark:text-blue-400">
+							Access main application.
+						</p>
+					</a>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<script>
+		// Handle logout test
+		document.getElementById('logout-btn')?.addEventListener('click', async () => {
+			try {
+				console.log('🧪 [Private Test] Testing logout functionality');
+				
+				// Import logout function
+				const { logout } = await import('../../lib/auth/auth-checker');
+				
+				// Clear all tokens
+				logout();
+				
+				// Show confirmation
+				alert('✅ Logout successful! You will be redirected when accessing protected routes.');
+				
+				console.log('✅ [Private Test] Logout completed');
+			} catch (error) {
+				console.error('❌ [Private Test] Logout failed:', error);
+				alert('❌ Logout failed. Check console for details.');
+			}
+		});
+
+		// Log successful access
+		console.log('🔒 [Private Test] Successfully accessed protected route!');
+		console.log('👤 [Private Test] User from server:', user);
+	</script>
+</Layout>

@@ -96,20 +96,43 @@
 					refreshToken: refreshToken ? 'PRESENT' : 'MISSING'
 				});
 
-				// Store tokens
-				const storage = rememberMe ? localStorage : sessionStorage;
-				storage.setItem('accessToken', accessToken);
-				storage.setItem('idToken', idToken);
-				storage.setItem('refreshToken', refreshToken);
-				storage.setItem('rememberMe', rememberMe.toString());
-
-				showSuccess('Login successful! Redirecting...');
+				// Store tokens using the new token storage bridge
+				const storeTokensAsync = async () => {
+					try {
+						console.log('🔄 [Svelte Login] Storing tokens with new bridge...');
+						
+						// Import token storage dynamically
+						const { storeTokens, debugStorage } = await import('../../lib/auth/token-storage');
+						
+						// Store tokens in both localStorage/sessionStorage AND cookies
+						storeTokens({
+							accessToken,
+							idToken,
+							refreshToken,
+							rememberMe
+						});
+						
+						// Debug storage contents after storing
+						debugStorage();
+						
+						console.log('✅ [Svelte Login] Tokens stored successfully with bridge');
+						
+						showSuccess('Login successful! Redirecting...');
+						
+						// Redirect after short delay
+						setTimeout(() => {
+							console.log('🔄 [Svelte Login] Redirecting to dashboard...');
+							window.location.href = '/app/dashboard';
+						}, 1000);
+						
+					} catch (storageError) {
+						console.error('❌ [Svelte Login] Failed to store tokens:', storageError);
+						showError('Login successful but failed to store session. Please try again.');
+					}
+				};
 				
-				// Redirect after short delay
-				setTimeout(() => {
-					console.log('🔄 [Svelte Login] Redirecting to dashboard...');
-					window.location.href = '/app/dashboard';
-				}, 1000);
+				// Execute the async function
+				storeTokensAsync();
 			},
 
 			onFailure: function (err) {
