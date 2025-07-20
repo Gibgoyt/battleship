@@ -13,8 +13,6 @@ export const onRequest = defineMiddleware(async (
   } = context
 
   const isProtectedRoute: boolean = [
-    '/app',
-    '/settings',
     '/test-auth/private'
   ].some((item: string): boolean => {
     return (url.pathname.startsWith(item))

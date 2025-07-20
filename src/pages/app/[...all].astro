@@ -3,6 +3,82 @@ import {
   App
 } from 'src/applications-qwik/app/App.tsx'
 import 'src/styles/global.css'
+import { jwtValidator } from 'src/lib/auth/jwt-validator'
+
+// ==== AUTH PROTECTION LOGIC ====
+// This route requires authentication - validate JWT token
+console.log('🔒 [APP SPA] Processing protected route:', Astro.url.pathname)
+
+// Get the Cognito auth token from cookies
+const authToken = Astro.cookies.get('cognito-auth-token')
+console.log('🍪 [APP SPA] Cookie inspection:', {
+  hasCognitoToken: Boolean(authToken?.value),
+  cognitoTokenValue: authToken?.value ? 'PRESENT' : 'MISSING',
+  authStatusCookie: Astro.cookies.get('auth-status')?.value ? 'PRESENT' : 'MISSING'
+})
+
+// If no auth token is present, redirect to sign-in
+if (!authToken || !authToken.value) {
+  console.log('❌ [APP SPA] No auth token found for protected route, redirecting to sign-in')
+  return Astro.redirect('/auth/sign-in', 302)
+}
+
+try {
+  console.log('🔍 [APP SPA] Validating token for protected route access...')
+  
+  // Validate the Cognito JWT token
+  const validation = jwtValidator.validateTokenBasic(authToken.value)
+  console.log('🔍 [APP SPA] Protected route token validation:', {
+    isValid: validation.isValid,
+    isExpired: validation.isExpired,
+    hasPayload: Boolean(validation.payload),
+    error: validation.error,
+    payloadPreview: validation.payload ? {
+      sub: validation.payload.sub?.substring(0, 8) + '...',
+      email: validation.payload.email,
+      tokenUse: validation.payload.token_use,
+      exp: new Date(validation.payload.exp * 1000).toISOString()
+    } : null
+  })
+  
+  if (!validation.isValid) {
+    throw new Error(validation.error || 'Invalid token')
+  }
+
+  if (validation.isExpired) {
+    throw new Error('Token has expired')
+  }
+
+  // Store user info in locals for use in pages
+  if (validation.payload) {
+    Astro.locals.user = {
+      sub: validation.payload.sub,
+      email: validation.payload.email,
+      username: validation.payload['cognito:username'] || validation.payload.username,
+      emailVerified: validation.payload.email_verified || false,
+      groups: validation.payload['cognito:groups'] || [],
+      tokenUse: validation.payload.token_use
+    }
+    
+    console.log('👤 [APP SPA] User info stored in locals:', {
+      email: Astro.locals.user.email,
+      username: Astro.locals.user.username,
+      tokenUse: Astro.locals.user.tokenUse
+    })
+  }
+
+  console.log('✅ [APP SPA] Protected route access granted')
+} catch (error) {
+  console.error('❌ [APP SPA] Protected route validation failed:', error)
+  // Invalid token, clear it and redirect to sign-in
+  Astro.cookies.delete('cognito-auth-token', {
+    path: '/',
+  })
+  console.log('🔄 [APP SPA] Redirecting to sign-in due to validation failure')
+  return Astro.redirect('/auth/sign-in', 302)
+}
+
+// ==== END AUTH PROTECTION LOGIC ====
 
 // Define valid routes for type safety
 type ValidRoute = '/' | '/dashboard' | '/counter'
