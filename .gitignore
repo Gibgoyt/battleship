@@ -1,5 +1,4 @@
-**/*.sh
-wrangler.sh
+tmp_errors
 
 .env
 node_modules

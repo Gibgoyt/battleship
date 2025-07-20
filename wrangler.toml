@@ -1,0 +1,9 @@
+name = "docforge-frontend"
+compatibility_date = "2025-07-20"
+
+[build]
+command = "npm run build"
+
+[vars]
+BACKEND_API_URL = "http://192.168.0.6:8443"
+BACKEND_WS_URL = "ws://192.168.0.6:8443/ws"
