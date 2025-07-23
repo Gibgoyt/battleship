@@ -1,33 +1,63 @@
 /** @jsxImportSource @builder.io/qwik */
 import { component$, useSignal, $, useVisibleTask$ } from '@builder.io/qwik'
 import DashboardPage from './pages/dashboard/index.tsx'
-import CounterPage from './pages/counter/index.tsx'
+import RepositoriesPage from './pages/repositories/index.tsx'
+import DocumentationPage from './pages/documentation/index.tsx'
+import ConnectPage from './pages/connect/index.tsx'
 import { createLogger } from '../../lib/logger'
 
 const logger = createLogger('QwikApp');
 
 // Define valid routes for type safety
-type ValidRoute = '/' | '/dashboard' | '/counter'
+type ValidRoute = '/' | '/connect' | '/repositories' | '/documentation'
 type Theme = 'light' | 'dark'
+
+// TypeScript interfaces for initial backend data load
+// Used for frontend-first MVP to identify backend schemas for Redis HSETs
+interface RepositoryData {
+  id: number
+  name: string
+  description: string
+  language: string
+  stargazers_count: number
+  private: boolean
+  updated_at: string
+}
+
+interface DocumentationData {
+  id: number
+  repoName: string
+  status: string
+  lastUpdated: string
+  url: string
+}
+
+// Initial app data loaded once to minimize Cloudflare server requests
+interface InitialAppData {
+  repositories: RepositoryData[]
+  documentation: DocumentationData[]
+}
 
 interface AppProps {
   initialRoute: ValidRoute
   initialTheme: Theme
   initialSidebarOpen: boolean
   initialIsMobile: boolean
+  initialAppData?: InitialAppData  // Loaded once on catch-all route, Qwik handles rest client-side
 }
 
-export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSidebarOpen, initialIsMobile }) => {
+export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSidebarOpen, initialIsMobile, initialAppData }) => {
   const currentPath = useSignal(initialRoute)
   const isDark = useSignal(initialTheme === 'dark')
   const sidebarOpen = useSignal(initialSidebarOpen)
   const isMobile = useSignal(initialIsMobile)
 
-  logger.debug('Component Init', {
+  logger.debug('Qwik SPA Init - Optimized for minimal Cloudflare requests', {
     initialRoute,
     initialTheme,
     initialSidebarOpen,
     initialIsMobile,
+    hasInitialData: Boolean(initialAppData),
     windowWidth: typeof window !== 'undefined' ? window.innerWidth : 'SSR'
   })
 
@@ -151,16 +181,22 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSi
   // Navigation items
   const navigationItems = [
     {
-      id: 'dashboard',
-      path: '/dashboard',
-      label: 'Dashboard',
-      icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'
+      id: 'connect',
+      path: '/connect',
+      label: 'Connect',
+      icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1'
     },
     {
-      id: 'counter',
-      path: '/counter',
-      label: 'Counter',
-      icon: 'M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z'
+      id: 'repositories',
+      path: '/repositories',
+      label: 'Repositories',
+      icon: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z'
+    },
+    {
+      id: 'documentation',
+      path: '/documentation',
+      label: 'Documentation',
+      icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
     }
   ]
 
@@ -194,7 +230,7 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSi
               </div>
               <h1 class={`text-lg font-bold ${isDark.value ? 'text-gray-100' : 'text-gray-800'} ${
                 !sidebarOpen.value && !isMobile.value ? 'lg:hidden' : ''
-              }`}>Qwik App</h1>
+              }`}>DocForge</h1>
             </div>
             <div class={`flex items-center gap-2 ${!sidebarOpen.value && !isMobile.value ? 'lg:hidden' : ''}`}>
               <button
@@ -309,7 +345,7 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSi
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
               </svg>
             </div>
-            <h1 class={`text-lg font-bold ${isDark.value ? 'text-gray-100' : 'text-gray-800'}`}>Qwik App</h1>
+            <h1 class={`text-lg font-bold ${isDark.value ? 'text-gray-100' : 'text-gray-800'}`}>DocForge</h1>
           </div>
           <button
             onClick$={toggleTheme}
@@ -348,12 +384,16 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSi
         </button>
 
         <main class="p-4 lg:p-8">
-          {(currentPath.value === '/dashboard' || currentPath.value === '/') && (
-            <DashboardPage isDark={isDark.value} />
+          {(currentPath.value === '/' || currentPath.value === '/connect') && (
+            <ConnectPage isDark={isDark.value} />
           )}
 
-          {currentPath.value === '/counter' && (
-            <CounterPage isDark={isDark.value} />
+          {currentPath.value === '/repositories' && (
+            <RepositoriesPage isDark={isDark.value} data={initialAppData?.repositories} />
+          )}
+
+          {currentPath.value === '/documentation' && (
+            <DocumentationPage isDark={isDark.value} data={initialAppData?.documentation} />
           )}
         </main>
       </div>

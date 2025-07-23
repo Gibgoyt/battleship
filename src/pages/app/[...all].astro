@@ -80,18 +80,64 @@ try {
 
 // ==== END AUTH PROTECTION LOGIC ====
 
+// ==== INITIAL APP DATA LOADING ====
+// Single comprehensive load to minimize Cloudflare server requests (100k daily limit)
+// Qwik SPA handles all subsequent interactions client-side
+let initialAppData = null
+
+try {
+  // Environment variables for backend API
+  const BACKEND_API_URL = import.meta.env.BACKEND_API_URL || 'https://192.168.0.6:3000'
+  
+  console.log('🔄 [APP SPA] Loading initial app data from backend:', `${BACKEND_API_URL}/api/spa-load/app`)
+  
+  // Single comprehensive API call to load ALL app data
+  const response = await fetch(`${BACKEND_API_URL}/api/spa-load/app`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${authToken.value}`,
+      'Content-Type': 'application/json',
+      'User-Agent': 'DocForge-Frontend/1.0'
+    }
+  })
+
+  if (response.ok) {
+    initialAppData = await response.json()
+    console.log('✅ [APP SPA] Initial app data loaded successfully:', {
+      repositoriesCount: initialAppData?.repositories?.length || 0,
+      documentationCount: initialAppData?.documentation?.length || 0
+    })
+  } else {
+    console.warn('⚠️ [APP SPA] Backend API request failed:', {
+      status: response.status,
+      statusText: response.statusText
+    })
+  }
+} catch (error) {
+  console.warn('⚠️ [APP SPA] Failed to load initial app data from backend:', error)
+  // Continue with null data - frontend will show fallbacks for initial load
+}
+
+console.log('🎯 [APP SPA] Final initial app data state (minimizing Cloudflare requests):', {
+  hasInitialData: Boolean(initialAppData),
+  repositories: initialAppData?.repositories?.length || 0,
+  documentation: initialAppData?.documentation?.length || 0
+})
+
+// ==== END INITIAL APP DATA LOADING ====
+
 // Define valid routes for type safety
-type ValidRoute = '/' | '/dashboard' | '/counter'
+type ValidRoute = '/' | '/connect' | '/repositories' | '/documentation'
 
 // Get the route from URL params
-const routeSegment = Astro.params.all || 'dashboard'
-const requestedRoute = routeSegment === '' ? '/dashboard' : `/${routeSegment}`
+const routeSegment = Astro.params.all || 'connect'
+const requestedRoute = routeSegment === '' ? '/connect' : `/${routeSegment}`
 
 // Validate route against known routes
-const validRoutes: ValidRoute[] = ['/', '/dashboard', '/counter']
+const validRoutes: ValidRoute[] = ['/', '/connect', '/repositories', '/documentation']
 const initialRoute: ValidRoute = validRoutes.includes(requestedRoute as ValidRoute) 
   ? (requestedRoute as ValidRoute)
-  : '/dashboard' // fallback to dashboard for unknown routes
+  : '/connect' // fallback to connect for unknown routes
 
 // Detect theme from cookies or headers
 let initialTheme: 'light' | 'dark' = 'dark' // default
@@ -180,6 +226,7 @@ const bodyClass = `h-full ${initialTheme === 'dark' ? 'bg-zinc-900' : 'bg-gray-5
     initialTheme={initialTheme}
     initialSidebarOpen={initialSidebarOpen}
     initialIsMobile={!!isMobileDevice}
+    initialAppData={initialAppData}
   />
 </div>
 
