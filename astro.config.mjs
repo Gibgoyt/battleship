@@ -46,14 +46,17 @@ export default defineConfig({
       tailwindcss(),
     ],
     define: {
-      // TOD!!: Run test on these inside './src/actions/' folder
-      // "process.env.PUBLIC_TEST": JSON.stringify(process.env.PUBLIC_TEST),
-      // "process.env.VITE_TEST": JSON.stringify(process.env.VITE_TEST),
-      // "process.env.TEST": JSON.stringify(process.env.TEST),
+      // AWS Cognito Configuration (PUBLIC_ variables for client-side access)
+      "import.meta.env.PUBLIC_COGNITO_REGION": JSON.stringify(process.env.PUBLIC_COGNITO_REGION),
+      "import.meta.env.PUBLIC_COGNITO_USER_POOL_ID": JSON.stringify(process.env.PUBLIC_COGNITO_USER_POOL_ID),
+      "import.meta.env.PUBLIC_COGNITO_CLIENT_ID": JSON.stringify(process.env.PUBLIC_COGNITO_CLIENT_ID),
+      
+      // Claude API Configuration (server-side variables)
       "process.env.CLAUDE_API_KEY": JSON.stringify(process.env.CLAUDE_API_KEY),
       "process.env.CLAUDE_MODEL": JSON.stringify(process.env.CLAUDE_MODEL),
       "process.env.CLAUDE_MAX_TOKENS": JSON.stringify(process.env.CLAUDE_MAX_TOKENS),
-      "process.env.ANTHROPIC_VERSION": JSON.stringify(process.env.ANTHROPIC_VERSION_the),
+      "process.env.ANTHROPIC_VERSION": JSON.stringify(process.env.ANTHROPIC_VERSION),
+      
       // Fix for AWS Cognito SDK Node.js polyfills in browser
       global: 'globalThis',
     },
