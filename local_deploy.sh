@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 ## first clean just in case
-##./clean_the_fucker.sh
+##./clean.sh
 #rm -rf dist node_modules .astro
 #rm package-lock.json
 

@@ -107,7 +107,7 @@ export const prerender = false;
 
 ### **Solution Applied**
 ```bash
-./clean_the_fucker.sh && npm install && npm run dev
+./clean.sh && npm install && npm run dev
 ```
 
 **What the clean script does**:
@@ -242,7 +242,7 @@ export const cognitoConfig = {
 4. **Code Organization**: Svelte components provide much cleaner architecture
 
 ### **Development Process**
-1. **Clean Script**: `./clean_the_fucker.sh` is essential for dependency issues
+1. **Clean Script**: `./clean.sh` is essential for dependency issues
 2. **Port Management**: Configuration changes require cache clearing
 3. **Testing Strategy**: Test both error and success scenarios immediately
 4. **Documentation**: Real-time documentation during development is crucial
