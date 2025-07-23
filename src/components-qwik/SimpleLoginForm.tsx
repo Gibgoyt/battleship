@@ -1,4 +1,7 @@
 /** @jsxImportSource @builder.io/qwik */
+import { createLogger } from '../lib/logger';
+
+const logger = createLogger('SimpleLoginForm');
 import { component$, useSignal, $ } from '@builder.io/qwik';
 
 export default component$(() => {
@@ -10,7 +13,7 @@ export default component$(() => {
 
   const handleSubmit = $(async (event: Event) => {
     event.preventDefault();
-    console.log('🚀 [SimpleLoginForm] Form submitted!');
+    logger.debug('Form submitted');
     
     if (!email.value || !password.value) {
       error.value = 'Please enter both email and password';
@@ -26,20 +29,20 @@ export default component$(() => {
         const result = await (window as any).loginWithCognito(email.value, password.value, rememberMe.value);
         
         if (result.success) {
-          console.log('✅ [SimpleLoginForm] Login successful, redirecting...');
+          logger.info('Login successful, redirecting');
           window.location.href = '/app/dashboard';
         } else {
-          console.error('❌ [SimpleLoginForm] Login failed:', result.error);
+          logger.error('Login failed', result.error);
           error.value = result.error || 'Login failed. Please try again.';
           isLoading.value = false;
         }
       } catch (err) {
-        console.error('❌ [SimpleLoginForm] Unexpected error:', err);
+        logger.error('Unexpected error', err);
         error.value = 'An unexpected error occurred. Please try again.';
         isLoading.value = false;
       }
     } else {
-      console.error('❌ [SimpleLoginForm] Authentication service not available');
+      logger.error('Authentication service not available');
       error.value = 'Authentication service not available';
       isLoading.value = false;
     }

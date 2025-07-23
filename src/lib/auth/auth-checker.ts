@@ -1,4 +1,8 @@
 import { jwtValidator, type AuthValidationResult, type CognitoTokenPayload } from './jwt-validator';
+import { tokenStorage } from './token-storage'
+import { createLogger } from '../logger'
+
+const logger = createLogger('AuthChecker');
 
 export interface AuthStatus {
   isAuthenticated: boolean;
@@ -43,13 +47,13 @@ export class AuthChecker {
     } = options;
 
     try {
-      console.log('🔍 [Auth Checker] Checking authentication status...');
+      logger.debug('Checking authentication status');
 
       // Get tokens from specified storage
       const tokens = this.getTokensFromStorage(checkStorage);
       
       if (!tokens.accessToken && !tokens.idToken) {
-        console.log('📭 [Auth Checker] No tokens found in storage');
+        logger.debug('No tokens found in storage');
         return {
           isAuthenticated: false,
           isExpired: false,
@@ -82,7 +86,7 @@ export class AuthChecker {
 
       // Clear expired tokens if requested
       if (clearExpiredTokens && hasExpiredTokens) {
-        console.log('🧹 [Auth Checker] Clearing expired tokens');
+        logger.warn('Clearing expired tokens');
         jwtValidator.clearInvalidTokens();
       }
 
@@ -119,7 +123,7 @@ export class AuthChecker {
         authStatus.error = 'No valid authentication tokens found';
       }
 
-      console.log('✅ [Auth Checker] Auth status:', {
+      logger.debug('Auth status', {
         isAuthenticated: authStatus.isAuthenticated,
         isExpired: authStatus.isExpired,
         hasUser: Boolean(authStatus.user),
@@ -128,7 +132,7 @@ export class AuthChecker {
 
       return authStatus;
     } catch (error) {
-      console.error('❌ [Auth Checker] Failed to check auth status:', error);
+      logger.error('Failed to check auth status', error);
       return {
         isAuthenticated: false,
         isExpired: false,
@@ -159,7 +163,7 @@ export class AuthChecker {
         result.refreshToken = result.refreshToken || sessionStorage.getItem('refreshToken');
       }
     } catch (error) {
-      console.error('❌ [Auth Checker] Failed to access storage:', error);
+      logger.error('Failed to access storage', error);
     }
 
     return result;
@@ -186,7 +190,7 @@ export class AuthChecker {
   // Force logout by clearing all tokens
   logout(): void {
     try {
-      console.log('🚪 [Auth Checker] Logging out user');
+      logger.info('Logging out user');
       
       // Clear from both storages
       [localStorage, sessionStorage].forEach(storage => {
@@ -196,9 +200,9 @@ export class AuthChecker {
         storage.removeItem('rememberMe');
       });
       
-      console.log('✅ [Auth Checker] User logged out successfully');
+      logger.info('User logged out successfully');
     } catch (error) {
-      console.error('❌ [Auth Checker] Failed to logout:', error);
+      logger.error('Failed to logout', error);
     }
   }
 
@@ -244,7 +248,7 @@ export class AuthChecker {
         error: validation.error
       };
     } catch (error) {
-      console.error('❌ [Auth Checker] Failed to check auth from request:', error);
+      logger.error('Failed to check auth from request', error);
       return {
         isAuthenticated: false,
         isExpired: false,

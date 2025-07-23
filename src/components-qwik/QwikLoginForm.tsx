@@ -1,6 +1,9 @@
 /** @jsxImportSource @builder.io/qwik */
 import { component$, useSignal, useStore, $ } from '@builder.io/qwik';
 import { CognitoSignInService, type SignInCredentials } from '../lib/auth/sign-in';
+import { createLogger } from '../lib/logger';
+
+const logger = createLogger('QwikLoginForm');
 
 interface FormState {
   email: string;
@@ -23,18 +26,18 @@ export default component$(() => {
 
   // Initialize auth service on demand (not in useVisibleTask$ to avoid chunking issues)
   const getAuthService = $(() => {
-    console.log('🔧 [QwikLoginForm] Creating auth service...');
+    logger.debug('Creating auth service');
     return new CognitoSignInService();
   });
 
   const showError = $((message: string) => {
-    console.error('❌ [QwikLoginForm] Error:', message);
+    logger.error(`Form error: ${message}`);
     formState.error = message;
     formState.success = '';
   });
 
   const showSuccess = $((message: string) => {
-    console.log('✅ [QwikLoginForm] Success:', message);
+    logger.info(`Form success: ${message}`);
     formState.success = message;
     formState.error = '';
   });
@@ -50,7 +53,7 @@ export default component$(() => {
 
   const handleSubmit = $(async (event: SubmitEvent) => {
     event.preventDefault();
-    console.log('🚀 [QwikLoginForm] Form submitted!');
+    logger.debug('Form submitted');
 
     if (!formState.email || !formState.password) {
       await showError('Please enter both email and password.');
@@ -69,37 +72,37 @@ export default component$(() => {
         rememberMe: formState.rememberMe,
       };
 
-      console.log('🔄 [QwikLoginForm] Calling sign in...');
+      logger.debug('Calling sign in');
       const result = await authService.signIn(credentials);
 
       if (result.success) {
-        console.log('✅ [QwikLoginForm] Sign in successful!');
+        logger.info('Sign in successful');
         await showSuccess('Login successful! Redirecting...');
         
         // Redirect after short delay
         setTimeout(() => {
-          console.log('🔄 [QwikLoginForm] Redirecting to dashboard...');
+          logger.info('Redirecting to dashboard');
           window.location.href = '/app/dashboard';
         }, 1000);
       } else {
-        console.error('❌ [QwikLoginForm] Sign in failed:', result.error);
+        logger.error('Sign in failed', result.error);
         await showError(result.error || 'Login failed. Please try again.');
         await setLoading(false);
       }
     } catch (error) {
-      console.error('❌ [QwikLoginForm] Unexpected error:', error);
+      logger.error('Unexpected error', error);
       await showError('An unexpected error occurred. Please try again.');
       await setLoading(false);
     }
   });
 
   const handleGoogleLogin = $(async () => {
-    console.log('🔧 [QwikLoginForm] Google login clicked');
+    logger.debug('Google login clicked');
     await showError('Google login not yet implemented.');
   });
 
   const handleGitHubLogin = $(async () => {
-    console.log('🔧 [QwikLoginForm] GitHub login clicked');
+    logger.debug('GitHub login clicked');
     await showError('GitHub login not yet implemented.');
   });
 

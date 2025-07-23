@@ -1,5 +1,8 @@
 import { CognitoIdentityProviderClient, InitiateAuthCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { cognitoConfig } from './cognito-config';
+import { createLogger } from './logger';
+
+const logger = createLogger('AuthService');
 
 export class AuthService {
   private client: CognitoIdentityProviderClient;
@@ -21,7 +24,7 @@ export class AuthService {
     challenge?: string;
   }> {
     try {
-      console.log('🔄 [AuthService] Starting authentication for:', email);
+      logger.info(`Starting authentication for: ${email}`);
 
       const authCommand = new InitiateAuthCommand({
         AuthFlow: 'USER_PASSWORD_AUTH',
@@ -33,7 +36,7 @@ export class AuthService {
       });
 
       const response = await this.client.send(authCommand);
-      console.log('✅ [AuthService] Authentication response received:', response);
+      logger.info('Authentication response received');
 
       if (response.AuthenticationResult) {
         const { AccessToken, IdToken, RefreshToken } = response.AuthenticationResult;
@@ -62,7 +65,7 @@ export class AuthService {
         error: 'Unknown authentication error',
       };
     } catch (error: any) {
-      console.error('❌ [AuthService] Authentication failed:', error);
+      logger.error('Authentication failed', error);
       
       let errorMessage = 'Login failed. Please try again.';
       
@@ -91,7 +94,7 @@ export class AuthService {
     storage.setItem('idToken', tokens.idToken);
     storage.setItem('refreshToken', tokens.refreshToken);
     storage.setItem('rememberMe', rememberMe.toString());
-    console.log('✅ [AuthService] Tokens stored');
+    logger.info('Tokens stored');
   }
 
   clearTokens() {
@@ -103,6 +106,6 @@ export class AuthService {
     sessionStorage.removeItem('idToken');
     sessionStorage.removeItem('refreshToken');
     sessionStorage.removeItem('rememberMe');
-    console.log('✅ [AuthService] Tokens cleared');
+    logger.info('Tokens cleared');
   }
 }

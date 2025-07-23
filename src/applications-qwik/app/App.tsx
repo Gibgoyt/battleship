@@ -2,6 +2,9 @@
 import { component$, useSignal, $, useVisibleTask$ } from '@builder.io/qwik'
 import DashboardPage from './pages/dashboard/index.tsx'
 import CounterPage from './pages/counter/index.tsx'
+import { createLogger } from '../../lib/logger'
+
+const logger = createLogger('QwikApp');
 
 // Define valid routes for type safety
 type ValidRoute = '/' | '/dashboard' | '/counter'
@@ -20,7 +23,7 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSi
   const sidebarOpen = useSignal(initialSidebarOpen)
   const isMobile = useSignal(initialIsMobile)
 
-  console.log('🚀 [QWIK /app] Component Init:', {
+  logger.debug('Component Init', {
     initialRoute,
     initialTheme,
     initialSidebarOpen,
@@ -74,7 +77,7 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSi
       const currentWindowWidth = window.innerWidth
       const actualIsMobile = currentWindowWidth < 1024
       
-      console.log('🔍 [QWIK /app] Client Validation:', {
+      logger.debug('Client Validation', {
         windowWidth: currentWindowWidth,
         ssrMobile: initialIsMobile,
         actualMobile: actualIsMobile,
@@ -83,7 +86,7 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSi
 
       // Fix SSR detection mismatch immediately
       if (isMobile.value !== actualIsMobile) {
-        console.log('🚨 [QWIK /app] SSR Mismatch Detected - Fixing!', {
+        logger.warn('SSR Mismatch Detected - Fixing!', {
           ssrDetected: isMobile.value,
           actualValue: actualIsMobile
         })
@@ -93,14 +96,14 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSi
         // If we're actually mobile and sidebar is open, close it
         if (actualIsMobile && sidebarOpen.value) {
           sidebarOpen.value = false
-          console.log('📱 [QWIK /app] Auto-closed sidebar for corrected mobile detection')
+          logger.debug('Auto-closed sidebar for corrected mobile detection');
         }
       }
 
       // Check if mobile on resize (for responsive behavior)
       const checkMobile = () => {
         const newIsMobile = window.innerWidth < 1024 // lg breakpoint
-        console.log('📏 [QWIK /app] Resize Event:', {
+        logger.debug('Resize Event', {
           windowWidth: window.innerWidth,
           oldIsMobile: isMobile.value,
           newIsMobile,
@@ -113,9 +116,9 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSi
           // If switching from desktop to mobile and sidebar is open, close it
           if (newIsMobile && sidebarOpen.value) {
             sidebarOpen.value = false
-            console.log('📱 [QWIK /app] Auto-closed sidebar for mobile')
+            logger.debug('Auto-closed sidebar for mobile');
           }
-          console.log('🔄 [QWIK /app] Device type changed:', { newIsMobile })
+          logger.debug('Device type changed', { newIsMobile });
         }
       }
 

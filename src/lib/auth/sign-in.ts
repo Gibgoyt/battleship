@@ -1,5 +1,8 @@
 import { CognitoUserPool, CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
 import { cognitoConfig } from '../cognito-config';
+import { createLogger } from '../logger';
+
+const logger = createLogger('CognitoSignInService');
 
 export interface SignInResult {
   success: boolean;
@@ -27,15 +30,18 @@ export class CognitoSignInService {
       ClientId: cognitoConfig.userPoolWebClientId,
     };
 
-    console.log('🔧 [CognitoSignInService] Initializing with pool data:', poolData);
+    logger.debug('Initializing with pool data', {
+      UserPoolId: poolData.UserPoolId ? 'PRESENT' : 'MISSING',
+      ClientId: poolData.ClientId ? 'PRESENT' : 'MISSING'
+    });
     this.userPool = new CognitoUserPool(poolData);
-    console.log('✅ [CognitoSignInService] User pool created successfully');
+    logger.info('User pool created successfully');
   }
 
   async signIn(credentials: SignInCredentials): Promise<SignInResult> {
     const { email, password, rememberMe = false } = credentials;
     
-    console.log('🚀 [CognitoSignInService] Starting sign in for:', email);
+    logger.info(`Starting sign in for: ${email}`);
 
     return new Promise((resolve) => {
       const authenticationDetails = new AuthenticationDetails({
@@ -48,17 +54,17 @@ export class CognitoSignInService {
         Pool: this.userPool,
       });
 
-      console.log('🔧 [CognitoSignInService] Calling authenticateUser...');
+      logger.debug('Calling authenticateUser');
 
       cognitoUser.authenticateUser(authenticationDetails, {
         onSuccess: (result) => {
-          console.log('✅ [CognitoSignInService] Authentication SUCCESS!', result);
+          logger.info('Authentication SUCCESS');
 
           const accessToken = result.getAccessToken().getJwtToken();
           const idToken = result.getIdToken().getJwtToken();
           const refreshToken = result.getRefreshToken().getToken();
 
-          console.log('🔧 [CognitoSignInService] Tokens received:', {
+          logger.debug('Tokens received', {
             accessToken: accessToken ? 'PRESENT' : 'MISSING',
             idToken: idToken ? 'PRESENT' : 'MISSING',
             refreshToken: refreshToken ? 'PRESENT' : 'MISSING'
@@ -80,7 +86,7 @@ export class CognitoSignInService {
         },
 
         onFailure: (err) => {
-          console.error('❌ [CognitoSignInService] Authentication FAILED:', err);
+          logger.error('Authentication FAILED', err);
 
           let errorMessage = 'Login failed. Please try again.';
           
@@ -111,7 +117,7 @@ export class CognitoSignInService {
         },
 
         newPasswordRequired: (userAttributes, requiredAttributes) => {
-          console.log('🔄 [CognitoSignInService] New password required:', { userAttributes, requiredAttributes });
+          logger.warn('New password required', { userAttributes, requiredAttributes });
           
           resolve({
             success: false,
@@ -121,7 +127,7 @@ export class CognitoSignInService {
         },
 
         mfaRequired: (challengeName, challengeParameters) => {
-          console.log('🔄 [CognitoSignInService] MFA required:', { challengeName, challengeParameters });
+          logger.warn('MFA required', { challengeName, challengeParameters });
           
           resolve({
             success: false,
@@ -141,7 +147,7 @@ export class CognitoSignInService {
     storage.setItem('refreshToken', tokens.refreshToken);
     storage.setItem('rememberMe', rememberMe.toString());
     
-    console.log('✅ [CognitoSignInService] Tokens stored in', rememberMe ? 'localStorage' : 'sessionStorage');
+    logger.info(`Tokens stored in ${rememberMe ? 'localStorage' : 'sessionStorage'}`);
   }
 
   clearTokens(): void {
@@ -156,7 +162,7 @@ export class CognitoSignInService {
     sessionStorage.removeItem('refreshToken');
     sessionStorage.removeItem('rememberMe');
     
-    console.log('✅ [CognitoSignInService] Tokens cleared from all storage');
+    logger.info('Tokens cleared from all storage');
   }
 
   isAuthenticated(): boolean {

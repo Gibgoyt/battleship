@@ -1,3 +1,7 @@
+import { createLogger } from '../logger';
+
+const logger = createLogger('TokenStorage');
+
 export interface TokenData {
   accessToken?: string;
   idToken?: string;
@@ -22,7 +26,7 @@ export class TokenStorage {
     const { accessToken, idToken, refreshToken, rememberMe = false } = tokens;
 
     try {
-      console.log('🔄 [Token Storage] Storing tokens...', {
+      logger.debug('Storing tokens', {
         hasAccessToken: Boolean(accessToken),
         hasIdToken: Boolean(idToken),
         hasRefreshToken: Boolean(refreshToken),
@@ -35,17 +39,17 @@ export class TokenStorage {
       // Store in browser storage (for client-side access)
       if (accessToken) {
         storage.setItem('accessToken', accessToken);
-        console.log('✅ [Token Storage] Access token stored in', rememberMe ? 'localStorage' : 'sessionStorage');
+        logger.debug(`Access token stored in ${rememberMe ? 'localStorage' : 'sessionStorage'}`);
       }
       
       if (idToken) {
         storage.setItem('idToken', idToken);
-        console.log('✅ [Token Storage] ID token stored in', rememberMe ? 'localStorage' : 'sessionStorage');
+        logger.debug(`ID token stored in ${rememberMe ? 'localStorage' : 'sessionStorage'}`);
       }
       
       if (refreshToken) {
         storage.setItem('refreshToken', refreshToken);
-        console.log('✅ [Token Storage] Refresh token stored in', rememberMe ? 'localStorage' : 'sessionStorage');
+        logger.debug(`Refresh token stored in ${rememberMe ? 'localStorage' : 'sessionStorage'}`);
       }
 
       storage.setItem('rememberMe', rememberMe.toString());
@@ -55,19 +59,19 @@ export class TokenStorage {
       const primaryToken = idToken || accessToken;
       if (primaryToken) {
         this.setTokenCookie('cognito-auth-token', primaryToken, rememberMe);
-        console.log('✅ [Token Storage] Primary token stored in cookies for middleware');
+        logger.debug('Primary token stored in cookies for middleware');
       }
 
       // Store a simple auth flag cookie
       this.setTokenCookie('auth-status', 'authenticated', rememberMe);
 
-      console.log('🎉 [Token Storage] All tokens stored successfully');
+      logger.info('All tokens stored successfully');
 
       // Debug: Log what's actually in storage now
       this.debugStorageContents();
 
     } catch (error) {
-      console.error('❌ [Token Storage] Failed to store tokens:', error);
+      logger.error('Failed to store tokens', error);
       throw new Error('Failed to store authentication tokens');
     }
   }
@@ -88,24 +92,23 @@ export class TokenStorage {
 
       document.cookie = cookieValue;
       
-      console.log('🍪 [Token Storage] Cookie set:', {
+      logger.debug('Cookie set', {
         name,
         hasValue: Boolean(value),
-        valueLength: value.length,
+        valueLength: value ? value.length : 0,
         expires: expirationDate.toISOString(),
-        rememberMe,
-        cookieString: cookieValue.substring(0, 100) + '...'
+        rememberMe
       });
 
       // Immediately verify the cookie was set
       const verification = this.getTokenForMiddleware();
-      console.log('🔍 [Token Storage] Cookie verification:', {
+      logger.debug('Cookie verification', {
         cookieSetSuccessfully: Boolean(verification),
         cookieValueMatches: verification === value
       });
 
     } catch (error) {
-      console.error('❌ [Token Storage] Failed to set cookie:', name, error);
+      logger.error(`Failed to set cookie: ${name}`, error);
     }
   }
 
@@ -126,7 +129,7 @@ export class TokenStorage {
         }
       }
 
-      console.log('📥 [Token Storage] Retrieved tokens:', {
+      logger.debug('Retrieved tokens', {
         hasAccessToken: Boolean(tokens.accessToken),
         hasIdToken: Boolean(tokens.idToken),
         hasRefreshToken: Boolean(tokens.refreshToken),
@@ -135,7 +138,7 @@ export class TokenStorage {
 
       return tokens;
     } catch (error) {
-      console.error('❌ [Token Storage] Failed to retrieve tokens:', error);
+      logger.error('Failed to retrieve tokens', error);
       return {};
     }
   }
@@ -143,7 +146,7 @@ export class TokenStorage {
   // Clear all tokens from both storage and cookies
   clearTokens(): void {
     try {
-      console.log('🧹 [Token Storage] Clearing all tokens...');
+      logger.info('Clearing all tokens');
 
       // Clear from both storage types
       [localStorage, sessionStorage].forEach(storage => {
@@ -157,9 +160,9 @@ export class TokenStorage {
       this.clearTokenCookie('cognito-auth-token');
       this.clearTokenCookie('auth-status');
 
-      console.log('✅ [Token Storage] All tokens cleared successfully');
+      logger.info('All tokens cleared successfully');
     } catch (error) {
-      console.error('❌ [Token Storage] Failed to clear tokens:', error);
+      logger.error('Failed to clear tokens', error);
     }
   }
 
@@ -167,9 +170,9 @@ export class TokenStorage {
   private clearTokenCookie(name: string): void {
     try {
       document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax`;
-      console.log('🍪 [Token Storage] Cookie cleared:', name);
+      logger.debug(`Cookie cleared: ${name}`);
     } catch (error) {
-      console.error('❌ [Token Storage] Failed to clear cookie:', name, error);
+      logger.error(`Failed to clear cookie: ${name}`, error);
     }
   }
 
@@ -178,7 +181,7 @@ export class TokenStorage {
     const tokens = this.getTokens();
     const hasTokens = Boolean(tokens.accessToken || tokens.idToken);
     
-    console.log('🔍 [Token Storage] Authentication check:', {
+    logger.debug('Authentication check', {
       hasTokens,
       hasAccessToken: Boolean(tokens.accessToken),
       hasIdToken: Boolean(tokens.idToken)
@@ -190,10 +193,10 @@ export class TokenStorage {
   // Debug function to log all storage contents
   debugStorageContents(): void {
     try {
-      console.group('🔍 [Token Storage] Debug: Storage Contents');
+      logger.debug('=== Storage Contents Debug ===');
       
       // Check localStorage
-      console.log('📦 localStorage:', {
+      logger.debug('localStorage', {
         accessToken: localStorage.getItem('accessToken') ? 'PRESENT' : 'MISSING',
         idToken: localStorage.getItem('idToken') ? 'PRESENT' : 'MISSING',
         refreshToken: localStorage.getItem('refreshToken') ? 'PRESENT' : 'MISSING',
@@ -201,16 +204,13 @@ export class TokenStorage {
       });
 
       // Check sessionStorage
-      console.log('📦 sessionStorage:', {
+      logger.debug('sessionStorage', {
         accessToken: sessionStorage.getItem('accessToken') ? 'PRESENT' : 'MISSING',
         idToken: sessionStorage.getItem('idToken') ? 'PRESENT' : 'MISSING',
         refreshToken: sessionStorage.getItem('refreshToken') ? 'PRESENT' : 'MISSING',
         rememberMe: sessionStorage.getItem('rememberMe')
       });
 
-      // Check cookies
-      console.log('🍪 document.cookie:', document.cookie);
-      
       // Parse cookies for better display
       const cookies = document.cookie.split(';').reduce((acc: any, cookie) => {
         const [name, value] = cookie.trim().split('=');
@@ -218,11 +218,9 @@ export class TokenStorage {
         return acc;
       }, {});
       
-      console.log('🍪 Parsed cookies:', cookies);
-
-      console.groupEnd();
+      logger.debug('Parsed cookies', cookies);
     } catch (error) {
-      console.error('❌ [Token Storage] Debug failed:', error);
+      logger.error('Debug failed', error);
     }
   }
 
@@ -234,15 +232,15 @@ export class TokenStorage {
       for (const cookie of cookies) {
         const [name, value] = cookie.trim().split('=');
         if (name === 'cognito-auth-token' && value) {
-          console.log('🍪 [Token Storage] Token found in cookies for middleware');
+          logger.debug('Token found in cookies for middleware');
           return decodeURIComponent(value);
         }
       }
       
-      console.log('🍪 [Token Storage] No token found in cookies for middleware');
+      logger.debug('No token found in cookies for middleware');
       return null;
     } catch (error) {
-      console.error('❌ [Token Storage] Failed to get token from cookies:', error);
+      logger.error('Failed to get token from cookies', error);
       return null;
     }
   }

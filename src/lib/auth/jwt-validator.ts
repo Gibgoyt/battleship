@@ -1,4 +1,7 @@
 // JWT validation utilities for AWS Cognito tokens
+import { createLogger } from '../logger';
+
+const logger = createLogger('JWTValidator');
 
 export interface CognitoTokenPayload {
   sub: string;
@@ -46,7 +49,7 @@ export class JWTValidator {
 
       return { header, payload };
     } catch (error) {
-      console.error('❌ [JWT Validator] Failed to decode token:', error);
+      logger.error('Failed to decode token', error);
       return null;
     }
   }
@@ -63,15 +66,13 @@ export class JWTValidator {
   // Basic token validation (without signature verification)
   validateTokenBasic(token: string): AuthValidationResult {
     try {
-      console.log('🔍 [JWT Validator] Starting token validation...', {
+      logger.debug('Starting token validation', {
         hasToken: Boolean(token),
-        tokenLength: token?.length,
-        tokenPrefix: token?.substring(0, 20) + '...',
-        tokenSuffix: '...' + token?.substring(token.length - 20)
+        tokenLength: token?.length
       });
 
       if (!token || typeof token !== 'string') {
-        console.log('❌ [JWT Validator] Token missing or invalid format');
+        logger.warn('Token missing or invalid format');
         return {
           isValid: false,
           isExpired: false,
@@ -81,7 +82,7 @@ export class JWTValidator {
 
       const decoded = this.decodeToken(token);
       if (!decoded) {
-        console.log('❌ [JWT Validator] Failed to decode token');
+        logger.warn('Failed to decode token');
         return {
           isValid: false,
           isExpired: false,
@@ -93,18 +94,18 @@ export class JWTValidator {
       const currentTime = Math.floor(Date.now() / 1000);
       const isExpired = payload.exp < currentTime;
 
-      console.log('🔍 [JWT Validator] Token decoded successfully:', {
-        sub: payload.sub?.substring(0, 8) + '...',
+      logger.debug('Token decoded successfully', {
+        sub: payload.sub?.substring(0, 8) + '***',
         email: payload.email,
         tokenUse: payload.token_use,
         iat: new Date(payload.iat * 1000).toISOString(),
         exp: new Date(payload.exp * 1000).toISOString(),
         isExpired,
-        timeUntilExpiry: payload.exp - currentTime + ' seconds'
+        timeUntilExpiry: `${payload.exp - currentTime} seconds`
       });
 
       if (isExpired) {
-        console.log('❌ [JWT Validator] Token has expired');
+        logger.warn('Token has expired');
         return {
           isValid: false,
           isExpired: true,
@@ -115,7 +116,7 @@ export class JWTValidator {
 
       // Basic payload validation
       if (!payload.sub || !payload.exp || !payload.iat) {
-        console.log('❌ [JWT Validator] Token missing required claims:', {
+        logger.warn('Token missing required claims', {
           hasSub: Boolean(payload.sub),
           hasExp: Boolean(payload.exp),
           hasIat: Boolean(payload.iat)
@@ -128,14 +129,14 @@ export class JWTValidator {
         };
       }
 
-      console.log('✅ [JWT Validator] Token validation successful');
+      logger.debug('Token validation successful');
       return {
         isValid: true,
         isExpired: false,
         payload
       };
     } catch (error) {
-      console.error('❌ [JWT Validator] Validation error:', error);
+      logger.error('Validation error', error);
       return {
         isValid: false,
         isExpired: false,
@@ -189,7 +190,7 @@ export class JWTValidator {
         hasValidTokens
       };
     } catch (error) {
-      console.error('❌ [JWT Validator] Failed to validate stored tokens:', error);
+      logger.error('Failed to validate stored tokens', error);
       return { hasValidTokens: false };
     }
   }
@@ -221,7 +222,7 @@ export class JWTValidator {
         }
 
         if (shouldClear) {
-          console.log('🧹 [JWT Validator] Clearing invalid tokens from storage');
+          logger.warn('Clearing invalid tokens from storage');
           storage.removeItem('accessToken');
           storage.removeItem('idToken');
           storage.removeItem('refreshToken');
@@ -229,7 +230,7 @@ export class JWTValidator {
         }
       }
     } catch (error) {
-      console.error('❌ [JWT Validator] Failed to clear invalid tokens:', error);
+      logger.error('Failed to clear invalid tokens', error);
     }
   }
 }

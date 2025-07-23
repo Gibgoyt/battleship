@@ -1,6 +1,9 @@
 <script>
 	import { onMount } from 'svelte';
 	import { cognitoConfig } from '../../lib/cognito-config.ts';
+	import { createLogger } from '../../lib/logger';
+
+	const logger = createLogger('SvelteLoginForm');
 
 	let email = '';
 	let password = '';
@@ -13,7 +16,7 @@
 	let CognitoUserPool, CognitoUser, AuthenticationDetails;
 
 	onMount(async () => {
-		console.log('🔥 [Svelte Login] Component mounted, initializing...');
+		logger.info('Component mounted, initializing');
 		
 		// Dynamic import to prevent SSR issues
 		const cognitoModule = await import('amazon-cognito-identity-js');
@@ -27,17 +30,17 @@
 		};
 		
 		userPool = new CognitoUserPool(poolData);
-		console.log('✅ [Svelte Login] User pool created:', userPool);
+		logger.info('User pool created successfully');
 	});
 
 	function showError(message) {
-		console.error('❌ [Svelte Login] Error:', message);
+		logger.error(`Authentication error: ${message}`);
 		errorMessage = message;
 		successMessage = '';
 	}
 
 	function showSuccess(message) {
-		console.log('✅ [Svelte Login] Success:', message);
+		logger.info(`Authentication success: ${message}`);
 		successMessage = message;
 		errorMessage = '';
 	}
@@ -49,7 +52,7 @@
 
 	function handleSubmit(e) {
 		e.preventDefault();
-		console.log('🚀 [Svelte Login] Form submitted!');
+		logger.debug('Form submitted');
 
 		if (!email || !password) {
 			showError('Please enter both email and password.');
@@ -60,7 +63,7 @@
 	}
 
 	function signIn(email, password, rememberMe) {
-		console.log('🚀 [Svelte Login] Starting sign in for:', email);
+		logger.info(`Starting sign in for: ${email}`);
 		
 		if (!userPool || !CognitoUserPool || !CognitoUser || !AuthenticationDetails) {
 			showError('Authentication system not ready. Please wait and try again.');
@@ -80,17 +83,17 @@
 			Pool: userPool,
 		});
 
-		console.log('🔧 [Svelte Login] Calling authenticateUser...');
+		logger.debug('Calling authenticateUser');
 
 		cognitoUser.authenticateUser(authenticationDetails, {
 			onSuccess: function (result) {
-				console.log('✅ [Svelte Login] Authentication SUCCESS!', result);
+				logger.info('Authentication SUCCESS');
 
 				const accessToken = result.getAccessToken().getJwtToken();
 				const idToken = result.getIdToken().getJwtToken();
 				const refreshToken = result.getRefreshToken().getToken();
 
-				console.log('🔧 [Svelte Login] Tokens received:', {
+				logger.debug('Tokens received', {
 					accessToken: accessToken ? 'PRESENT' : 'MISSING',
 					idToken: idToken ? 'PRESENT' : 'MISSING',
 					refreshToken: refreshToken ? 'PRESENT' : 'MISSING'
@@ -99,7 +102,7 @@
 				// Store tokens using the new token storage bridge
 				const storeTokensAsync = async () => {
 					try {
-						console.log('🔄 [Svelte Login] Storing tokens with new bridge...');
+						logger.debug('Storing tokens with token storage bridge');
 						
 						// Import token storage dynamically
 						const { storeTokens, debugStorage } = await import('../../lib/auth/token-storage');
@@ -115,18 +118,18 @@
 						// Debug storage contents after storing
 						debugStorage();
 						
-						console.log('✅ [Svelte Login] Tokens stored successfully with bridge');
+						logger.info('Tokens stored successfully');
 						
 						showSuccess('Login successful! Redirecting...');
 						
 						// Redirect after short delay
 						setTimeout(() => {
-							console.log('🔄 [Svelte Login] Redirecting to dashboard...');
+							logger.info('Redirecting to dashboard');
 							window.location.href = '/app/dashboard';
 						}, 1000);
 						
 					} catch (storageError) {
-						console.error('❌ [Svelte Login] Failed to store tokens:', storageError);
+						logger.error('Failed to store tokens', storageError);
 						showError('Login successful but failed to store session. Please try again.');
 					}
 				};
@@ -136,7 +139,7 @@
 			},
 
 			onFailure: function (err) {
-				console.error('❌ [Svelte Login] Authentication FAILED:', err);
+				logger.error('Authentication FAILED', err);
 				loading = false;
 
 				let errorMsg = 'Login failed. Please try again.';
@@ -165,7 +168,7 @@
 			},
 
 			newPasswordRequired: function (userAttributes, requiredAttributes) {
-				console.log('🔄 [Svelte Login] New password required');
+				logger.warn('New password required');
 				loading = false;
 				showError('New password required. Please contact support.');
 			}

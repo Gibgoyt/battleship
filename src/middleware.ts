@@ -1,6 +1,9 @@
 import { defineMiddleware } from 'astro:middleware'
 import { type APIContext, type MiddlewareNext } from "astro"
 import { jwtValidator } from './lib/auth/jwt-validator'
+import { createLogger } from './lib/logger'
+
+const logger = createLogger('Middleware');
 
 export const onRequest = defineMiddleware(async (
   context: APIContext,
@@ -40,77 +43,75 @@ export const onRequest = defineMiddleware(async (
 
   // Get the Cognito auth token from cookies
   const authToken = cookies.get('cognito-auth-token')
-  console.log('🍪 [MIDDLEWARE] Cookie inspection:', {
+  logger.debug('Cookie inspection', {
     hasCognitoToken: Boolean(authToken?.value),
     cognitoTokenValue: authToken?.value ? 'PRESENT' : 'MISSING',
-    authStatusCookie: cookies.get('auth-status')?.value ? 'PRESENT' : 'MISSING'
+    authStatusCookie: cookies.get('auth-status')?.value ? 'PRESENT' : 'MISSING',
+    path: url.pathname
   })
 
   // Check if the route is auth route
   if (isAuthRoute) {
-    console.log('🔐 [MIDDLEWARE] Processing auth route:', url.pathname)
+    logger.debug(`Processing auth route: ${url.pathname}`);
     
     // If user is already logged in, redirect to app dashboard
     if (authToken && authToken.value) {
       try {
-        console.log('🔍 [MIDDLEWARE] Validating token for auth route redirect...')
+        logger.debug('Validating token for auth route redirect');
         
         // Validate the Cognito JWT token
         const validation = jwtValidator.validateTokenBasic(authToken.value)
-        console.log('🔍 [MIDDLEWARE] Token validation result:', {
+        logger.debug('Token validation result', {
           isValid: validation.isValid,
           isExpired: validation.isExpired,
           hasPayload: Boolean(validation.payload),
           error: validation.error
-        })
+        });
         
         if (validation.isValid && !validation.isExpired) {
-          console.log('✅ [MIDDLEWARE] Valid token found, redirecting to dashboard from auth page')
+          logger.info('Valid token found, redirecting to dashboard from auth page');
           // Token is valid, user is logged in, redirect to dashboard
           return Response.redirect(new URL('/app/dashboard', url), 302)
         } else {
-          console.log('❌ [MIDDLEWARE] Invalid or expired token, allowing auth page access')
+          logger.debug('Invalid or expired token, allowing auth page access');
         }
       } catch (error) {
-        console.error('❌ [MIDDLEWARE] Token validation failed for auth route:', error)
+        logger.error('Token validation failed for auth route', error);
         // Invalid token, clear it and continue to auth page
         cookies.delete('cognito-auth-token', {
           path: '/',
         })
       }
     } else {
-      console.log('📭 [MIDDLEWARE] No auth token found, allowing auth page access')
+      logger.debug('No auth token found, allowing auth page access')
     }
     return next()
   }
 
   // Check if the route is protected 
   if (isProtectedRoute) {
-    console.log('🔒 [MIDDLEWARE] Processing protected route:', url.pathname)
+    logger.debug(`Processing protected route: ${url.pathname}`);
     
     // If no auth token is present, redirect to sign-in
     if (!authToken || !authToken.value) {
-      console.log('❌ [MIDDLEWARE] No auth token found for protected route, redirecting to sign-in')
+      logger.warn('No auth token found for protected route, redirecting to sign-in');
       return Response.redirect(new URL('/auth/sign-in', url), 302)
     }
 
     try {
-      console.log('🔍 [MIDDLEWARE] Validating token for protected route access...')
+      logger.debug('Validating token for protected route access');
       
       // Validate the Cognito JWT token
       const validation = jwtValidator.validateTokenBasic(authToken.value)
-      console.log('🔍 [MIDDLEWARE] Protected route token validation:', {
+      logger.debug('Protected route token validation', {
         isValid: validation.isValid,
         isExpired: validation.isExpired,
         hasPayload: Boolean(validation.payload),
         error: validation.error,
-        payloadPreview: validation.payload ? {
-          sub: validation.payload.sub?.substring(0, 8) + '...',
-          email: validation.payload.email,
-          tokenUse: validation.payload.token_use,
-          exp: new Date(validation.payload.exp * 1000).toISOString()
-        } : null
-      })
+        userEmail: validation.payload?.email,
+        tokenUse: validation.payload?.token_use,
+        exp: validation.payload?.exp ? new Date(validation.payload.exp * 1000).toISOString() : null
+      });
       
       if (!validation.isValid) {
         throw new Error(validation.error || 'Invalid token')
@@ -131,23 +132,23 @@ export const onRequest = defineMiddleware(async (
           tokenUse: validation.payload.token_use
         }
         
-        console.log('👤 [MIDDLEWARE] User info stored in locals:', {
+        logger.debug('User info stored in locals', {
           email: locals.user.email,
           username: locals.user.username,
           tokenUse: locals.user.tokenUse
-        })
+        });
       }
 
-      console.log('✅ [MIDDLEWARE] Protected route access granted')
+      logger.info('Protected route access granted');
       // Token exists and is valid, allow access
       return next()
     } catch (error) {
-      console.error('❌ [MIDDLEWARE] Protected route validation failed:', error)
+      logger.error('Protected route validation failed', error);
       // Invalid token, clear it and redirect to sign-in
       cookies.delete('cognito-auth-token', {
         path: '/',
       })
-      console.log('🔄 [MIDDLEWARE] Redirecting to sign-in due to validation failure')
+      logger.warn('Redirecting to sign-in due to validation failure');
       return Response.redirect(new URL('/auth/sign-in', url), 302)
     }
   }
