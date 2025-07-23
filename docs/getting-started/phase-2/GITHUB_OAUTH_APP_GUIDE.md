@@ -1,9 +1,10 @@
-# Complete GitHub OAuth 2.0 Integration Guide for DocForge
+# Complete GitHub Integration Guide for DocForge (AWS Cognito + GitHub)
 
 **Date:** July 23, 2025  
-**Phase:** 2 - GitHub Integration  
+**Phase:** 2 - GitHub Integration as Additional Data Source  
 **Implementation Type:** Frontend-First MVP → Backend Schema Definition → Production Deployment  
-**Duration:** 2-3 weeks for complete implementation  
+**Duration:** 1-2 weeks for complete implementation  
+**Authentication:** AWS Cognito (Primary) + GitHub OAuth (Data Source Only)
 
 ## Table of Contents
 
@@ -23,9 +24,10 @@
 
 ### 🎯 Integration Goals
 
-**Primary Objective:** Enable users to connect their GitHub account (1:1 relationship) to DocForge for automated repository documentation generation.
+**Primary Objective:** Enable existing Cognito-authenticated users to connect their GitHub account (1:1 relationship) for automated repository documentation generation.
 
 **Key Requirements:**
+- **AWS Cognito Remains Primary Auth:** Users sign in with Cognito JWT - GitHub is additional data source only
 - **Single GitHub Account per User:** Each DocForge user can connect exactly one GitHub account
 - **Repository Selection:** Users choose which repositories to include in documentation
 - **Minimal Server Requests:** Optimize for Cloudflare's 100k daily request limit
@@ -36,25 +38,28 @@
 
 ```mermaid
 graph TB
-    A[User lands on DocForge] --> B[Click 'Connect GitHub']
-    B --> C[Redirect to GitHub OAuth]
-    C --> D[User authorizes DocForge]
-    D --> E[GitHub redirects with code]
-    E --> F[Exchange code for access token]
-    F --> G[Fetch user profile & repos]
-    G --> H[Store in Redis HSET]
-    H --> I[Return to repository selection]
-    I --> J[User selects repos]
-    J --> K[Ready for documentation generation]
+    A[User signs in with AWS Cognito] --> B[User accesses DocForge app with JWT]
+    B --> C[User clicks 'Connect GitHub' in app]
+    C --> D[Redirect to GitHub OAuth]
+    D --> E[User authorizes DocForge]
+    E --> F[GitHub redirects with code]
+    F --> G[Exchange code for access token]
+    G --> H[Link GitHub account to Cognito user]
+    H --> I[Fetch user profile & repos from GitHub]
+    I --> J[Store in Redis linked to Cognito user ID]
+    J --> K[Return to app - repositories now available]
+    K --> L[User selects repos for documentation]
 ```
 
 ### 🔄 Data Flow Strategy
 
-**Single Initial Load Pattern:**
-1. **Astro Catch-All Route:** Loads ALL initial data in one request
-2. **GitHub Integration:** Part of the initial data load includes GitHub repos
-3. **Client-Side Mutations:** Repository selection handled by Qwik SPA
-4. **Minimal Backend Requests:** Only authentication and critical updates hit the server
+**Cognito + GitHub Integration Pattern:**
+1. **Primary Authentication:** AWS Cognito handles all user authentication (sign-up, sign-in, JWT tokens)
+2. **GitHub Connection:** Optional service integration for users who want GitHub repository access
+3. **Data Linking:** GitHub data linked to Cognito user ID in backend storage
+4. **Single Initial Load:** Astro catch-all loads user data + GitHub data (if connected) in one request
+5. **Client-Side Mutations:** Repository selection handled by Qwik SPA
+6. **Minimal Backend Requests:** Only GitHub connection and critical updates hit the server
 
 ---
 
@@ -70,17 +75,32 @@ graph TB
 
 2. **Create New OAuth App:**
    ```
-   Application name: DocForge [Environment]
-   Homepage URL: https://your-domain.com
-   Application description: AI-powered documentation generation for GitHub repositories
-   Authorization callback URL: https://your-domain.com/auth/github/callback
+   Application name: DocForge Dev
+   Homepage URL: http://localhost:4321
+   Application description: AI-powered documentation generation for GitHub repositories (connects to existing user accounts)
+   Authorization callback URL: http://localhost:4321/auth/github/callback
+   Enable Device Flow: DISABLED (not needed for web app)
    ```
 
 3. **Environment-Specific Apps:**
    Create separate OAuth apps for each environment:
-   - **Development:** `DocForge Dev` → `http://localhost:4321/auth/github/callback`
-   - **Staging:** `DocForge Staging` → `https://staging.docforge.com/auth/github/callback`
-   - **Production:** `DocForge` → `https://docforge.com/auth/github/callback`
+   - **Development:** 
+     - Name: `DocForge Dev`
+     - Homepage: `http://localhost:4321`
+     - Callback: `http://localhost:4321/auth/github/callback`
+   - **Staging:** 
+     - Name: `DocForge Staging`
+     - Homepage: `https://staging.docforge.com`
+     - Callback: `https://staging.docforge.com/auth/github/callback`
+   - **Production:** 
+     - Name: `DocForge`
+     - Homepage: `https://docforge.com`
+     - Callback: `https://docforge.com/auth/github/callback`
+
+### Important Notes:
+- **Device Flow:** Keep DISABLED - you're building a web app, not a CLI tool
+- **Callback URL:** Must be exact match - `/auth/github/callback` is handled by your Astro backend
+- **Homepage URL:** Can be your local dev server for development
 
 ### Step 2: Obtain OAuth Credentials
 
@@ -143,81 +163,58 @@ const CALLBACK_URLS = {
 
 ### Redis HSET Schema Architecture
 
-**Design Philosophy:** Use Redis HSET structures for high-performance, atomic operations with built-in expiration management.
+**Design Philosophy:** Use Redis HSET structures for high-performance, atomic operations with built-in expiration management. **AWS Cognito handles user authentication - GitHub data is linked to Cognito users.**
 
-### User Profile Storage
-
-```bash
-# Primary user profile
-HSET user:{user_id}
-  github_id "12345678"
-  login "octocat"
-  email "octocat@github.com"
-  name "The Octocat"
-  avatar_url "https://github.com/images/error/octocat_happy.gif"
-  company "GitHub"
-  location "San Francisco"
-  bio "There once was..."
-  public_repos "8"
-  public_gists "8"
-  followers "20"
-  following "0"
-  created_at "1672444800"
-  updated_at "1672444800"
-  github_created_at "2011-01-25T18:44:36Z"
-  github_updated_at "2025-07-23T10:00:00Z"
-
-# User lookup by GitHub ID
-HSET github_user_lookup
-  "12345678" "user:abc123-def456-ghi789"  # Maps github_id to user_id
-
-# User session management
-HSET user_session:{session_id}
-  user_id "abc123-def456-ghi789"
-  github_id "12345678"
-  created_at "1672444800"
-  expires_at "1675036800"
-  last_activity "1672444800"
-  ip_address "192.168.1.1"
-  user_agent "Mozilla/5.0..."
-```
-
-### OAuth Token Storage
+### Cognito User + GitHub Integration Storage
 
 ```bash
-# GitHub OAuth tokens (encrypted)
-HSET github_oauth:{user_id}
+# NO USER PROFILE STORAGE NEEDED - Cognito handles this!
+# We only store GitHub integration data linked to Cognito user ID
+
+# GitHub integration per Cognito user (main integration record)
+HSET github_integration:{cognito_user_id}
+  github_user_id "12345678"
+  github_username "octocat"
+  github_email "octocat@github.com"
+  github_name "The Octocat"
+  github_avatar_url "https://github.com/images/error/octocat_happy.gif"
+  github_company "GitHub"
+  github_location "San Francisco"
+  github_bio "There once was..."
+  github_public_repos "8"
+  github_followers "20"
+  github_following "0"
   access_token "{encrypted_with_aes256_gcm}"
   token_type "bearer"
   scope "repo,user:email,read:user"
-  granted_scopes "repo,user:email,read:user"  # What GitHub actually granted
-  created_at "1672444800"
+  connected_at "1672444800"
   updated_at "1672444800"
-  last_used "1672444800"
-  rate_limit_remaining "5000"
-  rate_limit_reset "1672448400"
+  last_sync "1672444800"
+  sync_status "completed"
+  repos_count "25"
 
-# Token encryption metadata
-HSET oauth_encryption:{user_id}
-  algorithm "aes-256-gcm"
-  iv "{base64_encoded_iv}"
-  auth_tag "{base64_encoded_auth_tag}"
-  key_version "v1"  # For key rotation
+# Reverse lookup: GitHub user ID → Cognito user ID (prevent duplicate connections)
+HSET github_to_cognito_lookup
+  "12345678" "cognito_user_123-abc-456-def"  # Maps github_id to cognito_user_id
+
+# NO SESSION MANAGEMENT NEEDED - Cognito JWT handles this!
 ```
 
-### Repository Data Storage
+### Repository Data Storage (Linked to Cognito Users)
 
 ```bash
-# User's GitHub repositories (cached from API)
-HSET user_repos:{user_id}
+# User's GitHub repositories (cached from API) - linked to Cognito user
+HSET github_repos:{cognito_user_id}
   repo_count "25"
   last_sync "1672444800"
   sync_status "completed"
   private_count "5"
   public_count "20"
+  total_stars "1250"
+  primary_language "TypeScript"
 
-# Individual repository data
-HSET repo:{repo_id}
+# Individual repository data (shared across users if same repo)
+HSET repo:{github_repo_id}
   github_id "123456789"
   name "Hello-World"
   full_name "octocat/Hello-World"
@@ -245,57 +242,78 @@ HSET repo:{repo_id}
   disabled "false"
   cached_at "1672444800"
 
-# Repository ownership mapping
-HSET repo_owners:{user_id}
+# Repository ownership mapping (Cognito user → their repos)
+HSET github_user_repos:{cognito_user_id}
   "123456789" "repo:123456789"  # Maps repo github_id to repo data key
   "234567890" "repo:234567890"
+  "345678901" "repo:345678901"
   last_updated "1672444800"
+  access_level "owner"  # owner, collaborator, etc.
 ```
 
-### User Repository Selection
+### User Repository Selection (Cognito User Preferences)
 
 ```bash
-# Repositories selected for documentation
-HSET user_selected_repos:{user_id}
-  "123456789" "selected"    # repo github_id -> status
+# Repositories selected for documentation by Cognito user
+HSET user_selected_repos:{cognito_user_id}
+  "123456789" "selected"    # repo github_id → status
   "234567890" "selected"
   "345678901" "deselected"
   selection_count "2"
   last_updated "1672444800"
   auto_sync "true"  # Automatically include new repos
 
-# Documentation generation status
-HSET documentation_status:{user_id}
-  "123456789" "completed"   # repo_id -> status
+# Documentation generation status per Cognito user
+HSET documentation_status:{cognito_user_id}
+  "123456789" "completed"   # repo_id → status
   "234567890" "in_progress"
   "345678901" "queued"
   last_generated "1672444800"
   generation_count "15"
+  docs_generated_today "3"
 ```
 
-### Rate Limiting & API Usage
+### Rate Limiting & API Usage (Per Cognito User)
 
 ```bash
-# GitHub API rate limiting per user
-HSET github_rate_limit:{user_id}
+# GitHub API rate limiting per Cognito user
+HSET github_rate_limit:{cognito_user_id}
   remaining "4985"
   limit "5000"
   reset_at "1672448400"
-  used "15"
+  used_requests "15"
   last_request "1672444800"
+  hourly_usage "25"
 
-# DocForge API usage tracking
-HSET api_usage:{user_id}:{date}  # date format: YYYY-MM-DD
+# DocForge API usage tracking per Cognito user
+HSET api_usage:{cognito_user_id}:{date}  # date format: YYYY-MM-DD
   github_api_calls "25"
   documentation_generations "3"
   spa_loads "8"
+  github_syncs "2"
   last_activity "1672444800"
 
-# Global rate limiting (by IP)
+# Global rate limiting (by IP) - for non-authenticated requests
 HSET rate_limit:ip:{ip_address}:{window}
   requests "150"
   window_start "1672444800"
   window_end "1672448400"
+```
+
+### OAuth State Management (Temporary)
+
+```bash
+# OAuth state for GitHub connection flow (temporary, expires in 10 minutes)
+HSET github_oauth_state:{state_uuid}
+  cognito_user_id "cognito_user_123-abc-456-def"
+  created_at "1672444800"
+  expires_at "1672445400"  # 10 minutes later
+  ip_address "192.168.1.1"
+  user_agent "Mozilla/5.0..."
+  flow_type "github_connect"  # vs "github_reconnect"
+
+# OAuth state cleanup happens automatically via Redis TTL
+EXPIRE github_oauth_state:{state_uuid} 600  # 10 minutes
 ```
 
 ### Token Encryption Implementation
@@ -373,13 +391,13 @@ await redis.hset(`github_oauth:${userId}`, {
 
 ### Postman Collection Setup
 
-**Collection 1: GitHub OAuth Flow Testing**
+**Collection 1: DocForge GitHub Integration Testing (Cognito + GitHub)**
 
 ```json
 {
   "info": {
-    "name": "DocForge GitHub OAuth Testing",
-    "description": "Complete OAuth flow testing for GitHub integration",
+    "name": "DocForge GitHub Integration Testing",
+    "description": "GitHub integration testing for Cognito-authenticated users",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -402,14 +420,66 @@ await redis.hset(`github_oauth:${userId}`, {
       "key": "BACKEND_URL",
       "value": "https://192.168.0.6:3000",
       "type": "string"
+    },
+    {
+      "key": "COGNITO_JWT_TOKEN",
+      "value": "your_cognito_jwt_token_here",
+      "type": "string"
+    },
+    {
+      "key": "COGNITO_USER_ID",
+      "value": "cognito_user_123-abc-456-def",
+      "type": "string"
     }
   ]
 }
 ```
 
-### Test 1: OAuth Authorization URL Generation
+### Test 0: Initiate GitHub Connection (Cognito User)
 
-**Purpose:** Generate the correct OAuth URL to test manual authorization flow.
+**Purpose:** Start GitHub connection flow for already-authenticated Cognito user.  
+**Method:** `GET`  
+**URL:** `{{BACKEND_URL}}/auth/github/connect`  
+**Headers:** `Authorization: Bearer {{COGNITO_JWT_TOKEN}}`
+
+```javascript
+// Pre-request Script - Extract Cognito user ID from JWT
+const jwtToken = pm.collectionVariables.get('COGNITO_JWT_TOKEN');
+if (jwtToken) {
+  // Decode JWT payload (base64 decode middle part)
+  const payload = JSON.parse(atob(jwtToken.split('.')[1]));
+  pm.collectionVariables.set('COGNITO_USER_ID', payload.sub);
+  console.log('🆔 Cognito User ID:', payload.sub);
+  console.log('👤 Cognito Username:', payload['cognito:username'] || payload.username);
+}
+
+// Test Script
+pm.test("GitHub connect initiated for Cognito user", function () {
+    // This should redirect to GitHub OAuth with state parameter
+    pm.expect(pm.response.code).to.be.oneOf([302, 200]);
+    
+    const location = pm.response.headers.get('Location');
+    if (location) {
+        pm.expect(location).to.include('github.com/login/oauth/authorize');
+        pm.expect(location).to.include('client_id=');
+        pm.expect(location).to.include('state=');
+        
+        // Extract state for later use
+        const stateMatch = location.match(/state=([^&]+)/);
+        if (stateMatch) {
+            pm.collectionVariables.set('oauth_state', stateMatch[1]);
+            console.log('🔐 OAuth state:', stateMatch[1]);
+        }
+        
+        console.log('📋 Copy this URL to browser for GitHub OAuth:');
+        console.log(location);
+    }
+});
+```
+
+### Test 1: OAuth Authorization URL Generation (Alternative Manual Method)
+
+**Purpose:** Generate the correct OAuth URL manually if backend not ready.
 
 ```javascript
 // Pre-request Script
@@ -427,10 +497,10 @@ const authUrl = `https://github.com/login/oauth/authorize?` +
 
 console.log('📋 Copy this URL to browser for manual OAuth flow:');
 console.log(authUrl);
+console.log('🆔 Associated with Cognito User:', pm.collectionVariables.get('COGNITO_USER_ID'));
 
 // Test Script  
 pm.test("OAuth URL generated successfully", function () {
-    const authUrl = pm.collectionVariables.get('oauth_url');
     pm.expect(authUrl).to.include('github.com/login/oauth/authorize');
     pm.expect(authUrl).to.include('client_id=');
     pm.expect(authUrl).to.include('scope=repo');
@@ -646,17 +716,18 @@ pm.test("Pagination headers present", function () {
 ```
 backend/
 ├── routes/
-│   ├── auth.js          # OAuth routes
-│   └── api.js           # API routes
+│   ├── auth.js          # GitHub OAuth routes (connect/disconnect)
+│   └── api.js           # API routes (SPA load, etc.)
 ├── middleware/
-│   ├── auth.js          # Authentication middleware
+│   ├── cognitoAuth.js   # Cognito JWT validation middleware
 │   └── rateLimit.js     # Rate limiting
 ├── services/
 │   ├── github.js        # GitHub API service
 │   ├── redis.js         # Redis operations
-│   └── encryption.js    # Token encryption
+│   ├── encryption.js    # Token encryption
+│   └── cognito.js       # Cognito JWT validation service
 └── config/
-    └── oauth.js         # OAuth configuration
+    └── oauth.js         # GitHub OAuth configuration
 ```
 
 ### OAuth Configuration
@@ -673,20 +744,26 @@ const OAUTH_CONFIG = {
     callbackUrl: process.env.GITHUB_CALLBACK_URL
   },
   
+  cognito: {
+    region: process.env.AWS_REGION,
+    userPoolId: process.env.COGNITO_USER_POOL_ID,
+    clientId: process.env.COGNITO_CLIENT_ID,
+    jwtVerificationUrl: `https://cognito-idp.${process.env.AWS_REGION}.amazonaws.com/${process.env.COGNITO_USER_POOL_ID}/.well-known/jwks.json`
+  },
+  
   security: {
     stateExpiration: 600, // 10 minutes
-    tokenEncryptionKey: process.env.TOKEN_ENCRYPTION_KEY,
-    sessionSecret: process.env.SESSION_SECRET
+    tokenEncryptionKey: process.env.TOKEN_ENCRYPTION_KEY
   },
   
   redis: {
     url: process.env.REDIS_URL,
     keyPrefix: 'docforge:',
     ttl: {
-      oauthState: 600,      // 10 minutes
-      userSession: 2592000, // 30 days
-      repoCache: 3600,      // 1 hour
-      rateLimitWindow: 3600 // 1 hour
+      githubOauthState: 600,    // 10 minutes
+      githubIntegration: 31536000, // 1 year (or until disconnected)
+      repoCache: 3600,          // 1 hour
+      rateLimitWindow: 3600     // 1 hour
     }
   }
 };
@@ -694,7 +771,89 @@ const OAUTH_CONFIG = {
 module.exports = OAUTH_CONFIG;
 ```
 
-### OAuth Route Implementation
+### Cognito Authentication Middleware
+
+```javascript
+// middleware/cognitoAuth.js
+const jwt = require('jsonwebtoken');
+const jwksClient = require('jwks-rsa');
+const OAUTH_CONFIG = require('../config/oauth');
+
+// Create JWKS client for Cognito JWT verification
+const client = jwksClient({
+  jwksUri: OAUTH_CONFIG.cognito.jwtVerificationUrl,
+  cache: true,
+  cacheMaxAge: 600000 // 10 minutes
+});
+
+function getKey(header, callback) {
+  client.getSigningKey(header.kid, (err, key) => {
+    const signingKey = key?.publicKey || key?.rsaPublicKey;
+    callback(null, signingKey);
+  });
+}
+
+/**
+ * Validate Cognito JWT token
+ */
+const validateCognitoJWT = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader?.startsWith('Bearer ')) {
+      return res.status(401).json({
+        error: 'missing_token',
+        message: 'Authorization header with Bearer token required'
+      });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    
+    // Verify JWT with Cognito public keys
+    const decoded = await new Promise((resolve, reject) => {
+      jwt.verify(token, getKey, {
+        issuer: `https://cognito-idp.${OAUTH_CONFIG.cognito.region}.amazonaws.com/${OAUTH_CONFIG.cognito.userPoolId}`,
+        audience: OAUTH_CONFIG.cognito.clientId,
+        algorithms: ['RS256']
+      }, (err, decoded) => {
+        if (err) reject(err);
+        else resolve(decoded);
+      });
+    });
+    
+    // Extract Cognito user information
+    req.cognitoUser = {
+      id: decoded.sub,
+      username: decoded['cognito:username'] || decoded.username,
+      email: decoded.email,
+      email_verified: decoded.email_verified,
+      groups: decoded['cognito:groups'] || [],
+      token_use: decoded.token_use,
+      auth_time: decoded.auth_time,
+      exp: decoded.exp
+    };
+    
+    console.log(`✅ [Auth] Cognito user authenticated`, {
+      userId: req.cognitoUser.id,
+      username: req.cognitoUser.username,
+      email: req.cognitoUser.email
+    });
+    
+    next();
+    
+  } catch (error) {
+    console.error('❌ [Auth] Cognito JWT validation failed:', error);
+    res.status(401).json({
+      error: 'invalid_token',
+      message: 'Invalid or expired Cognito JWT token'
+    });
+  }
+};
+
+module.exports = { validateCognitoJWT };
+```
+
+### GitHub OAuth Route Implementation
 
 ```javascript
 // routes/auth.js
@@ -704,6 +863,7 @@ const axios = require('axios');
 const { RedisService } = require('../services/redis');
 const { GitHubService } = require('../services/github');
 const { TokenEncryption } = require('../services/encryption');
+const { validateCognitoJWT } = require('../middleware/cognitoAuth');
 const OAUTH_CONFIG = require('../config/oauth');
 
 const router = express.Router();
@@ -712,25 +872,36 @@ const github = new GitHubService();
 const tokenEncryption = new TokenEncryption();
 
 /**
- * Initiate GitHub OAuth flow
- * GET /auth/github
+ * Initiate GitHub connection for authenticated Cognito user
+ * GET /auth/github/connect
  */
-router.get('/github', async (req, res) => {
+router.get('/github/connect', validateCognitoJWT, async (req, res) => {
   try {
-    // Generate secure state parameter
+    const cognitoUserId = req.cognitoUser.id;
+    
+    // Check if user already has GitHub connected
+    const existingIntegration = await redis.hgetall(`github_integration:${cognitoUserId}`);
+    if (existingIntegration.github_user_id) {
+      console.log(`⚠️ [GitHub] User ${cognitoUserId} already has GitHub connected`);
+      return res.redirect(`${process.env.FRONTEND_URL}/app/repositories?github_already_connected=true`);
+    }
+    
+    // Generate secure state parameter linked to Cognito user
     const state = crypto.randomUUID();
     const stateExpiry = Math.floor(Date.now() / 1000) + OAUTH_CONFIG.security.stateExpiration;
     
-    // Store state in Redis with expiration
+    // Store state in Redis with Cognito user ID
     await redis.setWithExpiry(
-      `oauth_state:${state}`, 
+      `github_oauth_state:${state}`, 
       JSON.stringify({ 
+        cognito_user_id: cognitoUserId,
         created_at: Math.floor(Date.now() / 1000),
         expires_at: stateExpiry,
         ip: req.ip,
-        user_agent: req.get('User-Agent')
+        user_agent: req.get('User-Agent'),
+        flow_type: 'github_connect'
       }),
-      OAUTH_CONFIG.redis.ttl.oauthState
+      OAUTH_CONFIG.redis.ttl.githubOauthState
     );
     
     // Build OAuth authorization URL
@@ -744,7 +915,8 @@ router.get('/github', async (req, res) => {
     
     const authUrl = `${OAUTH_CONFIG.github.authorizeUrl}?${params.toString()}`;
     
-    console.log(`🚀 [OAuth] Initiating GitHub OAuth flow`, {
+    console.log(`🚀 [GitHub] Initiating GitHub connection for Cognito user`, {
+      cognitoUserId,
       state,
       ip: req.ip,
       userAgent: req.get('User-Agent')?.substring(0, 100)
@@ -753,10 +925,10 @@ router.get('/github', async (req, res) => {
     res.redirect(authUrl);
     
   } catch (error) {
-    console.error('❌ [OAuth] Failed to initiate GitHub OAuth:', error);
+    console.error('❌ [GitHub] Failed to initiate GitHub connection:', error);
     res.status(500).json({ 
-      error: 'oauth_initiation_failed',
-      message: 'Failed to initiate GitHub OAuth flow'
+      error: 'github_connect_failed',
+      message: 'Failed to initiate GitHub connection'
     });
   }
 });
