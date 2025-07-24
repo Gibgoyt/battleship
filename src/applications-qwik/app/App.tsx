@@ -3,13 +3,12 @@ import { component$, useSignal, $, useVisibleTask$ } from '@builder.io/qwik'
 import DashboardPage from './pages/dashboard/index.tsx'
 import RepositoriesPage from './pages/repositories/index.tsx'
 import DocumentationPage from './pages/documentation/index.tsx'
-import ConnectPage from './pages/connect/index.tsx'
 import { createLogger } from '../../lib/logger'
 
 const logger = createLogger('QwikApp');
 
 // Define valid routes for type safety
-type ValidRoute = '/' | '/connect' | '/repositories' | '/documentation'
+type ValidRoute = '/' | '/repositories' | '/documentation'
 type Theme = 'light' | 'dark'
 
 // TypeScript interfaces for initial backend data load
@@ -180,12 +179,6 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSi
 
   // Navigation items
   const navigationItems = [
-    {
-      id: 'connect',
-      path: '/connect',
-      label: 'Connect',
-      icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1'
-    },
     {
       id: 'repositories',
       path: '/repositories',
@@ -384,11 +377,7 @@ export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSi
         </button>
 
         <main class="p-4 lg:p-8">
-          {(currentPath.value === '/' || currentPath.value === '/connect') && (
-            <ConnectPage isDark={isDark.value} />
-          )}
-
-          {currentPath.value === '/repositories' && (
+          {(currentPath.value === '/' || currentPath.value === '/repositories') && (
             <RepositoriesPage isDark={isDark.value} data={initialAppData?.repositories} />
           )}
 

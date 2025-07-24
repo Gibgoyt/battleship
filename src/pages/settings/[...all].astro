@@ -81,14 +81,14 @@ try {
 // ==== END AUTH PROTECTION LOGIC ====
 
 // Define valid routes for type safety
-type ValidRoute = '/' | '/dashboard' | '/counter'
+type ValidRoute = '/' | '/dashboard' | '/counter' | '/integrations'
 
 // Get the route from URL params
 const routeSegment = Astro.params.all || 'dashboard'
 const requestedRoute = routeSegment === '' ? '/dashboard' : `/${routeSegment}`
 
 // Validate route against known routes
-const validRoutes: ValidRoute[] = ['/', '/dashboard', '/counter']
+const validRoutes: ValidRoute[] = ['/', '/dashboard', '/counter', '/integrations']
 const initialRoute: ValidRoute = validRoutes.includes(requestedRoute as ValidRoute) 
   ? (requestedRoute as ValidRoute)
   : '/dashboard' // fallback to dashboard for unknown routes
