@@ -1,390 +1,95 @@
 /** @jsxImportSource @builder.io/qwik */
-import { component$, useSignal, $, useVisibleTask$ } from '@builder.io/qwik'
-import DashboardPage from './pages/dashboard/index.tsx'
-import RepositoriesPage from './pages/repositories/index.tsx'
-import DocumentationPage from './pages/documentation/index.tsx'
-import { createLogger } from '../../lib/logger'
-
-const logger = createLogger('QwikApp');
-
-// Define valid routes for type safety
-type ValidRoute = '/' | '/repositories' | '/documentation'
-type Theme = 'light' | 'dark'
-
-// TypeScript interfaces for initial backend data load
-// Used for frontend-first MVP to identify backend schemas for Redis HSETs
-interface RepositoryData {
-  id: number
-  name: string
-  description: string
-  language: string
-  stargazers_count: number
-  private: boolean
-  updated_at: string
-}
-
-interface DocumentationData {
-  id: number
-  repoName: string
-  status: string
-  lastUpdated: string
-  url: string
-}
-
-// Initial app data loaded once to minimize Cloudflare server requests
-interface InitialAppData {
-  repositories: RepositoryData[]
-  documentation: DocumentationData[]
-}
+import { component$ } from '@builder.io/qwik'
 
 interface AppProps {
-  initialRoute: ValidRoute
-  initialTheme: Theme
-  initialSidebarOpen: boolean
-  initialIsMobile: boolean
-  initialAppData?: InitialAppData  // Loaded once on catch-all route, Qwik handles rest client-side
+  initialRoute?: string
+  initialTheme?: string
+  initialSidebarOpen?: boolean
+  initialIsMobile?: boolean
+  initialAppData?: any
 }
 
-export const App = component$<AppProps>(({ initialRoute, initialTheme, initialSidebarOpen, initialIsMobile, initialAppData }) => {
-  const currentPath = useSignal(initialRoute)
-  const isDark = useSignal(initialTheme === 'dark')
-  const sidebarOpen = useSignal(initialSidebarOpen)
-  const isMobile = useSignal(initialIsMobile)
-
-  logger.debug('Qwik SPA Init - Optimized for minimal Cloudflare requests', {
-    initialRoute,
-    initialTheme,
-    initialSidebarOpen,
-    initialIsMobile,
-    hasInitialData: Boolean(initialAppData),
-    windowWidth: typeof window !== 'undefined' ? window.innerWidth : 'SSR'
-  })
-
-  // Client-side navigation
-  const navigate = $((path: string) => {
-    currentPath.value = path as ValidRoute
-    if (typeof window !== 'undefined') {
-      const fullPath = `/app${path}`
-      window.history.pushState({}, '', fullPath)
-    }
-
-    // Close sidebar on mobile after navigation
-    if (isMobile.value) {
-      sidebarOpen.value = false
-    }
-  })
-
-  // Toggle sidebar
-  const toggleSidebar = $(() => {
-    sidebarOpen.value = !sidebarOpen.value
-    // Save sidebar state to cookie (mobile and desktop behavior)
-    if (isMobile.value) {
-      // On mobile, only save 'true' if user explicitly opens it
-      // Don't save 'false' to let it default to closed on reload
-      if (sidebarOpen.value) {
-        document.cookie = `sidebarOpen=true; path=/; max-age=${60 * 60 * 24 * 365}` // 1 year
-      } else {
-        // Clear the cookie when closing on mobile
-        document.cookie = `sidebarOpen=; path=/; max-age=0`
-      }
-    } else {
-      // On desktop, save both true and false states
-      document.cookie = `sidebarOpen=${sidebarOpen.value}; path=/; max-age=${60 * 60 * 24 * 365}` // 1 year
-    }
-  })
-
-  // Close sidebar when clicking outside on mobile
-  const closeSidebar = $(() => {
-    if (isMobile.value) {
-      sidebarOpen.value = false
-    }
-  })
-
-  // Initialize responsive behavior and validate SSR detection
-  useVisibleTask$(() => {
-    if (typeof window !== 'undefined') {
-      const currentWindowWidth = window.innerWidth
-      const actualIsMobile = currentWindowWidth < 1024
-      
-      logger.debug('Client Validation', {
-        windowWidth: currentWindowWidth,
-        ssrMobile: initialIsMobile,
-        actualMobile: actualIsMobile,
-        mismatch: initialIsMobile !== actualIsMobile
-      })
-
-      // Fix SSR detection mismatch immediately
-      if (isMobile.value !== actualIsMobile) {
-        logger.warn('SSR Mismatch Detected - Fixing!', {
-          ssrDetected: isMobile.value,
-          actualValue: actualIsMobile
-        })
-        
-        isMobile.value = actualIsMobile
-        
-        // If we're actually mobile and sidebar is open, close it
-        if (actualIsMobile && sidebarOpen.value) {
-          sidebarOpen.value = false
-          logger.debug('Auto-closed sidebar for corrected mobile detection');
-        }
-      }
-
-      // Check if mobile on resize (for responsive behavior)
-      const checkMobile = () => {
-        const newIsMobile = window.innerWidth < 1024 // lg breakpoint
-        logger.debug('Resize Event', {
-          windowWidth: window.innerWidth,
-          oldIsMobile: isMobile.value,
-          newIsMobile,
-          sidebarOpen: sidebarOpen.value,
-          willChangeIsMobile: isMobile.value !== newIsMobile
-        })
-        
-        if (isMobile.value !== newIsMobile) {
-          isMobile.value = newIsMobile
-          // If switching from desktop to mobile and sidebar is open, close it
-          if (newIsMobile && sidebarOpen.value) {
-            sidebarOpen.value = false
-            logger.debug('Auto-closed sidebar for mobile');
-          }
-          logger.debug('Device type changed', { newIsMobile });
-        }
-      }
-
-      window.addEventListener('resize', checkMobile)
-
-      return () => {
-        window.removeEventListener('resize', checkMobile)
-      }
-    }
-  })
-
-  const updateTheme = $((dark: boolean) => {
-    isDark.value = dark
-    
-    // Save theme preference to both localStorage and cookie
-    localStorage.setItem('darkMode', dark.toString())
-    document.cookie = `theme=${dark ? 'dark' : 'light'}; path=/; max-age=${60 * 60 * 24 * 365}` // 1 year
-    
-    if (dark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  })
-
-  const toggleTheme = $(() => {
-    updateTheme(!isDark.value)
-  })
-
-  // Navigation items
-  const navigationItems = [
-    {
-      id: 'repositories',
-      path: '/repositories',
-      label: 'Repositories',
-      icon: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z'
-    },
-    {
-      id: 'documentation',
-      path: '/documentation',
-      label: 'Documentation',
-      icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-    }
-  ]
-
+export const App = component$<AppProps>(() => {
   return (
-    <div class={`min-h-screen flex ${isDark.value ? 'bg-zinc-900 text-gray-100' : 'bg-gray-50'}`}>
-      {/* Mobile Backdrop */}
-      {isMobile.value && sidebarOpen.value && (
-        <div
-          class="fixed inset-0 z-40 lg:hidden"
-          onClick$={closeSidebar}
-          style="backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); background-color: rgba(0, 0, 0, 0.3);"
-        />
-      )}
-
-      {/* Sidebar */}
-      <div class={`w-64 min-h-screen fixed left-0 top-0 z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
-        isMobile.value 
-          ? (sidebarOpen.value ? 'translate-x-0' : '-translate-x-full')
-          : (sidebarOpen.value ? 'translate-x-0 lg:w-64' : 'translate-x-0 lg:w-16')
-      } ${
-        isDark.value ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'
-      } border-r shadow-lg`}>
-        {/* Header */}
-        <div class={`p-6 border-b ${isDark.value ? 'border-zinc-700' : 'border-gray-200'}`}>
-          <div class="flex items-center justify-between">
-            <div class={`flex items-center space-x-3 ${!sidebarOpen.value && !isMobile.value ? 'lg:justify-center lg:space-x-0' : ''}`}>
-              <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
-              </div>
-              <h1 class={`text-lg font-bold ${isDark.value ? 'text-gray-100' : 'text-gray-800'} ${
-                !sidebarOpen.value && !isMobile.value ? 'lg:hidden' : ''
-              }`}>DocForge</h1>
-            </div>
-            <div class={`flex items-center gap-2 ${!sidebarOpen.value && !isMobile.value ? 'lg:hidden' : ''}`}>
-              <button
-                onClick$={toggleTheme}
-                class={`p-2 rounded-lg transition-colors ${
-                  isDark.value
-                    ? 'bg-zinc-700 hover:bg-zinc-600 text-yellow-400'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                }`}
-                title="Toggle theme"
-              >
-                {isDark.value ? (
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                  </svg>
-                ) : (
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-                  </svg>
-                )}
-              </button>
+    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-teal-50 dark:from-gray-900 dark:to-gray-800">
+      <div class="text-center px-4 max-w-2xl mx-auto">
+        {/* SplitDo Logo */}
+        <div class="mb-8">
+          <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-orange-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-xl">
+            <div class="w-16 h-16 bg-gradient-to-br from-orange-600 to-teal-600 rounded-xl flex items-center justify-center relative">
+              <div class="w-8 h-8 bg-orange-500 rounded-full absolute top-2 left-2"></div>
+              <div class="w-10 h-10 bg-teal-500 rounded-lg absolute bottom-1 right-1 transform rotate-45"></div>
             </div>
           </div>
-          <a
-            href="/"
-            class={`flex items-center gap-2 mt-4 px-3 py-2 rounded-lg transition-colors text-sm ${
-              isDark.value
-                ? 'bg-zinc-700 hover:bg-zinc-600 text-gray-300'
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-            } ${!sidebarOpen.value && !isMobile.value ? 'lg:justify-center lg:px-2' : ''}`}
-          >
-            <span>←</span>
-            <span class={`font-medium ${!sidebarOpen.value && !isMobile.value ? 'lg:hidden' : ''}`}>
-              Exit
-            </span>
-          </a>
+          <h1 class="text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-orange-600 to-teal-600 bg-clip-text text-transparent">
+            SplitDo
+          </h1>
         </div>
 
-        {/* Navigation */}
-        <nav class="flex-1 p-4 flex flex-col">
-          <div class="space-y-1">
-            {navigationItems.map((item) => (
-              <button
-                key={item.id}
-                onClick$={() => navigate(item.path)}
-                class={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-all duration-200 text-left ${
-                  currentPath.value === item.path
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : isDark.value
-                      ? 'text-gray-300 hover:text-blue-400 hover:bg-zinc-700'
-                      : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-                } ${!sidebarOpen.value && !isMobile.value ? 'lg:justify-center lg:px-2' : ''}`}
-                title={!sidebarOpen.value && !isMobile.value ? item.label : ''}
-              >
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={item.icon}></path>
-                </svg>
-                <span class={!sidebarOpen.value && !isMobile.value ? 'lg:hidden' : ''}>
-                  {item.label}
-                </span>
-              </button>
-            ))}
-          </div>
-          
-          {/* Spacer to push settingsNo to bottom */}
-          <div class="flex-1"></div>
-          
-          {/* Settings link at bottom */}
-          <div class={`pt-4 mt-4 border-t ${isDark.value ? 'border-zinc-700' : 'border-gray-200'}`}>
-            <a
-              href="/settings"
-              class={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-all duration-200 text-left ${
-                isDark.value
-                  ? 'text-gray-300 hover:text-purple-400 hover:bg-zinc-700'
-                  : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50'
-              } ${!sidebarOpen.value && !isMobile.value ? 'lg:justify-center lg:px-2' : ''}`}
-              title={!sidebarOpen.value && !isMobile.value ? 'Settings' : ''}
-            >
-              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        {/* Coming Soon Message */}
+        <div class="mb-8">
+          <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            Coming Soon
+          </h2>
+          <p class="text-xl text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+            We're building the most advanced expense splitting platform powered by Solana blockchain. 
+            Get ready for lightning-fast settlements with minimal fees.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div class="flex items-center space-x-2 text-orange-600 dark:text-orange-400">
+              <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
               </svg>
-              <span class={!sidebarOpen.value && !isMobile.value ? 'lg:hidden' : ''}>
-                Settings
-              </span>
-            </a>
+              <span class="font-medium">Development in Progress</span>
+            </div>
           </div>
-        </nav>
-      </div>
+        </div>
 
-      {/* Main Content */}
-      <div class={`flex-1 transition-all duration-300 ease-in-out ${
-        isMobile.value ? '' : (sidebarOpen.value ? 'lg:ml-64' : 'lg:ml-16')
-      }`}>
-        {/* Mobile Header */}
-        <div class={`lg:hidden sticky top-0 z-30 ${isDark.value ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'} border-b px-4 py-3 flex items-center justify-between`}>
-          <button
-            onClick$={toggleSidebar}
-            class={`p-2 rounded-lg transition-colors ${
-              isDark.value
-                ? 'bg-zinc-700 hover:bg-zinc-600 text-gray-300'
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
-            }`}
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-          </button>
-          <div class="flex items-center gap-3">
-            <div class="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {/* Features Preview */}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="text-center p-4">
+            <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
               </svg>
             </div>
-            <h1 class={`text-lg font-bold ${isDark.value ? 'text-gray-100' : 'text-gray-800'}`}>DocForge</h1>
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-1">Solana Powered</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Lightning-fast blockchain settlements</p>
           </div>
-          <button
-            onClick$={toggleTheme}
-            class={`p-2 rounded-lg transition-colors ${
-              isDark.value
-                ? 'bg-zinc-700 hover:bg-zinc-600 text-yellow-400'
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-            }`}
-          >
-            {isDark.value ? (
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+
+          <div class="text-center p-4">
+            <div class="w-12 h-12 bg-teal-100 dark:bg-teal-900 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
               </svg>
-            ) : (
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+            </div>
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-1">Smart Splitting</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300">AI-powered expense calculations</p>
+          </div>
+
+          <div class="text-center p-4">
+            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
               </svg>
-            )}
-          </button>
+            </div>
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-1">Group Management</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Advanced expense group controls</p>
+          </div>
         </div>
 
-        {/* Desktop Sidebar Toggle */}
-        <button
-          onClick$={toggleSidebar}
-          class={`hidden lg:block fixed top-4 z-40 p-2 rounded-lg transition-all duration-300 ${
-            sidebarOpen.value ? 'left-60' : 'left-12'
-          } ${
-            isDark.value
-              ? 'bg-zinc-700 hover:bg-zinc-600 text-gray-300 border-zinc-600'
-              : 'bg-white hover:bg-gray-50 text-gray-600 border-gray-300'
-          } border shadow-md`}
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={sidebarOpen.value ? "M11 19l-7-7 7-7m8 14l-7-7 7-7" : "M9 5l7 7-7 7"}></path>
-          </svg>
-        </button>
-
-        <main class="p-4 lg:p-8">
-          {(currentPath.value === '/' || currentPath.value === '/repositories') && (
-            <RepositoriesPage isDark={isDark.value} data={initialAppData?.repositories} />
-          )}
-
-          {currentPath.value === '/documentation' && (
-            <DocumentationPage isDark={isDark.value} data={initialAppData?.documentation} />
-          )}
-        </main>
+        {/* Back to Home */}
+        <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+          <a 
+            href="/" 
+            class="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-orange-600 to-teal-600 text-white rounded-lg hover:from-orange-700 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            <span>Back to Homepage</span>
+          </a>
+        </div>
       </div>
     </div>
   )
