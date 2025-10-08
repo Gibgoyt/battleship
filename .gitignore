@@ -47,3 +47,4 @@ pnpm-debug.log*
 
 **/logs
 gitCommit.sh
+debug_txts/
