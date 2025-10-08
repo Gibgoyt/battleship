@@ -2,9 +2,29 @@
 export const prerender = false;
 import 'src/styles/global.css'
 
-// Get the route from URL params
-const routeSegment = Astro.params.all || ''
+// Define valid routes for type safety
+type ValidRoute = 'dashboard' | 'project' | 'product' | 'development'
+
+// Get the route from URL params and parse client routes
+const routeSegment = Astro.params.all || 'dashboard'
 console.log('🔧 [ADMIN] Processing route:', Astro.url.pathname, 'Segment:', routeSegment)
+
+// Validate route against known routes
+const validRoutes: ValidRoute[] = ['dashboard', 'project', 'product', 'development']
+
+// Check if the requested route is valid
+if (routeSegment && !validRoutes.includes(routeSegment as ValidRoute)) {
+  console.log('🔧 [ADMIN] Invalid route detected, redirecting to dashboard:', routeSegment)
+  return Astro.redirect('/admin/dashboard', 302)
+}
+
+// Route is valid, continue
+const initialRoute: ValidRoute = (routeSegment || 'dashboard') as ValidRoute
+
+console.log('🔧 [ADMIN] Route validation passed:', {
+  segment: routeSegment,
+  initialRoute
+})
 ---
 
 <!DOCTYPE html>
