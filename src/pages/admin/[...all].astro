@@ -51,6 +51,36 @@ console.log('🔧 [ADMIN] Route validation passed:', {
   <div id="wasm-root" class="w-full h-full"></div>
 
   <script is:inline>
+    // Early click interception - prevent navigation until WASM is ready
+    let wasmReady = false;
+    let pendingNavigation = null;
+
+    // Intercept ALL clicks on navigation links immediately (capture phase)
+    document.addEventListener('click', function(e) {
+      const link = e.target.closest('a[data-route]');
+      if (link) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const route = link.getAttribute('data-route');
+
+        if (!wasmReady) {
+          console.log('⏳ WASM not ready yet, queuing navigation to:', route);
+          pendingNavigation = route;
+        } else {
+          // WASM is ready, trigger navigation through the module
+          console.log('✅ WASM ready, navigating to:', route);
+          const fullPath = '/admin' + route;
+          history.pushState({}, '', fullPath);
+          if (window.Module && window.Module._handle_route_change) {
+            window.Module._handle_route_change();
+          }
+        }
+
+        return false;
+      }
+    }, true); // Use capture phase to intercept BEFORE any other handlers
+
     async function loadEmscriptenApp() {
       try {
         console.log('🔧 Initializing Emscripten C WASM module...');
@@ -94,6 +124,18 @@ console.log('🔧 [ADMIN] Route validation passed:', {
         Module._main();
 
         console.log('✅ Emscripten C WASM app loaded successfully!');
+
+        // Mark WASM as ready
+        wasmReady = true;
+
+        // Handle any pending navigation that was queued during loading
+        if (pendingNavigation) {
+          console.log('🔄 Processing pending navigation to:', pendingNavigation);
+          const fullPath = '/admin' + pendingNavigation;
+          history.pushState({}, '', fullPath);
+          Module._handle_route_change();
+          pendingNavigation = null;
+        }
       } catch (err) {
         console.error('❌ Failed to load Emscripten C WASM app:', err);
 
