@@ -4,14 +4,14 @@ import 'src/styles/global.css'
 
 // ==== ROUTE VALIDATION LOGIC ====
 // Define valid admin routes
-type ValidAdminRoute = '' | 'dashboard' | 'database' | 'crm' | 'ci-cd' | 'settings'
+type ValidAdminRoute = '' | 'dashboard' | 'database' | 'crm' | 'ci-cd' | 'settings' | 'protocol-demo'
 
 // Get the route from URL params
 const routeSegment = Astro.params.all || ''
 console.log('🔒 [ADMIN] Processing admin route:', Astro.url.pathname, 'Segment:', routeSegment)
 
 // Validate route against known routes
-const validRoutes: ValidAdminRoute[] = ['', 'dashboard', 'database', 'crm', 'ci-cd', 'settings']
+const validRoutes: ValidAdminRoute[] = ['', 'dashboard', 'database', 'crm', 'ci-cd', 'settings', 'protocol-demo']
 
 // Allow nested database routes like 'database/contact-form'
 const isNestedDatabaseRoute = routeSegment.startsWith('database/')

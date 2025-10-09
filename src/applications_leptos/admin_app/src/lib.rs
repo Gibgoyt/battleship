@@ -5,9 +5,11 @@ use wasm_bindgen::JsCast;
 
 mod components;
 mod pages;
+mod protocol;
+mod api;
 
 use components::{Sidebar, Header, DarkMode};
-use pages::{Dashboard, Database, DatabaseTable, Crm, Cicd, Settings};
+use pages::{Dashboard, Database, DatabaseTable, Crm, Cicd, Settings, ProtocolDemo};
 
 fn initialize_dark_mode() -> bool {
     if let Some(window) = web_sys::window() {
@@ -69,6 +71,7 @@ fn App() -> impl IntoView {
                                 <Route path="/admin/crm" view=Crm/>
                                 <Route path="/admin/ci-cd" view=Cicd/>
                                 <Route path="/admin/settings" view=Settings/>
+                                <Route path="/admin/protocol-demo" view=ProtocolDemo/>
                             </Routes>
                         </main>
                     </div>

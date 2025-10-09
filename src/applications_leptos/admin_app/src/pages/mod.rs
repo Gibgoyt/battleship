@@ -4,6 +4,7 @@ pub mod database_table;
 pub mod crm;
 pub mod cicd;
 pub mod settings;
+pub mod protocol_demo;
 
 pub use dashboard::Dashboard;
 pub use database::Database;
@@ -11,3 +12,4 @@ pub use database_table::DatabaseTable;
 pub use crm::Crm;
 pub use cicd::Cicd;
 pub use settings::Settings;
+pub use protocol_demo::ProtocolDemo;
