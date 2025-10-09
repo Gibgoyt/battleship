@@ -9,7 +9,7 @@ mod protocol;
 mod api;
 
 use components::{Sidebar, Header, DarkMode};
-use pages::{Dashboard, Database, DatabaseTable, Crm, Cicd, Settings, ProtocolDemo};
+use pages::{Dashboard, Project, Product, Development, ProtocolDemo};
 
 fn initialize_dark_mode() -> bool {
     if let Some(window) = web_sys::window() {
@@ -66,11 +66,9 @@ fn App() -> impl IntoView {
                             <Routes>
                                 <Route path="/admin" view=Dashboard/>
                                 <Route path="/admin/dashboard" view=Dashboard/>
-                                <Route path="/admin/database" view=Database/>
-                                <Route path="/admin/database/:table" view=DatabaseTable/>
-                                <Route path="/admin/crm" view=Crm/>
-                                <Route path="/admin/ci-cd" view=Cicd/>
-                                <Route path="/admin/settings" view=Settings/>
+                                <Route path="/admin/project" view=Project/>
+                                <Route path="/admin/product" view=Product/>
+                                <Route path="/admin/development" view=Development/>
                                 <Route path="/admin/protocol-demo" view=ProtocolDemo/>
                             </Routes>
                         </main>
