@@ -32,7 +32,20 @@ export const GET: APIRoute = async ({ request, locals }) => {
       );
     }
 
-    // Fetch all data in parallel
+    // 1. First, ensure user exists in database (create if doesn't exist)
+    if (auth.user?.sub && auth.user?.email) {
+      console.log('[API] /api/admin - Syncing user to database:', auth.user.email);
+
+      await teamMemberQueries.upsertByCognitoSub(db, {
+        cognito_sub: auth.user.sub,
+        email: auth.user.email,
+        name: auth.user.username || auth.user.email.split('@')[0] || 'User',
+      });
+
+      console.log('[API] /api/admin - User synced successfully');
+    }
+
+    // 2. Fetch all data in parallel
     const [teamMembers, projectStages, productIssues, developmentIssues] = await Promise.all([
       teamMemberQueries.getAll(db),
       projectStageQueries.getAllWithIssueCounts(db),

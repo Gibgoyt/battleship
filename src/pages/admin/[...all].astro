@@ -102,42 +102,20 @@ console.log('✅ [ADMIN] Valid route accessed:', routeSegment || 'home')
 // ==== END ROUTE VALIDATION LOGIC ====
 
 // ==== SERVER-SIDE DATA LOADING ====
-const authToken = Astro.cookies.get('cognito-admin-auth-token')?.value;
+// Single comprehensive load - matches /app pattern exactly
+// /api/admin will handle user creation if doesn't exist AND return all data
 let initialData = null;
 let loadError = null;
 
 if (authToken && Astro.locals.adminUser) {
   try {
-    console.log('📡 [ADMIN] Loading initial data from server...')
+    console.log('📡 [ADMIN] Loading initial data from /api/admin...')
 
-    // 1. Sync user to database (creates if doesn't exist)
-    const syncResponse = await fetch(`${Astro.url.origin}/api/admin/team-members/sync`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: Astro.locals.adminUser.email,
-        cognito_sub: Astro.locals.adminUser.sub,
-        name: Astro.locals.adminUser.username || Astro.locals.adminUser.email?.split('@')[0] || 'User',
-      }),
-    });
-
-    if (!syncResponse.ok) {
-      const errorText = await syncResponse.text();
-      console.error('❌ [ADMIN] User sync failed:', syncResponse.status, errorText);
-      loadError = `User sync failed: ${syncResponse.status}`;
-    } else {
-      const syncResult = await syncResponse.json();
-      console.log('✅ [ADMIN] User synced:', syncResult.data?.id, syncResult.data?.email);
-    }
-
-    // 2. Load all admin data
+    // Single call to /api/admin - it handles user sync + data loading
     const dataResponse = await fetch(`${Astro.url.origin}/api/admin`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${authToken}`,
+        'Authorization': `Bearer ${authToken.value}`,
         'Content-Type': 'application/json',
       },
     });
