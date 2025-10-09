@@ -5,6 +5,7 @@
 // Cloudflare Workers Environment
 export interface Env {
   DB: D1Database;
+  INTERNAL_OPS_ADMIN_DB: D1Database;
   SESSION?: KVNamespace;
 }
 
