@@ -1,0 +1,22 @@
+---
+import SvelteLoginForm from 'src/components-svelte/admin/auth/SvelteLoginForm.svelte';
+import 'src/styles/global.css';
+
+// Render static HTML
+export const prerender = true;
+---
+
+<!DOCTYPE html>
+<html lang="en" class="h-full dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Sign In - Pritchard</title>
+  <meta name="theme-color" content="#18181b">
+  <meta name="color-scheme" content="dark">
+  <meta name="robots" content="noindex, nofollow">
+</head>
+<body class="h-full bg-gray-900">
+  <SvelteLoginForm client:load />
+</body>
+</html>
