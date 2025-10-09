@@ -3,9 +3,19 @@ import { teamMemberQueries } from 'src/lib/db/admin/team-member-queries';
 import { projectStageQueries } from 'src/lib/db/admin/project-stage-queries';
 import { productIssueQueries } from 'src/lib/db/admin/product-issue-queries';
 import { developmentIssueQueries } from 'src/lib/db/admin/development-issue-queries';
+import { validateAuthHeader, createAuthErrorResponse } from 'src/lib/auth/api-jwt-validator';
 
-export const GET: APIRoute = async ({ locals }) => {
+export const GET: APIRoute = async ({ request, locals }) => {
   try {
+    // Validate JWT token from Authorization header
+    const auth = validateAuthHeader(request);
+    if (!auth.success) {
+      console.error('[API] /api/admin - Auth failed:', auth.error);
+      return createAuthErrorResponse(auth);
+    }
+
+    console.log('[API] /api/admin - Authenticated user:', auth.user?.email);
+
     const runtime = locals.runtime;
     const db = runtime?.env?.INTERNAL_OPS_ADMIN_DB;
 
