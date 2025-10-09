@@ -3,6 +3,7 @@ import type { D1Database } from '@cloudflare/workers-types';
 export interface TeamMember {
   id: number;
   name: string;
+  cognito_sub: string | null; // Cognito user sub (unique identifier)
   is_online: number; // 0 or 1
   last_seen_at: string | null;
   created_at: string;
@@ -64,4 +65,46 @@ export const teamMemberQueries = {
       WHERE id = ?
       RETURNING *
     `).bind(is_online, id).first<TeamMember>(),
+
+  getByCognitoSub: (db: D1Database, cognito_sub: string) =>
+    db.prepare('SELECT * FROM TeamMembers WHERE cognito_sub = ?')
+      .bind(cognito_sub)
+      .first<TeamMember>(),
+
+  getByEmail: (db: D1Database, email: string) =>
+    db.prepare('SELECT * FROM TeamMembers WHERE name = ?')
+      .bind(email)
+      .first<TeamMember>(),
+
+  /**
+   * Upsert user by Cognito Sub
+   * - If user exists (by cognito_sub), update last_seen_at and set is_online = 1
+   * - If user doesn't exist, create new user
+   * - Returns the TeamMember record
+   */
+  upsertByCognitoSub: async (db: D1Database, data: {
+    cognito_sub: string;
+    email: string;
+    name?: string;
+  }): Promise<TeamMember | null> => {
+    // Try to find existing user by cognito_sub
+    const existing = await teamMemberQueries.getByCognitoSub(db, data.cognito_sub);
+
+    if (existing) {
+      // User exists, update last_seen_at and set online
+      return teamMemberQueries.updateOnlineStatus(db, existing.id, 1);
+    }
+
+    // User doesn't exist, create new
+    const result = await db.prepare(`
+      INSERT INTO TeamMembers (name, cognito_sub, is_online, last_seen_at)
+      VALUES (?, ?, 1, CURRENT_TIMESTAMP)
+      RETURNING *
+    `).bind(
+      data.name || data.email,
+      data.cognito_sub
+    ).first<TeamMember>();
+
+    return result;
+  },
 };

@@ -125,6 +125,25 @@ console.log('✅ [ADMIN] Valid route accessed:', routeSegment || 'home')
 <body class="h-full">
   <div id="wasm-root" class="w-full h-full"></div>
 
+  <!-- Admin API Client Helper - Injects Authorization header automatically -->
+  <script type="module">
+    import { adminApiFetch, syncCurrentUser, loadInitialData } from '/src/lib/auth/admin-api-client.ts';
+
+    // Make available globally for WASM app
+    window.adminApiFetch = adminApiFetch;
+    window.syncCurrentUser = syncCurrentUser;
+    window.loadInitialData = loadInitialData;
+
+    // Store user info from server-side validation
+    window.adminUserInfo = {
+      email: '{Astro.locals.adminUser?.email}',
+      username: '{Astro.locals.adminUser?.username}',
+      sub: '{Astro.locals.adminUser?.sub}',
+    };
+
+    console.log('✅ Admin API client loaded and available globally');
+  </script>
+
   <script type="module">
     import init, { mount_admin_app } from '/wasm/admin_app/admin_wasm_app.js';
 

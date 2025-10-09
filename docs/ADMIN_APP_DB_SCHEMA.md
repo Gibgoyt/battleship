@@ -14,6 +14,18 @@ CREATE TABLE TeamMembers (
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 ```
+
+```bash
+CREATE TABLE TeamMembers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    cognito_sub TEXT UNIQUE,
+    is_online INTEGER DEFAULT 0,
+    last_seen_at TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+```
 - `is_online` 0 = false, 1 = true
 - `last_seen_at` ISO8601
 - will probably have to add Cognito User ID, we will use AWS Cognito for authentication right now (probably with server-stored secret too)
