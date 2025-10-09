@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build:admin_app": "cd src/applications_c/admin_app && ./build.sh",
+    "build:admin_app": "cd src/applications_leptos/admin_app && ./build.sh",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",

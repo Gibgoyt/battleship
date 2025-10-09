@@ -2,29 +2,28 @@
 export const prerender = false;
 import 'src/styles/global.css'
 
-// Define valid routes for type safety
-type ValidRoute = 'dashboard' | 'project' | 'product' | 'development'
+// ==== ROUTE VALIDATION LOGIC ====
+// Define valid admin routes
+type ValidAdminRoute = '' | 'dashboard' | 'database' | 'crm' | 'ci-cd' | 'settings'
 
-// Get the route from URL params and parse client routes
-const routeSegment = Astro.params.all || 'dashboard'
-console.log('🔧 [ADMIN] Processing route:', Astro.url.pathname, 'Segment:', routeSegment)
+// Get the route from URL params
+const routeSegment = Astro.params.all || ''
+console.log('🔒 [ADMIN] Processing admin route:', Astro.url.pathname, 'Segment:', routeSegment)
 
 // Validate route against known routes
-const validRoutes: ValidRoute[] = ['dashboard', 'project', 'product', 'development']
+const validRoutes: ValidAdminRoute[] = ['', 'dashboard', 'database', 'crm', 'ci-cd', 'settings']
 
-// Check if the requested route is valid
-if (routeSegment && !validRoutes.includes(routeSegment as ValidRoute)) {
-  console.log('🔧 [ADMIN] Invalid route detected, redirecting to dashboard:', routeSegment)
+// Allow nested database routes like 'database/contact-form'
+const isNestedDatabaseRoute = routeSegment.startsWith('database/')
+
+// Check if the route is valid
+if (routeSegment && !validRoutes.includes(routeSegment as ValidAdminRoute) && !isNestedDatabaseRoute) {
+  console.log('❌ [ADMIN] Invalid route, redirecting to dashboard:', routeSegment)
   return Astro.redirect('/admin/dashboard', 302)
 }
 
-// Route is valid, continue
-const initialRoute: ValidRoute = (routeSegment || 'dashboard') as ValidRoute
-
-console.log('🔧 [ADMIN] Route validation passed:', {
-  segment: routeSegment,
-  initialRoute
-})
+console.log('✅ [ADMIN] Valid route accessed:', routeSegment || 'home')
+// ==== END ROUTE VALIDATION LOGIC ====
 ---
 
 <!DOCTYPE html>
@@ -32,7 +31,7 @@ console.log('🔧 [ADMIN] Route validation passed:', {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
+  <title>Admin Panel - Leptos</title>
 
   <meta name="theme-color" content="#18181b">
   <meta name="color-scheme" content="dark light">
@@ -50,129 +49,37 @@ console.log('🔧 [ADMIN] Route validation passed:', {
 <body class="h-full">
   <div id="wasm-root" class="w-full h-full"></div>
 
-  <script is:inline>
-    // Early click interception - prevent navigation until WASM is ready
-    let wasmReady = false;
-    let pendingNavigation = null;
+  <script type="module">
+    import init, { mount_admin_app } from '/wasm/admin_app/admin_wasm_app.js';
 
-    // Intercept ALL clicks on navigation links immediately (capture phase)
-    document.addEventListener('click', function(e) {
-      const link = e.target.closest('a[data-route]');
-      if (link) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const route = link.getAttribute('data-route');
-
-        if (!wasmReady) {
-          console.log('⏳ WASM not ready yet, queuing navigation to:', route);
-          pendingNavigation = route;
-        } else {
-          // WASM is ready, trigger navigation through the module
-          console.log('✅ WASM ready, navigating to:', route);
-          const fullPath = '/admin' + route;
-          history.pushState({}, '', fullPath);
-          if (window.Module && window.Module._handle_route_change) {
-            window.Module._handle_route_change();
-          }
-        }
-
-        return false;
-      }
-    }, true); // Use capture phase to intercept BEFORE any other handlers
-
-    async function loadEmscriptenApp() {
+    async function loadAdminApp() {
       try {
-        console.log('🔧 Initializing Emscripten C WASM module...');
+        // Initialize the WASM module
+        await init('/wasm/admin_app/admin_wasm_app_bg.wasm');
 
-        // Dynamically load the Emscripten script (History API version)
-        const script = document.createElement('script');
-        script.src = '/wasm/c/admin_app/app.js';
+        // Mount the Admin Leptos app to #wasm-root
+        mount_admin_app();
 
-        await new Promise((resolve, reject) => {
-          script.onload = resolve;
-          script.onerror = () => reject(new Error('Failed to load Emscripten script'));
-          document.head.appendChild(script);
-        });
-
-        console.log('✅ Emscripten script loaded (History API version)');
-
-        // createEmscriptenModule is now available globally
-        const Module = await createEmscriptenModule({
-          locateFile: (path) => {
-            if (path.endsWith('.wasm')) {
-              return '/wasm/c/admin_app/app.wasm';
-            }
-            return path;
-          },
-          print: (text) => {
-            console.log('[C stdout]', text);
-          },
-          printErr: (text) => {
-            console.error('[C stderr]', text);
-          },
-          onRuntimeInitialized: () => {
-            console.log('✅ Emscripten runtime initialized');
-          }
-        });
-
-        // Expose Module globally for onclick handlers
-        window.Module = Module;
-
-        // Call main() to initialize the dashboard
-        // (INVOKE_RUN=0 means it doesn't run automatically)
-        Module._main();
-
-        console.log('✅ Emscripten C WASM app loaded successfully!');
-
-        // Mark WASM as ready
-        wasmReady = true;
-
-        // Handle any pending navigation that was queued during loading
-        if (pendingNavigation) {
-          console.log('🔄 Processing pending navigation to:', pendingNavigation);
-          const fullPath = '/admin' + pendingNavigation;
-          history.pushState({}, '', fullPath);
-          Module._handle_route_change();
-          pendingNavigation = null;
-        }
+        console.log('✅ Admin WASM app loaded successfully!');
       } catch (err) {
-        console.error('❌ Failed to load Emscripten C WASM app:', err);
+        console.error('❌ Failed to load Admin WASM app:', err);
 
         // Show error to user
         const root = document.getElementById('wasm-root');
         if (root) {
           root.innerHTML = `
-            <div class="min-h-screen bg-gray-50 dark:bg-zinc-900 p-8">
-              <div class="max-w-2xl mx-auto">
-                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-                  <h1 class="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">
-                    Failed to Load Emscripten C App
-                  </h1>
-                  <p class="text-gray-700 dark:text-gray-300 mb-4">
-                    Please ensure the Emscripten C WASM module is built:
-                  </p>
-                  <div class="bg-zinc-800 rounded p-4 mb-4">
-                    <code class="text-green-400 text-sm">
-                      cd src/applications_c/admin_app<br>
-                      make
-                    </code>
-                  </div>
-                  <details class="text-sm">
-                    <summary class="cursor-pointer text-red-600 dark:text-red-400 font-medium mb-2">
-                      Error Details
-                    </summary>
-                    <pre class="bg-zinc-800 text-red-400 p-4 rounded overflow-auto">${err.stack || err.message}</pre>
-                  </details>
-                </div>
-              </div>
+            <div class="p-8 text-center">
+              <h1 class="text-3xl font-bold text-red-400 mb-4">Failed to Load Admin App</h1>
+              <p class="text-zinc-400 mb-4">Please ensure the Admin WASM module is built:</p>
+              <code class="bg-zinc-800 px-4 py-2 rounded">cd src/applications_leptos/admin_app && ./build.sh</code>
+              <p class="text-zinc-500 mt-4 text-sm">${err.message}</p>
             </div>
           `;
         }
       }
     }
 
-    loadEmscriptenApp();
+    loadAdminApp();
   </script>
 </body>
 </html>
