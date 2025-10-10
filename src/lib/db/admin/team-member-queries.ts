@@ -101,7 +101,7 @@ export const teamMemberQueries = {
       VALUES (?, ?, 1, CURRENT_TIMESTAMP)
       RETURNING *
     `).bind(
-      data.name || data.email,
+      data.email,
       data.cognito_sub
     ).first<TeamMember>();
 

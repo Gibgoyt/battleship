@@ -39,7 +39,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
       await teamMemberQueries.upsertByCognitoSub(db, {
         cognito_sub: auth.user.sub,
         email: auth.user.email,
-        name: auth.user.username || auth.user.email.split('@')[0] || 'User',
+        name: auth.user.email,
       });
 
       console.log('[API] /api/admin - User synced successfully');
