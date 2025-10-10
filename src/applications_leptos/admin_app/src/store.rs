@@ -1,5 +1,4 @@
 use leptos::*;
-use serde::{Deserialize, Serialize};
 use crate::api::types::*;
 
 /// Global app state shared across all pages
@@ -12,6 +11,7 @@ pub struct AdminStore {
     pub stats: RwSignal<DashboardStats>,
     pub loading: RwSignal<bool>,
     pub error: RwSignal<Option<String>>,
+    pub current_user_id: RwSignal<i32>, // Current logged-in user's team_member ID
 }
 
 impl AdminStore {
@@ -25,17 +25,24 @@ impl AdminStore {
             stats: create_rw_signal(DashboardStats::default()),
             loading: create_rw_signal(false),
             error: create_rw_signal(None),
+            current_user_id: create_rw_signal(1), // Default to 1, will be set from initial data
         }
     }
 
     /// Initialize store from window.adminInitialData
     pub fn init_from_window(&self) {
         if let Some(initial_data) = get_initial_data_from_window() {
-            self.team_members.set(initial_data.team_members);
+            self.team_members.set(initial_data.team_members.clone());
             self.project_stages.set(initial_data.project_stages);
             self.product_issues.set(initial_data.product_issues);
             self.development_issues.set(initial_data.development_issues);
             self.stats.set(initial_data.stats);
+
+            // Set current_user_id from team_members (first member is usually the logged-in user)
+            if let Some(first_member) = initial_data.team_members.first() {
+                self.current_user_id.set(first_member.id);
+                logging::log!("✅ Current user ID set to: {}", first_member.id);
+            }
 
             logging::log!("✅ Store initialized from window.adminInitialData");
         } else {

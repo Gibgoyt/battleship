@@ -1,6 +1,7 @@
 use leptos::*;
 use crate::store::AdminStore;
 use crate::api::refresh_development_data;
+use crate::components::CreateDevelopmentIssueModal;
 
 // Mock data for tech stack (can be made dynamic later if needed)
 #[derive(Clone)]
@@ -71,9 +72,35 @@ pub fn Development() -> impl IntoView {
         }
     };
 
-    // New dev issue handler (placeholder)
+    // Modal visibility
+    let (show_modal, set_show_modal) = create_signal(false);
+
+    // New dev issue handler
     let new_issue = move |_| {
-        logging::log!("New Dev Issue clicked - TODO: Implement modal");
+        set_show_modal.set(true);
+    };
+
+    // Success callback
+    let on_modal_success = {
+        let store = store.clone();
+        move || {
+            let store = store.clone();
+            store.set_loading(true);
+
+            spawn_local(async move {
+                match refresh_development_data().await {
+                    Ok((dev, stages)) => {
+                        store.development_issues.set(dev);
+                        store.project_stages.set(stages);
+                        logging::log!("✅ Data refreshed after development issue creation");
+                    }
+                    Err(err) => {
+                        logging::error!("❌ Failed to refresh after creation: {}", err);
+                    }
+                }
+                store.set_loading(false);
+            });
+        }
     };
 
     view! {
@@ -129,7 +156,16 @@ pub fn Development() -> impl IntoView {
             </div>
 
             // Development Issues section
-            <DevelopmentContent store=store />
+            <DevelopmentContent store=store.clone() />
+
+            // Create Development Issue Modal
+            <CreateDevelopmentIssueModal
+                show=show_modal
+                on_close=move || set_show_modal.set(false)
+                on_success=on_modal_success
+                project_stages=store.project_stages
+                current_user_id=store.current_user_id
+            />
         </div>
     }
 }

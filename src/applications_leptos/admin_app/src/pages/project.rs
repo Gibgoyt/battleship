@@ -1,6 +1,7 @@
 use leptos::*;
 use crate::store::AdminStore;
 use crate::api::refresh_project_data;
+use crate::components::CreateProjectStageModal;
 
 #[component]
 fn StatusBadge(#[prop(into)] status: String) -> impl IntoView {
@@ -58,9 +59,36 @@ pub fn Project() -> impl IntoView {
         }
     };
 
-    // Add milestone handler (placeholder for now)
+    // Modal visibility
+    let (show_modal, set_show_modal) = create_signal(false);
+
+    // Add milestone handler
     let add_milestone = move |_| {
-        logging::log!("Add Milestone clicked - TODO: Implement modal");
+        set_show_modal.set(true);
+    };
+
+    // Success callback - refresh project data after creating milestone
+    let on_modal_success = {
+        let store = store.clone();
+        move || {
+            let store = store.clone();
+            store.set_loading(true);
+
+            spawn_local(async move {
+                match refresh_project_data().await {
+                    Ok((stages, product, dev)) => {
+                        store.project_stages.set(stages);
+                        store.product_issues.set(product);
+                        store.development_issues.set(dev);
+                        logging::log!("✅ Data refreshed after milestone creation");
+                    }
+                    Err(err) => {
+                        logging::error!("❌ Failed to refresh after creation: {}", err);
+                    }
+                }
+                store.set_loading(false);
+            });
+        }
     };
 
     view! {
@@ -101,6 +129,13 @@ pub fn Project() -> impl IntoView {
             })}
 
             <ProjectContent store=store />
+
+            // Create Project Stage Modal
+            <CreateProjectStageModal
+                show=show_modal
+                on_close=move || set_show_modal.set(false)
+                on_success=on_modal_success
+            />
         </div>
     }
 }

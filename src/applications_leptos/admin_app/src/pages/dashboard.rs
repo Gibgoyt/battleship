@@ -1,6 +1,5 @@
 use leptos::*;
 use crate::store::AdminStore;
-use crate::api::refresh_dashboard_data;
 
 #[component]
 pub fn Dashboard() -> impl IntoView {
@@ -8,51 +7,11 @@ pub fn Dashboard() -> impl IntoView {
     let store = use_context::<AdminStore>()
         .expect("AdminStore should be provided");
 
-    // Refresh handler
-    let refresh_data = {
-        let store = store.clone();
-        move |_| {
-            let store = store.clone();
-            store.set_loading(true);
-            store.set_error(None);
-
-            spawn_local(async move {
-                match refresh_dashboard_data().await {
-                    Ok(data) => {
-                        // Don't overwrite team_members from initial load
-                        store.project_stages.set(data.project_stages);
-                        store.product_issues.set(data.product_issues);
-                        store.development_issues.set(data.development_issues);
-                        store.stats.set(data.stats);
-                        logging::log!("✅ Dashboard data refreshed (3 endpoints)");
-                    }
-                    Err(err) => {
-                        logging::error!("❌ Failed to refresh data: {}", err);
-                        store.set_error(Some(err));
-                    }
-                }
-                store.set_loading(false);
-            });
-        }
-    };
-
     view! {
         <div class="p-8 bg-gray-50 dark:bg-zinc-900 min-h-screen">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">"Dashboard"</h2>
-                    <p class="text-gray-600 dark:text-gray-400">"Overview of team activity and project status"</p>
-                </div>
-                <button
-                    on:click=refresh_data
-                    disabled=move || store.loading.get()
-                    class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    {move || if store.loading.get() { "Refreshing..." } else { "Refresh" }}
-                </button>
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">"Dashboard"</h2>
+                <p class="text-gray-600 dark:text-gray-400">"Overview of team activity and project status"</p>
             </div>
 
             {move || store.error.get().map(|err| view! {

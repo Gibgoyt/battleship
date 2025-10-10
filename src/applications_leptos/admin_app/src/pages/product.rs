@@ -1,6 +1,7 @@
 use leptos::*;
 use crate::store::AdminStore;
 use crate::api::refresh_product_data;
+use crate::components::CreateProductIssueModal;
 
 #[component]
 fn StatusBadge(#[prop(into)] status: String) -> impl IntoView {
@@ -53,9 +54,35 @@ pub fn Product() -> impl IntoView {
         }
     };
 
-    // New product issue handler (placeholder)
+    // Modal visibility
+    let (show_modal, set_show_modal) = create_signal(false);
+
+    // New product issue handler
     let new_issue = move |_| {
-        logging::log!("New Product Issue clicked - TODO: Implement modal");
+        set_show_modal.set(true);
+    };
+
+    // Success callback
+    let on_modal_success = {
+        let store = store.clone();
+        move || {
+            let store = store.clone();
+            store.set_loading(true);
+
+            spawn_local(async move {
+                match refresh_product_data().await {
+                    Ok((product, stages)) => {
+                        store.product_issues.set(product);
+                        store.project_stages.set(stages);
+                        logging::log!("✅ Data refreshed after product issue creation");
+                    }
+                    Err(err) => {
+                        logging::error!("❌ Failed to refresh after creation: {}", err);
+                    }
+                }
+                store.set_loading(false);
+            });
+        }
     };
 
     view! {
@@ -95,7 +122,16 @@ pub fn Product() -> impl IntoView {
                 </div>
             })}
 
-            <ProductContent store=store />
+            <ProductContent store=store.clone() />
+
+            // Create Product Issue Modal
+            <CreateProductIssueModal
+                show=show_modal
+                on_close=move || set_show_modal.set(false)
+                on_success=on_modal_success
+                project_stages=store.project_stages
+                current_user_id=store.current_user_id
+            />
         </div>
     }
 }
