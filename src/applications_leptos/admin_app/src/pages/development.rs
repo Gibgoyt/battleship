@@ -1,5 +1,6 @@
 use leptos::*;
-use crate::api::{get_initial_data_from_window, fetch_initial_data, DevelopmentIssue, ProjectStage};
+use crate::store::AdminStore;
+use crate::api::{refresh_all_data, DevelopmentIssue, ProjectStage};
 
 // Mock data for tech stack (can be made dynamic later if needed)
 #[derive(Clone)]
@@ -41,19 +42,38 @@ fn StatusBadge(#[prop(into)] status: String) -> impl IntoView {
 pub fn Development() -> impl IntoView {
     let tech_stack = get_tech_stack();
 
-    // Try to load from window first (server-side rendered data), fallback to API call
-    let initial_data = create_resource(
-        || (),
-        |_| async move {
-            // First try to get server-side rendered data
-            if let Some(data) = get_initial_data_from_window() {
-                return Ok(data);
-            }
+    // Get store from context
+    let store = use_context::<AdminStore>()
+        .expect("AdminStore should be provided");
 
-            // Fallback to API call
-            fetch_initial_data().await
-        },
-    );
+    // Refresh handler
+    let refresh_data = {
+        let store = store.clone();
+        move |_| {
+            let store = store.clone();
+            store.set_loading(true);
+            store.set_error(None);
+
+            spawn_local(async move {
+                match refresh_all_data().await {
+                    Ok(data) => {
+                        store.update(data);
+                        logging::log!("✅ Development data refreshed");
+                    }
+                    Err(err) => {
+                        logging::error!("❌ Failed to refresh data: {}", err);
+                        store.set_error(Some(err));
+                    }
+                }
+                store.set_loading(false);
+            });
+        }
+    };
+
+    // New dev issue handler (placeholder)
+    let new_issue = move |_| {
+        logging::log!("New Dev Issue clicked - TODO: Implement modal");
+    };
 
     view! {
         <div class="p-8 bg-gray-50 dark:bg-zinc-900 min-h-screen">
@@ -62,13 +82,35 @@ pub fn Development() -> impl IntoView {
                     <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">"Development"</h2>
                     <p class="text-gray-600 dark:text-gray-400">"Technical implementation and developer resources"</p>
                 </div>
-                <button class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    "New Dev Issue"
-                </button>
+                <div class="flex gap-2">
+                    <button
+                        on:click=refresh_data
+                        disabled=move || store.loading.get()
+                        class="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        {move || if store.loading.get() { "Refreshing..." } else { "Refresh" }}
+                    </button>
+                    <button
+                        on:click=new_issue
+                        class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        "New Dev Issue"
+                    </button>
+                </div>
             </div>
+
+            {move || store.error.get().map(|err| view! {
+                <div class="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-red-900 dark:text-red-400 mb-2">"Error"</h3>
+                    <p class="text-red-700 dark:text-red-300">{err}</p>
+                </div>
+            })}
 
             // Tech Stack section (static)
             <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 p-6 mb-6">
@@ -85,94 +127,71 @@ pub fn Development() -> impl IntoView {
                 </div>
             </div>
 
-            // Development Issues section (dynamic from API)
-            <Suspense fallback=move || view! {
-                <div class="grid grid-cols-1 gap-4">
-                    <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 p-6 animate-pulse">
-                        <div class="h-6 bg-gray-200 dark:bg-zinc-700 rounded w-3/4 mb-4"></div>
-                        <div class="h-4 bg-gray-200 dark:bg-zinc-700 rounded w-1/2"></div>
-                    </div>
-                    <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 p-6 animate-pulse">
-                        <div class="h-6 bg-gray-200 dark:bg-zinc-700 rounded w-3/4 mb-4"></div>
-                        <div class="h-4 bg-gray-200 dark:bg-zinc-700 rounded w-1/2"></div>
-                    </div>
-                </div>
-            }>
-                {move || {
-                    initial_data.get().map(|data| match data {
-                        Ok(data) => view! {
-                            <DevelopmentContent
-                                development_issues=data.development_issues
-                                milestones=data.project_stages
-                            />
-                        }.into_view(),
-                        Err(err) => view! {
-                            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-                                <h3 class="text-lg font-semibold text-red-900 dark:text-red-400 mb-2">"Error Loading Data"</h3>
-                                <p class="text-red-700 dark:text-red-300">{err}</p>
-                            </div>
-                        }.into_view(),
-                    })
-                }}
-            </Suspense>
+            // Development Issues section
+            <DevelopmentContent store=store />
         </div>
     }
 }
 
 #[component]
-fn DevelopmentContent(
-    development_issues: Vec<DevelopmentIssue>,
-    milestones: Vec<ProjectStage>,
-) -> impl IntoView {
+fn DevelopmentContent(store: AdminStore) -> impl IntoView {
+    let development_issues = store.development_issues;
+    let milestones = store.project_stages;
+
     view! {
         <div class="grid grid-cols-1 gap-4">
-            {if development_issues.is_empty() {
-                view! {
-                    <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 p-12">
-                        <p class="text-gray-500 dark:text-gray-400 text-center">"No development issues found"</p>
-                    </div>
-                }.into_view()
-            } else {
-                development_issues.into_iter().map(|issue| {
-                    let milestone = milestones.iter().find(|m| m.id == issue.roadmap_stage_id);
-                    let milestone_title = milestone.map(|m| m.title.clone()).unwrap_or_else(|| "Unknown milestone".to_string());
+            {move || {
+                let issues = development_issues.get();
+                let stages = milestones.get();
 
+                if issues.is_empty() {
                     view! {
-                        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 p-6 hover:shadow-md transition-shadow cursor-pointer">
-                            <div class="flex items-start justify-between mb-4">
-                                <div class="flex items-center gap-3">
-                                    <span class="text-sm font-medium text-blue-600 dark:text-blue-400">
-                                        {"#"}{issue.issue_number}
-                                    </span>
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{issue.title}</h3>
-                                    <StatusBadge status={issue.status.clone()} />
-                                </div>
-                                <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                </svg>
-                            </div>
-
-                            {issue.description.as_ref().map(|desc| view! {
-                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{desc}</p>
-                            })}
-
-                            <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
-                                <span>"Related to: " {milestone_title}</span>
-                                <span>"•"</span>
-                                <span>{issue.message_count} " comments"</span>
-                                <span>"•"</span>
-                                <span>"By " {issue.creator_name.clone()}</span>
-                            </div>
-
-                            {issue.description.as_ref().map(|desc| view! {
-                                <div class="mt-4 p-4 bg-gray-50 dark:bg-zinc-900/50 rounded text-sm text-gray-700 dark:text-gray-300 font-mono">
-                                    <strong class="text-gray-900 dark:text-white font-sans">"Technical Details: "</strong>
-                                    <span class="font-sans">{desc}</span>
-                                </div>
-                            })}
+                        <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 p-12">
+                            <p class="text-gray-500 dark:text-gray-400 text-center">"No development issues found"</p>
                         </div>
-                    }
-                }).collect::<Vec<_>>().into_view()
+                    }.into_view()
+                } else {
+                    issues.into_iter().map(|issue| {
+                        let milestone = stages.iter().find(|m| m.id == issue.roadmap_stage_id);
+                        let milestone_title = milestone.map(|m| m.title.clone()).unwrap_or_else(|| "Unknown milestone".to_string());
+
+                        view! {
+                            <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 p-6 hover:shadow-md transition-shadow cursor-pointer">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-sm font-medium text-blue-600 dark:text-blue-400">
+                                            {"#"}{issue.issue_number}
+                                        </span>
+                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{issue.title}</h3>
+                                        <StatusBadge status={issue.status.clone()} />
+                                    </div>
+                                    <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </div>
+
+                                {issue.description.as_ref().map(|desc| view! {
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{desc}</p>
+                                })}
+
+                                <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
+                                    <span>"Related to: " {milestone_title}</span>
+                                    <span>"•"</span>
+                                    <span>{issue.message_count} " comments"</span>
+                                    <span>"•"</span>
+                                    <span>"By " {issue.creator_name.clone()}</span>
+                                </div>
+
+                                {issue.description.as_ref().map(|desc| view! {
+                                    <div class="mt-4 p-4 bg-gray-50 dark:bg-zinc-900/50 rounded text-sm text-gray-700 dark:text-gray-300 font-mono">
+                                        <strong class="text-gray-900 dark:text-white font-sans">"Technical Details: "</strong>
+                                        <span class="font-sans">{desc}</span>
+                                    </div>
+                                })}
+                            </div>
+                        }
+                    }).collect::<Vec<_>>().into_view()
+                }
             }}
         </div>
     }

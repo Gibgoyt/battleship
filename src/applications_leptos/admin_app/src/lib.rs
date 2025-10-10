@@ -7,9 +7,11 @@ mod components;
 mod pages;
 mod protocol;
 mod api;
+mod store;
 
 use components::{Sidebar, Header, DarkMode};
 use pages::{Dashboard, Project, Product, Development, ProtocolDemo};
+use store::AdminStore;
 
 fn initialize_dark_mode() -> bool {
     if let Some(window) = web_sys::window() {
@@ -45,6 +47,11 @@ fn App() -> impl IntoView {
     let is_dark = initialize_dark_mode();
     let dark_mode = create_rw_signal(is_dark);
     provide_context(DarkMode(dark_mode));
+
+    // Initialize global store and load initial data from window
+    let store = AdminStore::new();
+    store.init_from_window();
+    provide_context(store);
 
     // Create derived signal for dynamic classes
     let bg_class = move || {

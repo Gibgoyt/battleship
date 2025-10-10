@@ -167,6 +167,7 @@ if (authToken && Astro.locals.adminUser) {
     class="w-full h-full"
     data-initial-data={initialData ? JSON.stringify(initialData) : null}
     data-load-error={loadError}
+    data-api-origin={Astro.url.origin}
   ></div>
 
   <!-- Admin API Client Helper - Injects Authorization header automatically -->
