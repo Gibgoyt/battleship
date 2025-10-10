@@ -1,53 +1,20 @@
 use leptos::*;
+use crate::api::{get_initial_data_from_window, fetch_initial_data, DevelopmentIssue, ProjectStage};
 
-// Mock data structures
+// Mock data for tech stack (can be made dynamic later if needed)
 #[derive(Clone)]
 struct TechStack {
     name: &'static str,
     category: &'static str,
 }
 
-#[derive(Clone)]
-struct RoadmapMilestone {
-    id: u32,
-    title: &'static str,
-}
-
-#[derive(Clone)]
-struct DevelopmentIssue {
-    id: &'static str,
-    milestone_id: u32,
-    title: &'static str,
-    status: &'static str,
-    priority: &'static str,
-    comments: u32,
-}
-
 fn get_tech_stack() -> Vec<TechStack> {
     vec![
-        TechStack { name: "React", category: "Frontend" },
-        TechStack { name: "Node.js", category: "Backend" },
-        TechStack { name: "PostgreSQL", category: "Database" },
-        TechStack { name: "Firebase", category: "Services" },
-        TechStack { name: "Sentry", category: "Monitoring" },
-    ]
-}
-
-fn get_roadmap_milestones() -> Vec<RoadmapMilestone> {
-    vec![
-        RoadmapMilestone { id: 1, title: "User Authentication System" },
-        RoadmapMilestone { id: 2, title: "Core Dashboard Features" },
-        RoadmapMilestone { id: 3, title: "Analytics Integration" },
-        RoadmapMilestone { id: 4, title: "Mobile Responsiveness" },
-        RoadmapMilestone { id: 5, title: "Performance Optimization" },
-    ]
-}
-
-fn get_development_issues() -> Vec<DevelopmentIssue> {
-    vec![
-        DevelopmentIssue { id: "d1", milestone_id: 2, title: "API rate limiting", status: "open", priority: "high", comments: 5 },
-        DevelopmentIssue { id: "d2", milestone_id: 2, title: "Database query optimization", status: "in-progress", priority: "medium", comments: 12 },
-        DevelopmentIssue { id: "d3", milestone_id: 3, title: "Firebase SDK integration", status: "open", priority: "high", comments: 3 },
+        TechStack { name: "Astro", category: "Frontend" },
+        TechStack { name: "Leptos", category: "WASM" },
+        TechStack { name: "Cloudflare", category: "Platform" },
+        TechStack { name: "D1", category: "Database" },
+        TechStack { name: "Cognito", category: "Auth" },
     ]
 }
 
@@ -71,26 +38,22 @@ fn StatusBadge(#[prop(into)] status: String) -> impl IntoView {
 }
 
 #[component]
-fn PriorityBadge(#[prop(into)] priority: String) -> impl IntoView {
-    let color_class = match priority.as_str() {
-        "high" => "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-        "medium" => "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
-        "low" => "bg-gray-100 text-gray-700 dark:bg-gray-700/30 dark:text-gray-400",
-        _ => "bg-gray-100 text-gray-700 dark:bg-gray-700/30 dark:text-gray-400",
-    };
-
-    view! {
-        <span class={format!("px-2 py-1 rounded text-xs font-medium {}", color_class)}>
-            {priority}
-        </span>
-    }
-}
-
-#[component]
 pub fn Development() -> impl IntoView {
     let tech_stack = get_tech_stack();
-    let development_issues = get_development_issues();
-    let milestones = get_roadmap_milestones();
+
+    // Try to load from window first (server-side rendered data), fallback to API call
+    let initial_data = create_resource(
+        || (),
+        |_| async move {
+            // First try to get server-side rendered data
+            if let Some(data) = get_initial_data_from_window() {
+                return Ok(data);
+            }
+
+            // Fallback to API call
+            fetch_initial_data().await
+        },
+    );
 
     view! {
         <div class="p-8 bg-gray-50 dark:bg-zinc-900 min-h-screen">
@@ -107,7 +70,7 @@ pub fn Development() -> impl IntoView {
                 </button>
             </div>
 
-            // Tech Stack section
+            // Tech Stack section (static)
             <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 p-6 mb-6">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">"Tech Stack"</h3>
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -122,37 +85,95 @@ pub fn Development() -> impl IntoView {
                 </div>
             </div>
 
-            // Development Issues section
-            <div class="grid grid-cols-1 gap-4">
-                {development_issues.into_iter().map(|issue| {
-                    let milestone = milestones.iter().find(|m| m.id == issue.milestone_id);
-                    let milestone_title = milestone.map(|m| m.title).unwrap_or("");
+            // Development Issues section (dynamic from API)
+            <Suspense fallback=move || view! {
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 p-6 animate-pulse">
+                        <div class="h-6 bg-gray-200 dark:bg-zinc-700 rounded w-3/4 mb-4"></div>
+                        <div class="h-4 bg-gray-200 dark:bg-zinc-700 rounded w-1/2"></div>
+                    </div>
+                    <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 p-6 animate-pulse">
+                        <div class="h-6 bg-gray-200 dark:bg-zinc-700 rounded w-3/4 mb-4"></div>
+                        <div class="h-4 bg-gray-200 dark:bg-zinc-700 rounded w-1/2"></div>
+                    </div>
+                </div>
+            }>
+                {move || {
+                    initial_data.get().map(|data| match data {
+                        Ok(data) => view! {
+                            <DevelopmentContent
+                                development_issues=data.development_issues
+                                milestones=data.project_stages
+                            />
+                        }.into_view(),
+                        Err(err) => view! {
+                            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
+                                <h3 class="text-lg font-semibold text-red-900 dark:text-red-400 mb-2">"Error Loading Data"</h3>
+                                <p class="text-red-700 dark:text-red-300">{err}</p>
+                            </div>
+                        }.into_view(),
+                    })
+                }}
+            </Suspense>
+        </div>
+    }
+}
+
+#[component]
+fn DevelopmentContent(
+    development_issues: Vec<DevelopmentIssue>,
+    milestones: Vec<ProjectStage>,
+) -> impl IntoView {
+    view! {
+        <div class="grid grid-cols-1 gap-4">
+            {if development_issues.is_empty() {
+                view! {
+                    <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 p-12">
+                        <p class="text-gray-500 dark:text-gray-400 text-center">"No development issues found"</p>
+                    </div>
+                }.into_view()
+            } else {
+                development_issues.into_iter().map(|issue| {
+                    let milestone = milestones.iter().find(|m| m.id == issue.roadmap_stage_id);
+                    let milestone_title = milestone.map(|m| m.title.clone()).unwrap_or_else(|| "Unknown milestone".to_string());
 
                     view! {
                         <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-700 p-6 hover:shadow-md transition-shadow cursor-pointer">
                             <div class="flex items-start justify-between mb-4">
                                 <div class="flex items-center gap-3">
+                                    <span class="text-sm font-medium text-blue-600 dark:text-blue-400">
+                                        {"#"}{issue.issue_number}
+                                    </span>
                                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{issue.title}</h3>
-                                    <PriorityBadge priority={issue.priority.to_string()} />
-                                    <StatusBadge status={issue.status.to_string()} />
+                                    <StatusBadge status={issue.status.clone()} />
                                 </div>
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg>
                             </div>
-                            <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+
+                            {issue.description.as_ref().map(|desc| view! {
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{desc}</p>
+                            })}
+
+                            <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
                                 <span>"Related to: " {milestone_title}</span>
                                 <span>"•"</span>
-                                <span>{issue.comments} " comments"</span>
+                                <span>{issue.message_count} " comments"</span>
+                                <span>"•"</span>
+                                <span>"By " {issue.creator_name.clone()}</span>
                             </div>
-                            <div class="mt-4 p-4 bg-gray-50 dark:bg-zinc-900/50 rounded text-sm text-gray-700 dark:text-gray-300 font-mono">
-                                <strong>"Technical Details: "</strong>
-                                "Need to implement rate limiting middleware to prevent API abuse and ensure system stability."
-                            </div>
+
+                            {issue.description.as_ref().map(|desc| view! {
+                                <div class="mt-4 p-4 bg-gray-50 dark:bg-zinc-900/50 rounded text-sm text-gray-700 dark:text-gray-300 font-mono">
+                                    <strong class="text-gray-900 dark:text-white font-sans">"Technical Details: "</strong>
+                                    <span class="font-sans">{desc}</span>
+                                </div>
+                            })}
                         </div>
                     }
-                }).collect::<Vec<_>>()}
-            </div>
+                }).collect::<Vec<_>>().into_view()
+            }}
         </div>
     }
 }
