@@ -1,4 +1,4 @@
-name = "docforge-frontend"
+name = "cloudflare-frontend"
 compatibility_date = "2025-07-20"
 
 [build]
@@ -7,3 +7,8 @@ command = "npm run build"
 [vars]
 BACKEND_API_URL = "http://192.168.0.6:8443"
 BACKEND_WS_URL = "ws://192.168.0.6:8443/ws"
+
+[[d1_databases]]
+binding = "INTERNAL_OPS_ADMIN_DB"
+database_name = "internal-ops-admin-db"
+database_id = "7578e789-07c9-4f9e-8cc4-8a3044847b22"

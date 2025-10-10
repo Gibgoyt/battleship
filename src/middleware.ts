@@ -37,7 +37,10 @@ export const onRequest = defineMiddleware(async (
   // Skip middleware for auth routes to prevent redirect loops
   const isAuthRoute: boolean = url.pathname.startsWith('/auth/')
 
-  if (isPublicRoute) {
+  // Skip middleware for /app/* and /admin/* routes - they handle auth in their catch-all pages
+  const isCatchAllRoute: boolean = url.pathname.startsWith('/app/') || url.pathname.startsWith('/admin/')
+
+  if (isPublicRoute || isCatchAllRoute) {
     return next()
   }
 

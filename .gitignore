@@ -46,3 +46,8 @@ pnpm-debug.log*
 .vercel
 
 **/logs
+gitCommit.sh
+debug_txts/
+
+.astro
+.wrangler

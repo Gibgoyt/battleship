@@ -1,0 +1,292 @@
+---
+export const prerender = false;
+import 'src/styles/global.css'
+import { jwtValidator } from 'src/lib/auth/jwt-validator'
+
+// ==== AUTH PROTECTION LOGIC ====
+// Admin portal requires authentication - validate JWT token
+console.log('🔒 [ADMIN] Processing protected admin route:', Astro.url.pathname)
+
+// Get the admin Cognito auth token from cookies
+const authToken = Astro.cookies.get('cognito-admin-auth-token')
+console.log('🍪 [ADMIN] Cookie inspection:', {
+  hasAdminToken: Boolean(authToken?.value),
+  adminTokenValue: authToken?.value ? 'PRESENT' : 'MISSING',
+  adminAuthStatusCookie: Astro.cookies.get('admin-auth-status')?.value ? 'PRESENT' : 'MISSING'
+})
+
+// If no auth token is present, redirect to admin sign-in
+if (!authToken || !authToken.value) {
+  console.log('❌ [ADMIN] No admin auth token found, redirecting to admin sign-in (/admin-sign-in)')
+  return Astro.redirect('/admin-sign-in', 302)
+}
+
+try {
+  console.log('🔍 [ADMIN] Validating admin token...')
+
+  // Validate the Cognito JWT token
+  const validation = jwtValidator.validateTokenBasic(authToken.value)
+  console.log('🔍 [ADMIN] Admin token validation:', {
+    isValid: validation.isValid,
+    isExpired: validation.isExpired,
+    hasPayload: Boolean(validation.payload),
+    error: validation.error,
+    payloadPreview: validation.payload ? {
+      sub: validation.payload.sub?.substring(0, 8) + '...',
+      email: validation.payload.email,
+      tokenUse: validation.payload.token_use,
+      exp: new Date(validation.payload.exp * 1000).toISOString()
+    } : null
+  })
+
+  if (!validation.isValid) {
+    throw new Error(validation.error || 'Invalid admin token')
+  }
+
+  if (validation.isExpired) {
+    throw new Error('Admin token has expired')
+  }
+
+  // Store admin user info in locals
+  if (validation.payload) {
+    Astro.locals.adminUser = {
+      sub: validation.payload.sub,
+      email: validation.payload.email,
+      username: validation.payload['cognito:username'] || validation.payload.username,
+      emailVerified: validation.payload.email_verified || false,
+      groups: validation.payload['cognito:groups'] || [],
+      tokenUse: validation.payload.token_use
+    }
+
+    console.log('👤 [ADMIN] Admin user info stored in locals:', {
+      email: Astro.locals.adminUser.email,
+      username: Astro.locals.adminUser.username,
+      tokenUse: Astro.locals.adminUser.tokenUse
+    })
+  }
+
+  console.log('✅ [ADMIN] Admin access granted')
+} catch (error) {
+  console.error('❌ [ADMIN] Admin validation failed:', error)
+  // Invalid token, clear it and redirect to admin sign-in
+  Astro.cookies.delete('cognito-admin-auth-token', {
+    path: '/',
+  })
+  Astro.cookies.delete('admin-auth-status', {
+    path: '/',
+  })
+  console.log('🔄 [ADMIN] Redirecting to admin sign-in due to validation failure')
+  return Astro.redirect('/admin-sign-in', 302)
+}
+
+// ==== END AUTH PROTECTION LOGIC ====
+
+// ==== ROUTE VALIDATION LOGIC ====
+// Define valid admin routes
+type ValidAdminRoute = '' | 'dashboard' | 'project' | 'product' | 'development' | 'protocol-demo'
+
+// Get the route from URL params
+const routeSegment = Astro.params.all || ''
+console.log('🔒 [ADMIN] Processing admin route:', Astro.url.pathname, 'Segment:', routeSegment)
+
+// Validate route against known routes
+const validRoutes: ValidAdminRoute[] = ['', 'dashboard', 'project', 'product', 'development', 'protocol-demo']
+
+// Check if the route is valid
+if (routeSegment && !validRoutes.includes(routeSegment as ValidAdminRoute)) {
+  console.log('❌ [ADMIN] Invalid route, redirecting to dashboard (/admin/dashboard):', routeSegment)
+  return Astro.redirect('/admin/dashboard', 302)
+}
+
+console.log('✅ [ADMIN] Valid route accessed:', routeSegment || 'home')
+// ==== END ROUTE VALIDATION LOGIC ====
+
+// ==== SERVER-SIDE DATA LOADING ====
+// Single comprehensive load - matches /app pattern exactly
+// /api/admin will handle user creation if doesn't exist AND return all data
+let initialData = null;
+let loadError = null;
+
+if (authToken && Astro.locals.adminUser) {
+  try {
+    console.log('📡 [ADMIN] Loading initial data from /api/admin...')
+
+    // Single call to /api/admin - it handles user sync + data loading
+    const dataResponse = await fetch(`${Astro.url.origin}/api/admin`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${authToken.value}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (dataResponse.ok) {
+      initialData = await dataResponse.json();
+      console.log('✅ [ADMIN] Initial data loaded:', {
+        teamMembers: initialData.data?.team_members?.length,
+        projectStages: initialData.data?.project_stages?.length,
+        productIssues: initialData.data?.product_issues?.length,
+        developmentIssues: initialData.data?.development_issues?.length,
+      });
+    } else {
+      const errorText = await dataResponse.text();
+      console.error('❌ [ADMIN] Failed to load initial data:', dataResponse.status, errorText);
+      loadError = `Failed to load data: ${dataResponse.status}`;
+    }
+  } catch (error) {
+    console.error('❌ [ADMIN] Error loading data:', error);
+    loadError = error instanceof Error ? error.message : 'Unknown error';
+  }
+}
+// ==== END SERVER-SIDE DATA LOADING ====
+---
+
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Leptos</title>
+
+  <meta name="theme-color" content="#18181b">
+  <meta name="color-scheme" content="dark light">
+
+  <script is:inline>
+    // Prevent flash of wrong theme - Sync with Astro app theme
+    const isDarkMode = localStorage.getItem('darkMode') === 'true' ||
+      (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+</head>
+<body class="h-full">
+  <div
+    id="wasm-root"
+    class="w-full h-full"
+    data-initial-data={initialData ? JSON.stringify(initialData) : null}
+    data-load-error={loadError}
+    data-api-origin={Astro.url.origin}
+  ></div>
+
+  <!-- Admin API Client Helper - Injects Authorization header automatically -->
+  <script is:inline>
+    // Admin API fetch wrapper that automatically injects JWT from cookies
+    window.adminApiFetch = async function(url, options = {}) {
+      try {
+        // Get admin token from cookies
+        const cookies = document.cookie.split(';');
+        let token = null;
+        for (const cookie of cookies) {
+          const [name, value] = cookie.trim().split('=');
+          if (name === 'cognito-admin-auth-token' && value) {
+            token = decodeURIComponent(value);
+            break;
+          }
+        }
+
+        if (!token) {
+          console.warn('[AdminAPIClient] No auth token found in cookies');
+        }
+
+        // Setup headers
+        const headers = new Headers(options.headers || {});
+
+        // Inject Authorization header
+        if (token) {
+          headers.set('Authorization', `Bearer ${token}`);
+        }
+
+        // Set Content-Type for JSON requests
+        if (!headers.has('Content-Type') && (options.method === 'POST' || options.method === 'PUT')) {
+          headers.set('Content-Type', 'application/json');
+        }
+
+        // Make the fetch request
+        const response = await fetch(url, {
+          ...options,
+          headers
+        });
+
+        // Log errors for debugging
+        if (!response.ok) {
+          console.error('[AdminAPIClient] Request failed:', {
+            url,
+            status: response.status,
+            statusText: response.statusText
+          });
+        }
+
+        return response;
+      } catch (error) {
+        console.error('[AdminAPIClient] Network error:', error);
+        throw error;
+      }
+    };
+
+    console.log('✅ Admin API client loaded and available globally');
+  </script>
+
+  <script type="module">
+    import init, { mount_admin_app } from '/wasm/admin_app/admin_wasm_app.js';
+
+    async function loadAdminApp() {
+      try {
+        // Initialize the WASM module
+        await init('/wasm/admin_app/admin_wasm_app_bg.wasm');
+
+        // Get initial data from server-side render
+        const rootEl = document.getElementById('wasm-root');
+        const initialDataStr = rootEl?.getAttribute('data-initial-data');
+        const loadError = rootEl?.getAttribute('data-load-error');
+
+        let initialData = null;
+        if (initialDataStr && initialDataStr !== 'null') {
+          try {
+            initialData = JSON.parse(initialDataStr);
+            console.log('📦 [ADMIN] Initial data received from server:', {
+              teamMembers: initialData.data?.team_members?.length,
+              projectStages: initialData.data?.project_stages?.length,
+            });
+          } catch (e) {
+            console.error('Failed to parse initial data:', e);
+          }
+        }
+
+        if (loadError) {
+          console.warn('⚠️ [ADMIN] Data load error:', loadError);
+        }
+
+        // Mount the Admin Leptos app to #wasm-root
+        // TODO: Pass initialData to mount_admin_app once Leptos accepts it
+        mount_admin_app();
+
+        // Store data globally for WASM to access
+        if (initialData) {
+          window.adminInitialData = initialData;
+        }
+
+        console.log('✅ Admin WASM app loaded successfully!');
+      } catch (err) {
+        console.error('❌ Failed to load Admin WASM app:', err);
+
+        // Show error to user
+        const root = document.getElementById('wasm-root');
+        if (root) {
+          root.innerHTML = `
+            <div class="p-8 text-center">
+              <h1 class="text-3xl font-bold text-red-400 mb-4">Failed to Load Admin App</h1>
+              <p class="text-zinc-400 mb-4">Please ensure the Admin WASM module is built:</p>
+              <code class="bg-zinc-800 px-4 py-2 rounded">cd src/applications_leptos/admin_app && ./build.sh</code>
+              <p class="text-zinc-500 mt-4 text-sm">${err.message}</p>
+            </div>
+          `;
+        }
+      }
+    }
+
+    loadAdminApp();
+  </script>
+</body>
+</html>

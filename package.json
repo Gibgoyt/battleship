@@ -3,7 +3,8 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro dev --remote",
+    "build:admin_app": "cd src/applications_leptos/admin_app && ./build.sh",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",

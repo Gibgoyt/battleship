@@ -11,7 +11,7 @@ import tailwindcss from "@tailwindcss/vite"
 export default defineConfig({
   output: 'server',
   server: {
-    port: 3000,
+    port: 8443,
     host: true
   },
   integrations: [
