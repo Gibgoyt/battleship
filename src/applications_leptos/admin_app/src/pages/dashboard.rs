@@ -1,6 +1,6 @@
 use leptos::*;
 use crate::store::AdminStore;
-use crate::api::refresh_all_data;
+use crate::api::refresh_dashboard_data;
 
 #[component]
 pub fn Dashboard() -> impl IntoView {
@@ -17,10 +17,14 @@ pub fn Dashboard() -> impl IntoView {
             store.set_error(None);
 
             spawn_local(async move {
-                match refresh_all_data().await {
+                match refresh_dashboard_data().await {
                     Ok(data) => {
-                        store.update(data);
-                        logging::log!("✅ Dashboard data refreshed");
+                        // Don't overwrite team_members from initial load
+                        store.project_stages.set(data.project_stages);
+                        store.product_issues.set(data.product_issues);
+                        store.development_issues.set(data.development_issues);
+                        store.stats.set(data.stats);
+                        logging::log!("✅ Dashboard data refreshed (3 endpoints)");
                     }
                     Err(err) => {
                         logging::error!("❌ Failed to refresh data: {}", err);

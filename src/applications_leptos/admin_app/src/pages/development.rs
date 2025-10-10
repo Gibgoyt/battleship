@@ -1,6 +1,6 @@
 use leptos::*;
 use crate::store::AdminStore;
-use crate::api::{refresh_all_data, DevelopmentIssue, ProjectStage};
+use crate::api::refresh_development_data;
 
 // Mock data for tech stack (can be made dynamic later if needed)
 #[derive(Clone)]
@@ -55,10 +55,11 @@ pub fn Development() -> impl IntoView {
             store.set_error(None);
 
             spawn_local(async move {
-                match refresh_all_data().await {
-                    Ok(data) => {
-                        store.update(data);
-                        logging::log!("✅ Development data refreshed");
+                match refresh_development_data().await {
+                    Ok((dev, stages)) => {
+                        store.development_issues.set(dev);
+                        store.project_stages.set(stages);
+                        logging::log!("✅ Development data refreshed (2 endpoints)");
                     }
                     Err(err) => {
                         logging::error!("❌ Failed to refresh data: {}", err);

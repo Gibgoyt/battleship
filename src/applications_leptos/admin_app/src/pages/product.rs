@@ -1,6 +1,6 @@
 use leptos::*;
 use crate::store::AdminStore;
-use crate::api::{refresh_all_data, ProductIssue, ProjectStage};
+use crate::api::refresh_product_data;
 
 #[component]
 fn StatusBadge(#[prop(into)] status: String) -> impl IntoView {
@@ -37,10 +37,11 @@ pub fn Product() -> impl IntoView {
             store.set_error(None);
 
             spawn_local(async move {
-                match refresh_all_data().await {
-                    Ok(data) => {
-                        store.update(data);
-                        logging::log!("✅ Product data refreshed");
+                match refresh_product_data().await {
+                    Ok((product, stages)) => {
+                        store.product_issues.set(product);
+                        store.project_stages.set(stages);
+                        logging::log!("✅ Product data refreshed (2 endpoints)");
                     }
                     Err(err) => {
                         logging::error!("❌ Failed to refresh data: {}", err);

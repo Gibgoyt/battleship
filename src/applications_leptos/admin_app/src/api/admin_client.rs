@@ -135,6 +135,66 @@ pub async fn refresh_all_data() -> Result<InitialData, String> {
     })
 }
 
+// ==== PAGE-SPECIFIC REFRESH FUNCTIONS ====
+
+/// Refresh Dashboard data (project_stages, product_issues, development_issues)
+/// Team members are not needed for dashboard, stats are calculated client-side
+pub async fn refresh_dashboard_data() -> Result<InitialData, String> {
+    // Fetch all required data in parallel using wasm_bindgen_futures
+    use wasm_bindgen_futures::spawn_local;
+    use wasm_bindgen_futures::JsFuture;
+
+    // Fetch in sequence for now (parallel would require more complex setup in WASM)
+    let project_stages = fetch_project_stages().await?;
+    let product_issues = fetch_product_issues().await?;
+    let development_issues = fetch_development_issues().await?;
+
+    // Calculate stats client-side
+    let stats = DashboardStats {
+        total_team_members: 0, // Not loaded for dashboard refresh
+        online_team_members: 0, // Not loaded for dashboard refresh
+        total_product_issues: product_issues.len() as i32,
+        total_development_issues: development_issues.len() as i32,
+        open_product_issues: product_issues.iter().filter(|i| i.status == "open").count() as i32,
+        open_development_issues: development_issues.iter().filter(|i| i.status == "open").count() as i32,
+        total_project_stages: project_stages.len() as i32,
+        current_stage: project_stages.iter().find(|s| s.status == "current").map(|s| s.title.clone()),
+    };
+
+    Ok(InitialData {
+        team_members: Vec::new(), // Empty for dashboard refresh
+        project_stages,
+        product_issues,
+        development_issues,
+        stats,
+    })
+}
+
+/// Refresh Project page data (all roadmap data needed for timeline view)
+pub async fn refresh_project_data() -> Result<(Vec<ProjectStage>, Vec<ProductIssue>, Vec<DevelopmentIssue>), String> {
+    let project_stages = fetch_project_stages().await?;
+    let product_issues = fetch_product_issues().await?;
+    let development_issues = fetch_development_issues().await?;
+
+    Ok((project_stages, product_issues, development_issues))
+}
+
+/// Refresh Product page data (product issues + milestones for context)
+pub async fn refresh_product_data() -> Result<(Vec<ProductIssue>, Vec<ProjectStage>), String> {
+    let product_issues = fetch_product_issues().await?;
+    let project_stages = fetch_project_stages().await?;
+
+    Ok((product_issues, project_stages))
+}
+
+/// Refresh Development page data (development issues + milestones for context)
+pub async fn refresh_development_data() -> Result<(Vec<DevelopmentIssue>, Vec<ProjectStage>), String> {
+    let development_issues = fetch_development_issues().await?;
+    let project_stages = fetch_project_stages().await?;
+
+    Ok((development_issues, project_stages))
+}
+
 // ==== PROJECT STAGES ====
 
 /// Fetch all project stages

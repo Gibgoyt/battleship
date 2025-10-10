@@ -17,7 +17,7 @@ console.log('🍪 [ADMIN] Cookie inspection:', {
 
 // If no auth token is present, redirect to admin sign-in
 if (!authToken || !authToken.value) {
-  console.log('❌ [ADMIN] No admin auth token found, redirecting to admin sign-in')
+  console.log('❌ [ADMIN] No admin auth token found, redirecting to admin sign-in (/admin-sign-in)')
   return Astro.redirect('/admin-sign-in', 302)
 }
 
@@ -94,7 +94,7 @@ const validRoutes: ValidAdminRoute[] = ['', 'dashboard', 'project', 'product', '
 
 // Check if the route is valid
 if (routeSegment && !validRoutes.includes(routeSegment as ValidAdminRoute)) {
-  console.log('❌ [ADMIN] Invalid route, redirecting to dashboard:', routeSegment)
+  console.log('❌ [ADMIN] Invalid route, redirecting to dashboard (/admin/dashboard):', routeSegment)
   return Astro.redirect('/admin/dashboard', 302)
 }
 
