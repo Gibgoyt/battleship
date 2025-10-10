@@ -1,79 +1,51 @@
 use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::JsFuture;
 use serde::de::DeserializeOwned;
-use serde::Serialize;
-use gloo_net::http::Request;
+use web_sys::Response;
 
 use super::types::*;
 
-// JS interop to call window.adminApiFetch
+// JS interop - call window.adminApiFetch which automatically adds auth headers
 #[wasm_bindgen]
 extern "C" {
-    #[wasm_bindgen(js_name = adminApiFetch)]
-    async fn admin_api_fetch(url: &str, options: JsValue) -> JsValue;
-
-    #[wasm_bindgen(js_name = console, js_namespace = console)]
-    fn log(s: &str);
+    #[wasm_bindgen(js_name = adminApiFetch, catch)]
+    async fn admin_api_fetch_js(url: &str, options: JsValue) -> Result<JsValue, JsValue>;
 }
 
-// Fetch helper that uses window.adminApiFetch for authenticated requests
-async fn fetch_api<T: DeserializeOwned>(url: &str) -> Result<ApiResponse<T>, String> {
-    let response = Request::get(url)
-        .send()
-        .await
-        .map_err(|e| format!("Network error: {:?}", e))?;
+// Helper to call window.adminApiFetch and parse JSON response
+async fn admin_api_fetch<T: DeserializeOwned>(url: &str, method: &str) -> Result<T, String> {
+    // Create fetch options
+    let opts = js_sys::Object::new();
+    js_sys::Reflect::set(&opts, &"method".into(), &method.into())
+        .map_err(|_| "Failed to set method".to_string())?;
 
+    // Call window.adminApiFetch (which adds Authorization header automatically)
+    let response_value = admin_api_fetch_js(url, opts.into())
+        .await
+        .map_err(|e| format!("Fetch error: {:?}", e))?;
+
+    // Convert JsValue to web_sys::Response
+    let response: Response = response_value
+        .dyn_into()
+        .map_err(|_| "Failed to convert to Response".to_string())?;
+
+    // Check if response is ok
     if !response.ok() {
         return Err(format!("HTTP error: {}", response.status()));
     }
 
-    response
-        .json::<ApiResponse<T>>()
+    // Get JSON from response
+    let json_promise = response
+        .json()
+        .map_err(|_| "Failed to call .json()".to_string())?;
+
+    let json_value = JsFuture::from(json_promise)
         .await
-        .map_err(|e| format!("JSON parse error: {:?}", e))
-}
+        .map_err(|e| format!("JSON parse error: {:?}", e))?;
 
-// Post helper with JSON body
-async fn post_api<T: DeserializeOwned, B: Serialize>(
-    url: &str,
-    body: &B,
-) -> Result<ApiResponse<T>, String> {
-    let response = Request::post(url)
-        .json(body)
-        .map_err(|e| format!("Serialize error: {:?}", e))?
-        .send()
-        .await
-        .map_err(|e| format!("Network error: {:?}", e))?;
-
-    if !response.ok() {
-        return Err(format!("HTTP error: {}", response.status()));
-    }
-
-    response
-        .json::<ApiResponse<T>>()
-        .await
-        .map_err(|e| format!("JSON parse error: {:?}", e))
-}
-
-// Put helper with JSON body
-async fn put_api<T: DeserializeOwned, B: Serialize>(
-    url: &str,
-    body: &B,
-) -> Result<ApiResponse<T>, String> {
-    let response = Request::put(url)
-        .json(body)
-        .map_err(|e| format!("Serialize error: {:?}", e))?
-        .send()
-        .await
-        .map_err(|e| format!("Network error: {:?}", e))?;
-
-    if !response.ok() {
-        return Err(format!("HTTP error: {}", response.status()));
-    }
-
-    response
-        .json::<ApiResponse<T>>()
-        .await
-        .map_err(|e| format!("JSON parse error: {:?}", e))
+    // Convert to Rust type
+    serde_wasm_bindgen::from_value(json_value)
+        .map_err(|e| format!("Deserialization error: {:?}", e))
 }
 
 // Load initial data from window.adminInitialData (server-side rendered)
@@ -92,7 +64,7 @@ pub fn get_initial_data_from_window() -> Option<InitialData> {
 
 // Fetch all initial data from API
 pub async fn fetch_initial_data() -> Result<InitialData, String> {
-    let response = fetch_api::<InitialData>("/api/admin").await?;
+    let response: ApiResponse<InitialData> = admin_api_fetch("/api/admin", "GET").await?;
 
     response.data.ok_or_else(|| {
         response
@@ -101,9 +73,15 @@ pub async fn fetch_initial_data() -> Result<InitialData, String> {
     })
 }
 
-// Team Members
+// The functions below are kept for future use when we need to:
+// - Refresh specific data sets
+// - Create new records
+// - Update existing records
+
+// Team Members (kept for future use when we need to refresh specific data)
+#[allow(dead_code)]
 pub async fn fetch_team_members() -> Result<Vec<TeamMember>, String> {
-    let response = fetch_api::<Vec<TeamMember>>("/api/admin/team-members").await?;
+    let response: ApiResponse<Vec<TeamMember>> = admin_api_fetch("/api/admin/team-members", "GET").await?;
 
     response.data.ok_or_else(|| {
         response
@@ -112,9 +90,10 @@ pub async fn fetch_team_members() -> Result<Vec<TeamMember>, String> {
     })
 }
 
-// Project Stages
+// Project Stages (kept for future use - mutations and selective refreshes)
+#[allow(dead_code)]
 pub async fn fetch_project_stages() -> Result<Vec<ProjectStage>, String> {
-    let response = fetch_api::<Vec<ProjectStage>>("/api/admin/project-stages").await?;
+    let response: ApiResponse<Vec<ProjectStage>> = admin_api_fetch("/api/admin/project-stages", "GET").await?;
 
     response.data.ok_or_else(|| {
         response
@@ -123,35 +102,13 @@ pub async fn fetch_project_stages() -> Result<Vec<ProjectStage>, String> {
     })
 }
 
-pub async fn create_project_stage(
-    request: CreateProjectStageRequest,
-) -> Result<ProjectStage, String> {
-    let response = post_api::<ProjectStage, _>("/api/admin/project-stages", &request).await?;
+// Note: POST/PUT operations would require sending JSON body
+// For now, we're only implementing GET since the app loads all data initially
+// Create/Update functions can be implemented when needed using FormData or JSON body
 
-    response.data.ok_or_else(|| {
-        response
-            .error
-            .unwrap_or_else(|| "Failed to create project stage".to_string())
-    })
-}
-
-pub async fn update_project_stage(
-    id: i32,
-    request: UpdateProjectStageRequest,
-) -> Result<ProjectStage, String> {
-    let url = format!("/api/admin/project-stages/{}", id);
-    let response = put_api::<ProjectStage, _>(&url, &request).await?;
-
-    response.data.ok_or_else(|| {
-        response
-            .error
-            .unwrap_or_else(|| "Failed to update project stage".to_string())
-    })
-}
-
-// Product Issues
+#[allow(dead_code)]
 pub async fn fetch_product_issues() -> Result<Vec<ProductIssue>, String> {
-    let response = fetch_api::<Vec<ProductIssue>>("/api/admin/product-issues").await?;
+    let response: ApiResponse<Vec<ProductIssue>> = admin_api_fetch("/api/admin/product-issues", "GET").await?;
 
     response.data.ok_or_else(|| {
         response
@@ -160,65 +117,13 @@ pub async fn fetch_product_issues() -> Result<Vec<ProductIssue>, String> {
     })
 }
 
-pub async fn create_product_issue(
-    request: CreateProductIssueRequest,
-) -> Result<ProductIssue, String> {
-    let response = post_api::<ProductIssue, _>("/api/admin/product-issues", &request).await?;
-
-    response.data.ok_or_else(|| {
-        response
-            .error
-            .unwrap_or_else(|| "Failed to create product issue".to_string())
-    })
-}
-
-pub async fn update_product_issue(
-    id: i32,
-    request: UpdateProductIssueRequest,
-) -> Result<ProductIssue, String> {
-    let url = format!("/api/admin/product-issues/{}", id);
-    let response = put_api::<ProductIssue, _>(&url, &request).await?;
-
-    response.data.ok_or_else(|| {
-        response
-            .error
-            .unwrap_or_else(|| "Failed to update product issue".to_string())
-    })
-}
-
-// Development Issues
+#[allow(dead_code)]
 pub async fn fetch_development_issues() -> Result<Vec<DevelopmentIssue>, String> {
-    let response = fetch_api::<Vec<DevelopmentIssue>>("/api/admin/development-issues").await?;
+    let response: ApiResponse<Vec<DevelopmentIssue>> = admin_api_fetch("/api/admin/development-issues", "GET").await?;
 
     response.data.ok_or_else(|| {
         response
             .error
             .unwrap_or_else(|| "No development issues data".to_string())
-    })
-}
-
-pub async fn create_development_issue(
-    request: CreateDevelopmentIssueRequest,
-) -> Result<DevelopmentIssue, String> {
-    let response = post_api::<DevelopmentIssue, _>("/api/admin/development-issues", &request).await?;
-
-    response.data.ok_or_else(|| {
-        response
-            .error
-            .unwrap_or_else(|| "Failed to create development issue".to_string())
-    })
-}
-
-pub async fn update_development_issue(
-    id: i32,
-    request: UpdateDevelopmentIssueRequest,
-) -> Result<DevelopmentIssue, String> {
-    let url = format!("/api/admin/development-issues/{}", id);
-    let response = put_api::<DevelopmentIssue, _>(&url, &request).await?;
-
-    response.data.ok_or_else(|| {
-        response
-            .error
-            .unwrap_or_else(|| "Failed to update development issue".to_string())
     })
 }
