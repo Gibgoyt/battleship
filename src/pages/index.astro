@@ -44,13 +44,13 @@ export const prerender = true
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 
                 <a href="/groups/new" 
-                   class="px-8 py-4 text-white dark:text-gray-200 text-lg font-semibold rounded-xl transition-colors shadow-lg hover:shadow-xl transform hover:scale-105"
+                   class="px-8 py-4 text-white dark:text-gray-200 text-lg font-semibold rounded-xl transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform"
                    style="background-color: var(--color-primary); hover-bg-color: #f07d40;">
                     Start Splitting Bills (It's Free)
                 </a>
                 
                 <a href="/how-it-works" 
-                   class="px-8 py-4 bg-white dark:bg-gray-200 text-black text-lg font-medium rounded-xl hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl border border-gray-300 transform hover:scale-105">
+                   class="px-8 py-4 bg-white dark:bg-gray-200 text-black text-lg font-medium rounded-xl hover:white dark:hover:bg-gray-200 transition-colors shadow-lg hover:shadow-xl border border-gray-300 transform hover:scale-105 transition-transform">
                     Learn How It Works
                 </a>
             </div>
@@ -58,7 +58,7 @@ export const prerender = true
     </div>
 </section>
 
-<section class="w-full p-4 mx-auto bg-black">
+<section class="w-full p-4 mx-auto bg-white dark:bg-black">
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
 
@@ -333,44 +333,44 @@ Intelligent algorithms automatically calculate fair splits. Handle unequal share
 </section>
 
 		<!-- How It Works Section -->
-		<section class="py-16 lg:py-24 bg-black dark:bg-gray-900 border-t border-[#47a49e] border-b border-[#47a49e]">
+		<section class="py-16 lg:py-24 bg-white dark:bg-gray-200 border-t border-[#47a49e] border-b border-[#47a49e]">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div class="text-center mb-12">
-					<h2 class="text-3xl lg:text-4xl font-bold mb-4 text-white dark:text-gray-200">
+					<h2 class="text-3xl lg:text-4xl font-bold mb-4 text-black">
 						How SplitDo Works
 					</h2>
-					<p class="text-lg text-white dark:text-gray-200">
+					<p class="text-lg text-black">
 						Three simple steps to split expenses and settle debts on the blockchain
 					</p>
 				</div>
 
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 					<div class="text-center">
-						<div class="w-20 h-20 bg-[#564740] text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+						<div class="w-20 h-20 bg-[#564740] text-white dark:text-gray-200 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
 							1
 						</div>
-						<h3 class="text-xl font-semibold mb-3">Create Your Group</h3>
-						<p class="text-white dark:text-gray-200">
+						<h3 class="text-xl font-semibold mb-3 text-black">Create Your Group</h3>
+						<p class="text-black">
 							Set up an expense group with friends, roommates, or colleagues. Add members and customize splitting rules.
 						</p>
 					</div>
 
 					<div class="text-center">
-						<div class="w-20 h-20 bg-[#f07d40] text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+						<div class="w-20 h-20 bg-[#f07d40] text-white dark:text-gray-200 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
 							2
 						</div>
-						<h3 class="text-xl font-semibold mb-3">Add & Track Expenses</h3>
-						<p class="text-white dark:text-gray-200">
+						<h3 class="text-xl font-semibold mb-3 text-black">Add & Track Expenses</h3>
+						<p class="text-black">
 							Log purchases, receipts, and shared costs. Our smart algorithms automatically calculate fair splits for everyone.
 						</p>
 					</div>
 
 					<div class="text-center">
-						<div class="w-20 h-20 bg-[#47a49e] text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+						<div class="w-20 h-20 bg-[#47a49e] text-white dark:text-gray-200 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
 							3
 						</div>
-						<h3 class="text-xl font-semibold mb-3">Settle via Solana</h3>
-						<p class="text-white dark:text-gray-200">
+						<h3 class="text-xl font-semibold mb-3 text-black">Settle via Solana</h3>
+						<p class="text-black">
 							Connect your Solana wallet and settle debts instantly. Fast transactions with minimal fees on the blockchain.
 						</p>
 					</div>
@@ -379,19 +379,19 @@ Intelligent algorithms automatically calculate fair splits. Handle unequal share
 		</section>
 
 		<!-- CTA Section -->
-		<section class="py-16 lg:py-24">
+		<section class="py-16 lg:py-24 bg-black">
 			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-				<h2 class="text-3xl lg:text-4xl font-bold mb-4 text-black">
+				<h2 class="text-3xl lg:text-4xl font-bold mb-4 text-white dark:text-gray-200">
 					Ready to Split Expenses?
 				</h2>
-				<p class="text-lg text-gray-600 dark:text-gray-300 mb-8">
+				<p class="text-lg text-white dark:text-gray-200 mb-8">
 					Join thousands of groups using SplitDo to manage expenses and settle debts seamlessly on Solana.
 				</p>
 				<div class="flex flex-col sm:flex-row gap-4 justify-center">
-					<a href="/groups/new" class="px-8 py-4 bg-[#47a49e] text-white text-lg rounded-lg transition-colors shadow-lg hover:shadow-xl transform hover:scale-105">
+					<a href="/groups/new" class="px-8 py-4 bg-[#47a49e] text-white text-lg rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-transform">
 						Start Splitting Expenses
 					</a>
-					<a href="/demo" class="px-8 py-4 bg-black text-white dark:text-gray-200 text-lg rounded-lg  hover:shadow-xl transform hover:scale-105 shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700">
+					<a href="/demo" class="px-8 py-4 bg-white dark:bg-gray-200 text-black text-lg rounded-lg  hover:shadow-xl transform hover:scale-105 transition-transform shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700">
 						See How It Works
 					</a>
 				</div>
