@@ -1,0 +1,50 @@
+<svg width="340" height="680" viewBox="0 0 340 680" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Phone outer frame/bezel -->
+  <rect x="0" y="0" width="340" height="680" rx="50" fill="#2D3748"/>
+
+  <!-- Inner lighter border -->
+  <rect x="4" y="4" width="332" height="672" rx="46" fill="#3A4556"/>
+
+  <!-- Screen area (transparent for screenshots) -->
+  <g>
+    <!-- Main screen background -->
+    <rect x="12" y="12" width="316" height="656" rx="42" fill="#1A202C"/>
+
+    <!-- Screen content area with notch cutout -->
+    <mask id="screen-mask">
+      <rect x="12" y="12" width="316" height="656" rx="42" fill="white"/>
+      <!-- Notch cutout -->
+      <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+    </mask>
+
+    <!-- Transparent screen area where screenshots go -->
+    <rect x="12" y="12" width="316" height="656" rx="42" fill="transparent" mask="url(#screen-mask)"/>
+  </g>
+
+  <!-- Notch detail -->
+  <g>
+    <!-- Notch outer shape -->
+    <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#2D3748"/>
+
+    <!-- Notch inner dark area -->
+    <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#1A1F2E"/>
+
+    <!-- Speaker grille -->
+    <rect x="155" y="18" width="30" height="4" rx="2" fill="#0F1419"/>
+
+    <!-- Front camera -->
+    <circle cx="180" cy="20" r="4.5" fill="#0F1419"/>
+    <circle cx="180" cy="20" r="2.5" fill="#1E293B"/>
+  </g>
+
+  <!-- Side buttons -->
+  <!-- Power button (right side) -->
+  <rect x="335" y="150" width="5" height="60" rx="2.5" fill="#1A202C"/>
+
+  <!-- Volume buttons (left side) -->
+  <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#1A202C"/>
+  <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#1A202C"/>
+
+  <!-- Silent switch (left side) -->
+  <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#1A202C"/>
+</svg>
