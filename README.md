@@ -300,3 +300,4 @@ If you see environment variable errors in the console, double-check your `.env` 
 - **Build errors**: Ensure all required PUBLIC_ variables are set
 
 This multi-framework architecture provides the flexibility to use the best tool for each part of your application while maintaining a cohesive user experience.
+
