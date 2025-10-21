@@ -9,7 +9,7 @@
       <!-- Edge top corner -->
       <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -10 0, -10 50 L 0 50 Z" fill="#14181F" opacity="0.7"/>
       <!-- Edge bottom corner -->
-      <path d="M 0 630 L -10 630 A 50 50 0 0 1 40 680 L 50 680 A 50 50 0 0 0 0 630 Z" fill="#14181F" opacity="0.7"/>
+      <path d="M 0 630 L -10 630 A 50 50 0 0 0 40 680 L 50 680 A 50 50 0 0 1 0 630 Z" fill="#14181F" opacity="0.7"/>
     </g>
 
     <!-- Phone outer frame/bezel -->
