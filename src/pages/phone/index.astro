@@ -10,20 +10,26 @@ export const prerender = true
     <!-- Header -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
       <h1 class="text-4xl font-bold text-center mb-4">Angled Phone SVG Demo</h1>
-      <p class="text-center text-gray-600">Testing all angled phone variations</p>
+      <p class="text-center text-gray-600">Testing all angled phone variations with 3D depth!</p>
     </div>
 
     <!-- Section 1: Phones WITHOUT Images -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 overflow-visible">
       <h2 class="text-3xl font-bold mb-8 text-center">Without Images (Empty)</h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 overflow-visible">
 
         <!-- Left Black -->
-        <div class="bg-white p-6 rounded-lg shadow-lg">
+        <div class="bg-white p-6 rounded-lg shadow-lg overflow-visible">
           <h3 class="text-lg font-semibold mb-4 text-center">Left Black</h3>
-          <svg width="500" height="750" viewBox="0 0 500 750" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
-            <g transform="matrix(0.9, -0.1, -0.32, 1.05, 100, 40)">
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, -0.1, -0.32, 1.05, 140, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 340 50 L 350 50 L 350 680 L 340 680 L 340 50 Z" fill="#1A1F2E" opacity="0.8"/>
+                <path d="M 340 50 Q 340 0, 290 0 L 300 0 Q 350 0, 350 50 L 340 50 Z" fill="#14181F" opacity="0.7"/>
+                <path d="M 340 630 L 350 630 Q 350 680, 300 680 L 290 680 Q 340 680, 340 630 Z" fill="#14181F" opacity="0.7"/>
+              </g>
               <rect x="0" y="0" width="340" height="680" rx="50" fill="#2D3748"/>
               <rect x="4" y="4" width="332" height="672" rx="46" fill="#3A4556"/>
               <g>
@@ -50,10 +56,16 @@ export const prerender = true
         </div>
 
         <!-- Right Black -->
-        <div class="bg-white p-6 rounded-lg shadow-lg">
+        <div class="bg-white p-6 rounded-lg shadow-lg overflow-visible">
           <h3 class="text-lg font-semibold mb-4 text-center">Right Black</h3>
-          <svg width="500" height="750" viewBox="0 0 500 750" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
-            <g transform="matrix(0.9, 0.1, 0.32, 1.05, 50, 40)">
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, 0.1, 0.32, 1.05, 80, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 0 50 L -10 50 L -10 680 L 0 680 L 0 50 Z" fill="#1A1F2E" opacity="0.8"/>
+                <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -10 0, -10 50 L 0 50 Z" fill="#14181F" opacity="0.7"/>
+                <path d="M 0 630 L -10 630 Q -10 680, 40 680 L 50 680 Q 0 680, 0 630 Z" fill="#14181F" opacity="0.7"/>
+              </g>
               <rect x="0" y="0" width="340" height="680" rx="50" fill="#2D3748"/>
               <rect x="4" y="4" width="332" height="672" rx="46" fill="#3A4556"/>
               <g>
@@ -80,10 +92,16 @@ export const prerender = true
         </div>
 
         <!-- Left White -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg overflow-visible">
           <h3 class="text-lg font-semibold mb-4 text-center text-white">Left White</h3>
-          <svg width="500" height="750" viewBox="0 0 500 750" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
-            <g transform="matrix(0.9, -0.1, -0.32, 1.05, 100, 40)">
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, -0.1, -0.32, 1.05, 140, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 340 50 L 350 50 L 350 680 L 340 680 L 340 50 Z" fill="#B8BABE" opacity="0.9"/>
+                <path d="M 340 50 Q 340 0, 290 0 L 300 0 Q 350 0, 350 50 L 340 50 Z" fill="#A0A4A8" opacity="0.8"/>
+                <path d="M 340 630 L 350 630 Q 350 680, 300 680 L 290 680 Q 340 680, 340 630 Z" fill="#A0A4A8" opacity="0.8"/>
+              </g>
               <rect x="0" y="0" width="340" height="680" rx="50" fill="#E5E7EB"/>
               <rect x="4" y="4" width="332" height="672" rx="46" fill="#F3F4F6"/>
               <g>
@@ -110,10 +128,16 @@ export const prerender = true
         </div>
 
         <!-- Right White -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg overflow-visible">
           <h3 class="text-lg font-semibold mb-4 text-center text-white">Right White</h3>
-          <svg width="500" height="750" viewBox="0 0 500 750" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
-            <g transform="matrix(0.9, 0.1, 0.32, 1.05, 50, 40)">
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, 0.1, 0.32, 1.05, 80, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 0 50 L -10 50 L -10 680 L 0 680 L 0 50 Z" fill="#B8BABE" opacity="0.9"/>
+                <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -10 0, -10 50 L 0 50 Z" fill="#A0A4A8" opacity="0.8"/>
+                <path d="M 0 630 L -10 630 Q -10 680, 40 680 L 50 680 Q 0 680, 0 630 Z" fill="#A0A4A8" opacity="0.8"/>
+              </g>
               <rect x="0" y="0" width="340" height="680" rx="50" fill="#E5E7EB"/>
               <rect x="4" y="4" width="332" height="672" rx="46" fill="#F3F4F6"/>
               <g>
@@ -143,16 +167,22 @@ export const prerender = true
     </section>
 
     <!-- Section 2: Phones WITH Images -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-      <h2 class="text-3xl font-bold mb-8 text-center">With Images (/splitdo/2.PNG)</h2>
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 overflow-visible">
+      <h2 class="text-3xl font-bold mb-8 text-center">With Images (/APP.webp)</h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 overflow-visible">
 
         <!-- Left Black with Image -->
-        <div class="bg-white p-6 rounded-lg shadow-lg">
+        <div class="bg-white p-6 rounded-lg shadow-lg overflow-visible">
           <h3 class="text-lg font-semibold mb-4 text-center">Left Black + Image</h3>
-          <svg width="500" height="750" viewBox="0 0 500 750" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
-            <g transform="matrix(0.9, -0.1, -0.32, 1.05, 100, 40)">
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, -0.1, -0.32, 1.05, 140, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 340 50 L 350 50 L 350 680 L 340 680 L 340 50 Z" fill="#1A1F2E" opacity="0.8"/>
+                <path d="M 340 50 Q 340 0, 290 0 L 300 0 Q 350 0, 350 50 L 340 50 Z" fill="#14181F" opacity="0.7"/>
+                <path d="M 340 630 L 350 630 Q 350 680, 300 680 L 290 680 Q 340 680, 340 630 Z" fill="#14181F" opacity="0.7"/>
+              </g>
               <rect x="0" y="0" width="340" height="680" rx="50" fill="#2D3748"/>
               <rect x="4" y="4" width="332" height="672" rx="46" fill="#3A4556"/>
               <g>
@@ -166,7 +196,7 @@ export const prerender = true
                   y="12"
                   width="316"
                   height="656"
-                  href="/splitdo/2.PNG"
+                  href="/APP.webp"
                   preserveAspectRatio="xMidYMid slice"
                   mask="url(#screen-mask-left-black-img)"
                 />
@@ -188,10 +218,16 @@ export const prerender = true
         </div>
 
         <!-- Right Black with Image -->
-        <div class="bg-white p-6 rounded-lg shadow-lg">
+        <div class="bg-white p-6 rounded-lg shadow-lg overflow-visible">
           <h3 class="text-lg font-semibold mb-4 text-center">Right Black + Image</h3>
-          <svg width="500" height="750" viewBox="0 0 500 750" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
-            <g transform="matrix(0.9, 0.1, 0.32, 1.05, 50, 40)">
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, 0.1, 0.32, 1.05, 80, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 0 50 L -10 50 L -10 680 L 0 680 L 0 50 Z" fill="#1A1F2E" opacity="0.8"/>
+                <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -10 0, -10 50 L 0 50 Z" fill="#14181F" opacity="0.7"/>
+                <path d="M 0 630 L -10 630 Q -10 680, 40 680 L 50 680 Q 0 680, 0 630 Z" fill="#14181F" opacity="0.7"/>
+              </g>
               <rect x="0" y="0" width="340" height="680" rx="50" fill="#2D3748"/>
               <rect x="4" y="4" width="332" height="672" rx="46" fill="#3A4556"/>
               <g>
@@ -205,7 +241,7 @@ export const prerender = true
                   y="12"
                   width="316"
                   height="656"
-                  href="/splitdo/2.PNG"
+                  href="/APP.webp"
                   preserveAspectRatio="xMidYMid slice"
                   mask="url(#screen-mask-right-black-img)"
                 />
@@ -227,10 +263,16 @@ export const prerender = true
         </div>
 
         <!-- Left White with Image -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg overflow-visible">
           <h3 class="text-lg font-semibold mb-4 text-center text-white">Left White + Image</h3>
-          <svg width="500" height="750" viewBox="0 0 500 750" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
-            <g transform="matrix(0.9, -0.1, -0.32, 1.05, 100, 40)">
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, -0.1, -0.32, 1.05, 140, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 340 50 L 350 50 L 350 680 L 340 680 L 340 50 Z" fill="#B8BABE" opacity="0.9"/>
+                <path d="M 340 50 Q 340 0, 290 0 L 300 0 Q 350 0, 350 50 L 340 50 Z" fill="#A0A4A8" opacity="0.8"/>
+                <path d="M 340 630 L 350 630 Q 350 680, 300 680 L 290 680 Q 340 680, 340 630 Z" fill="#A0A4A8" opacity="0.8"/>
+              </g>
               <rect x="0" y="0" width="340" height="680" rx="50" fill="#E5E7EB"/>
               <rect x="4" y="4" width="332" height="672" rx="46" fill="#F3F4F6"/>
               <g>
@@ -244,7 +286,7 @@ export const prerender = true
                   y="12"
                   width="316"
                   height="656"
-                  href="/splitdo/2.PNG"
+                  href="/APP.webp"
                   preserveAspectRatio="xMidYMid slice"
                   mask="url(#screen-mask-left-white-img)"
                 />
@@ -266,10 +308,16 @@ export const prerender = true
         </div>
 
         <!-- Right White with Image -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg overflow-visible">
           <h3 class="text-lg font-semibold mb-4 text-center text-white">Right White + Image</h3>
-          <svg width="500" height="750" viewBox="0 0 500 750" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
-            <g transform="matrix(0.9, 0.1, 0.32, 1.05, 50, 40)">
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, 0.1, 0.32, 1.05, 80, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 0 50 L -10 50 L -10 680 L 0 680 L 0 50 Z" fill="#B8BABE" opacity="0.9"/>
+                <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -10 0, -10 50 L 0 50 Z" fill="#A0A4A8" opacity="0.8"/>
+                <path d="M 0 630 L -10 630 Q -10 680, 40 680 L 50 680 Q 0 680, 0 630 Z" fill="#A0A4A8" opacity="0.8"/>
+              </g>
               <rect x="0" y="0" width="340" height="680" rx="50" fill="#E5E7EB"/>
               <rect x="4" y="4" width="332" height="672" rx="46" fill="#F3F4F6"/>
               <g>
@@ -283,7 +331,7 @@ export const prerender = true
                   y="12"
                   width="316"
                   height="656"
-                  href="/splitdo/2.PNG"
+                  href="/APP.webp"
                   preserveAspectRatio="xMidYMid slice"
                   mask="url(#screen-mask-right-white-img)"
                 />
@@ -307,21 +355,27 @@ export const prerender = true
       </div>
     </section>
 
-    <!-- Section 3: Side by Side Comparison -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+    <!-- Section 3: Side by Side Comparison (SWAPPED ORDER - Right then Left to face each other) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 overflow-visible">
       <h2 class="text-3xl font-bold mb-8 text-center">Side-by-Side (Like Hero Image)</h2>
 
-      <div class="flex justify-center items-center gap-8 bg-gradient-to-br from-gray-700 to-gray-900 p-12 rounded-2xl">
+      <div class="flex justify-center items-center gap-8 bg-gradient-to-br from-gray-700 to-gray-900 p-12 rounded-2xl overflow-visible">
 
-        <!-- Left Phone -->
-        <div class="flex-shrink-0">
-          <svg width="500" height="750" viewBox="0 0 500 750" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-64 h-auto">
-            <g transform="matrix(0.9, -0.1, -0.32, 1.05, 100, 40)">
+        <!-- RIGHT Phone FIRST (faces left toward center) -->
+        <div class="flex-shrink-0 overflow-visible">
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-64 h-auto">
+            <g transform="matrix(0.9, 0.1, 0.32, 1.05, 80, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 0 50 L -10 50 L -10 680 L 0 680 L 0 50 Z" fill="#B8BABE" opacity="0.9"/>
+                <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -10 0, -10 50 L 0 50 Z" fill="#A0A4A8" opacity="0.8"/>
+                <path d="M 0 630 L -10 630 Q -10 680, 40 680 L 50 680 Q 0 680, 0 630 Z" fill="#A0A4A8" opacity="0.8"/>
+              </g>
               <rect x="0" y="0" width="340" height="680" rx="50" fill="#E5E7EB"/>
               <rect x="4" y="4" width="332" height="672" rx="46" fill="#F3F4F6"/>
               <g>
                 <rect x="12" y="12" width="316" height="656" rx="42" fill="#000000"/>
-                <mask id="screen-mask-hero-left">
+                <mask id="screen-mask-hero-right">
                   <rect x="12" y="12" width="316" height="656" rx="42" fill="white"/>
                   <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
                 </mask>
@@ -330,9 +384,9 @@ export const prerender = true
                   y="12"
                   width="316"
                   height="656"
-                  href="/splitdo/2.PNG"
+                  href="/APP.webp"
                   preserveAspectRatio="xMidYMid slice"
-                  mask="url(#screen-mask-hero-left)"
+                  mask="url(#screen-mask-hero-right)"
                 />
               </g>
               <g>
@@ -350,15 +404,21 @@ export const prerender = true
           </svg>
         </div>
 
-        <!-- Right Phone -->
-        <div class="flex-shrink-0">
-          <svg width="500" height="750" viewBox="0 0 500 750" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-64 h-auto">
-            <g transform="matrix(0.9, 0.1, 0.32, 1.05, 50, 40)">
+        <!-- LEFT Phone SECOND (faces right toward center) -->
+        <div class="flex-shrink-0 overflow-visible">
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-64 h-auto">
+            <g transform="matrix(0.9, -0.1, -0.32, 1.05, 140, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 340 50 L 350 50 L 350 680 L 340 680 L 340 50 Z" fill="#B8BABE" opacity="0.9"/>
+                <path d="M 340 50 Q 340 0, 290 0 L 300 0 Q 350 0, 350 50 L 340 50 Z" fill="#A0A4A8" opacity="0.8"/>
+                <path d="M 340 630 L 350 630 Q 350 680, 300 680 L 290 680 Q 340 680, 340 630 Z" fill="#A0A4A8" opacity="0.8"/>
+              </g>
               <rect x="0" y="0" width="340" height="680" rx="50" fill="#E5E7EB"/>
               <rect x="4" y="4" width="332" height="672" rx="46" fill="#F3F4F6"/>
               <g>
                 <rect x="12" y="12" width="316" height="656" rx="42" fill="#000000"/>
-                <mask id="screen-mask-hero-right">
+                <mask id="screen-mask-hero-left">
                   <rect x="12" y="12" width="316" height="656" rx="42" fill="white"/>
                   <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
                 </mask>
@@ -367,9 +427,9 @@ export const prerender = true
                   y="12"
                   width="316"
                   height="656"
-                  href="/splitdo/2.PNG"
+                  href="/APP.webp"
                   preserveAspectRatio="xMidYMid slice"
-                  mask="url(#screen-mask-hero-right)"
+                  mask="url(#screen-mask-hero-left)"
                 />
               </g>
               <g>
