@@ -5,11 +5,11 @@
     <!-- 3D Edge/Depth (right side visible) -->
     <g>
       <!-- Right edge of phone (creates 3D depth effect) -->
-      <path d="M 340 50 L 350 50 L 350 650 L 340 650 L 340 50 Z" fill="#B8BABE" opacity="0.9"/>
+      <path d="M 340 50 L 350 50 L 350 630 L 340 630 L 340 50 Z" fill="#B8BABE" opacity="0.9"/>
       <!-- Edge top corner -->
       <path d="M 340 50 Q 340 0, 290 0 L 300 0 Q 350 0, 350 50 L 340 50 Z" fill="#A0A4A8" opacity="0.8"/>
       <!-- Edge bottom corner -->
-      <path d="M 340 630 L 350 630 Q 350 650, 315 650 L 305 650 Q 340 650, 340 630 Z" fill="#A0A4A8" opacity="0.8"/>
+      <path d="M 340 630 L 350 630 A 50 50 0 0 1 300 680 L 290 680 A 50 50 0 0 0 340 630 Z" fill="#A0A4A8" opacity="0.8"/>
     </g>
 
     <!-- Phone outer frame/bezel -->
