@@ -13,19 +13,19 @@
     </g>
 
     <!-- Phone outer frame/bezel -->
-    <rect x="0" y="0" width="340" height="680" rx="50" fill="#2D3748"/>
+    <rect x="0" y="0" width="335" height="680" rx="50" fill="#2D3748"/>
 
     <!-- Inner lighter border -->
-    <rect x="4" y="4" width="332" height="672" rx="46" fill="#3A4556"/>
+    <rect x="4" y="4" width="327" height="672" rx="46" fill="#3A4556"/>
 
     <!-- Screen area (transparent for screenshots) -->
     <g>
       <!-- Main screen background -->
-      <rect x="12" y="12" width="316" height="656" rx="42" fill="#1A202C"/>
+      <rect x="12" y="12" width="311" height="656" rx="42" fill="#1A202C"/>
 
       <!-- Screen content area with notch cutout -->
       <mask id="screen-mask-left">
-        <rect x="12" y="12" width="316" height="656" rx="42" fill="white"/>
+        <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
         <!-- Notch cutout -->
         <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
       </mask>
@@ -34,7 +34,7 @@
       <image
         x="12"
         y="12"
-        width="316"
+        width="311"
         height="656"
         href=""
         preserveAspectRatio="xMidYMid slice"
@@ -42,7 +42,7 @@
       />
 
       <!-- Transparent overlay for compatibility -->
-      <rect x="12" y="12" width="316" height="656" rx="42" fill="transparent" mask="url(#screen-mask-left)"/>
+      <rect x="12" y="12" width="311" height="656" rx="42" fill="transparent" mask="url(#screen-mask-left)"/>
     </g>
 
     <!-- Notch detail -->
@@ -63,7 +63,7 @@
 
     <!-- Side buttons -->
     <!-- Power button (right side) -->
-    <rect x="335" y="150" width="5" height="60" rx="2.5" fill="#1A202C"/>
+    <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#1A202C"/>
 
     <!-- Volume buttons (left side) -->
     <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#1A202C"/>
