@@ -1,0 +1,493 @@
+---
+import Layout from 'src/layouts/Layout.astro';
+
+export const prerender = true
+---
+
+<Layout title="Phone SVG Demo - SplitDo">
+  <main class="bg-gray-100 py-12">
+
+    <!-- Header -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+      <h1 class="text-4xl font-bold text-center mb-4">Angled Phone SVG Demo</h1>
+      <p class="text-center text-gray-600">Testing all angled phone variations with 3D depth!</p>
+    </div>
+
+    <!-- Section 1: Phones WITHOUT Images -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 overflow-visible">
+      <h2 class="text-3xl font-bold mb-8 text-center">Without Images (Empty)</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 overflow-visible">
+
+        <!-- Left Black -->
+        <div class="bg-white p-6 rounded-lg shadow-lg overflow-visible">
+          <h3 class="text-lg font-semibold mb-4 text-center">Left Black</h3>
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, -0.1, -0.32, 1.05, 220, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 335 50 L 350 50 L 350 630 L 335 630 L 335 50 Z" fill="#1A1F2E" opacity="0.8"/>
+                <path d="M 335 50 Q 335 0, 285 0 L 300 0 Q 350 0, 350 50 L 335 50 Z" fill="#14181F" opacity="0.7"/>
+                <path d="M 335 630 L 350 630 A 50 50 0 0 1 300 680 L 285 680 A 50 50 0 0 0 335 630 Z" fill="#14181F" opacity="0.7"/>
+              </g>
+              <rect x="0" y="0" width="335" height="680" rx="50" fill="#2D3748"/>
+              <rect x="4" y="4" width="327" height="672" rx="46" fill="#3A4556"/>
+              <g>
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="#1A202C"/>
+                <mask id="screen-mask-left-black-empty">
+                  <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
+                  <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+                </mask>
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="transparent" mask="url(#screen-mask-left-black-empty)"/>
+              </g>
+              <g>
+                <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#2D3748"/>
+                <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#1A1F2E"/>
+                <rect x="155" y="18" width="30" height="4" rx="2" fill="#0F1419"/>
+                <circle cx="180" cy="20" r="4.5" fill="#0F1419"/>
+                <circle cx="180" cy="20" r="2.5" fill="#1E293B"/>
+              </g>
+              <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#1A202C"/>
+              <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#1A202C"/>
+              <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#1A202C"/>
+              <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#1A202C"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Right Black -->
+        <div class="bg-white p-6 rounded-lg shadow-lg overflow-visible">
+          <h3 class="text-lg font-semibold mb-4 text-center">Right Black</h3>
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, 0.1, 0.32, 1.05, 80, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 0 50 L -15 50 L -15 630 L 0 630 L 0 50 Z" fill="#1A1F2E" opacity="0.8"/>
+                <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -15 0, -15 50 L 0 50 Z" fill="#14181F" opacity="0.7"/>
+                <path d="M 0 630 L -15 630 A 50 50 0 0 0 40 680 L 55 680 A 50 50 0 0 1 0 630 Z" fill="#14181F" opacity="0.7"/>
+              </g>
+              <rect x="0" y="0" width="335" height="680" rx="50" fill="#2D3748"/>
+              <rect x="4" y="4" width="327" height="672" rx="46" fill="#3A4556"/>
+              <g>
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="#1A202C"/>
+                <mask id="screen-mask-right-black-empty">
+                  <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
+                  <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+                </mask>
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="transparent" mask="url(#screen-mask-right-black-empty)"/>
+              </g>
+              <g>
+                <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#2D3748"/>
+                <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#1A1F2E"/>
+                <rect x="155" y="18" width="30" height="4" rx="2" fill="#0F1419"/>
+                <circle cx="180" cy="20" r="4.5" fill="#0F1419"/>
+                <circle cx="180" cy="20" r="2.5" fill="#1E293B"/>
+              </g>
+              <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#1A202C"/>
+              <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#1A202C"/>
+              <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#1A202C"/>
+              <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#1A202C"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Left White -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg overflow-visible">
+          <h3 class="text-lg font-semibold mb-4 text-center text-white">Left White</h3>
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, -0.1, -0.32, 1.05, 220, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 335 50 L 350 50 L 350 630 L 335 630 L 335 50 Z" fill="#B8BABE" opacity="0.9"/>
+                <path d="M 335 50 Q 335 0, 285 0 L 300 0 Q 350 0, 350 50 L 335 50 Z" fill="#A0A4A8" opacity="0.8"/>
+                <path d="M 335 630 L 350 630 A 50 50 0 0 1 300 680 L 285 680 A 50 50 0 0 0 335 630 Z" fill="#A0A4A8" opacity="0.8"/>
+              </g>
+              <rect x="0" y="0" width="335" height="680" rx="50" fill="#E5E7EB"/>
+              <rect x="4" y="4" width="327" height="672" rx="46" fill="#F3F4F6"/>
+              <g>
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="#000000"/>
+                <mask id="screen-mask-left-white-empty">
+                  <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
+                  <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+                </mask>
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="transparent" mask="url(#screen-mask-left-white-empty)"/>
+              </g>
+              <g>
+                <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#E5E7EB"/>
+                <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#D1D5DB"/>
+                <rect x="155" y="18" width="30" height="4" rx="2" fill="#9CA3AF"/>
+                <circle cx="180" cy="20" r="4.5" fill="#9CA3AF"/>
+                <circle cx="180" cy="20" r="2.5" fill="#6B7280"/>
+              </g>
+              <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#D1D5DB"/>
+              <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+              <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+              <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#D1D5DB"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Right White -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg overflow-visible">
+          <h3 class="text-lg font-semibold mb-4 text-center text-white">Right White</h3>
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, 0.1, 0.32, 1.05, 80, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 0 50 L -15 50 L -15 630 L 0 630 L 0 50 Z" fill="#B8BABE" opacity="0.9"/>
+                <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -15 0, -15 50 L 0 50 Z" fill="#A0A4A8" opacity="0.8"/>
+                <path d="M 0 630 L -15 630 A 50 50 0 0 0 40 680 L 55 680 A 50 50 0 0 1 0 630 Z" fill="#A0A4A8" opacity="0.8"/>
+              </g>
+              <rect x="0" y="0" width="335" height="680" rx="50" fill="#E5E7EB"/>
+              <rect x="4" y="4" width="327" height="672" rx="46" fill="#F3F4F6"/>
+              <g>
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="#000000"/>
+                <mask id="screen-mask-right-white-empty">
+                  <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
+                  <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+                </mask>
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="transparent" mask="url(#screen-mask-right-white-empty)"/>
+              </g>
+              <g>
+                <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#E5E7EB"/>
+                <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#D1D5DB"/>
+                <rect x="155" y="18" width="30" height="4" rx="2" fill="#9CA3AF"/>
+                <circle cx="180" cy="20" r="4.5" fill="#9CA3AF"/>
+                <circle cx="180" cy="20" r="2.5" fill="#6B7280"/>
+              </g>
+              <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#D1D5DB"/>
+              <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+              <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+              <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#D1D5DB"/>
+            </g>
+          </svg>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Section 2: Phones WITH Images -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 overflow-visible">
+      <h2 class="text-3xl font-bold mb-8 text-center">With Images (/APP.webp)</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 overflow-visible">
+
+        <!-- Left Black with Image -->
+        <div class="bg-white p-6 rounded-lg shadow-lg overflow-visible">
+          <h3 class="text-lg font-semibold mb-4 text-center">Left Black + Image</h3>
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, -0.1, -0.32, 1.05, 220, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 335 50 L 350 50 L 350 630 L 335 630 L 335 50 Z" fill="#1A1F2E" opacity="0.8"/>
+                <path d="M 335 50 Q 335 0, 285 0 L 300 0 Q 350 0, 350 50 L 335 50 Z" fill="#14181F" opacity="0.7"/>
+                <path d="M 335 630 L 350 630 A 50 50 0 0 1 300 680 L 285 680 A 50 50 0 0 0 335 630 Z" fill="#14181F" opacity="0.7"/>
+              </g>
+              <rect x="0" y="0" width="335" height="680" rx="50" fill="#2D3748"/>
+              <rect x="4" y="4" width="327" height="672" rx="46" fill="#3A4556"/>
+              <g>
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="#1A202C"/>
+                <mask id="screen-mask-left-black-img">
+                  <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
+                  <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+                </mask>
+                <image
+                  x="12"
+                  y="12"
+                  width="311"
+                  height="656"
+                  href="/APP.webp"
+                  preserveAspectRatio="xMidYMid slice"
+                  mask="url(#screen-mask-left-black-img)"
+                />
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="transparent" mask="url(#screen-mask-left-black-img)"/>
+              </g>
+              <g>
+                <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#2D3748"/>
+                <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#1A1F2E"/>
+                <rect x="155" y="18" width="30" height="4" rx="2" fill="#0F1419"/>
+                <circle cx="180" cy="20" r="4.5" fill="#0F1419"/>
+                <circle cx="180" cy="20" r="2.5" fill="#1E293B"/>
+              </g>
+              <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#1A202C"/>
+              <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#1A202C"/>
+              <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#1A202C"/>
+              <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#1A202C"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Right Black with Image -->
+        <div class="bg-white p-6 rounded-lg shadow-lg overflow-visible">
+          <h3 class="text-lg font-semibold mb-4 text-center">Right Black + Image</h3>
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, 0.1, 0.32, 1.05, 80, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 0 50 L -15 50 L -15 630 L 0 630 L 0 50 Z" fill="#1A1F2E" opacity="0.8"/>
+                <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -15 0, -15 50 L 0 50 Z" fill="#14181F" opacity="0.7"/>
+                <path d="M 0 630 L -15 630 A 50 50 0 0 0 40 680 L 55 680 A 50 50 0 0 1 0 630 Z" fill="#14181F" opacity="0.7"/>
+              </g>
+              <rect x="0" y="0" width="335" height="680" rx="50" fill="#2D3748"/>
+              <rect x="4" y="4" width="327" height="672" rx="46" fill="#3A4556"/>
+              <g>
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="#1A202C"/>
+                <mask id="screen-mask-right-black-img">
+                  <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
+                  <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+                </mask>
+                <image
+                  x="12"
+                  y="12"
+                  width="311"
+                  height="656"
+                  href="/APP.webp"
+                  preserveAspectRatio="xMidYMid slice"
+                  mask="url(#screen-mask-right-black-img)"
+                />
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="transparent" mask="url(#screen-mask-right-black-img)"/>
+              </g>
+              <g>
+                <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#2D3748"/>
+                <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#1A1F2E"/>
+                <rect x="155" y="18" width="30" height="4" rx="2" fill="#0F1419"/>
+                <circle cx="180" cy="20" r="4.5" fill="#0F1419"/>
+                <circle cx="180" cy="20" r="2.5" fill="#1E293B"/>
+              </g>
+              <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#1A202C"/>
+              <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#1A202C"/>
+              <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#1A202C"/>
+              <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#1A202C"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Left White with Image -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg overflow-visible">
+          <h3 class="text-lg font-semibold mb-4 text-center text-white">Left White + Image</h3>
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, -0.1, -0.32, 1.05, 220, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 335 50 L 350 50 L 350 630 L 335 630 L 335 50 Z" fill="#B8BABE" opacity="0.9"/>
+                <path d="M 335 50 Q 335 0, 285 0 L 300 0 Q 350 0, 350 50 L 335 50 Z" fill="#A0A4A8" opacity="0.8"/>
+                <path d="M 335 630 L 350 630 A 50 50 0 0 1 300 680 L 285 680 A 50 50 0 0 0 335 630 Z" fill="#A0A4A8" opacity="0.8"/>
+              </g>
+              <rect x="0" y="0" width="335" height="680" rx="50" fill="#E5E7EB"/>
+              <rect x="4" y="4" width="327" height="672" rx="46" fill="#F3F4F6"/>
+              <g>
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="#000000"/>
+                <mask id="screen-mask-left-white-img">
+                  <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
+                  <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+                </mask>
+                <image
+                  x="12"
+                  y="12"
+                  width="311"
+                  height="656"
+                  href="/APP.webp"
+                  preserveAspectRatio="xMidYMid slice"
+                  mask="url(#screen-mask-left-white-img)"
+                />
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="transparent" mask="url(#screen-mask-left-white-img)"/>
+              </g>
+              <g>
+                <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#E5E7EB"/>
+                <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#D1D5DB"/>
+                <rect x="155" y="18" width="30" height="4" rx="2" fill="#9CA3AF"/>
+                <circle cx="180" cy="20" r="4.5" fill="#9CA3AF"/>
+                <circle cx="180" cy="20" r="2.5" fill="#6B7280"/>
+              </g>
+              <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#D1D5DB"/>
+              <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+              <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+              <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#D1D5DB"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Right White with Image -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg overflow-visible">
+          <h3 class="text-lg font-semibold mb-4 text-center text-white">Right White + Image</h3>
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+            <g transform="matrix(0.9, 0.1, 0.32, 1.05, 80, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 0 50 L -15 50 L -15 630 L 0 630 L 0 50 Z" fill="#B8BABE" opacity="0.9"/>
+                <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -15 0, -15 50 L 0 50 Z" fill="#A0A4A8" opacity="0.8"/>
+                <path d="M 0 630 L -15 630 A 50 50 0 0 0 40 680 L 55 680 A 50 50 0 0 1 0 630 Z" fill="#A0A4A8" opacity="0.8"/>
+              </g>
+              <rect x="0" y="0" width="335" height="680" rx="50" fill="#E5E7EB"/>
+              <rect x="4" y="4" width="327" height="672" rx="46" fill="#F3F4F6"/>
+              <g>
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="#000000"/>
+                <mask id="screen-mask-right-white-img">
+                  <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
+                  <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+                </mask>
+                <image
+                  x="12"
+                  y="12"
+                  width="311"
+                  height="656"
+                  href="/APP.webp"
+                  preserveAspectRatio="xMidYMid slice"
+                  mask="url(#screen-mask-right-white-img)"
+                />
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="transparent" mask="url(#screen-mask-right-white-img)"/>
+              </g>
+              <g>
+                <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#E5E7EB"/>
+                <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#D1D5DB"/>
+                <rect x="155" y="18" width="30" height="4" rx="2" fill="#9CA3AF"/>
+                <circle cx="180" cy="20" r="4.5" fill="#9CA3AF"/>
+                <circle cx="180" cy="20" r="2.5" fill="#6B7280"/>
+              </g>
+              <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#D1D5DB"/>
+              <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+              <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+              <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#D1D5DB"/>
+            </g>
+          </svg>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Section 3: Side by Side Comparison (SWAPPED ORDER - Right then Left to face each other) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 overflow-visible">
+      <h2 class="text-3xl font-bold mb-8 text-center">Side-by-Side (Like Hero Image)</h2>
+
+      <div class="relative p-12 rounded-2xl overflow-visible"
+           style="background: linear-gradient(to bottom right, #6b4e3d, #564740, #304445);">
+
+        <!-- Content container -->
+        <div class="flex flex-col items-center gap-8 relative">
+
+          <!-- Phones container -->
+          <div class="flex justify-center items-center gap-8 overflow-visible relative">
+
+            <!-- RIGHT Phone FIRST (faces left toward center) -->
+            <div class="flex-shrink-0 overflow-visible">
+          <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-80 h-auto">
+            <g transform="matrix(0.9, 0.1, 0.32, 1.05, 80, 80)">
+              <!-- 3D Edge -->
+              <g>
+                <path d="M 0 50 L -15 50 L -15 630 L 0 630 L 0 50 Z" fill="#B8BABE" opacity="0.9"/>
+                <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -15 0, -15 50 L 0 50 Z" fill="#A0A4A8" opacity="0.8"/>
+                <path d="M 0 630 L -15 630 A 50 50 0 0 0 40 680 L 55 680 A 50 50 0 0 1 0 630 Z" fill="#A0A4A8" opacity="0.8"/>
+              </g>
+              <rect x="0" y="0" width="335" height="680" rx="50" fill="#E5E7EB"/>
+              <rect x="4" y="4" width="327" height="672" rx="46" fill="#F3F4F6"/>
+              <g>
+                <rect x="12" y="12" width="311" height="656" rx="42" fill="#000000"/>
+                <mask id="screen-mask-hero-right">
+                  <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
+                  <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+                </mask>
+                <image
+                  x="12"
+                  y="12"
+                  width="311"
+                  height="656"
+                  href="/APP.webp"
+                  preserveAspectRatio="xMidYMid slice"
+                  mask="url(#screen-mask-hero-right)"
+                />
+              </g>
+              <g>
+                <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#E5E7EB"/>
+                <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#D1D5DB"/>
+                <rect x="155" y="18" width="30" height="4" rx="2" fill="#9CA3AF"/>
+                <circle cx="180" cy="20" r="4.5" fill="#9CA3AF"/>
+                <circle cx="180" cy="20" r="2.5" fill="#6B7280"/>
+              </g>
+              <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#D1D5DB"/>
+              <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+              <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+              <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#D1D5DB"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- SWOOSH in the middle -->
+        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
+          <svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-64 h-64 opacity-90">
+            <image
+              x="0"
+              y="0"
+              width="300"
+              height="300"
+              href="/splitdo/Swoosh.webp"
+              preserveAspectRatio="xMidYMid meet"
+            />
+          </svg>
+        </div>
+
+            <!-- LEFT Phone SECOND (faces right toward center) -->
+            <div class="flex-shrink-0 overflow-visible">
+              <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-80 h-auto">
+                <g transform="matrix(0.9, -0.1, -0.32, 1.05, 220, 80)">
+                  <!-- 3D Edge -->
+                  <g>
+                    <path d="M 335 50 L 350 50 L 350 630 L 335 630 L 335 50 Z" fill="#B8BABE" opacity="0.9"/>
+                    <path d="M 335 50 Q 335 0, 285 0 L 300 0 Q 350 0, 350 50 L 335 50 Z" fill="#A0A4A8" opacity="0.8"/>
+                    <path d="M 335 630 L 350 630 A 50 50 0 0 1 300 680 L 285 680 A 50 50 0 0 0 335 630 Z" fill="#A0A4A8" opacity="0.8"/>
+                  </g>
+                  <rect x="0" y="0" width="335" height="680" rx="50" fill="#E5E7EB"/>
+                  <rect x="4" y="4" width="327" height="672" rx="46" fill="#F3F4F6"/>
+                  <g>
+                    <rect x="12" y="12" width="311" height="656" rx="42" fill="#000000"/>
+                    <mask id="screen-mask-hero-left">
+                      <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
+                      <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+                    </mask>
+                    <image
+                      x="12"
+                      y="12"
+                      width="311"
+                      height="656"
+                      href="/APP.webp"
+                      preserveAspectRatio="xMidYMid slice"
+                      mask="url(#screen-mask-hero-left)"
+                    />
+                  </g>
+                  <g>
+                    <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#E5E7EB"/>
+                    <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#D1D5DB"/>
+                    <rect x="155" y="18" width="30" height="4" rx="2" fill="#9CA3AF"/>
+                    <circle cx="180" cy="20" r="4.5" fill="#9CA3AF"/>
+                    <circle cx="180" cy="20" r="2.5" fill="#6B7280"/>
+                  </g>
+                  <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#D1D5DB"/>
+                  <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+                  <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+                  <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#D1D5DB"/>
+                </g>
+              </svg>
+            </div>
+
+          </div>
+
+          <!-- Logo and Text at the bottom (matching hero image layout) -->
+          <div class="flex items-center justify-center gap-6 -mt-8">
+            <!-- Logo on the left -->
+            <img src="/splitdo/logo.svg" alt="SplitDo Logo" class="h-40 w-auto flex-shrink-0">
+
+            <!-- Text on the right, centered -->
+            <div class="flex flex-col items-center text-center">
+              <h2 class="text-5xl lg:text-6xl font-extrabold text-[#f07d40] leading-tight tracking-wider">
+                Split Bills.
+              </h2>
+              <h2 class="text-5xl lg:text-6xl font-extrabold text-[#47a49e] leading-tight tracking-wider">
+                Settle Instantly.
+              </h2>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>

@@ -1,0 +1,76 @@
+<svg width="500" height="750" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Angled phone - tilted left for right side placement -->
+  <g transform="matrix(0.9, 0.1, 0.32, 1.05, 80, 80)">
+
+    <!-- 3D Edge/Depth (left side visible) -->
+    <g>
+      <!-- Left edge of phone (creates 3D depth effect) -->
+      <path d="M 0 50 L -15 50 L -15 630 L 0 630 L 0 50 Z" fill="#1A1F2E" opacity="0.8"/>
+      <!-- Edge top corner -->
+      <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -15 0, -15 50 L 0 50 Z" fill="#14181F" opacity="0.7"/>
+      <!-- Edge bottom corner -->
+      <path d="M 0 630 L -15 630 A 50 50 0 0 0 40 680 L 55 680 A 50 50 0 0 1 0 630 Z" fill="#14181F" opacity="0.7"/>
+    </g>
+
+    <!-- Phone outer frame/bezel -->
+    <rect x="0" y="0" width="340" height="680" rx="50" fill="#2D3748"/>
+
+    <!-- Inner lighter border -->
+    <rect x="4" y="4" width="332" height="672" rx="46" fill="#3A4556"/>
+
+    <!-- Screen area (transparent for screenshots) -->
+    <g>
+      <!-- Main screen background -->
+      <rect x="12" y="12" width="316" height="656" rx="42" fill="#1A202C"/>
+
+      <!-- Screen content area with notch cutout -->
+      <mask id="screen-mask-right">
+        <rect x="12" y="12" width="316" height="656" rx="42" fill="white"/>
+        <!-- Notch cutout -->
+        <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+      </mask>
+
+      <!-- Image placeholder - replace href with your screenshot -->
+      <image
+        x="12"
+        y="12"
+        width="316"
+        height="656"
+        href=""
+        preserveAspectRatio="xMidYMid slice"
+        mask="url(#screen-mask-right)"
+      />
+
+      <!-- Transparent overlay for compatibility -->
+      <rect x="12" y="12" width="316" height="656" rx="42" fill="transparent" mask="url(#screen-mask-right)"/>
+    </g>
+
+    <!-- Notch detail -->
+    <g>
+      <!-- Notch outer shape -->
+      <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#2D3748"/>
+
+      <!-- Notch inner dark area -->
+      <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#1A1F2E"/>
+
+      <!-- Speaker grille -->
+      <rect x="155" y="18" width="30" height="4" rx="2" fill="#0F1419"/>
+
+      <!-- Front camera -->
+      <circle cx="180" cy="20" r="4.5" fill="#0F1419"/>
+      <circle cx="180" cy="20" r="2.5" fill="#1E293B"/>
+    </g>
+
+    <!-- Side buttons -->
+    <!-- Power button (right side) -->
+    <rect x="335" y="150" width="5" height="60" rx="2.5" fill="#1A202C"/>
+
+    <!-- Volume buttons (left side) -->
+    <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#1A202C"/>
+    <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#1A202C"/>
+
+    <!-- Silent switch (left side) -->
+    <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#1A202C"/>
+
+  </g>
+</svg>
