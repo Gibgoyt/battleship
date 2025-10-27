@@ -366,21 +366,34 @@ export const prerender = true
         <div class="flex flex-row items-start justify-between gap-12 relative">
 
           <!-- Left side: Logo and Text -->
-          <div class="flex-1 flex flex-col items-start justify-center gap-8">
+          <div class="flex-1 flex flex-col items-start justify-center gap-8 mt-12">
             <!-- Logo -->
             <img src="/splitdo/logo.svg" alt="SplitDo Logo" class="h-32 w-auto">
 
             <!-- Text -->
             <div class="flex flex-col gap-2">
-              <h2 class="text-4xl lg:text-5xl font-extrabold text-[#f07d40] tracking-wider">
+              <h2 class="text-6xl lg:text-7xl font-extrabold text-[#f07d40] tracking-wider">
                 Split Bills Instantly.
               </h2>
-              <h2 class="text-4xl lg:text-5xl font-extrabold text-[#47a49e] tracking-wider">
+              <h2 class="text-6xl lg:text-7xl font-extrabold text-[#47a49e] tracking-wider">
                 Settle Up on Solana.
               </h2>
               <p class="text-3xl lg:text-4xl mt-4 leading-loose"></p>
                The fastest way to split expenses and settle balances. <br> Powered by Solana for near-zero fees and instant transfer.
               </p>
+            </div>
+               <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                
+                <a href="/groups/new" 
+                   class="px-4 py-2 text-white dark:text-gray-200 text-lg font-semibold rounded-xl transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform"
+                   style="background-color: var(--color-primary); hover-bg-color: #f07d40;">
+                    Start Splitting Bills (It's Free)
+                </a>
+                
+                <a href="/how-it-works" 
+                   class="px-8 py-4 bg-white dark:bg-gray-200 text-black text-lg font-medium rounded-xl hover:white dark:hover:bg-gray-200 transition-colors shadow-lg hover:shadow-xl border border-gray-300 transform hover:scale-105 transition-transform">
+                    Learn How It Works
+                </a>
             </div>
           </div>
 
@@ -388,8 +401,8 @@ export const prerender = true
           <div class="flex-1 relative flex justify-center items-center overflow-visible" style="height: 600px;">
 
             <!-- RIGHT Phone (back phone, front-facing) -->
-            <div class="absolute overflow-visible" style="right: 200px; top: 120px; z-index: 1;">
-              <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-80 h-auto">
+            <div class="absolute overflow-visible" style="right: 0px; top: 80px; z-index: 1;">
+              <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-100 h-auto">
                 <g transform="matrix(0.95, 0.08, 0.25, 1.05, 80, 80)">
                   <!-- 3D Edge -->
                   <g>
@@ -431,8 +444,8 @@ export const prerender = true
             </div>
 
             <!-- LEFT Phone (front phone, angled left) -->
-            <div class="absolute overflow-visible" style="left: 20px; top: 40px; z-index: 0;">
-              <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-80 h-auto">
+            <div class="absolute overflow-visible" style="left: 180px; top: 40px; z-index: 0;">
+              <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-100 h-auto">
                 <g transform="matrix(0.9, -0.08, -0.15, 1.05, 200, 80)">
                   <!-- 3D Edge -->
                   <g>
@@ -471,6 +484,7 @@ export const prerender = true
                   <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#D1D5DB"/>
                 </g>
               </svg>
+              
             </div>
 
           </div>
