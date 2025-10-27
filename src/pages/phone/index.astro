@@ -365,18 +365,18 @@ export const prerender = true
         <!-- Content container -->
         <div class="flex flex-col items-center gap-8 relative">
 
-          <!-- Phones container - overlapping phones facing left -->
+          <!-- Phones container - two phones -->
           <div class="relative flex justify-center items-center overflow-visible" style="height: 600px; width: 600px; margin: 0 auto;">
 
-            <!-- RIGHT Phone (back phone, more angled) -->
-            <div class="absolute overflow-visible" style="right: 80px; top: 50px; z-index: 1;">
+            <!-- RIGHT Phone (back phone, front-facing) -->
+            <div class="absolute overflow-visible" style="right: 200px; top: 120px; z-index: 1;">
               <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-80 h-auto">
-                <g transform="matrix(0.85, -0.15, -0.4, 1.1, 250, 60)">
+                <g transform="matrix(0.95, 0.08, 0.25, 1.05, 80, 80)">
                   <!-- 3D Edge -->
                   <g>
-                    <path d="M 335 50 L 350 50 L 350 630 L 335 630 L 335 50 Z" fill="#B8BABE" opacity="0.9"/>
-                    <path d="M 335 50 Q 335 0, 285 0 L 300 0 Q 350 0, 350 50 L 335 50 Z" fill="#A0A4A8" opacity="0.8"/>
-                    <path d="M 335 630 L 350 630 A 50 50 0 0 1 300 680 L 285 680 A 50 50 0 0 0 335 630 Z" fill="#A0A4A8" opacity="0.8"/>
+                    <path d="M 0 50 L -15 50 L -15 630 L 0 630 L 0 50 Z" fill="#B8BABE" opacity="0.9"/>
+                    <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -15 0, -15 50 L 0 50 Z" fill="#A0A4A8" opacity="0.8"/>
+                    <path d="M 0 630 L -15 630 A 50 50 0 0 0 40 680 L 55 680 A 50 50 0 0 1 0 630 Z" fill="#A0A4A8" opacity="0.8"/>
                   </g>
                   <rect x="0" y="0" width="335" height="680" rx="50" fill="#E5E7EB"/>
                   <rect x="4" y="4" width="327" height="672" rx="46" fill="#F3F4F6"/>
@@ -411,24 +411,10 @@ export const prerender = true
               </svg>
             </div>
 
-            <!-- SWOOSH in the middle -->
-            <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
-              <svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-64 h-64 opacity-90">
-                <image
-                  x="0"
-                  y="0"
-                  width="300"
-                  height="300"
-                  href="/splitdo/Swoosh.webp"
-                  preserveAspectRatio="xMidYMid meet"
-                />
-              </svg>
-            </div>
-
-            <!-- LEFT Phone (front phone, less angled, overlapping the right phone) -->
-            <div class="absolute overflow-visible" style="left: 100px; top: 100px; z-index: 2;">
+            <!-- LEFT Phone (front phone, angled left) -->
+            <div class="absolute overflow-visible" style="left: 120px; top: 40px; z-index: 0;">
               <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-80 h-auto">
-                <g transform="matrix(0.9, -0.08, -0.25, 1.05, 200, 80)">
+                <g transform="matrix(0.9, -0.08, -0.15, 1.05, 200, 80)">
                   <!-- 3D Edge -->
                   <g>
                     <path d="M 335 50 L 350 50 L 350 630 L 335 630 L 335 50 Z" fill="#B8BABE" opacity="0.9"/>
