@@ -359,7 +359,7 @@ export const prerender = true
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 overflow-visible">
       <h2 class="text-3xl font-bold mb-8 text-center">Side-by-Side (Like Hero Image)</h2>
 
-      <div class="flex justify-center items-center gap-8 bg-gradient-to-br from-gray-700 to-gray-900 p-12 rounded-2xl overflow-visible">
+      <div class="flex justify-center items-center gap-8 bg-gradient-to-br from-gray-700 to-gray-900 p-12 rounded-2xl overflow-visible relative">
 
         <!-- RIGHT Phone FIRST (faces left toward center) -->
         <div class="flex-shrink-0 overflow-visible">
@@ -401,6 +401,20 @@ export const prerender = true
               <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
               <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#D1D5DB"/>
             </g>
+          </svg>
+        </div>
+
+        <!-- SWOOSH in the middle -->
+        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
+          <svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-64 h-64 opacity-90">
+            <image
+              x="0"
+              y="0"
+              width="300"
+              height="300"
+              href="/splitdo/Swoosh.webp"
+              preserveAspectRatio="xMidYMid meet"
+            />
           </svg>
         </div>
 
