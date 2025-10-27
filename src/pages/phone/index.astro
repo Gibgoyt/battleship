@@ -355,18 +355,37 @@ export const prerender = true
       </div>
     </section>
 
-    <!-- Section 3: Side by Side Comparison (SWAPPED ORDER - Right then Left to face each other) -->
+    <!-- Section 3: Side by Side Comparison (Text Left, Phones Right) -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 overflow-visible">
-      <h2 class="text-3xl font-bold mb-8 text-center">Side-by-Side (Like Hero Image)</h2>
+      <h2 class="text-3xl font-bold mb-8 text-center">Side-by-Side (Text Left, Phones Right)</h2>
 
       <div class="relative p-12 rounded-2xl overflow-visible"
            style="background: linear-gradient(to bottom right, #6b4e3d, #564740, #304445);">
 
-        <!-- Content container -->
-        <div class="flex flex-col items-center gap-8 relative">
+        <!-- Content container - Flex row with text left and phones right -->
+        <div class="flex flex-row items-start justify-between gap-12 relative">
 
-          <!-- Phones container - two phones -->
-          <div class="relative flex justify-center items-center overflow-visible" style="height: 600px; width: 600px; margin: 0 auto;">
+          <!-- Left side: Logo and Text -->
+          <div class="flex-1 flex flex-col items-start justify-center gap-8">
+            <!-- Logo -->
+            <img src="/splitdo/logo.svg" alt="SplitDo Logo" class="h-32 w-auto">
+
+            <!-- Text -->
+            <div class="flex flex-col gap-2">
+              <h2 class="text-4xl lg:text-5xl font-extrabold text-[#f07d40] tracking-wider">
+                Split Bills Instantly.
+              </h2>
+              <h2 class="text-4xl lg:text-5xl font-extrabold text-[#47a49e] tracking-wider">
+                Settle Up on Solana.
+              </h2>
+              <p class="text-3xl lg:text-4xl mt-4 leading-loose"></p>
+               The fastest way to split expenses and settle balances. <br> Powered by Solana for near-zero fees and instant transfer.
+              </p>
+            </div>
+          </div>
+
+          <!-- Right side: Phones container - two phones -->
+          <div class="flex-1 relative flex justify-center items-center overflow-visible" style="height: 600px;">
 
             <!-- RIGHT Phone (back phone, front-facing) -->
             <div class="absolute overflow-visible" style="right: 200px; top: 120px; z-index: 1;">
@@ -412,7 +431,7 @@ export const prerender = true
             </div>
 
             <!-- LEFT Phone (front phone, angled left) -->
-            <div class="absolute overflow-visible" style="left: 120px; top: 40px; z-index: 0;">
+            <div class="absolute overflow-visible" style="left: 20px; top: 40px; z-index: 0;">
               <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-80 h-auto">
                 <g transform="matrix(0.9, -0.08, -0.15, 1.05, 200, 80)">
                   <!-- 3D Edge -->
@@ -454,22 +473,6 @@ export const prerender = true
               </svg>
             </div>
 
-          </div>
-
-          <!-- Logo and Text at the bottom (matching hero image layout) -->
-          <div class="flex items-center justify-center gap-6 -mt-8">
-            <!-- Logo on the left -->
-            <img src="/splitdo/logo.svg" alt="SplitDo Logo" class="h-40 w-auto flex-shrink-0">
-
-            <!-- Text on the right, centered -->
-            <div class="flex flex-col items-center text-center">
-              <h2 class="text-5xl lg:text-6xl font-extrabold text-[#f07d40] leading-tight tracking-wider">
-                Split Bills.
-              </h2>
-              <h2 class="text-5xl lg:text-6xl font-extrabold text-[#47a49e] leading-tight tracking-wider">
-                Settle Instantly.
-              </h2>
-            </div>
           </div>
 
         </div>
