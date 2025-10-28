@@ -75,11 +75,42 @@ export const prerender = true
       </div>
     </section>
 
-    <!-- SECTION 3: Placeholder -->
+    <!-- SECTION 3: Unfold Animation -->
     <section class="min-h-screen flex items-center justify-center border-b-2 border-gray-300 dark:border-gray-700">
       <div class="text-center">
-        <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4">Animation 3: Coming Soon</h1>
-        <p class="text-xl text-gray-700 dark:text-gray-300">More animation styles to explore</p>
+        <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4 opacity-0" id="title-3">Animation 3: The Unfold</h1>
+        <p class="text-xl text-gray-700 dark:text-gray-300 mb-12 opacity-0" id="subtitle-3">Watch the colors reveal</p>
+
+        <div class="flex justify-center items-center" style="min-height: 600px; position: relative;">
+          <svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" id="animated-logo-3">
+            <defs>
+              <clipPath id="rounded-clip-3">
+                <rect x="80" y="240" width="240" height="240" rx="30"/>
+              </clipPath>
+            </defs>
+
+            <circle cx="200" cy="120" r="80" fill="#f07d40" id="logo-head-3" style="opacity: 0; transform-origin: 200px 120px;"/>
+
+            <!-- Full orange square that slides in -->
+            <g clip-path="url(#rounded-clip-3)" id="orange-square-3" style="opacity: 0;">
+              <rect x="80" y="240" width="240" height="240" fill="#f07d40"/>
+            </g>
+
+            <!-- Orange triangle (left part) - revealed after square -->
+            <g clip-path="url(#rounded-clip-3)" id="orange-triangle-3" style="opacity: 0;">
+              <path d="M 80 240 L 320 240 L 80 480 Z" fill="#f07d40"/>
+            </g>
+
+            <!-- Teal triangle that flips out of the orange square like a page turning -->
+            <g clip-path="url(#rounded-clip-3)" id="teal-flip-3" style="opacity: 0; transform-style: preserve-3d;">
+              <path d="M 320 240 L 320 480 L 80 480 Z" fill="#47a49e"/>
+            </g>
+          </svg>
+        </div>
+
+        <button id="replay-btn-3" class="mt-8 px-8 py-4 bg-gradient-to-r from-orange-500 to-teal-500 text-white dark:text-gray-100 text-lg font-semibold rounded-full hover:scale-105 transition-transform shadow-xl opacity-0">
+          Replay Animation 3
+        </button>
       </div>
     </section>
 
@@ -203,6 +234,63 @@ export const prerender = true
       }
     }
 
+    /* Section 3: Head grows from tiny dot at its position (no movement) */
+    @keyframes growInPlace {
+      0% {
+        opacity: 1;
+        transform: scale(0);
+      }
+      70% {
+        opacity: 1;
+        transform: scale(1.05);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Section 3: Orange square slides in from left */
+    @keyframes slideInFromLeft {
+      0% {
+        opacity: 0;
+        transform: translateX(-400px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Section 3: Teal layer fades in */
+    @keyframes tealReveal {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    /* Section 3: Teal triangle flips in along diagonal axis like a page turning */
+    @keyframes diagonalPageFlip {
+      0% {
+        opacity: 0;
+        transform: perspective(1500px) rotateY(-90deg) rotateZ(-45deg);
+        transform-origin: 200px 360px;
+      }
+      50% {
+        opacity: 1;
+        transform: perspective(1500px) rotateY(-45deg) rotateZ(-22.5deg) translateZ(60px);
+        transform-origin: 200px 360px;
+      }
+      100% {
+        opacity: 1;
+        transform: perspective(1500px) rotateY(0deg) rotateZ(0deg) translateZ(0px);
+        transform-origin: 200px 360px;
+      }
+    }
+
     /* Button fade in */
     @keyframes fadeIn {
       from {
@@ -240,6 +328,23 @@ export const prerender = true
 
     .animate-slide-from-right {
       animation: slideFromRight 1.5s ease-out forwards;
+    }
+
+    .animate-grow-in-place {
+      animation: growInPlace 1s ease-out forwards;
+    }
+
+    .animate-slide-left {
+      animation: slideInFromLeft 1s ease-out forwards;
+    }
+
+    .animate-teal-reveal {
+      animation: tealReveal 0.3s ease-out forwards;
+    }
+
+    .animate-teal-diagonal-flip {
+      animation: diagonalPageFlip 1.5s ease-out forwards;
+      transform-style: preserve-3d;
     }
 
     .animate-button {
@@ -430,6 +535,102 @@ export const prerender = true
       }, 3750);
     }
 
+    // SECTION 3: Page Flip Animation (teal flips OUT of orange square diagonally)
+    function playAnimation3() {
+      const title = document.getElementById('title-3');
+      const subtitle = document.getElementById('subtitle-3');
+      const head = document.getElementById('logo-head-3');
+      const orangeSquare = document.getElementById('orange-square-3');
+      const orangeTriangle = document.getElementById('orange-triangle-3');
+      const tealFlip = document.getElementById('teal-flip-3');
+      const button = document.getElementById('replay-btn-3');
+      const logo = document.getElementById('animated-logo-3');
+
+      const elements = [
+        { el: title, classes: ['animate-title'] },
+        { el: subtitle, classes: ['animate-title'] },
+        { el: head, classes: ['animate-grow-in-place'] },
+        { el: orangeSquare, classes: ['animate-slide-left'] },
+        { el: orangeTriangle, classes: ['animate-teal-reveal'] },
+        { el: tealFlip, classes: ['animate-teal-diagonal-flip'] },
+        { el: button, classes: ['animate-button'] },
+        { el: logo, classes: ['glow-effect'] }
+      ];
+
+      elements.forEach(({ el, classes }) => {
+        if (el) {
+          classes.forEach(cls => el.classList.remove(cls));
+          void el.offsetWidth;
+        }
+      });
+
+      if (title) title.style.opacity = '0';
+      if (subtitle) subtitle.style.opacity = '0';
+      if (head) head.style.opacity = '0';
+      if (orangeSquare) orangeSquare.style.opacity = '0';
+      if (orangeTriangle) orangeTriangle.style.opacity = '0';
+      if (tealFlip) tealFlip.style.opacity = '0';
+      if (button) button.style.opacity = '0';
+
+      // Title
+      setTimeout(() => {
+        if (title) {
+          title.style.opacity = '';
+          title.classList.add('animate-title');
+        }
+      }, 50);
+
+      // Subtitle
+      setTimeout(() => {
+        if (subtitle) {
+          subtitle.style.opacity = '';
+          subtitle.classList.add('animate-title');
+        }
+      }, 350);
+
+      // Head grows in place from tiny dot
+      setTimeout(() => {
+        if (head) {
+          head.style.opacity = '';
+          head.classList.add('animate-grow-in-place');
+        }
+      }, 850);
+
+      // Orange square slides in from left
+      setTimeout(() => {
+        if (orangeSquare) {
+          orangeSquare.style.opacity = '';
+          orangeSquare.classList.add('animate-slide-left');
+        }
+      }, 1750);
+
+      // After square is in, hide it and show the split pieces
+      setTimeout(() => {
+        if (orangeSquare) {
+          orangeSquare.style.opacity = '0';
+        }
+        // Show orange triangle (stays in place)
+        if (orangeTriangle) {
+          orangeTriangle.style.opacity = '';
+          orangeTriangle.classList.add('animate-teal-reveal');
+        }
+        // Teal triangle flips in diagonally
+        if (tealFlip) {
+          tealFlip.style.opacity = '';
+          tealFlip.classList.add('animate-teal-diagonal-flip');
+        }
+      }, 2850);
+
+      // Button and glow
+      setTimeout(() => {
+        if (button) {
+          button.style.opacity = '';
+          button.classList.add('animate-button');
+        }
+        if (logo) logo.classList.add('glow-effect');
+      }, 4750);
+    }
+
     // Play animations on page load and setup replay buttons
     document.addEventListener('DOMContentLoaded', () => {
       playAnimation1();
@@ -444,6 +645,11 @@ export const prerender = true
         replayBtn2.addEventListener('click', playAnimation2);
       }
 
+      const replayBtn3 = document.getElementById('replay-btn-3');
+      if (replayBtn3) {
+        replayBtn3.addEventListener('click', playAnimation3);
+      }
+
       // Use Intersection Observer to trigger animations when sections come into view
       const observerOptions = {
         threshold: 0.5
@@ -454,6 +660,8 @@ export const prerender = true
           if (entry.isIntersecting) {
             if (entry.target.id === 'animated-logo-2') {
               playAnimation2();
+            } else if (entry.target.id === 'animated-logo-3') {
+              playAnimation3();
             }
           }
         });
@@ -461,6 +669,9 @@ export const prerender = true
 
       const logo2 = document.getElementById('animated-logo-2');
       if (logo2) observer.observe(logo2);
+
+      const logo3 = document.getElementById('animated-logo-3');
+      if (logo3) observer.observe(logo3);
     });
   </script>
 </Layout>
