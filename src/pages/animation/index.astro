@@ -1,0 +1,293 @@
+---
+import Layout from 'src/layouts/Layout.astro';
+
+export const prerender = true
+---
+
+<Layout title="Animation Demo - SplitDo">
+  <main class="min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center overflow-hidden">
+
+    <div class="text-center">
+      <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4 opacity-0" id="title">Watch the Magic</h1>
+      <p class="text-xl text-gray-700 dark:text-gray-300 mb-12 opacity-0" id="subtitle">The SplitDo logo comes to life</p>
+
+      <div class="flex justify-center items-center" style="min-height: 600px; position: relative;">
+        <svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" id="animated-logo">
+          <!-- Define clip path for rounded corners -->
+          <defs>
+            <clipPath id="rounded-clip-animated">
+              <rect x="80" y="240" width="240" height="240" rx="30"/>
+            </clipPath>
+          </defs>
+
+          <!-- Circle (head) - will animate in from top -->
+          <circle cx="200" cy="120" r="80" fill="#f07d40" id="logo-head" style="opacity: 0;"/>
+
+          <!-- Orange square (body) - will appear first as full square -->
+          <g clip-path="url(#rounded-clip-animated)" id="logo-body" style="opacity: 0;">
+            <rect x="80" y="240" width="240" height="240" fill="#f07d40"/>
+          </g>
+
+          <!-- Orange triangle - top-left half that will slide away -->
+          <g clip-path="url(#rounded-clip-animated)" id="orange-triangle" style="opacity: 0;">
+            <path d="M 80 240 L 320 240 L 80 480 Z" fill="#f07d40"/>
+          </g>
+
+          <!-- Teal triangle - bottom-right half that will slide away -->
+          <g clip-path="url(#rounded-clip-animated)" id="teal-triangle" style="opacity: 0;">
+            <path d="M 320 240 L 320 480 L 80 480 Z" fill="#47a49e"/>
+          </g>
+        </svg>
+      </div>
+
+      <button id="replay-btn" class="mt-8 px-8 py-4 bg-gradient-to-r from-orange-500 to-teal-500 text-white dark:text-gray-100 text-lg font-semibold rounded-full hover:scale-105 transition-transform shadow-xl opacity-0">
+        Replay Animation
+      </button>
+    </div>
+
+  </main>
+
+  <style>
+    /* Title animations */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Head drops from above */
+    @keyframes dropIn {
+      0% {
+        opacity: 0;
+        transform: translateY(-400px) scale(0.3);
+      }
+      50% {
+        opacity: 1;
+      }
+      70% {
+        transform: translateY(10px) scale(1.1);
+      }
+      85% {
+        transform: translateY(-5px) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Orange square appears */
+    @keyframes fadeInGrow {
+      0% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Orange triangle splits to top-left */
+    @keyframes splitOrange {
+      0% {
+        opacity: 0;
+        transform: translate(0, 0);
+      }
+      30% {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+      70% {
+        opacity: 1;
+        transform: translate(-30px, -30px);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+    }
+
+    /* Teal triangle splits to bottom-right */
+    @keyframes splitTeal {
+      0% {
+        opacity: 0;
+        transform: translate(0, 0);
+      }
+      30% {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+      70% {
+        opacity: 1;
+        transform: translate(30px, 30px);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+    }
+
+    /* Button fade in */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Animation classes */
+    .animate-title {
+      animation: fadeInDown 0.8s ease-out forwards;
+    }
+
+    .animate-head {
+      animation: dropIn 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    }
+
+    .animate-body {
+      animation: fadeInGrow 0.8s ease-out forwards;
+    }
+
+    .animate-orange-split {
+      animation: splitOrange 2s ease-in-out forwards;
+    }
+
+    .animate-teal-split {
+      animation: splitTeal 2s ease-in-out forwards;
+    }
+
+    .animate-button {
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+
+    /* Glow effect on complete */
+    @keyframes glow {
+      0%, 100% {
+        filter: drop-shadow(0 0 10px rgba(240, 125, 64, 0.5));
+      }
+      50% {
+        filter: drop-shadow(0 0 30px rgba(71, 164, 158, 0.8));
+      }
+    }
+
+    .glow-effect {
+      animation: glow 2s ease-in-out infinite;
+    }
+  </style>
+
+  <script>
+    function playAnimation() {
+      // Reset all animations
+      const title = document.getElementById('title');
+      const subtitle = document.getElementById('subtitle');
+      const head = document.getElementById('logo-head');
+      const body = document.getElementById('logo-body');
+      const orangeTriangle = document.getElementById('orange-triangle');
+      const tealTriangle = document.getElementById('teal-triangle');
+      const button = document.getElementById('replay-btn');
+      const logo = document.getElementById('animated-logo');
+
+      // Remove all animation classes and reset styles
+      const elements = [
+        { el: title, classes: ['animate-title'] },
+        { el: subtitle, classes: ['animate-title'] },
+        { el: head, classes: ['animate-head'] },
+        { el: body, classes: ['animate-body'] },
+        { el: orangeTriangle, classes: ['animate-orange-split'] },
+        { el: tealTriangle, classes: ['animate-teal-split'] },
+        { el: button, classes: ['animate-button'] },
+        { el: logo, classes: ['glow-effect'] }
+      ];
+
+      elements.forEach(({ el, classes }) => {
+        if (el) {
+          classes.forEach(cls => el.classList.remove(cls));
+          // Force reflow to restart animation
+          void el.offsetWidth;
+        }
+      });
+
+      // Reset opacity inline styles
+      if (title) title.style.opacity = '0';
+      if (subtitle) subtitle.style.opacity = '0';
+      if (head) head.style.opacity = '0';
+      if (body) body.style.opacity = '0';
+      if (orangeTriangle) orangeTriangle.style.opacity = '0';
+      if (tealTriangle) tealTriangle.style.opacity = '0';
+      if (button) button.style.opacity = '0';
+
+      // Sequence the animations with a small delay to ensure reset
+      setTimeout(() => {
+        if (title) {
+          title.style.opacity = '';
+          title.classList.add('animate-title');
+        }
+      }, 50);
+
+      setTimeout(() => {
+        if (subtitle) {
+          subtitle.style.opacity = '';
+          subtitle.classList.add('animate-title');
+        }
+      }, 350);
+
+      setTimeout(() => {
+        if (head) {
+          head.style.opacity = '';
+          head.classList.add('animate-head');
+        }
+      }, 850);
+
+      setTimeout(() => {
+        if (body) {
+          body.style.opacity = '';
+          body.classList.add('animate-body');
+        }
+      }, 1750);
+
+      // Split animation - body fades out, triangles split apart and come back
+      setTimeout(() => {
+        // Hide the full orange square
+        if (body) {
+          body.style.opacity = '0';
+        }
+        // Show and animate the split triangles
+        if (orangeTriangle) {
+          orangeTriangle.style.opacity = '';
+          orangeTriangle.classList.add('animate-orange-split');
+        }
+        if (tealTriangle) {
+          tealTriangle.style.opacity = '';
+          tealTriangle.classList.add('animate-teal-split');
+        }
+      }, 2650);
+
+      setTimeout(() => {
+        if (button) {
+          button.style.opacity = '';
+          button.classList.add('animate-button');
+        }
+        if (logo) logo.classList.add('glow-effect');
+      }, 4150);
+    }
+
+    // Play animation on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      playAnimation();
+
+      // Replay button
+      const replayBtn = document.getElementById('replay-btn');
+      if (replayBtn) {
+        replayBtn.addEventListener('click', playAnimation);
+      }
+    });
+  </script>
+</Layout>
