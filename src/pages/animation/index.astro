@@ -5,45 +5,91 @@ export const prerender = true
 ---
 
 <Layout title="Animation Demo - SplitDo">
-  <main class="min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center overflow-hidden">
+  <main class="bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-hidden">
 
-    <div class="text-center">
-      <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4 opacity-0" id="title">Watch the Magic</h1>
-      <p class="text-xl text-gray-700 dark:text-gray-300 mb-12 opacity-0" id="subtitle">The SplitDo logo comes to life</p>
+    <!-- SECTION 1: Split Animation -->
+    <section class="min-h-screen flex items-center justify-center border-b-2 border-gray-300 dark:border-gray-700">
+      <div class="text-center">
+        <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4 opacity-0" id="title-1">Animation 1: The Split</h1>
+        <p class="text-xl text-gray-700 dark:text-gray-300 mb-12 opacity-0" id="subtitle-1">Watch funds split and reunite</p>
 
-      <div class="flex justify-center items-center" style="min-height: 600px; position: relative;">
-        <svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" id="animated-logo">
-          <!-- Define clip path for rounded corners -->
-          <defs>
-            <clipPath id="rounded-clip-animated">
-              <rect x="80" y="240" width="240" height="240" rx="30"/>
-            </clipPath>
-          </defs>
+        <div class="flex justify-center items-center" style="min-height: 600px; position: relative;">
+          <svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" id="animated-logo-1">
+            <defs>
+              <clipPath id="rounded-clip-1">
+                <rect x="80" y="240" width="240" height="240" rx="30"/>
+              </clipPath>
+            </defs>
 
-          <!-- Circle (head) - will animate in from top -->
-          <circle cx="200" cy="120" r="80" fill="#f07d40" id="logo-head" style="opacity: 0;"/>
+            <circle cx="200" cy="120" r="80" fill="#f07d40" id="logo-head-1" style="opacity: 0;"/>
 
-          <!-- Orange square (body) - will appear first as full square -->
-          <g clip-path="url(#rounded-clip-animated)" id="logo-body" style="opacity: 0;">
-            <rect x="80" y="240" width="240" height="240" fill="#f07d40"/>
-          </g>
+            <g clip-path="url(#rounded-clip-1)" id="logo-body-1" style="opacity: 0;">
+              <rect x="80" y="240" width="240" height="240" fill="#f07d40"/>
+            </g>
 
-          <!-- Orange triangle - top-left half that will slide away -->
-          <g clip-path="url(#rounded-clip-animated)" id="orange-triangle" style="opacity: 0;">
-            <path d="M 80 240 L 320 240 L 80 480 Z" fill="#f07d40"/>
-          </g>
+            <g clip-path="url(#rounded-clip-1)" id="orange-triangle-1" style="opacity: 0;">
+              <path d="M 80 240 L 320 240 L 80 480 Z" fill="#f07d40"/>
+            </g>
 
-          <!-- Teal triangle - bottom-right half that will slide away -->
-          <g clip-path="url(#rounded-clip-animated)" id="teal-triangle" style="opacity: 0;">
-            <path d="M 320 240 L 320 480 L 80 480 Z" fill="#47a49e"/>
-          </g>
-        </svg>
+            <g clip-path="url(#rounded-clip-1)" id="teal-triangle-1" style="opacity: 0;">
+              <path d="M 320 240 L 320 480 L 80 480 Z" fill="#47a49e"/>
+            </g>
+          </svg>
+        </div>
+
+        <button id="replay-btn-1" class="mt-8 px-8 py-4 bg-gradient-to-r from-orange-500 to-teal-500 text-white dark:text-gray-100 text-lg font-semibold rounded-full hover:scale-105 transition-transform shadow-xl opacity-0">
+          Replay Animation 1
+        </button>
       </div>
+    </section>
 
-      <button id="replay-btn" class="mt-8 px-8 py-4 bg-gradient-to-r from-orange-500 to-teal-500 text-white dark:text-gray-100 text-lg font-semibold rounded-full hover:scale-105 transition-transform shadow-xl opacity-0">
-        Replay Animation
-      </button>
-    </div>
+    <!-- SECTION 2: Merge Animation Options -->
+    <section class="min-h-screen flex items-center justify-center border-b-2 border-gray-300 dark:border-gray-700">
+      <div class="text-center">
+        <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4 opacity-0" id="title-2">Animation 2: The Merge</h1>
+        <p class="text-xl text-gray-700 dark:text-gray-300 mb-12 opacity-0" id="subtitle-2">Two halves become one</p>
+
+        <div class="flex justify-center items-center" style="min-height: 600px; position: relative;">
+          <svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" id="animated-logo-2">
+            <defs>
+              <clipPath id="rounded-clip-2">
+                <rect x="80" y="240" width="240" height="240" rx="30"/>
+              </clipPath>
+            </defs>
+
+            <circle cx="200" cy="120" r="80" fill="#f07d40" id="logo-head-2" style="opacity: 0;"/>
+
+            <g clip-path="url(#rounded-clip-2)" id="orange-triangle-2" style="opacity: 0;">
+              <path d="M 80 240 L 320 240 L 80 480 Z" fill="#f07d40"/>
+            </g>
+
+            <g clip-path="url(#rounded-clip-2)" id="teal-triangle-2" style="opacity: 0;">
+              <path d="M 320 240 L 320 480 L 80 480 Z" fill="#47a49e"/>
+            </g>
+          </svg>
+        </div>
+
+        <button id="replay-btn-2" class="mt-8 px-8 py-4 bg-gradient-to-r from-orange-500 to-teal-500 text-white dark:text-gray-100 text-lg font-semibold rounded-full hover:scale-105 transition-transform shadow-xl opacity-0">
+          Replay Animation 2
+        </button>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Placeholder -->
+    <section class="min-h-screen flex items-center justify-center border-b-2 border-gray-300 dark:border-gray-700">
+      <div class="text-center">
+        <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4">Animation 3: Coming Soon</h1>
+        <p class="text-xl text-gray-700 dark:text-gray-300">More animation styles to explore</p>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Placeholder -->
+    <section class="min-h-screen flex items-center justify-center">
+      <div class="text-center">
+        <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4">Animation 4: Coming Soon</h1>
+        <p class="text-xl text-gray-700 dark:text-gray-300">More animation styles to explore</p>
+      </div>
+    </section>
 
   </main>
 
@@ -133,6 +179,30 @@ export const prerender = true
       }
     }
 
+    /* Section 2: Orange triangle slides in from left */
+    @keyframes slideFromLeft {
+      0% {
+        opacity: 0;
+        transform: translateX(-400px) rotate(-45deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0) rotate(0deg);
+      }
+    }
+
+    /* Section 2: Teal triangle slides in from right */
+    @keyframes slideFromRight {
+      0% {
+        opacity: 0;
+        transform: translateX(400px) rotate(45deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0) rotate(0deg);
+      }
+    }
+
     /* Button fade in */
     @keyframes fadeIn {
       from {
@@ -164,6 +234,14 @@ export const prerender = true
       animation: splitTeal 2s ease-in-out forwards;
     }
 
+    .animate-slide-from-left {
+      animation: slideFromLeft 1.5s ease-out forwards;
+    }
+
+    .animate-slide-from-right {
+      animation: slideFromRight 1.5s ease-out forwards;
+    }
+
     .animate-button {
       animation: fadeIn 0.6s ease-out forwards;
     }
@@ -184,16 +262,16 @@ export const prerender = true
   </style>
 
   <script>
-    function playAnimation() {
-      // Reset all animations
-      const title = document.getElementById('title');
-      const subtitle = document.getElementById('subtitle');
-      const head = document.getElementById('logo-head');
-      const body = document.getElementById('logo-body');
-      const orangeTriangle = document.getElementById('orange-triangle');
-      const tealTriangle = document.getElementById('teal-triangle');
-      const button = document.getElementById('replay-btn');
-      const logo = document.getElementById('animated-logo');
+    // SECTION 1: Split Animation
+    function playAnimation1() {
+      const title = document.getElementById('title-1');
+      const subtitle = document.getElementById('subtitle-1');
+      const head = document.getElementById('logo-head-1');
+      const body = document.getElementById('logo-body-1');
+      const orangeTriangle = document.getElementById('orange-triangle-1');
+      const tealTriangle = document.getElementById('teal-triangle-1');
+      const button = document.getElementById('replay-btn-1');
+      const logo = document.getElementById('animated-logo-1');
 
       // Remove all animation classes and reset styles
       const elements = [
@@ -255,11 +333,9 @@ export const prerender = true
 
       // Split animation - body fades out, triangles split apart and come back
       setTimeout(() => {
-        // Hide the full orange square
         if (body) {
           body.style.opacity = '0';
         }
-        // Show and animate the split triangles
         if (orangeTriangle) {
           orangeTriangle.style.opacity = '';
           orangeTriangle.classList.add('animate-orange-split');
@@ -279,15 +355,112 @@ export const prerender = true
       }, 4150);
     }
 
-    // Play animation on page load
-    document.addEventListener('DOMContentLoaded', () => {
-      playAnimation();
+    // SECTION 2: Merge Animation (triangles slide in from opposite sides)
+    function playAnimation2() {
+      const title = document.getElementById('title-2');
+      const subtitle = document.getElementById('subtitle-2');
+      const head = document.getElementById('logo-head-2');
+      const orangeTriangle = document.getElementById('orange-triangle-2');
+      const tealTriangle = document.getElementById('teal-triangle-2');
+      const button = document.getElementById('replay-btn-2');
+      const logo = document.getElementById('animated-logo-2');
 
-      // Replay button
-      const replayBtn = document.getElementById('replay-btn');
-      if (replayBtn) {
-        replayBtn.addEventListener('click', playAnimation);
+      const elements = [
+        { el: title, classes: ['animate-title'] },
+        { el: subtitle, classes: ['animate-title'] },
+        { el: head, classes: ['animate-head'] },
+        { el: orangeTriangle, classes: ['animate-slide-from-left'] },
+        { el: tealTriangle, classes: ['animate-slide-from-right'] },
+        { el: button, classes: ['animate-button'] },
+        { el: logo, classes: ['glow-effect'] }
+      ];
+
+      elements.forEach(({ el, classes }) => {
+        if (el) {
+          classes.forEach(cls => el.classList.remove(cls));
+          void el.offsetWidth;
+        }
+      });
+
+      if (title) title.style.opacity = '0';
+      if (subtitle) subtitle.style.opacity = '0';
+      if (head) head.style.opacity = '0';
+      if (orangeTriangle) orangeTriangle.style.opacity = '0';
+      if (tealTriangle) tealTriangle.style.opacity = '0';
+      if (button) button.style.opacity = '0';
+
+      setTimeout(() => {
+        if (title) {
+          title.style.opacity = '';
+          title.classList.add('animate-title');
+        }
+      }, 50);
+
+      setTimeout(() => {
+        if (subtitle) {
+          subtitle.style.opacity = '';
+          subtitle.classList.add('animate-title');
+        }
+      }, 350);
+
+      setTimeout(() => {
+        if (head) {
+          head.style.opacity = '';
+          head.classList.add('animate-head');
+        }
+      }, 850);
+
+      setTimeout(() => {
+        if (orangeTriangle) {
+          orangeTriangle.style.opacity = '';
+          orangeTriangle.classList.add('animate-slide-from-left');
+        }
+        if (tealTriangle) {
+          tealTriangle.style.opacity = '';
+          tealTriangle.classList.add('animate-slide-from-right');
+        }
+      }, 1750);
+
+      setTimeout(() => {
+        if (button) {
+          button.style.opacity = '';
+          button.classList.add('animate-button');
+        }
+        if (logo) logo.classList.add('glow-effect');
+      }, 3750);
+    }
+
+    // Play animations on page load and setup replay buttons
+    document.addEventListener('DOMContentLoaded', () => {
+      playAnimation1();
+
+      const replayBtn1 = document.getElementById('replay-btn-1');
+      if (replayBtn1) {
+        replayBtn1.addEventListener('click', playAnimation1);
       }
+
+      const replayBtn2 = document.getElementById('replay-btn-2');
+      if (replayBtn2) {
+        replayBtn2.addEventListener('click', playAnimation2);
+      }
+
+      // Use Intersection Observer to trigger animations when sections come into view
+      const observerOptions = {
+        threshold: 0.5
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            if (entry.target.id === 'animated-logo-2') {
+              playAnimation2();
+            }
+          }
+        });
+      }, observerOptions);
+
+      const logo2 = document.getElementById('animated-logo-2');
+      if (logo2) observer.observe(logo2);
     });
   </script>
 </Layout>
