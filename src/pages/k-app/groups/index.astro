@@ -1,0 +1,117 @@
+---
+import Taskbar from "../../../components/k-app/Taskbar.astro";
+export const prerender = true;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Groups - SplitDo</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+  </head>
+  <body>
+    <main
+      class="h-screen overflow-hidden pb-16"
+      style="background: linear-gradient(to bottom right, #6b4e3d, #564740, #304445);"
+    >
+      <section class="px-3 py-3 h-full overflow-hidden flex flex-col">
+        <!-- Header -->
+        <div class="pt-6 pb-4">
+          <h1 class="text-3xl font-bold text-white">Groups</h1>
+          <p class="text-white/70 mt-1">Manage your expense groups</p>
+        </div>
+
+        <!-- Groups Content -->
+        <div class="flex-1 overflow-y-auto">
+          <div class="space-y-3">
+            <!-- Group Card 1: Apartment -->
+            <div class="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-[#f07d40] to-[#d86e37] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                    <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
+                    <path d="M9 22v-4h6v4"/>
+                    <path d="M8 6h.01"/>
+                    <path d="M16 6h.01"/>
+                    <path d="M12 6h.01"/>
+                    <path d="M12 10h.01"/>
+                    <path d="M12 14h.01"/>
+                    <path d="M16 10h.01"/>
+                    <path d="M16 14h.01"/>
+                    <path d="M8 10h.01"/>
+                    <path d="M8 14h.01"/>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-semibold text-lg">Apartment</h3>
+                  <p class="text-gray-600 text-sm">4 members</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-[#f07d40] font-semibold">$325.00</p>
+                  <p class="text-gray-500 text-xs">You owe</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Group Card 2: Beach Trip -->
+            <div class="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-[#47a49e] to-[#3a8a82] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                    <path d="M2 12h5"/>
+                    <path d="M17 5h5"/>
+                    <path d="M12 2v3"/>
+                    <path d="m4.22 4.22 2.12 2.12"/>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-semibold text-lg">Beach Trip</h3>
+                  <p class="text-gray-600 text-sm">6 members</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-[#47a49e] font-semibold">$180.50</p>
+                  <p class="text-gray-500 text-xs">You're owed</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Group Card 3: Dinners -->
+            <div class="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+                    <path d="M7 2v20"/>
+                    <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-semibold text-lg">Dinners</h3>
+                  <p class="text-gray-600 text-sm">8 members</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-purple-600 font-semibold">$95.25</p>
+                  <p class="text-gray-500 text-xs">You're owed</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add New Group Button -->
+            <a
+              href="/k-app/create-group"
+              class="block w-full bg-[#f07d40] hover:bg-[#e06d30] text-white font-semibold py-4 rounded-lg shadow-lg transition-colors text-center"
+            >
+              + Create New Group
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <Taskbar />
+  </body>
+</html>

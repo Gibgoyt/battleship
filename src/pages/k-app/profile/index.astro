@@ -1,0 +1,87 @@
+---
+import Taskbar from "../../../components/k-app/Taskbar.astro";
+export const prerender = true;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile - SplitDo</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+  </head>
+  <body>
+    <main
+      class="h-screen overflow-hidden pb-16"
+      style="background: linear-gradient(to bottom right, #6b4e3d, #564740, #304445);"
+    >
+      <section class="px-3 py-3 h-full overflow-hidden flex flex-col">
+        <!-- Header -->
+        <div class="pt-6 pb-4">
+          <h1 class="text-3xl font-bold text-white">Profile</h1>
+          <p class="text-white/70 mt-1">Manage your account settings</p>
+        </div>
+
+        <!-- Profile Content -->
+        <div class="flex-1 overflow-y-auto">
+          <div class="space-y-4">
+            <!-- Profile Card -->
+            <div class="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-6">
+              <div class="flex items-center gap-4 mb-4">
+                <div class="w-20 h-20 bg-gradient-to-br from-[#f07d40] to-[#47a49e] rounded-full flex items-center justify-center text-white text-3xl font-bold">
+                  A
+                </div>
+                <div>
+                  <h2 class="text-2xl font-bold">Alex Johnson</h2>
+                  <p class="text-gray-600">alex.johnson@email.com</p>
+                </div>
+              </div>
+              <a href="/k-app/edit-profile" class="block w-full py-2 text-[#f07d40] font-semibold text-sm border-2 border-[#f07d40] rounded-lg hover:bg-[#f07d40] hover:text-white transition-colors text-center">
+                Edit Profile
+              </a>
+            </div>
+
+            <!-- Stats Card -->
+            <div class="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4">
+              <h3 class="font-semibold mb-3">Your Stats</h3>
+              <div class="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <p class="text-2xl font-bold text-[#564740]">12</p>
+                  <p class="text-xs text-gray-600">Groups</p>
+                </div>
+                <div>
+                  <p class="text-2xl font-bold text-[#564740]">48</p>
+                  <p class="text-xs text-gray-600">Friends</p>
+                </div>
+                <div>
+                  <p class="text-2xl font-bold text-[#564740]">156</p>
+                  <p class="text-xs text-gray-600">Expenses</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Settings Options -->
+            <div class="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4">
+              <h3 class="font-semibold mb-3">Settings & Support</h3>
+              <div class="space-y-1">
+                <a href="/k-app/settings" class="w-full text-left px-3 py-3 hover:bg-gray-50 rounded-lg transition-colors flex justify-between items-center block">
+                  <span class="text-gray-700">Settings</span>
+                  <span class="text-gray-400">›</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Logout Button -->
+            <a href="/k-app" class="block w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg shadow-lg transition-colors text-center">
+              Log Out
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <Taskbar />
+  </body>
+</html>

@@ -1,0 +1,327 @@
+---
+import Taskbar from "../../../components/k-app/Taskbar.astro";
+export const prerender = true;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings - SplitDo</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+  </head>
+  <body>
+    <main
+      class="h-screen overflow-hidden pb-16"
+      style="background: linear-gradient(to bottom right, #6b4e3d, #564740, #304445);"
+    >
+      <section class="px-3 py-3 h-full overflow-hidden flex flex-col">
+        <!-- Header -->
+        <div class="pt-6 pb-4 flex items-center justify-between">
+          <a href="/k-app/profile" class="text-white/70 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m15 18-6-6 6-6"/>
+            </svg>
+          </a>
+          <h1 class="text-3xl font-bold text-white">Settings</h1>
+          <div class="w-6"></div>
+        </div>
+
+        <!-- Settings Content -->
+        <div class="flex-1 overflow-y-auto">
+          <div class="space-y-4">
+
+            <!-- Account Settings -->
+            <div class="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4">
+              <h3 class="font-semibold mb-3 text-gray-900">Account Settings</h3>
+              <div class="space-y-1">
+                <a href="/k-app/edit-profile" class="w-full text-left px-3 py-3 hover:bg-gray-50 rounded-lg transition-colors flex justify-between items-center">
+                  <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    <span class="text-gray-700">Edit Profile</span>
+                  </div>
+                  <span class="text-gray-400">›</span>
+                </a>
+                <a href="/k-app/wallet" class="w-full text-left px-3 py-3 hover:bg-gray-50 rounded-lg transition-colors flex justify-between items-center">
+                  <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+                      <rect width="20" height="14" x="2" y="5" rx="2"/>
+                      <line x1="2" x2="22" y1="10" y2="10"/>
+                    </svg>
+                    <span class="text-gray-700">Wallet & Payment Methods</span>
+                  </div>
+                  <span class="text-gray-400">›</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Notifications -->
+            <div class="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4">
+              <h3 class="font-semibold mb-3 text-gray-900">Notifications</h3>
+              <div class="space-y-3">
+                <!-- Push Notifications -->
+                <div class="flex items-center justify-between py-2">
+                  <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+                      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                    </svg>
+                    <div>
+                      <p class="text-gray-700 font-medium">Push Notifications</p>
+                      <p class="text-xs text-gray-500">Get notified about new expenses</p>
+                    </div>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" class="sr-only peer" checked>
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#f07d40]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#f07d40]"></div>
+                  </label>
+                </div>
+
+                <!-- Email Notifications -->
+                <div class="flex items-center justify-between py-2">
+                  <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+                      <rect width="20" height="16" x="2" y="4" rx="2"/>
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    </svg>
+                    <div>
+                      <p class="text-gray-700 font-medium">Email Notifications</p>
+                      <p class="text-xs text-gray-500">Weekly expense summaries</p>
+                    </div>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" class="sr-only peer" checked>
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#f07d40]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#f07d40]"></div>
+                  </label>
+                </div>
+
+                <!-- Payment Reminders -->
+                <div class="flex items-center justify-between py-2">
+                  <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <div>
+                      <p class="text-gray-700 font-medium">Payment Reminders</p>
+                      <p class="text-xs text-gray-500">Remind me when payments are due</p>
+                    </div>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#f07d40]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#f07d40]"></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Privacy -->
+            <div class="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4">
+              <h3 class="font-semibold mb-3 text-gray-900">Privacy</h3>
+              <div class="space-y-3">
+                <!-- Profile Visibility -->
+                <div class="py-2">
+                  <div class="flex items-center gap-3 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+                      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <p class="text-gray-700 font-medium">Profile Visibility</p>
+                  </div>
+                  <select class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#f07d40] focus:outline-none focus:ring-2 focus:ring-[#f07d40]/20 transition-all text-sm">
+                    <option value="public">Public - Anyone can find me</option>
+                    <option value="friends" selected>Friends Only - Only group members</option>
+                    <option value="private">Private - Only me</option>
+                  </select>
+                </div>
+
+                <!-- Activity Sharing -->
+                <div class="flex items-center justify-between py-2">
+                  <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                      <circle cx="9" cy="7" r="4"/>
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <div>
+                      <p class="text-gray-700 font-medium">Activity Sharing</p>
+                      <p class="text-xs text-gray-500">Share activity with group members</p>
+                    </div>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" class="sr-only peer" checked>
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#f07d40]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#f07d40]"></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Preferences -->
+            <div class="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4">
+              <h3 class="font-semibold mb-3 text-gray-900">Preferences</h3>
+              <div class="space-y-3">
+                <!-- Default Currency -->
+                <div class="py-2">
+                  <div class="flex items-center gap-3 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+                      <line x1="12" x2="12" y1="2" y2="22"/>
+                      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    <p class="text-gray-700 font-medium">Default Currency</p>
+                  </div>
+                  <select class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#f07d40] focus:outline-none focus:ring-2 focus:ring-[#f07d40]/20 transition-all text-sm">
+                    <optgroup label="💰 Crypto (Recommended)">
+                      <option value="usdc">USDC - USD Coin</option>
+                      <option value="sol">SOL - Solana</option>
+                      <option value="btc">BTC - Bitcoin</option>
+                      <option value="eth">ETH - Ethereum</option>
+                    </optgroup>
+
+                    <optgroup label="🌟 Popular Fiat">
+                      <option value="usd" selected>USD - US Dollar ($)</option>
+                      <option value="eur">EUR - Euro (€)</option>
+                      <option value="gbp">GBP - British Pound (£)</option>
+                      <option value="jpy">JPY - Japanese Yen (¥)</option>
+                      <option value="cad">CAD - Canadian Dollar (C$)</option>
+                      <option value="aud">AUD - Australian Dollar (A$)</option>
+                    </optgroup>
+
+                    <optgroup label="🌍 All Currencies (A-Z)">
+                      <option value="aed">AED - UAE Dirham (د.إ)</option>
+                      <option value="afn">AFN - Afghan Afghani (؋)</option>
+                      <option value="ars">ARS - Argentine Peso ($)</option>
+                      <option value="bdt">BDT - Bangladeshi Taka (৳)</option>
+                      <option value="brl">BRL - Brazilian Real (R$)</option>
+                      <option value="chf">CHF - Swiss Franc (Fr)</option>
+                      <option value="clp">CLP - Chilean Peso ($)</option>
+                      <option value="cny">CNY - Chinese Yuan (¥)</option>
+                      <option value="cop">COP - Colombian Peso ($)</option>
+                      <option value="czk">CZK - Czech Koruna (Kč)</option>
+                      <option value="dkk">DKK - Danish Krone (kr)</option>
+                      <option value="egp">EGP - Egyptian Pound (£)</option>
+                      <option value="hkd">HKD - Hong Kong Dollar (HK$)</option>
+                      <option value="huf">HUF - Hungarian Forint (Ft)</option>
+                      <option value="idr">IDR - Indonesian Rupiah (Rp)</option>
+                      <option value="ils">ILS - Israeli Shekel (₪)</option>
+                      <option value="inr">INR - Indian Rupee (₹)</option>
+                      <option value="isk">ISK - Icelandic Króna (kr)</option>
+                      <option value="krw">KRW - South Korean Won (₩)</option>
+                      <option value="mxn">MXN - Mexican Peso ($)</option>
+                      <option value="myr">MYR - Malaysian Ringgit (RM)</option>
+                      <option value="ngn">NGN - Nigerian Naira (₦)</option>
+                      <option value="nok">NOK - Norwegian Krone (kr)</option>
+                      <option value="nzd">NZD - New Zealand Dollar (NZ$)</option>
+                      <option value="php">PHP - Philippine Peso (₱)</option>
+                      <option value="pkr">PKR - Pakistani Rupee (₨)</option>
+                      <option value="pln">PLN - Polish Złoty (zł)</option>
+                      <option value="rub">RUB - Russian Ruble (₽)</option>
+                      <option value="sar">SAR - Saudi Riyal (﷼)</option>
+                      <option value="sek">SEK - Swedish Krona (kr)</option>
+                      <option value="sgd">SGD - Singapore Dollar (S$)</option>
+                      <option value="thb">THB - Thai Baht (฿)</option>
+                      <option value="try">TRY - Turkish Lira (₺)</option>
+                      <option value="twd">TWD - Taiwan Dollar (NT$)</option>
+                      <option value="uah">UAH - Ukrainian Hryvnia (₴)</option>
+                      <option value="vnd">VND - Vietnamese Dong (₫)</option>
+                      <option value="zar">ZAR - South African Rand (R)</option>
+                    </optgroup>
+                  </select>
+                </div>
+
+                <!-- Language -->
+                <div class="py-2">
+                  <div class="flex items-center gap-3 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+                      <path d="M2 12h20"/>
+                    </svg>
+                    <p class="text-gray-700 font-medium">Language</p>
+                  </div>
+                  <select class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-[#f07d40] focus:outline-none focus:ring-2 focus:ring-[#f07d40]/20 transition-all text-sm">
+                    <option value="en" selected>English</option>
+                    <option value="es">Español (Spanish)</option>
+                    <option value="fr">Français (French)</option>
+                    <option value="de">Deutsch (German)</option>
+                    <option value="pt">Português (Portuguese)</option>
+                    <option value="zh">中文 (Chinese)</option>
+                    <option value="ja">日本語 (Japanese)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- About & Support -->
+            <div class="bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4">
+              <h3 class="font-semibold mb-3 text-gray-900">About & Support</h3>
+              <div class="space-y-1">
+                <a href="/" target="_blank" class="w-full text-left px-3 py-3 hover:bg-gray-50 rounded-lg transition-colors flex justify-between items-center">
+                  <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                      <path d="M12 17h.01"/>
+                    </svg>
+                    <span class="text-gray-700">Help Center</span>
+                  </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+                    <path d="M7 7h10v10"/>
+                    <path d="M7 17 17 7"/>
+                  </svg>
+                </a>
+                <a href="mailto:support@splitdo.com" class="w-full text-left px-3 py-3 hover:bg-gray-50 rounded-lg transition-colors flex justify-between items-center">
+                  <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span class="text-gray-700">Contact Support</span>
+                  </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+                    <rect width="20" height="16" x="2" y="4" rx="2"/>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                  </svg>
+                </a>
+                <a href="/k-app/about" class="w-full text-left px-3 py-3 hover:bg-gray-50 rounded-lg transition-colors flex justify-between items-center">
+                  <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M12 16v-4"/>
+                      <path d="M12 8h.01"/>
+                    </svg>
+                    <div>
+                      <span class="text-gray-700">About SplitDo</span>
+                      <p class="text-xs text-gray-500">Version 1.0.0</p>
+                    </div>
+                  </div>
+                  <span class="text-gray-400">›</span>
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <Taskbar />
+
+    <script>
+      // Save settings when changed (in a real app, this would save to a database)
+      const saveSettings = () => {
+        console.log('Settings saved');
+      };
+
+      // Add change listeners to all inputs
+      const inputs = document.querySelectorAll('input, select');
+      inputs.forEach(input => {
+        input.addEventListener('change', saveSettings);
+      });
+    </script>
+  </body>
+</html>

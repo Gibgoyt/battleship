@@ -12,18 +12,19 @@ export const prerender = true
     <link rel="stylesheet" href="/src/styles/global.css" />
 </head>
 <body>
-  <main class="overflow-hidden h-screen flex items-start justify-center pt-12" style="background: linear-gradient(to bottom right, #6b4e3d, #564740, #304445);">
+  <main class="overflow-hidden h-screen flex items-center justify-center" style="background: linear-gradient(to bottom right, #6b4e3d, #564740, #304445);">
 
     <!-- App Animation Preview -->
-    <section class="w-full flex flex-col items-center gap-3 px-4">
-      <div class="text-center">
+    <section class="w-full flex flex-col items-center px-4">
+      <div class="text-center flex flex-col items-center gap-6">
         <!-- Welcome Heading -->
-        <h1 class="text-xl font-extrabold text-[#f07d40] tracking-wider mb-4">
+        <h1 class="text-2xl font-extrabold text-[#f07d40] tracking-wider">
           Welcome to SplitDo
         </h1>
 
-        <div class="flex justify-center items-center mb-4">
-          <svg width="180" height="270" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" id="animated-logo-1">
+        <!-- Logo Animation -->
+        <div class="flex justify-center items-center my-4">
+          <svg width="200" height="300" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" id="animated-logo-1">
             <defs>
               <clipPath id="rounded-clip-1">
                 <rect x="80" y="240" width="240" height="240" rx="30"/>
@@ -47,16 +48,16 @@ export const prerender = true
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex flex-col gap-2.5 max-w-xs mx-auto">
-          <a href="/k-app/create-account" class="w-full px-5 py-2.5 bg-[#f07d40] hover:bg-[#d86e37] text-white text-sm font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-105 text-center">
+        <div class="flex flex-col gap-3 max-w-xs w-full mx-auto">
+          <a href="/k-app/create-account" class="w-full px-6 py-3 bg-[#f07d40] hover:bg-[#d86e37] text-white text-sm font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-105 text-center">
             Create Account
           </a>
 
-          <a href="/k-app/welcome" class="w-full px-5 py-2.5 bg-[#47a49e] hover:bg-[#3a8a82] text-white text-sm font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-105 text-center">
+          <a href="/k-app/sign-in" class="w-full px-6 py-3 bg-[#47a49e] hover:bg-[#3a8a82] text-white text-sm font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-105 text-center">
             Already Have an Account
           </a>
 
-          <a href="/k-app/learn-more" class="w-full px-5 py-2.5 bg-white hover:bg-gray-100 text-[#564740] text-sm font-medium rounded-xl transition-all shadow-lg hover:shadow-xl border-2 border-[#f07d40] transform hover:scale-105 text-center">
+          <a href="/k-app/learn-more" class="w-full px-6 py-3 bg-white hover:bg-gray-100 text-[#564740] text-sm font-medium rounded-xl transition-all shadow-lg hover:shadow-xl border-2 border-[#f07d40] transform hover:scale-105 text-center">
             Learn More
           </a>
         </div>

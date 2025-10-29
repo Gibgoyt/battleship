@@ -1,0 +1,260 @@
+---
+export const prerender = true;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Group - SplitDo</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+  </head>
+  <body>
+    <main
+      class="h-screen overflow-hidden flex items-center justify-center"
+      style="background: linear-gradient(to bottom right, #6b4e3d, #564740, #304445);"
+    >
+      <section class="w-full max-w-md px-4">
+        <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
+          <!-- Header -->
+          <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-[#564740] mb-2">Create New Group</h1>
+            <p class="text-gray-600 text-sm">Choose an icon and name your group</p>
+          </div>
+
+          <!-- Form -->
+          <form class="space-y-6">
+            <!-- Group Name Input -->
+            <div>
+              <label for="groupName" class="block text-sm font-semibold text-gray-700 mb-2">
+                Group Name
+              </label>
+              <input
+                type="text"
+                id="groupName"
+                name="groupName"
+                placeholder="e.g., Weekend Trip, Apartment, Dinners"
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#f07d40] focus:outline-none focus:ring-2 focus:ring-[#f07d40]/20 transition-all"
+                required
+              />
+            </div>
+
+            <!-- Icon Selection -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-3">
+                Choose Icon
+              </label>
+              <div class="grid grid-cols-4 gap-3">
+
+                <!-- Apartment Icon -->
+                <label class="cursor-pointer">
+                  <input type="radio" name="icon" value="apartment" class="peer sr-only" />
+                  <div class="w-full aspect-square bg-gradient-to-br from-[#f07d40] to-[#d86e37] rounded-lg flex items-center justify-center peer-checked:ring-4 peer-checked:ring-[#f07d40] transition-all hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
+                      <path d="M9 22v-4h6v4"/>
+                      <path d="M8 6h.01"/>
+                      <path d="M16 6h.01"/>
+                      <path d="M12 6h.01"/>
+                      <path d="M12 10h.01"/>
+                      <path d="M12 14h.01"/>
+                      <path d="M16 10h.01"/>
+                      <path d="M16 14h.01"/>
+                      <path d="M8 10h.01"/>
+                      <path d="M8 14h.01"/>
+                    </svg>
+                  </div>
+                  <p class="text-xs text-center mt-1 text-gray-600">Apartment</p>
+                </label>
+
+                <!-- Dinners Icon -->
+                <label class="cursor-pointer">
+                  <input type="radio" name="icon" value="dinners" class="peer sr-only" checked />
+                  <div class="w-full aspect-square bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center peer-checked:ring-4 peer-checked:ring-purple-500 transition-all hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+                      <path d="M7 2v20"/>
+                      <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
+                    </svg>
+                  </div>
+                  <p class="text-xs text-center mt-1 text-gray-600">Dinners</p>
+                </label>
+
+                <!-- Home Icon -->
+                <label class="cursor-pointer">
+                  <input type="radio" name="icon" value="home" class="peer sr-only" />
+                  <div class="w-full aspect-square bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center peer-checked:ring-4 peer-checked:ring-blue-500 transition-all hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                      <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                  </div>
+                  <p class="text-xs text-center mt-1 text-gray-600">Home</p>
+                </label>
+
+                <!-- Travel Icon -->
+                <label class="cursor-pointer">
+                  <input type="radio" name="icon" value="travel" class="peer sr-only" />
+                  <div class="w-full aspect-square bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center peer-checked:ring-4 peer-checked:ring-indigo-500 transition-all hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>
+                    </svg>
+                  </div>
+                  <p class="text-xs text-center mt-1 text-gray-600">Travel</p>
+                </label>
+
+                <!-- Shopping Icon -->
+                <label class="cursor-pointer">
+                  <input type="radio" name="icon" value="shopping" class="peer sr-only" />
+                  <div class="w-full aspect-square bg-gradient-to-br from-pink-500 to-pink-600 rounded-lg flex items-center justify-center peer-checked:ring-4 peer-checked:ring-pink-500 transition-all hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <circle cx="8" cy="21" r="1"/>
+                      <circle cx="19" cy="21" r="1"/>
+                      <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                    </svg>
+                  </div>
+                  <p class="text-xs text-center mt-1 text-gray-600">Shopping</p>
+                </label>
+
+                <!-- Coffee Icon -->
+                <label class="cursor-pointer">
+                  <input type="radio" name="icon" value="coffee" class="peer sr-only" />
+                  <div class="w-full aspect-square bg-gradient-to-br from-amber-600 to-amber-700 rounded-lg flex items-center justify-center peer-checked:ring-4 peer-checked:ring-amber-600 transition-all hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <path d="M17 8h1a4 4 0 1 1 0 8h-1"/>
+                      <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
+                      <line x1="6" x2="6" y1="2" y2="4"/>
+                      <line x1="10" x2="10" y1="2" y2="4"/>
+                      <line x1="14" x2="14" y1="2" y2="4"/>
+                    </svg>
+                  </div>
+                  <p class="text-xs text-center mt-1 text-gray-600">Coffee</p>
+                </label>
+
+                <!-- Gym Icon -->
+                <label class="cursor-pointer">
+                  <input type="radio" name="icon" value="gym" class="peer sr-only" />
+                  <div class="w-full aspect-square bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center peer-checked:ring-4 peer-checked:ring-red-500 transition-all hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <path d="m6.5 6.5 11 11"/>
+                      <path d="m21 21-1-1"/>
+                      <path d="m3 3 1 1"/>
+                      <path d="m18 22 4-4"/>
+                      <path d="m2 6 4-4"/>
+                      <path d="m3 10 7-7"/>
+                      <path d="m14 21 7-7"/>
+                    </svg>
+                  </div>
+                  <p class="text-xs text-center mt-1 text-gray-600">Gym</p>
+                </label>
+
+                <!-- Car/Transport Icon -->
+                <label class="cursor-pointer">
+                  <input type="radio" name="icon" value="car" class="peer sr-only" />
+                  <div class="w-full aspect-square bg-gradient-to-br from-slate-600 to-slate-700 rounded-lg flex items-center justify-center peer-checked:ring-4 peer-checked:ring-slate-600 transition-all hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
+                      <circle cx="7" cy="17" r="2"/>
+                      <path d="M9 17h6"/>
+                      <circle cx="17" cy="17" r="2"/>
+                    </svg>
+                  </div>
+                  <p class="text-xs text-center mt-1 text-gray-600">Car</p>
+                </label>
+
+                <!-- Briefcase/Work Icon -->
+                <label class="cursor-pointer">
+                  <input type="radio" name="icon" value="work" class="peer sr-only" />
+                  <div class="w-full aspect-square bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-lg flex items-center justify-center peer-checked:ring-4 peer-checked:ring-emerald-600 transition-all hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/>
+                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                    </svg>
+                  </div>
+                  <p class="text-xs text-center mt-1 text-gray-600">Work</p>
+                </label>
+
+                <!-- Party/Celebration Icon -->
+                <label class="cursor-pointer">
+                  <input type="radio" name="icon" value="party" class="peer sr-only" />
+                  <div class="w-full aspect-square bg-gradient-to-br from-fuchsia-500 to-fuchsia-600 rounded-lg flex items-center justify-center peer-checked:ring-4 peer-checked:ring-fuchsia-500 transition-all hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <path d="M5.8 11.3 2 22l10.7-3.79"/>
+                      <path d="M4 3h.01"/>
+                      <path d="M22 8h.01"/>
+                      <path d="M15 2h.01"/>
+                      <path d="M22 20h.01"/>
+                      <path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12v0c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/>
+                      <path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11v0c-.11.7-.72 1.22-1.43 1.22H17"/>
+                      <path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98v0C9.52 4.9 9 5.52 9 6.23V7"/>
+                      <path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/>
+                    </svg>
+                  </div>
+                  <p class="text-xs text-center mt-1 text-gray-600">Party</p>
+                </label>
+
+                <!-- Gift Icon -->
+                <label class="cursor-pointer">
+                  <input type="radio" name="icon" value="gift" class="peer sr-only" />
+                  <div class="w-full aspect-square bg-gradient-to-br from-rose-500 to-rose-600 rounded-lg flex items-center justify-center peer-checked:ring-4 peer-checked:ring-rose-500 transition-all hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <rect x="3" y="8" width="18" height="4" rx="1"/>
+                      <path d="M12 8v13"/>
+                      <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/>
+                      <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/>
+                    </svg>
+                  </div>
+                  <p class="text-xs text-center mt-1 text-gray-600">Gifts</p>
+                </label>
+
+                <!-- Other Icon -->
+                <label class="cursor-pointer">
+                  <input type="radio" name="icon" value="other" class="peer sr-only" />
+                  <div class="w-full aspect-square bg-gradient-to-br from-gray-500 to-gray-600 rounded-lg flex items-center justify-center peer-checked:ring-4 peer-checked:ring-gray-500 transition-all hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                      <circle cx="12" cy="12" r="10"/>
+                      <circle cx="12" cy="12" r="1"/>
+                      <circle cx="12" cy="7" r="1"/>
+                      <circle cx="12" cy="17" r="1"/>
+                    </svg>
+                  </div>
+                  <p class="text-xs text-center mt-1 text-gray-600">Other</p>
+                </label>
+
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+              type="submit"
+              class="w-full px-6 py-3 bg-[#f07d40] hover:bg-[#d86e37] text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+            >
+              Create Group
+            </button>
+          </form>
+
+          <!-- Back Button -->
+          <div class="text-center mt-4">
+            <a href="/k-app/groups" class="text-sm text-gray-500 hover:text-gray-700">
+              ← Back to Groups
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      // Handle form submission
+      const form = document.querySelector('form');
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          // In a real app, this would create the group
+          // For now, just redirect to the groups page
+          window.location.href = '/k-app/groups';
+        });
+      }
+    </script>
+  </body>
+</html>
