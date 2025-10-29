@@ -1,0 +1,238 @@
+---
+export const prerender = true
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Dashboard - SplitDo</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+</head>
+<body>
+  <main class="h-screen overflow-hidden pb-16" style="background: linear-gradient(to bottom right, #6b4e3d, #564740, #304445);">
+
+    <!-- Dashboard Content -->
+    <section class="px-3 py-3 h-full overflow-hidden flex flex-col">
+
+      <!-- Header -->
+      <div class="mb-2">
+        <h1 class="text-xl font-bold text-white">Welcome, Alex!</h1>
+        <p class="text-gray-300 text-xs">Your expense summary</p>
+      </div>
+
+      <!-- Balance Cards -->
+      <div class="grid grid-cols-2 gap-2 mb-3">
+        <!-- You Owe Card -->
+        <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-3 shadow-lg">
+          <p class="text-red-100 text-xs mb-0.5">You owe</p>
+          <p class="text-white text-lg font-bold">$245.50</p>
+          <p class="text-red-100 text-xs mt-1">3 people</p>
+        </div>
+
+        <!-- You're Owed Card -->
+        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-3 shadow-lg">
+          <p class="text-green-100 text-xs mb-0.5">You're owed</p>
+          <p class="text-white text-lg font-bold">$180.25</p>
+          <p class="text-green-100 text-xs mt-1">2 people</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="mb-3">
+        <h2 class="text-sm font-bold text-white mb-2">Quick Actions</h2>
+        <div class="grid grid-cols-3 gap-2">
+          <!-- New Expense -->
+          <button class="bg-white/95 backdrop-blur-sm rounded-lg p-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+            <div class="flex flex-col items-center gap-1">
+              <div class="w-8 h-8 bg-[#f07d40] rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <span class="text-xs font-semibold text-gray-800">Add</span>
+            </div>
+          </button>
+
+          <!-- Create Group -->
+          <button class="bg-white/95 backdrop-blur-sm rounded-lg p-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+            <div class="flex flex-col items-center gap-1">
+              <div class="w-8 h-8 bg-[#47a49e] rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <span class="text-xs font-semibold text-gray-800">Group</span>
+            </div>
+          </button>
+
+          <!-- Send Money -->
+          <button class="bg-white/95 backdrop-blur-sm rounded-lg p-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+            <div class="flex flex-col items-center gap-1">
+              <div class="w-8 h-8 bg-[#564740] rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span class="text-xs font-semibold text-gray-800">Pay</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Groups -->
+      <div class="mb-3 flex-1 overflow-hidden">
+        <h2 class="text-sm font-bold text-white mb-2">Active Groups</h2>
+        <div class="space-y-2">
+
+          <!-- Group 1 -->
+          <div class="bg-white/95 backdrop-blur-sm rounded-lg p-2.5 shadow-lg hover:shadow-xl transition-all cursor-pointer">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center text-sm">
+                  🏠
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-gray-800">Apartment</h3>
+                  <p class="text-xs text-gray-500">4 members</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-red-600 font-bold text-sm">-$125</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 2 -->
+          <div class="bg-white/95 backdrop-blur-sm rounded-lg p-2.5 shadow-lg hover:shadow-xl transition-all cursor-pointer">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-sm">
+                  ✈️
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-gray-800">Beach Trip</h3>
+                  <p class="text-xs text-gray-500">6 members</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-green-600 font-bold text-sm">+$95</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group 3 -->
+          <div class="bg-white/95 backdrop-blur-sm rounded-lg p-2.5 shadow-lg hover:shadow-xl transition-all cursor-pointer">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-sm">
+                  🍕
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-gray-800">Dinners</h3>
+                  <p class="text-xs text-gray-500">3 members</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-red-600 font-bold text-sm">-$43</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="mb-2">
+        <h2 class="text-sm font-bold text-white mb-2">Recent Activity</h2>
+        <div class="bg-white/95 backdrop-blur-sm rounded-lg p-2.5 shadow-lg">
+          <div class="space-y-2">
+
+            <!-- Activity 1 -->
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-3.5 h-3.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-gray-800 truncate">Sarah paid you</p>
+                <p class="text-xs text-gray-500">2h ago</p>
+              </div>
+              <p class="text-green-600 font-bold text-xs">+$45</p>
+            </div>
+
+            <!-- Activity 2 -->
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-3.5 h-3.5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-gray-800 truncate">You added Groceries</p>
+                <p class="text-xs text-gray-500">Yesterday</p>
+              </div>
+              <p class="text-gray-700 font-bold text-xs">$79</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
+    <div class="flex items-center justify-around max-w-2xl mx-auto">
+
+      <!-- Dashboard -->
+      <a href="/k-app/welcome" class="flex flex-col items-center gap-1 py-3 px-4 text-[#f07d40] transition-colors flex-1">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+        </svg>
+        <span class="text-xs font-semibold">Dashboard</span>
+      </a>
+
+      <!-- Groups -->
+      <a href="/k-app/groups" class="flex flex-col items-center gap-1 py-3 px-4 text-gray-500 hover:text-[#f07d40] transition-colors flex-1">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+        </svg>
+        <span class="text-xs font-semibold">Groups</span>
+      </a>
+
+      <!-- Activity -->
+      <a href="/k-app/activity" class="flex flex-col items-center gap-1 py-3 px-4 text-gray-500 hover:text-[#f07d40] transition-colors flex-1">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+        </svg>
+        <span class="text-xs font-semibold">Activity</span>
+      </a>
+
+      <!-- Wallet -->
+      <a href="/k-app/wallet" class="flex flex-col items-center gap-1 py-3 px-4 text-gray-500 hover:text-[#f07d40] transition-colors flex-1">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+        </svg>
+        <span class="text-xs font-semibold">Wallet</span>
+      </a>
+
+      <!-- Profile -->
+      <a href="/k-app/profile" class="flex flex-col items-center gap-1 py-3 px-4 text-gray-500 hover:text-[#f07d40] transition-colors flex-1">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+        </svg>
+        <span class="text-xs font-semibold">Profile</span>
+      </a>
+
+    </div>
+  </nav>
+
+</body>
+</html>
