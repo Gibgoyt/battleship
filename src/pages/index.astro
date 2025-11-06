@@ -24,57 +24,64 @@ export const prerender = true
         /* Scale down on smaller screens */
         @media (max-width: 1024px) {
           .phone-container {
-            transform: scale(0.8);
+            transform: scale(0.7);
           }
         }
 
         @media (max-width: 768px) {
           .phone-container {
-            transform: scale(0.6);
+            transform: scale(0.5);
+          }
+        }
+
+        @media (max-width: 640px) {
+          .phone-container {
+            transform: scale(0.4);
           }
         }
 
         @media (max-width: 480px) {
           .phone-container {
-            transform: scale(0.5);
+            transform: scale(0.35);
           }
         }
       </style>
 
-      <div class="relative px-4 sm:px-6 lg:px-12 py-12 overflow-visible"
+      <div class="relative px-6 sm:px-8 lg:px-12 py-8 sm:py-10 lg:py-12 overflow-visible"
            style="background: linear-gradient(to bottom right, #6b4e3d, #564740, #304445);">
 
         <!-- Content container - Flex row with text left and phones right -->
         <div class="flex flex-col lg:flex-row items-center justify-center gap-8 relative max-w-7xl mx-auto">
 
           <!-- Left side: Logo and Text -->
-          <div class="flex flex-col items-center justify-center gap-8 mt-4 w-full lg:w-auto lg:flex-1">
+          <div class="flex flex-col items-center justify-center gap-4 sm:gap-6 lg:gap-8 mt-2 sm:mt-4 w-full lg:w-auto lg:flex-1">
             <!-- Logo -->
-            <img src="/splitdo/logo_light.svg" alt="SplitDo Logo" class="h-32 w-auto dark:hidden">
-            <img src="/splitdo/logo_dark.svg" alt="SplitDo Logo" class="h-32 w-auto hidden dark:block">
+            <img src="/splitdo/logo_light.svg" alt="SplitDo Logo" class="h-24 sm:h-28 lg:h-32 w-auto dark:hidden">
+            <img src="/splitdo/logo_dark.svg" alt="SplitDo Logo" class="h-24 sm:h-28 lg:h-32 w-auto hidden dark:block">
 
             <!-- Text -->
             <div class="flex flex-col gap-2 w-full text-center">
-              <h2 class="text-5xl lg:text-6xl font-extrabold text-[#f07d40] tracking-wider whitespace-nowrap">
+              <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#f07d40] tracking-normal sm:tracking-wide lg:tracking-wider">
                 Split Bills Instantly.
               </h2>
-              <h2 class="text-5xl lg:text-6xl font-extrabold text-[#47a49e] tracking-wider whitespace-nowrap">
+              <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#47a49e] tracking-normal sm:tracking-wide lg:tracking-wider">
                 Settle Up on Solana.
               </h2>
-              <p class="text-xl lg:text-2xl mt-4 leading-loose text-white dark:text-gray-200">
+              <p class="text-base sm:text-lg lg:text-xl mt-4 leading-relaxed text-white dark:text-gray-200">
                The fastest way to split expenses and settle balances. <br> Powered by Solana for near-zero fees and instant transfer.
               </p>
             </div>
                <div class="flex flex-col sm:flex-row gap-4 justify-center">
 
               <a href="/groups/new"
-                class="inline-flex items-center justify-center px-4 py-2 text-white dark:text-gray-200 text-lg font-semibold rounded-xl transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform"
+                class="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 text-white dark:text-gray-200 text-base sm:text-lg font-semibold rounded-xl transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform"
                 style="background-color: var(--color-primary);">
-                Start Splitting Bills (It's Free)
+                <span class="hidden sm:inline">Start Splitting Bills (It's Free)</span>
+                <span class="sm:hidden">Get Started Free</span>
               </a>
 
                 <a href="/how-it-works"
-                   class="px-8 py-4 bg-white dark:bg-gray-200 text-black text-lg font-medium rounded-xl hover:white dark:hover:bg-gray-200 transition-colors shadow-lg hover:shadow-xl border border-gray-300 transform hover:scale-105 transition-transform">
+                   class="px-6 py-3 sm:px-8 sm:py-4 bg-white dark:bg-gray-200 text-black text-base sm:text-lg font-medium rounded-xl hover:white dark:hover:bg-gray-200 transition-colors shadow-lg hover:shadow-xl border border-gray-300 transform hover:scale-105 transition-transform">
                     Learn How It Works
                 </a>
             </div>
@@ -84,7 +91,7 @@ export const prerender = true
           <div class="flex justify-center items-center overflow-visible w-full lg:w-auto lg:flex-1">
 
             <!-- Inner wrapper with flexible dimensions to lock phone positions -->
-            <div class="relative overflow-visible phone-container" style="width: 500px; height: 500px;">
+            <div class="relative overflow-visible phone-container w-full max-w-[300px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px] mx-auto" style="height: 400px;">
 
               <!-- RIGHT Phone (back phone, front-facing) -->
               <div class="absolute overflow-visible" style="right: 30px; top: 20px; z-index: 1;">
@@ -209,7 +216,7 @@ export const prerender = true
       </p>
 
       <!-- Phone Mockup -->
-      <div class="relative overflow-hidden w-[280px] sm:w-[340px] lg:w-[380px] h-[350px]">
+      <div class="relative overflow-hidden max-w-[280px] sm:max-w-[340px] lg:max-w-[380px] w-full h-[350px] mx-auto">
         <div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[520px] mx-auto">
 
           <!-- Top bar -->
@@ -255,7 +262,7 @@ export const prerender = true
       </p>
 
       <!-- Phone Mockup -->
-      <div class="relative overflow-hidden w-[280px] sm:w-[340px] lg:w-[380px] h-[350px]">
+      <div class="relative overflow-hidden max-w-[280px] sm:max-w-[340px] lg:max-w-[380px] w-full h-[350px] mx-auto">
         <div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[520px] mx-auto">
           
           <!-- Top bar -->
@@ -299,7 +306,7 @@ export const prerender = true
 Intelligent algorithms automatically calculate fair splits. Handle unequal shares, tips, taxes, and complex expense scenarios with precision.  </p>
 
       <!-- Phone Mockup -->
-      <div class="relative overflow-hidden w-[280px] sm:w-[340px] lg:w-[380px] h-[350px]">
+      <div class="relative overflow-hidden max-w-[280px] sm:max-w-[340px] lg:max-w-[380px] w-full h-[350px] mx-auto">
         <div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[520px] mx-auto">
           
           <!-- Top bar -->
@@ -344,7 +351,7 @@ Intelligent algorithms automatically calculate fair splits. Handle unequal share
       </p>
 
       <!-- Phone Mockup -->
-      <div class="relative overflow-hidden w-[280px] sm:w-[340px] lg:w-[380px] h-[350px]">
+      <div class="relative overflow-hidden max-w-[280px] sm:max-w-[340px] lg:max-w-[380px] w-full h-[350px] mx-auto">
         <div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[520px] mx-auto">
           
           <!-- Top bar -->
@@ -388,7 +395,7 @@ Intelligent algorithms automatically calculate fair splits. Handle unequal share
 	  </p>
 
       <!-- Phone Mockup -->
-      <div class="relative overflow-hidden w-[280px] sm:w-[340px] lg:w-[380px] h-[350px]">
+      <div class="relative overflow-hidden max-w-[280px] sm:max-w-[340px] lg:max-w-[380px] w-full h-[350px] mx-auto">
         <div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[520px] mx-auto">
           
           <!-- Top bar -->
@@ -432,7 +439,7 @@ Intelligent algorithms automatically calculate fair splits. Handle unequal share
 	  </p>
 
       <!-- Phone Mockup -->
-      <div class="relative overflow-hidden w-[280px] sm:w-[340px] lg:w-[380px] h-[350px]">
+      <div class="relative overflow-hidden max-w-[280px] sm:max-w-[340px] lg:max-w-[380px] w-full h-[350px] mx-auto">
         <div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[520px] mx-auto">
           
           <!-- Top bar -->
