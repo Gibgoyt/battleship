@@ -29,7 +29,8 @@ const { title } = Astro.props;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
-    
+    <link rel="stylesheet" href="https://use.typekit.net/zog4rto.css">
+
     <style define:vars={customColors}>
         /* Define custom CSS variables globally from the passed frontmatter variables */
         :root {
@@ -80,8 +81,22 @@ const { title } = Astro.props;
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
             <div class="flex items-center space-x-4">
-                <a href="/" class="flex items-center">
-                    <img src="/splitdo/full_logo.JPG" alt="SplitDo Company Logo" class="h-16 w-auto">
+                <a href="/" class="flex items-center gap-2">
+                    <!-- Light mode logo -->
+                    <img src="/splitdo/logo_light.svg" alt="SplitDo Logo" class="h-12 w-auto dark:hidden">
+                    <!-- Dark mode logo -->
+                    <img src="/splitdo/logo_dark.svg" alt="SplitDo Logo" class="h-12 w-auto hidden dark:block">
+                    <!-- Text with vertical stretch -->
+                    <span class="font-bold text-2xl tracking-wide" style="font-family: 'houschka-rounded', sans-serif; font-weight: 700; transform: scaleY(1.1); transform-origin: center;">
+                        <!-- Light mode text -->
+                        <span class="dark:hidden">
+                            <span style="color: #564740;">SPLIT</span><span style="color: #47a49e;">DO</span>
+                        </span>
+                        <!-- Dark mode text -->
+                        <span class="hidden dark:inline">
+                            <span style="color: #47a49e;">SPLIT</span><span style="color: #f07d40;">DO</span>
+                        </span>
+                    </span>
                 </a>
             </div>
 
