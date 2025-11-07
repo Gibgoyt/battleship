@@ -10,7 +10,7 @@ export const prerender = true
 
 	<main>
 <!-- Hero Section - Side by Side (Text Left, Phones Right) -->
-    <section class="w-full mb-16 overflow-visible">
+    <section class="w-full overflow-visible border-b-[10px] border-[#47a49e]">
       <style>
         :root {
             --color-background: #564740; /* Dark Background */
@@ -24,30 +24,30 @@ export const prerender = true
         /* Scale down on smaller screens */
         @media (max-width: 1024px) {
           .phone-container {
-            transform: scale(0.7);
+            transform: scale(0.65);
           }
         }
 
         @media (max-width: 768px) {
           .phone-container {
-            transform: scale(0.5);
+            transform: scale(0.6);
           }
         }
 
         @media (max-width: 640px) {
           .phone-container {
-            transform: scale(0.4);
+            transform: scale(0.55);
           }
         }
 
         @media (max-width: 480px) {
           .phone-container {
-            transform: scale(0.35);
+            transform: scale(0.5);
           }
         }
       </style>
 
-      <div class="relative px-6 sm:px-8 lg:px-12 py-8 sm:py-10 lg:py-12 overflow-visible"
+      <div class="relative px-6 sm:px-8 lg:px-12 py-8 sm:py-10 lg:py-12 pb-16 sm:pb-20 lg:pb-24 overflow-visible"
            style="background: linear-gradient(to bottom right, #6b4e3d, #564740, #304445);">
 
         <!-- Content container - Flex row with text left and phones right -->
@@ -55,10 +55,7 @@ export const prerender = true
 
           <!-- Left side: Logo and Text -->
           <div class="flex flex-col items-center justify-center gap-4 sm:gap-6 lg:gap-8 mt-2 sm:mt-4 w-full lg:w-auto lg:flex-1">
-            <!-- Logo -->
-            <img src="/splitdo/logo_light.svg" alt="SplitDo Logo" class="h-24 sm:h-28 lg:h-32 w-auto dark:hidden">
-            <img src="/splitdo/logo_dark.svg" alt="SplitDo Logo" class="h-24 sm:h-28 lg:h-32 w-auto hidden dark:block">
-
+  
             <!-- Text -->
             <div class="flex flex-col gap-2 w-full text-center">
               <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#f07d40] tracking-normal sm:tracking-wide lg:tracking-wider">
@@ -67,8 +64,8 @@ export const prerender = true
               <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#47a49e] tracking-normal sm:tracking-wide lg:tracking-wider">
                 Settle Up on Solana.
               </h2>
-              <p class="text-base sm:text-lg lg:text-xl mt-4 leading-relaxed text-white dark:text-gray-200">
-               The fastest way to split expenses and settle balances. <br> Powered by Solana for near-zero fees and instant transfer.
+              <p class="text-base sm:text-lg lg:text-xl mt-4 leading-relaxed text-white dark:text-gray-200 text-balance">
+               The fastest way to split expenses and settle balances. Powered by Solana for near-zero fees and instant transfer.
               </p>
             </div>
                <div class="flex flex-col sm:flex-row gap-4 justify-center">
@@ -91,10 +88,10 @@ export const prerender = true
           <div class="flex justify-center items-center overflow-visible w-full lg:w-auto lg:flex-1">
 
             <!-- Inner wrapper with flexible dimensions to lock phone positions -->
-            <div class="relative overflow-visible phone-container w-full max-w-[300px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px] mx-auto" style="height: 400px;">
+            <div class="relative overflow-visible phone-container w-full max-w-[300px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px] mx-auto" style="height: 320px;">
 
               <!-- RIGHT Phone (back phone, front-facing) -->
-              <div class="absolute overflow-visible" style="right: 30px; top: 20px; z-index: 1;">
+              <div class="absolute overflow-visible" style="right: 30px; top: -70px; z-index: 1;">
                 <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-100 h-auto">
                   <g transform="matrix(0.95, 0.08, 0.25, 1.05, 80, 80)">
                     <!-- 3D Edge -->
@@ -137,7 +134,7 @@ export const prerender = true
               </div>
 
               <!-- LEFT Phone (front phone, angled left) -->
-              <div class="absolute overflow-visible" style="left: 80px; top: -20px; z-index: 0;">
+              <div class="absolute overflow-visible" style="left: 80px; top: -110px; z-index: 0;">
                 <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-100 h-auto">
                   <g transform="matrix(0.9, -0.08, -0.15, 1.05, 200, 80)">
                     <!-- 3D Edge -->
@@ -188,9 +185,9 @@ export const prerender = true
       </div>
     </section>
 
-<section class="w-full bg-[#f07d40] dark:bg-[#564740]">
+<section class="w-full">
 
-<div class="max-w-6xl mx-auto">
+<div class="w-full">
 <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
 
   <!-- 1. Smart Group Management (BROWN) -->
@@ -467,7 +464,7 @@ Intelligent algorithms automatically calculate fair splits. Handle unequal share
 </section>
 
 		<!-- How It Works Section -->
-		<section class="py-16 lg:py-24 bg-white dark:bg-gray-200 border-t border-[#47a49e] border-b border-[#47a49e]">
+		<section class="py-16 lg:py-24 bg-white dark:bg-gray-200 border-b border-[#47a49e]">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div class="text-center mb-12">
 					<h2 class="text-3xl lg:text-4xl font-bold mb-4 text-black">
