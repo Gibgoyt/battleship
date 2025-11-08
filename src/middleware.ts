@@ -29,7 +29,7 @@ export const onRequest = defineMiddleware(async (
   ].some((item: string): boolean => {
     return (url.pathname === item)
   }) || [
-    '/pricing'
+    '/download'
   ].some((item: string): boolean => {
     return (url.pathname.startsWith(item))
   })

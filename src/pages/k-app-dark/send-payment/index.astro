@@ -18,7 +18,7 @@ export const prerender = true;
       <section class="px-4 py-4 h-full overflow-y-auto">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
-          <a href="/k-app/welcome" class="text-white/70 hover:text-white transition-colors">
+          <a href="/k-app-dark/welcome" class="text-white/70 hover:text-white transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="m15 18-6-6 6-6"/>
             </svg>
@@ -151,7 +151,7 @@ export const prerender = true;
 
             <!-- Cancel Button -->
             <a
-              href="/k-app/welcome"
+              href="/k-app-dark/welcome"
               class="block w-full px-6 py-4 bg-white/95 hover:bg-white text-[#564740] font-medium rounded-xl shadow-lg text-center transition-all"
             >
               Cancel
@@ -236,7 +236,7 @@ export const prerender = true;
           const amount = amountInput.value;
           // In a real app, this would process the payment
           alert(`Payment of $${amount} sent to ${person}!`);
-          window.location.href = '/k-app/welcome';
+          window.location.href = '/k-app-dark/welcome';
         });
       }
     </script>
