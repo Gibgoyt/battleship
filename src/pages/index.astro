@@ -1,6 +1,7 @@
 ---
 import Layout from 'src/layouts/Layout.astro';
 import HeroPhones from 'src/components/HeroPhones.astro';
+import WhitePhoneHero from 'src/components/WhitePhoneHero.astro';
 
 // export static HTML
 export const prerender = true
@@ -16,34 +17,6 @@ export const prerender = true
             --color-background: #564740; /* Dark Background */
             --color-primary: #f07d40;    /* Primary Orange Accent */
             --color-secondary: #47a49e;  /* Secondary Teal Accent */
-        }
-        .phone-container {
-          transform-origin: center;
-        }
-
-        /* Scale down on smaller screens */
-        @media (max-width: 1024px) {
-          .phone-container {
-            transform: scale(0.65);
-          }
-        }
-
-        @media (max-width: 768px) {
-          .phone-container {
-            transform: scale(0.6);
-          }
-        }
-
-        @media (max-width: 640px) {
-          .phone-container {
-            transform: scale(0.55);
-          }
-        }
-
-        @media (max-width: 480px) {
-          .phone-container {
-            transform: scale(0.5);
-          }
         }
       </style>
 
@@ -86,99 +59,7 @@ export const prerender = true
 
           <!-- Right side: Phones container - two phones -->
           <div class="flex justify-center items-center overflow-visible w-full lg:w-auto lg:flex-1">
-
-            <!-- Inner wrapper with flexible dimensions to lock phone positions -->
-            <div class="relative overflow-visible phone-container w-full max-w-[300px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px] mx-auto" style="height: 320px;">
-
-              <!-- RIGHT Phone (back phone, front-facing) -->
-              <div class="absolute overflow-visible" style="right: 30px; top: -70px; z-index: 1;">
-                <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-100 h-auto">
-                  <g transform="matrix(0.95, 0.08, 0.25, 1.05, 80, 80)">
-                    <!-- 3D Edge -->
-                    <g>
-                      <path d="M 0 50 L -15 50 L -15 630 L 0 630 L 0 50 Z" fill="#B8BABE" opacity="0.9"/>
-                      <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -15 0, -15 50 L 0 50 Z" fill="#A0A4A8" opacity="0.8"/>
-                      <path d="M 0 630 L -15 630 A 50 50 0 0 0 40 680 L 55 680 A 50 50 0 0 1 0 630 Z" fill="#A0A4A8" opacity="0.8"/>
-                    </g>
-                    <rect x="0" y="0" width="335" height="680" rx="50" fill="#E5E7EB"/>
-                    <rect x="4" y="4" width="327" height="672" rx="46" fill="#F3F4F6"/>
-                    <g>
-                      <rect x="12" y="12" width="311" height="656" rx="42" fill="#000000"/>
-                      <mask id="screen-mask-hero-right">
-                        <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
-                        <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
-                      </mask>
-                      <image
-                        x="12"
-                        y="12"
-                        width="311"
-                        height="656"
-                        href="/APP.webp"
-                        preserveAspectRatio="xMidYMid slice"
-                        mask="url(#screen-mask-hero-right)"
-                      />
-                    </g>
-                    <g>
-                      <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#E5E7EB"/>
-                      <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#D1D5DB"/>
-                      <rect x="155" y="18" width="30" height="4" rx="2" fill="#9CA3AF"/>
-                      <circle cx="180" cy="20" r="4.5" fill="#9CA3AF"/>
-                      <circle cx="180" cy="20" r="2.5" fill="#6B7280"/>
-                    </g>
-                    <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#D1D5DB"/>
-                    <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
-                    <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
-                    <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#D1D5DB"/>
-                  </g>
-                </svg>
-              </div>
-
-              <!-- LEFT Phone (front phone, angled left) -->
-              <div class="absolute overflow-visible" style="left: 80px; top: -110px; z-index: 0;">
-                <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-100 h-auto">
-                  <g transform="matrix(0.9, -0.08, -0.15, 1.05, 200, 80)">
-                    <!-- 3D Edge -->
-                    <g>
-                      <path d="M 335 50 L 350 50 L 350 630 L 335 630 L 335 50 Z" fill="#B8BABE" opacity="0.9"/>
-                      <path d="M 335 50 Q 335 0, 285 0 L 300 0 Q 350 0, 350 50 L 335 50 Z" fill="#A0A4A8" opacity="0.8"/>
-                      <path d="M 335 630 L 350 630 A 50 50 0 0 1 300 680 L 285 680 A 50 50 0 0 0 335 630 Z" fill="#A0A4A8" opacity="0.8"/>
-                    </g>
-                    <rect x="0" y="0" width="335" height="680" rx="50" fill="#E5E7EB"/>
-                    <rect x="4" y="4" width="327" height="672" rx="46" fill="#F3F4F6"/>
-                    <g>
-                      <rect x="12" y="12" width="311" height="656" rx="42" fill="#000000"/>
-                      <mask id="screen-mask-hero-left">
-                        <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
-                        <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
-                      </mask>
-                      <image
-                        x="12"
-                        y="12"
-                        width="311"
-                        height="656"
-                        href="/APP.webp"
-                        preserveAspectRatio="xMidYMid slice"
-                        mask="url(#screen-mask-hero-left)"
-                      />
-                    </g>
-                    <g>
-                      <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#E5E7EB"/>
-                      <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#D1D5DB"/>
-                      <rect x="155" y="18" width="30" height="4" rx="2" fill="#9CA3AF"/>
-                      <circle cx="180" cy="20" r="4.5" fill="#9CA3AF"/>
-                      <circle cx="180" cy="20" r="2.5" fill="#6B7280"/>
-                    </g>
-                    <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#D1D5DB"/>
-                    <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
-                    <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
-                    <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#D1D5DB"/>
-                  </g>
-                </svg>
-
-              </div>
-
-            </div>
-
+            <WhitePhoneHero />
           </div>
 
         </div>
@@ -510,19 +391,19 @@ Intelligent algorithms automatically calculate fair splits. Handle unequal share
 		</section>
 
 		<!-- CTA Section -->
-		<section class="py-16 lg:py-24 bg-black">
+		<section class="py-16 lg:py-24 bg-gradient-to-br from-[#564740] to-[#47a49e] text-white dark:text-gray-200">
 			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-				<h2 class="text-3xl lg:text-4xl font-bold mb-4 text-white dark:text-gray-200">
+				<h2 class="text-3xl lg:text-4xl font-bold mb-4">
 					Ready to Split Expenses?
 				</h2>
-				<p class="text-lg text-white dark:text-gray-200 mb-8">
+				<p class="text-xl mb-8 opacity-90">
 					Join thousands of groups using SplitDo to manage expenses and settle debts seamlessly on Solana.
 				</p>
 				<div class="flex flex-col sm:flex-row gap-4 justify-center">
-					<a href="/groups/new" class="px-8 py-4 bg-[#47a49e] text-white text-lg rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-transform">
+					<a href="/groups/new" class="px-8 py-4 bg-white dark:bg-gray-200 text-[#f07d40] text-lg rounded-lg hover:scale-105 transition-transform shadow-lg hover:shadow-xl font-semibold">
 						Start Splitting Expenses
 					</a>
-					<a href="/demo" class="px-8 py-4 bg-white dark:bg-gray-200 text-black text-lg rounded-lg  hover:shadow-xl transform hover:scale-105 transition-transform shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700">
+					<a href="/demo" class="px-8 py-4 bg-transparent text-white dark:text-gray-200 text-lg rounded-lg hover:bg-white/10 transition-colors border-2 border-white dark:border-gray-200">
 						See How It Works
 					</a>
 				</div>
