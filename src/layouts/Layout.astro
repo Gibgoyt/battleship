@@ -29,7 +29,8 @@ const { title } = Astro.props;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
-    
+    <link rel="stylesheet" href="https://use.typekit.net/zog4rto.css">
+
     <style define:vars={customColors}>
         /* Define custom CSS variables globally from the passed frontmatter variables */
         :root {
@@ -76,20 +77,34 @@ const { title } = Astro.props;
     </script>
 </head>
 <body class="text-gray-900 dark:text-gray-100 transition-colors duration-300">
-<header class="border-b-4 border-[#47a49e] dark:border-header-dark bg-[#f07d40] dark:bg-header-dark shadow-md">
+<header class="border-b-4 border-[#47a49e] dark:border-[#f07d40] bg-[#f07d40] dark:bg-[#564740] shadow-md">
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
             <div class="flex items-center space-x-4">
-                <a href="/" class="flex items-center">
-                    <img src="/splitdo/full_logo.JPG" alt="SplitDo Company Logo" class="h-16 w-auto">
+                <a href="/" class="flex items-center gap-2">
+                    <!-- Light mode logo -->
+                    <img src="/splitdo/logo_light.svg" alt="SplitDo Logo" class="h-12 w-auto dark:hidden">
+                    <!-- Dark mode logo -->
+                    <img src="/splitdo/logo_dark.svg" alt="SplitDo Logo" class="h-12 w-auto hidden dark:block">
+                    <!-- Text with vertical stretch -->
+                    <span class="font-bold text-2xl tracking-wide" style="font-family: 'houschka-rounded', sans-serif; font-weight: 700; transform: scaleY(1.1); transform-origin: center;">
+                        <!-- Light mode text -->
+                        <span class="dark:hidden">
+                            <span style="color: #564740;">SPLIT</span><span style="color: #47a49e;">DO</span>
+                        </span>
+                        <!-- Dark mode text -->
+                        <span class="hidden dark:inline">
+                            <span style="color: #47a49e;">SPLIT</span><span style="color: #f07d40;">DO</span>
+                        </span>
+                    </span>
                 </a>
             </div>
 
             <div class="hidden md:flex items-center space-x-8">
-                <a href="/" class="text-black hover:scale-120 transition-transform">Home</a>
-                <a href="/features" class="text-black hover:scale-120 transition-transform">Features</a>
-                <a href="/pricing" class="text-black hover:scale-120 transition-transform">Download</a>
-                <a href="/about" class="text-black hover:scale-120 transition-transform">About Us</a>
+                <a href="/" class="text-black dark:text-gray-200 over:scale-120 transition-transform">Home</a>
+                <a href="/features" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">Features</a>
+                <a href="/download" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">Download</a>
+                <a href="/about" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">About Us</a>
                                 
                 <a href="/app/dashboard" 
                    class="px-4 py-2 text-white rounded-lg transition-colors shadow-md bg-primary-hover"
@@ -123,28 +138,29 @@ const { title } = Astro.props;
         </div>
 
         <div class="md:hidden hidden" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 border-t border-gray-200 dark:border-header-dark bg-white dark:bg-header-dark">
-                <a href="/" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Home</a>
-                <a href="/features" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Features</a>
-                <a href="/pricing" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Download</a>
-                <a href="/about" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">About</a>
-                <a href="/privacy" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Privacy</a>
+            <div class="px-2 pt-2 pb-3 space-y-1 border-t border-[#47a49e] dark:border-[#f07d40] bg-[#f07d40] dark:bg-[#564740]">
+                <a href="/" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Home</a>
+                <a href="/features" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Features</a>
+                <a href="/download" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Download</a>
+                <a href="/about" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">About</a>
+                <a href="/privacy" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Privacy</a>
                 
-                <a href="/app/dashboard" 
+                <a href="/app/dashboard"
                    class="block mx-3 my-2 px-4 py-2 text-white rounded-lg transition-colors text-center shadow-md bg-primary-hover"
                    style={`background-color: ${customColors.primary};`}>
                     Go To App
                 </a>
-
-                <div class="flex justify-center py-2">
-                    <DarkModeToggle client:load />
-                </div>
             </div>
         </div>
     </nav>
 </header>
 
 <slot />
+
+<!-- Fixed Dark Mode Toggle for Mobile - Bottom Right -->
+<div class="md:hidden fixed bottom-8 right-4 z-50">
+    <DarkModeToggle client:load />
+</div>
 
 <!-- FOOTER: Added after slot and styled using CSS variables -->
 <footer class="border-t dark:border-gray-800 py-12" 

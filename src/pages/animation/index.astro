@@ -1,0 +1,991 @@
+---
+import Layout from 'src/layouts/Layout.astro';
+
+export const prerender = true
+---
+
+<Layout title="Animation Demo - SplitDo">
+  <main class="bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-hidden">
+
+    <!-- SECTION 1: Split Animation -->
+    <section class="min-h-screen flex items-center justify-center border-b-2 border-gray-300 dark:border-gray-700">
+      <div class="text-center">
+        <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4 opacity-0" id="title-1">Animation 1: The Split</h1>
+        <p class="text-xl text-gray-700 dark:text-gray-300 mb-12 opacity-0" id="subtitle-1">Watch funds split and reunite</p>
+
+        <div class="flex justify-center items-center" style="min-height: 600px; position: relative;">
+          <svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" id="animated-logo-1">
+            <defs>
+              <clipPath id="rounded-clip-1">
+                <rect x="80" y="240" width="240" height="240" rx="30"/>
+              </clipPath>
+            </defs>
+
+            <circle cx="200" cy="120" r="80" fill="#f07d40" id="logo-head-1" style="opacity: 0;"/>
+
+            <g clip-path="url(#rounded-clip-1)" id="logo-body-1" style="opacity: 0;">
+              <rect x="80" y="240" width="240" height="240" fill="#f07d40"/>
+            </g>
+
+            <g clip-path="url(#rounded-clip-1)" id="orange-triangle-1" style="opacity: 0;">
+              <path d="M 80 240 L 320 240 L 80 480 Z" fill="#f07d40"/>
+            </g>
+
+            <g clip-path="url(#rounded-clip-1)" id="teal-triangle-1" style="opacity: 0;">
+              <path d="M 320 240 L 320 480 L 80 480 Z" fill="#47a49e"/>
+            </g>
+          </svg>
+        </div>
+
+        <button id="replay-btn-1" class="mt-8 px-8 py-4 bg-gradient-to-r from-orange-500 to-teal-500 text-white dark:text-gray-100 text-lg font-semibold rounded-full hover:scale-105 transition-transform shadow-xl opacity-0">
+          Replay Animation 1
+        </button>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Merge Animation Options -->
+    <section class="min-h-screen flex items-center justify-center border-b-2 border-gray-300 dark:border-gray-700">
+      <div class="text-center">
+        <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4 opacity-0" id="title-2">Animation 2: The Merge</h1>
+        <p class="text-xl text-gray-700 dark:text-gray-300 mb-12 opacity-0" id="subtitle-2">Two halves become one</p>
+
+        <div class="flex justify-center items-center" style="min-height: 600px; position: relative;">
+          <svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" id="animated-logo-2">
+            <defs>
+              <clipPath id="rounded-clip-2">
+                <rect x="80" y="240" width="240" height="240" rx="30"/>
+              </clipPath>
+            </defs>
+
+            <circle cx="200" cy="120" r="80" fill="#f07d40" id="logo-head-2" style="opacity: 0;"/>
+
+            <g clip-path="url(#rounded-clip-2)" id="orange-triangle-2" style="opacity: 0;">
+              <path d="M 80 240 L 320 240 L 80 480 Z" fill="#f07d40"/>
+            </g>
+
+            <g clip-path="url(#rounded-clip-2)" id="teal-triangle-2" style="opacity: 0;">
+              <path d="M 320 240 L 320 480 L 80 480 Z" fill="#47a49e"/>
+            </g>
+          </svg>
+        </div>
+
+        <button id="replay-btn-2" class="mt-8 px-8 py-4 bg-gradient-to-r from-orange-500 to-teal-500 text-white dark:text-gray-100 text-lg font-semibold rounded-full hover:scale-105 transition-transform shadow-xl opacity-0">
+          Replay Animation 2
+        </button>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Unfold Animation -->
+    <section class="min-h-screen flex items-center justify-center border-b-2 border-gray-300 dark:border-gray-700">
+      <div class="text-center">
+        <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4 opacity-0" id="title-3">Animation 3: The Unfold</h1>
+        <p class="text-xl text-gray-700 dark:text-gray-300 mb-12 opacity-0" id="subtitle-3">Watch the colors reveal</p>
+
+        <div class="flex justify-center items-center" style="min-height: 600px; position: relative;">
+          <svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" id="animated-logo-3">
+            <defs>
+              <clipPath id="rounded-clip-3">
+                <rect x="80" y="240" width="240" height="240" rx="30"/>
+              </clipPath>
+            </defs>
+
+            <circle cx="200" cy="120" r="80" fill="#f07d40" id="logo-head-3" style="opacity: 0; transform-origin: 200px 120px;"/>
+
+            <!-- Full orange square that slides in -->
+            <g clip-path="url(#rounded-clip-3)" id="orange-square-3" style="opacity: 0;">
+              <rect x="80" y="240" width="240" height="240" fill="#f07d40"/>
+            </g>
+
+            <!-- Orange triangle (left part) - revealed after square -->
+            <g clip-path="url(#rounded-clip-3)" id="orange-triangle-3" style="opacity: 0;">
+              <path d="M 80 240 L 320 240 L 80 480 Z" fill="#f07d40"/>
+            </g>
+
+            <!-- Teal triangle that flips out of the orange square like a page turning -->
+            <g clip-path="url(#rounded-clip-3)" id="teal-flip-3" style="opacity: 0; transform-style: preserve-3d;">
+              <path d="M 320 240 L 320 480 L 80 480 Z" fill="#47a49e"/>
+            </g>
+          </svg>
+        </div>
+
+        <button id="replay-btn-3" class="mt-8 px-8 py-4 bg-gradient-to-r from-orange-500 to-teal-500 text-white dark:text-gray-100 text-lg font-semibold rounded-full hover:scale-105 transition-transform shadow-xl opacity-0">
+          Replay Animation 3
+        </button>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Orbit Animation -->
+    <section class="min-h-screen flex items-center justify-center border-b-2 border-gray-300 dark:border-gray-700">
+      <div class="text-center">
+        <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4 opacity-0" id="title-4">Animation 4: The Orbit</h1>
+        <p class="text-xl text-gray-700 dark:text-gray-300 mb-12 opacity-0" id="subtitle-4">Pieces spiral into place</p>
+
+        <div class="flex justify-center items-center" style="min-height: 600px; position: relative;">
+          <svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" id="animated-logo-4">
+            <defs>
+              <clipPath id="rounded-clip-4">
+                <rect x="80" y="240" width="240" height="240" rx="30"/>
+              </clipPath>
+            </defs>
+
+            <circle cx="200" cy="120" r="80" fill="#f07d40" id="logo-head-4" style="opacity: 0; transform-origin: 200px 120px;"/>
+
+            <g clip-path="url(#rounded-clip-4)" id="orange-triangle-4" style="opacity: 0;">
+              <path d="M 80 240 L 320 240 L 80 480 Z" fill="#f07d40"/>
+            </g>
+
+            <g clip-path="url(#rounded-clip-4)" id="teal-triangle-4" style="opacity: 0;">
+              <path d="M 320 240 L 320 480 L 80 480 Z" fill="#47a49e"/>
+            </g>
+          </svg>
+        </div>
+
+        <button id="replay-btn-4" class="mt-8 px-8 py-4 bg-gradient-to-r from-orange-500 to-teal-500 text-white dark:text-gray-100 text-lg font-semibold rounded-full hover:scale-105 transition-transform shadow-xl opacity-0">
+          Replay Animation 4
+        </button>
+      </div>
+    </section>
+
+    <!-- SECTION 5: Diagonal Slide Animation -->
+    <section class="min-h-screen flex items-center justify-center">
+      <div class="text-center">
+        <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4 opacity-0" id="title-5">Animation 5: The Diagonal</h1>
+        <p class="text-xl text-gray-700 dark:text-gray-300 mb-12 opacity-0" id="subtitle-5">Sliding into place</p>
+
+        <div class="flex justify-center items-center" style="min-height: 600px; position: relative;">
+          <svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" id="animated-logo-5">
+            <defs>
+              <clipPath id="rounded-clip-5">
+                <rect x="80" y="240" width="240" height="240" rx="30"/>
+              </clipPath>
+            </defs>
+
+            <circle cx="200" cy="120" r="80" fill="#f07d40" id="logo-head-5" style="opacity: 0; transform-origin: 200px 120px;"/>
+
+            <!-- Orange triangle slides from top-left -->
+            <g clip-path="url(#rounded-clip-5)" id="orange-triangle-5" style="opacity: 0;">
+              <path d="M 80 240 L 320 240 L 80 480 Z" fill="#f07d40"/>
+            </g>
+
+            <!-- Teal triangle slides from bottom-right -->
+            <g clip-path="url(#rounded-clip-5)" id="teal-triangle-5" style="opacity: 0;">
+              <path d="M 320 240 L 320 480 L 80 480 Z" fill="#47a49e"/>
+            </g>
+          </svg>
+        </div>
+
+        <button id="replay-btn-5" class="mt-8 px-8 py-4 bg-gradient-to-r from-orange-500 to-teal-500 text-white dark:text-gray-100 text-lg font-semibold rounded-full hover:scale-105 transition-transform shadow-xl opacity-0">
+          Replay Animation 5
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <style>
+    /* Title animations */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Head drops from above */
+    @keyframes dropIn {
+      0% {
+        opacity: 0;
+        transform: translateY(-400px) scale(0.3);
+      }
+      50% {
+        opacity: 1;
+      }
+      70% {
+        transform: translateY(10px) scale(1.1);
+      }
+      85% {
+        transform: translateY(-5px) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Orange square appears */
+    @keyframes fadeInGrow {
+      0% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Orange triangle splits to top-left */
+    @keyframes splitOrange {
+      0% {
+        opacity: 0;
+        transform: translate(0, 0);
+      }
+      30% {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+      70% {
+        opacity: 1;
+        transform: translate(-30px, -30px);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+    }
+
+    /* Teal triangle splits to bottom-right */
+    @keyframes splitTeal {
+      0% {
+        opacity: 0;
+        transform: translate(0, 0);
+      }
+      30% {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+      70% {
+        opacity: 1;
+        transform: translate(30px, 30px);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+    }
+
+    /* Section 2: Orange triangle slides in from left */
+    @keyframes slideFromLeft {
+      0% {
+        opacity: 0;
+        transform: translateX(-400px) rotate(-45deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0) rotate(0deg);
+      }
+    }
+
+    /* Section 2: Teal triangle slides in from right */
+    @keyframes slideFromRight {
+      0% {
+        opacity: 0;
+        transform: translateX(400px) rotate(45deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0) rotate(0deg);
+      }
+    }
+
+    /* Section 3: Head grows from tiny dot at its position (no movement) */
+    @keyframes growInPlace {
+      0% {
+        opacity: 1;
+        transform: scale(0);
+      }
+      70% {
+        opacity: 1;
+        transform: scale(1.05);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Section 3: Orange square slides in from left */
+    @keyframes slideInFromLeft {
+      0% {
+        opacity: 0;
+        transform: translateX(-400px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Section 3: Teal layer fades in */
+    @keyframes tealReveal {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    /* Section 3: Teal triangle flips in along diagonal axis like a page turning */
+    @keyframes diagonalPageFlip {
+      0% {
+        opacity: 0;
+        transform: perspective(1500px) rotateY(-90deg) rotateZ(-45deg);
+        transform-origin: 200px 360px;
+      }
+      50% {
+        opacity: 1;
+        transform: perspective(1500px) rotateY(-45deg) rotateZ(-22.5deg) translateZ(60px);
+        transform-origin: 200px 360px;
+      }
+      100% {
+        opacity: 1;
+        transform: perspective(1500px) rotateY(0deg) rotateZ(0deg) translateZ(0px);
+        transform-origin: 200px 360px;
+      }
+    }
+
+    /* Section 4: Orange triangle orbits and spirals in */
+    @keyframes orbitOrange {
+      0% {
+        opacity: 1;
+        transform: translate(0, -300px) rotate(0deg) scale(0.5);
+      }
+      25% {
+        transform: translate(150px, -200px) rotate(90deg) scale(0.6);
+      }
+      50% {
+        transform: translate(200px, -50px) rotate(180deg) scale(0.8);
+      }
+      75% {
+        transform: translate(100px, 50px) rotate(270deg) scale(0.9);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(0, 0) rotate(360deg) scale(1);
+      }
+    }
+
+    /* Section 4: Teal triangle orbits and spirals in */
+    @keyframes orbitTeal {
+      0% {
+        opacity: 1;
+        transform: translate(0, -300px) rotate(0deg) scale(0.5);
+      }
+      25% {
+        transform: translate(-150px, -200px) rotate(-90deg) scale(0.6);
+      }
+      50% {
+        transform: translate(-200px, -50px) rotate(-180deg) scale(0.8);
+      }
+      75% {
+        transform: translate(-100px, 50px) rotate(-270deg) scale(0.9);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(0, 0) rotate(-360deg) scale(1);
+      }
+    }
+
+    /* Section 5: Orange triangle slides from top-left diagonally */
+    @keyframes slideDiagonalOrange {
+      0% {
+        opacity: 0;
+        transform: translate(-300px, -300px);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+    }
+
+    /* Section 5: Teal triangle slides from bottom-right diagonally */
+    @keyframes slideDiagonalTeal {
+      0% {
+        opacity: 0;
+        transform: translate(300px, 300px);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+    }
+
+    /* Button fade in */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Animation classes */
+    .animate-title {
+      animation: fadeInDown 0.8s ease-out forwards;
+    }
+
+    .animate-head {
+      animation: dropIn 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    }
+
+    .animate-body {
+      animation: fadeInGrow 0.8s ease-out forwards;
+    }
+
+    .animate-orange-split {
+      animation: splitOrange 2s ease-in-out forwards;
+    }
+
+    .animate-teal-split {
+      animation: splitTeal 2s ease-in-out forwards;
+    }
+
+    .animate-slide-from-left {
+      animation: slideFromLeft 1.5s ease-out forwards;
+    }
+
+    .animate-slide-from-right {
+      animation: slideFromRight 1.5s ease-out forwards;
+    }
+
+    .animate-grow-in-place {
+      animation: growInPlace 1s ease-out forwards;
+    }
+
+    .animate-slide-left {
+      animation: slideInFromLeft 1s ease-out forwards;
+    }
+
+    .animate-teal-reveal {
+      animation: tealReveal 0.3s ease-out forwards;
+    }
+
+    .animate-teal-diagonal-flip {
+      animation: diagonalPageFlip 1.5s ease-out forwards;
+      transform-style: preserve-3d;
+    }
+
+    .animate-orbit-orange {
+      animation: orbitOrange 2s ease-in-out forwards;
+      transform-origin: 200px 360px;
+    }
+
+    .animate-orbit-teal {
+      animation: orbitTeal 2s ease-in-out forwards;
+      transform-origin: 200px 360px;
+    }
+
+    .animate-diagonal-orange {
+      animation: slideDiagonalOrange 1.2s ease-out forwards;
+    }
+
+    .animate-diagonal-teal {
+      animation: slideDiagonalTeal 1.2s ease-out forwards;
+    }
+
+    .animate-button {
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+
+    /* Glow effect on complete */
+    @keyframes glow {
+      0%, 100% {
+        filter: drop-shadow(0 0 10px rgba(240, 125, 64, 0.5));
+      }
+      50% {
+        filter: drop-shadow(0 0 30px rgba(71, 164, 158, 0.8));
+      }
+    }
+
+    .glow-effect {
+      animation: glow 2s ease-in-out infinite;
+    }
+  </style>
+
+  <script>
+    // SECTION 1: Split Animation
+    function playAnimation1() {
+      const title = document.getElementById('title-1');
+      const subtitle = document.getElementById('subtitle-1');
+      const head = document.getElementById('logo-head-1');
+      const body = document.getElementById('logo-body-1');
+      const orangeTriangle = document.getElementById('orange-triangle-1');
+      const tealTriangle = document.getElementById('teal-triangle-1');
+      const button = document.getElementById('replay-btn-1');
+      const logo = document.getElementById('animated-logo-1');
+
+      // Remove all animation classes and reset styles
+      const elements = [
+        { el: title, classes: ['animate-title'] },
+        { el: subtitle, classes: ['animate-title'] },
+        { el: head, classes: ['animate-head'] },
+        { el: body, classes: ['animate-body'] },
+        { el: orangeTriangle, classes: ['animate-orange-split'] },
+        { el: tealTriangle, classes: ['animate-teal-split'] },
+        { el: button, classes: ['animate-button'] },
+        { el: logo, classes: ['glow-effect'] }
+      ];
+
+      elements.forEach(({ el, classes }) => {
+        if (el) {
+          classes.forEach(cls => el.classList.remove(cls));
+          // Force reflow to restart animation
+          void el.offsetWidth;
+        }
+      });
+
+      // Reset opacity inline styles
+      if (title) title.style.opacity = '0';
+      if (subtitle) subtitle.style.opacity = '0';
+      if (head) head.style.opacity = '0';
+      if (body) body.style.opacity = '0';
+      if (orangeTriangle) orangeTriangle.style.opacity = '0';
+      if (tealTriangle) tealTriangle.style.opacity = '0';
+      if (button) button.style.opacity = '0';
+
+      // Sequence the animations with a small delay to ensure reset
+      setTimeout(() => {
+        if (title) {
+          title.style.opacity = '';
+          title.classList.add('animate-title');
+        }
+      }, 50);
+
+      setTimeout(() => {
+        if (subtitle) {
+          subtitle.style.opacity = '';
+          subtitle.classList.add('animate-title');
+        }
+      }, 350);
+
+      setTimeout(() => {
+        if (head) {
+          head.style.opacity = '';
+          head.classList.add('animate-head');
+        }
+      }, 850);
+
+      setTimeout(() => {
+        if (body) {
+          body.style.opacity = '';
+          body.classList.add('animate-body');
+        }
+      }, 1750);
+
+      // Split animation - body fades out, triangles split apart and come back
+      setTimeout(() => {
+        if (body) {
+          body.style.opacity = '0';
+        }
+        if (orangeTriangle) {
+          orangeTriangle.style.opacity = '';
+          orangeTriangle.classList.add('animate-orange-split');
+        }
+        if (tealTriangle) {
+          tealTriangle.style.opacity = '';
+          tealTriangle.classList.add('animate-teal-split');
+        }
+      }, 2650);
+
+      setTimeout(() => {
+        if (button) {
+          button.style.opacity = '';
+          button.classList.add('animate-button');
+        }
+        if (logo) logo.classList.add('glow-effect');
+      }, 4150);
+    }
+
+    // SECTION 2: Merge Animation (triangles slide in from opposite sides)
+    function playAnimation2() {
+      const title = document.getElementById('title-2');
+      const subtitle = document.getElementById('subtitle-2');
+      const head = document.getElementById('logo-head-2');
+      const orangeTriangle = document.getElementById('orange-triangle-2');
+      const tealTriangle = document.getElementById('teal-triangle-2');
+      const button = document.getElementById('replay-btn-2');
+      const logo = document.getElementById('animated-logo-2');
+
+      const elements = [
+        { el: title, classes: ['animate-title'] },
+        { el: subtitle, classes: ['animate-title'] },
+        { el: head, classes: ['animate-head'] },
+        { el: orangeTriangle, classes: ['animate-slide-from-left'] },
+        { el: tealTriangle, classes: ['animate-slide-from-right'] },
+        { el: button, classes: ['animate-button'] },
+        { el: logo, classes: ['glow-effect'] }
+      ];
+
+      elements.forEach(({ el, classes }) => {
+        if (el) {
+          classes.forEach(cls => el.classList.remove(cls));
+          void el.offsetWidth;
+        }
+      });
+
+      if (title) title.style.opacity = '0';
+      if (subtitle) subtitle.style.opacity = '0';
+      if (head) head.style.opacity = '0';
+      if (orangeTriangle) orangeTriangle.style.opacity = '0';
+      if (tealTriangle) tealTriangle.style.opacity = '0';
+      if (button) button.style.opacity = '0';
+
+      setTimeout(() => {
+        if (title) {
+          title.style.opacity = '';
+          title.classList.add('animate-title');
+        }
+      }, 50);
+
+      setTimeout(() => {
+        if (subtitle) {
+          subtitle.style.opacity = '';
+          subtitle.classList.add('animate-title');
+        }
+      }, 350);
+
+      setTimeout(() => {
+        if (head) {
+          head.style.opacity = '';
+          head.classList.add('animate-head');
+        }
+      }, 850);
+
+      setTimeout(() => {
+        if (orangeTriangle) {
+          orangeTriangle.style.opacity = '';
+          orangeTriangle.classList.add('animate-slide-from-left');
+        }
+        if (tealTriangle) {
+          tealTriangle.style.opacity = '';
+          tealTriangle.classList.add('animate-slide-from-right');
+        }
+      }, 1750);
+
+      setTimeout(() => {
+        if (button) {
+          button.style.opacity = '';
+          button.classList.add('animate-button');
+        }
+        if (logo) logo.classList.add('glow-effect');
+      }, 3750);
+    }
+
+    // SECTION 3: Page Flip Animation (teal flips OUT of orange square diagonally)
+    function playAnimation3() {
+      const title = document.getElementById('title-3');
+      const subtitle = document.getElementById('subtitle-3');
+      const head = document.getElementById('logo-head-3');
+      const orangeSquare = document.getElementById('orange-square-3');
+      const orangeTriangle = document.getElementById('orange-triangle-3');
+      const tealFlip = document.getElementById('teal-flip-3');
+      const button = document.getElementById('replay-btn-3');
+      const logo = document.getElementById('animated-logo-3');
+
+      const elements = [
+        { el: title, classes: ['animate-title'] },
+        { el: subtitle, classes: ['animate-title'] },
+        { el: head, classes: ['animate-grow-in-place'] },
+        { el: orangeSquare, classes: ['animate-slide-left'] },
+        { el: orangeTriangle, classes: ['animate-teal-reveal'] },
+        { el: tealFlip, classes: ['animate-teal-diagonal-flip'] },
+        { el: button, classes: ['animate-button'] },
+        { el: logo, classes: ['glow-effect'] }
+      ];
+
+      elements.forEach(({ el, classes }) => {
+        if (el) {
+          classes.forEach(cls => el.classList.remove(cls));
+          void el.offsetWidth;
+        }
+      });
+
+      if (title) title.style.opacity = '0';
+      if (subtitle) subtitle.style.opacity = '0';
+      if (head) head.style.opacity = '0';
+      if (orangeSquare) orangeSquare.style.opacity = '0';
+      if (orangeTriangle) orangeTriangle.style.opacity = '0';
+      if (tealFlip) tealFlip.style.opacity = '0';
+      if (button) button.style.opacity = '0';
+
+      // Title
+      setTimeout(() => {
+        if (title) {
+          title.style.opacity = '';
+          title.classList.add('animate-title');
+        }
+      }, 50);
+
+      // Subtitle
+      setTimeout(() => {
+        if (subtitle) {
+          subtitle.style.opacity = '';
+          subtitle.classList.add('animate-title');
+        }
+      }, 350);
+
+      // Head grows in place from tiny dot
+      setTimeout(() => {
+        if (head) {
+          head.style.opacity = '';
+          head.classList.add('animate-grow-in-place');
+        }
+      }, 850);
+
+      // Orange square slides in from left
+      setTimeout(() => {
+        if (orangeSquare) {
+          orangeSquare.style.opacity = '';
+          orangeSquare.classList.add('animate-slide-left');
+        }
+      }, 1750);
+
+      // After square is in, hide it and show the split pieces
+      setTimeout(() => {
+        if (orangeSquare) {
+          orangeSquare.style.opacity = '0';
+        }
+        // Show orange triangle (stays in place)
+        if (orangeTriangle) {
+          orangeTriangle.style.opacity = '';
+          orangeTriangle.classList.add('animate-teal-reveal');
+        }
+        // Teal triangle flips in diagonally
+        if (tealFlip) {
+          tealFlip.style.opacity = '';
+          tealFlip.classList.add('animate-teal-diagonal-flip');
+        }
+      }, 2850);
+
+      // Button and glow
+      setTimeout(() => {
+        if (button) {
+          button.style.opacity = '';
+          button.classList.add('animate-button');
+        }
+        if (logo) logo.classList.add('glow-effect');
+      }, 4750);
+    }
+
+    // SECTION 4: Orbit Animation (triangles orbit around and spiral in)
+    function playAnimation4() {
+      const title = document.getElementById('title-4');
+      const subtitle = document.getElementById('subtitle-4');
+      const head = document.getElementById('logo-head-4');
+      const orangeTriangle = document.getElementById('orange-triangle-4');
+      const tealTriangle = document.getElementById('teal-triangle-4');
+      const button = document.getElementById('replay-btn-4');
+      const logo = document.getElementById('animated-logo-4');
+
+      const elements = [
+        { el: title, classes: ['animate-title'] },
+        { el: subtitle, classes: ['animate-title'] },
+        { el: head, classes: ['animate-grow-in-place'] },
+        { el: orangeTriangle, classes: ['animate-orbit-orange'] },
+        { el: tealTriangle, classes: ['animate-orbit-teal'] },
+        { el: button, classes: ['animate-button'] },
+        { el: logo, classes: ['glow-effect'] }
+      ];
+
+      elements.forEach(({ el, classes }) => {
+        if (el) {
+          classes.forEach(cls => el.classList.remove(cls));
+          void el.offsetWidth;
+        }
+      });
+
+      if (title) title.style.opacity = '0';
+      if (subtitle) subtitle.style.opacity = '0';
+      if (head) head.style.opacity = '0';
+      if (orangeTriangle) orangeTriangle.style.opacity = '0';
+      if (tealTriangle) tealTriangle.style.opacity = '0';
+      if (button) button.style.opacity = '0';
+
+      setTimeout(() => {
+        if (title) {
+          title.style.opacity = '';
+          title.classList.add('animate-title');
+        }
+      }, 50);
+
+      setTimeout(() => {
+        if (subtitle) {
+          subtitle.style.opacity = '';
+          subtitle.classList.add('animate-title');
+        }
+      }, 350);
+
+      setTimeout(() => {
+        if (head) {
+          head.style.opacity = '';
+          head.classList.add('animate-grow-in-place');
+        }
+      }, 850);
+
+      // Both triangles orbit simultaneously
+      setTimeout(() => {
+        if (orangeTriangle) {
+          orangeTriangle.style.opacity = '';
+          orangeTriangle.classList.add('animate-orbit-orange');
+        }
+        if (tealTriangle) {
+          tealTriangle.style.opacity = '';
+          tealTriangle.classList.add('animate-orbit-teal');
+        }
+      }, 1750);
+
+      setTimeout(() => {
+        if (button) {
+          button.style.opacity = '';
+          button.classList.add('animate-button');
+        }
+        if (logo) logo.classList.add('glow-effect');
+      }, 3850);
+    }
+
+    // SECTION 5: Diagonal Slide Animation (triangles slide from opposite corners)
+    function playAnimation5() {
+      const title = document.getElementById('title-5');
+      const subtitle = document.getElementById('subtitle-5');
+      const head = document.getElementById('logo-head-5');
+      const orangeTriangle = document.getElementById('orange-triangle-5');
+      const tealTriangle = document.getElementById('teal-triangle-5');
+      const button = document.getElementById('replay-btn-5');
+      const logo = document.getElementById('animated-logo-5');
+
+      const elements = [
+        { el: title, classes: ['animate-title'] },
+        { el: subtitle, classes: ['animate-title'] },
+        { el: head, classes: ['animate-grow-in-place'] },
+        { el: orangeTriangle, classes: ['animate-diagonal-orange'] },
+        { el: tealTriangle, classes: ['animate-diagonal-teal'] },
+        { el: button, classes: ['animate-button'] },
+        { el: logo, classes: ['glow-effect'] }
+      ];
+
+      elements.forEach(({ el, classes }) => {
+        if (el) {
+          classes.forEach(cls => el.classList.remove(cls));
+          void el.offsetWidth;
+        }
+      });
+
+      if (title) title.style.opacity = '0';
+      if (subtitle) subtitle.style.opacity = '0';
+      if (head) head.style.opacity = '0';
+      if (orangeTriangle) orangeTriangle.style.opacity = '0';
+      if (tealTriangle) tealTriangle.style.opacity = '0';
+      if (button) button.style.opacity = '0';
+
+      setTimeout(() => {
+        if (title) {
+          title.style.opacity = '';
+          title.classList.add('animate-title');
+        }
+      }, 50);
+
+      setTimeout(() => {
+        if (subtitle) {
+          subtitle.style.opacity = '';
+          subtitle.classList.add('animate-title');
+        }
+      }, 350);
+
+      setTimeout(() => {
+        if (head) {
+          head.style.opacity = '';
+          head.classList.add('animate-grow-in-place');
+        }
+      }, 850);
+
+      // Both triangles slide in diagonally simultaneously
+      setTimeout(() => {
+        if (orangeTriangle) {
+          orangeTriangle.style.opacity = '';
+          orangeTriangle.classList.add('animate-diagonal-orange');
+        }
+        if (tealTriangle) {
+          tealTriangle.style.opacity = '';
+          tealTriangle.classList.add('animate-diagonal-teal');
+        }
+      }, 1750);
+
+      setTimeout(() => {
+        if (button) {
+          button.style.opacity = '';
+          button.classList.add('animate-button');
+        }
+        if (logo) logo.classList.add('glow-effect');
+      }, 3050);
+    }
+
+    // Play animations on page load and setup replay buttons
+    document.addEventListener('DOMContentLoaded', () => {
+      playAnimation1();
+
+      const replayBtn1 = document.getElementById('replay-btn-1');
+      if (replayBtn1) {
+        replayBtn1.addEventListener('click', playAnimation1);
+      }
+
+      const replayBtn2 = document.getElementById('replay-btn-2');
+      if (replayBtn2) {
+        replayBtn2.addEventListener('click', playAnimation2);
+      }
+
+      const replayBtn3 = document.getElementById('replay-btn-3');
+      if (replayBtn3) {
+        replayBtn3.addEventListener('click', playAnimation3);
+      }
+
+      const replayBtn4 = document.getElementById('replay-btn-4');
+      if (replayBtn4) {
+        replayBtn4.addEventListener('click', playAnimation4);
+      }
+
+      const replayBtn5 = document.getElementById('replay-btn-5');
+      if (replayBtn5) {
+        replayBtn5.addEventListener('click', playAnimation5);
+      }
+
+      // Use Intersection Observer to trigger animations when sections come into view
+      const observerOptions = {
+        threshold: 0.5
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            if (entry.target.id === 'animated-logo-2') {
+              playAnimation2();
+            } else if (entry.target.id === 'animated-logo-3') {
+              playAnimation3();
+            } else if (entry.target.id === 'animated-logo-4') {
+              playAnimation4();
+            } else if (entry.target.id === 'animated-logo-5') {
+              playAnimation5();
+            }
+          }
+        });
+      }, observerOptions);
+
+      const logo2 = document.getElementById('animated-logo-2');
+      if (logo2) observer.observe(logo2);
+
+      const logo3 = document.getElementById('animated-logo-3');
+      if (logo3) observer.observe(logo3);
+
+      const logo4 = document.getElementById('animated-logo-4');
+      if (logo4) observer.observe(logo4);
+
+      const logo5 = document.getElementById('animated-logo-5');
+      if (logo5) observer.observe(logo5);
+    });
+  </script>
+</Layout>

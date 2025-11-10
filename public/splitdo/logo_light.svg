@@ -1,0 +1,20 @@
+<svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Define clip path for rounded corners -->
+  <defs>
+    <clipPath id="rounded-clip">
+      <rect x="80" y="240" width="240" height="240" rx="30"/>
+    </clipPath>
+  </defs>
+
+  <!-- Circle (head) -->
+  <circle cx="200" cy="120" r="80" fill="#47a49e"/>
+
+  <!-- Split square (body) with clip path for rounded corners -->
+  <g clip-path="url(#rounded-clip)">
+    <!-- Teal background -->
+    <rect x="80" y="240" width="240" height="240" fill="#47a49e"/>
+
+    <!-- Brown triangle (bottom-right half) -->
+    <path d="M 320 240 L 320 480 L 80 480 Z" fill="#564740"/>
+  </g>
+</svg>

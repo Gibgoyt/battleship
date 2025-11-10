@@ -1,0 +1,304 @@
+---
+// Reusable phone component for hero sections
+// Two phones with consistent angles - used in homepage and features page
+interface Props {
+  variant?: 'default' | 'compact';
+}
+
+const { variant = 'default' } = Astro.props;
+
+// Positioning based on variant
+const containerHeight = variant === 'compact' ? '200px' : '320px';
+const rightPhoneStyle = variant === 'compact' ? 'right: 35px; top: -90px;' : 'right: 30px; top: -70px;';
+const leftPhoneStyle = variant === 'compact' ? 'left: 70px; top: -130px;' : 'left: 80px; top: -110px;';
+---
+
+<!-- Phones container - two phones (scaled) -->
+<div class="relative overflow-visible phone-container w-full max-w-[300px] sm:max-w-[400px] md:max-w-[450px] lg:max-w-[500px] mx-auto" style={`height: ${containerHeight};`} data-variant={variant}>
+
+  <!-- RIGHT Phone (back phone, angled right) - WHITE VERSION -->
+  <div class="absolute overflow-visible phone-right dark:hidden" style={`${rightPhoneStyle} z-index: 1;`}>
+    <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-100 h-auto">
+      <g transform="matrix(0.95, 0.08, 0.25, 1.05, 80, 80)">
+        <!-- 3D Edge -->
+        <g>
+          <path d="M 0 50 L -15 50 L -15 630 L 0 630 L 0 50 Z" fill="#B8BABE" opacity="0.9"/>
+          <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -15 0, -15 50 L 0 50 Z" fill="#A0A4A8" opacity="0.8"/>
+          <path d="M 0 630 L -15 630 A 50 50 0 0 0 40 680 L 55 680 A 50 50 0 0 1 0 630 Z" fill="#A0A4A8" opacity="0.8"/>
+        </g>
+        <rect x="0" y="0" width="335" height="680" rx="50" fill="#E5E7EB"/>
+        <rect x="4" y="4" width="327" height="672" rx="46" fill="#F3F4F6"/>
+        <g>
+          <rect x="12" y="12" width="311" height="656" rx="42" fill="#000000"/>
+          <mask id="screen-mask-right">
+            <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
+            <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+          </mask>
+          <image
+            x="12"
+            y="12"
+            width="311"
+            height="656"
+            href="/APP.webp"
+            preserveAspectRatio="xMidYMid slice"
+            mask="url(#screen-mask-right)"
+          />
+        </g>
+        <g>
+          <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#E5E7EB"/>
+          <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#D1D5DB"/>
+          <rect x="155" y="18" width="30" height="4" rx="2" fill="#9CA3AF"/>
+          <circle cx="180" cy="20" r="4.5" fill="#9CA3AF"/>
+          <circle cx="180" cy="20" r="2.5" fill="#6B7280"/>
+        </g>
+        <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#D1D5DB"/>
+        <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+        <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+        <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#D1D5DB"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- LEFT Phone (front phone, angled left) - WHITE VERSION -->
+  <div class="absolute overflow-visible phone-left dark:hidden" style={`${leftPhoneStyle} z-index: 0;`}>
+    <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-100 h-auto">
+      <g transform="matrix(0.9, -0.08, -0.15, 1.05, 200, 80)">
+        <!-- 3D Edge -->
+        <g>
+          <path d="M 335 50 L 350 50 L 350 630 L 335 630 L 335 50 Z" fill="#B8BABE" opacity="0.9"/>
+          <path d="M 335 50 Q 335 0, 285 0 L 300 0 Q 350 0, 350 50 L 335 50 Z" fill="#A0A4A8" opacity="0.8"/>
+          <path d="M 335 630 L 350 630 A 50 50 0 0 1 300 680 L 285 680 A 50 50 0 0 0 335 630 Z" fill="#A0A4A8" opacity="0.8"/>
+        </g>
+        <rect x="0" y="0" width="335" height="680" rx="50" fill="#E5E7EB"/>
+        <rect x="4" y="4" width="327" height="672" rx="46" fill="#F3F4F6"/>
+        <g>
+          <rect x="12" y="12" width="311" height="656" rx="42" fill="#000000"/>
+          <mask id="screen-mask-left">
+            <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
+            <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+          </mask>
+          <image
+            x="12"
+            y="12"
+            width="311"
+            height="656"
+            href="/APP.webp"
+            preserveAspectRatio="xMidYMid slice"
+            mask="url(#screen-mask-left)"
+          />
+        </g>
+        <g>
+          <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#E5E7EB"/>
+          <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#D1D5DB"/>
+          <rect x="155" y="18" width="30" height="4" rx="2" fill="#9CA3AF"/>
+          <circle cx="180" cy="20" r="4.5" fill="#9CA3AF"/>
+          <circle cx="180" cy="20" r="2.5" fill="#6B7280"/>
+        </g>
+        <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#D1D5DB"/>
+        <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+        <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#D1D5DB"/>
+        <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#D1D5DB"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- RIGHT Phone (back phone, angled right) - BLACK VERSION (DARK MODE) -->
+  <div class="absolute overflow-visible phone-right hidden dark:block" style={`${rightPhoneStyle} z-index: 1;`}>
+    <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-100 h-auto">
+      <g transform="matrix(0.95, 0.08, 0.25, 1.05, 80, 80)">
+        <!-- 3D Edge -->
+        <g>
+          <path d="M 0 50 L -15 50 L -15 630 L 0 630 L 0 50 Z" fill="#1A1F2E" opacity="0.8"/>
+          <path d="M 0 50 Q 0 0, 50 0 L 40 0 Q -15 0, -15 50 L 0 50 Z" fill="#14181F" opacity="0.7"/>
+          <path d="M 0 630 L -15 630 A 50 50 0 0 0 40 680 L 55 680 A 50 50 0 0 1 0 630 Z" fill="#14181F" opacity="0.7"/>
+        </g>
+        <rect x="0" y="0" width="335" height="680" rx="50" fill="#2D3748"/>
+        <rect x="4" y="4" width="327" height="672" rx="46" fill="#3A4556"/>
+        <g>
+          <rect x="12" y="12" width="311" height="656" rx="42" fill="#1A202C"/>
+          <mask id="screen-mask-right-black-hero">
+            <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
+            <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+          </mask>
+          <image
+            x="12"
+            y="12"
+            width="311"
+            height="656"
+            href="/APP.webp"
+            preserveAspectRatio="xMidYMid slice"
+            mask="url(#screen-mask-right-black-hero)"
+          />
+        </g>
+        <g>
+          <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#2D3748"/>
+          <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#1A1F2E"/>
+          <rect x="155" y="18" width="30" height="4" rx="2" fill="#0F1419"/>
+          <circle cx="180" cy="20" r="4.5" fill="#0F1419"/>
+          <circle cx="180" cy="20" r="2.5" fill="#1E293B"/>
+        </g>
+        <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#1A202C"/>
+        <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#1A202C"/>
+        <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#1A202C"/>
+        <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#1A202C"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- LEFT Phone (front phone, angled left) - BLACK VERSION (DARK MODE) -->
+  <div class="absolute overflow-visible phone-left hidden dark:block" style={`${leftPhoneStyle} z-index: 0;`}>
+    <svg width="650" height="950" viewBox="0 0 650 950" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-100 h-auto">
+      <g transform="matrix(0.9, -0.08, -0.15, 1.05, 200, 80)">
+        <!-- 3D Edge -->
+        <g>
+          <path d="M 335 50 L 350 50 L 350 630 L 335 630 L 335 50 Z" fill="#1A1F2E" opacity="0.8"/>
+          <path d="M 335 50 Q 335 0, 285 0 L 300 0 Q 350 0, 350 50 L 335 50 Z" fill="#14181F" opacity="0.7"/>
+          <path d="M 335 630 L 350 630 A 50 50 0 0 1 300 680 L 285 680 A 50 50 0 0 0 335 630 Z" fill="#14181F" opacity="0.7"/>
+        </g>
+        <rect x="0" y="0" width="335" height="680" rx="50" fill="#2D3748"/>
+        <rect x="4" y="4" width="327" height="672" rx="46" fill="#3A4556"/>
+        <g>
+          <rect x="12" y="12" width="311" height="656" rx="42" fill="#1A202C"/>
+          <mask id="screen-mask-left-black-hero">
+            <rect x="12" y="12" width="311" height="656" rx="42" fill="white"/>
+            <path d="M 135 12 Q 135 32, 152 32 L 188 32 Q 205 32, 205 12 Z" fill="black"/>
+          </mask>
+          <image
+            x="12"
+            y="12"
+            width="311"
+            height="656"
+            href="/APP.webp"
+            preserveAspectRatio="xMidYMid slice"
+            mask="url(#screen-mask-left-black-hero)"
+          />
+        </g>
+        <g>
+          <path d="M 135 12 Q 135 36, 152 36 L 188 36 Q 205 36, 205 12 L 205 0 L 135 0 Z" fill="#2D3748"/>
+          <path d="M 138 12 Q 138 33, 153 33 L 187 33 Q 202 33, 202 12 L 202 8 L 138 8 Z" fill="#1A1F2E"/>
+          <rect x="155" y="18" width="30" height="4" rx="2" fill="#0F1419"/>
+          <circle cx="180" cy="20" r="4.5" fill="#0F1419"/>
+          <circle cx="180" cy="20" r="2.5" fill="#1E293B"/>
+        </g>
+        <rect x="330" y="150" width="5" height="60" rx="2.5" fill="#1A202C"/>
+        <rect x="0" y="120" width="5" height="45" rx="2.5" fill="#1A202C"/>
+        <rect x="0" y="175" width="5" height="45" rx="2.5" fill="#1A202C"/>
+        <rect x="0" y="80" width="5" height="25" rx="2.5" fill="#1A202C"/>
+      </g>
+    </svg>
+  </div>
+
+</div>
+
+<style>
+  .phone-container {
+    transform-origin: center;
+  }
+
+  /* Default variant - homepage size */
+  .phone-container[data-variant="default"] {
+    transform: scale(1);
+  }
+
+  @media (max-width: 1024px) {
+    .phone-container[data-variant="default"] {
+      transform: scale(0.65);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .phone-container[data-variant="default"] {
+      transform: scale(0.6);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .phone-container[data-variant="default"] {
+      transform: scale(0.55);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .phone-container[data-variant="default"] {
+      transform: scale(0.5);
+    }
+  }
+
+  /* Compact variant - features page size (smaller on desktop, better mobile spacing) */
+  .phone-container[data-variant="compact"] {
+    transform: scale(0.5);
+  }
+
+  @media (max-width: 1024px) {
+    .phone-container[data-variant="compact"] {
+      transform: scale(0.45);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .phone-container[data-variant="compact"] {
+      transform: scale(0.4);
+    }
+    /* Bring phones closer together on tablet */
+    .phone-container[data-variant="compact"] .phone-right {
+      right: 30px !important;
+    }
+    .phone-container[data-variant="compact"] .phone-left {
+      left: 80px !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .phone-container[data-variant="compact"] {
+      transform: scale(0.35);
+    }
+    /* Closer on small mobile */
+    .phone-container[data-variant="compact"] .phone-right {
+      right: 30px !important;
+    }
+    .phone-container[data-variant="compact"] .phone-left {
+      left: 80px !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .phone-container[data-variant="compact"] {
+      transform: scale(0.3);
+    }
+    /* Even closer on extra small mobile */
+    .phone-container[data-variant="compact"] .phone-right {
+      right: 30px !important;
+    }
+    .phone-container[data-variant="compact"] .phone-left {
+      left: 80px !important;
+    }
+  }
+
+  /* Default variant - adjust positioning on mobile to maintain overlap */
+  @media (max-width: 768px) {
+    .phone-container[data-variant="default"] .phone-right {
+      right: 30px !important;
+    }
+    .phone-container[data-variant="default"] .phone-left {
+      left: 80px !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .phone-container[data-variant="default"] .phone-right {
+      right: 30px !important;
+    }
+    .phone-container[data-variant="default"] .phone-left {
+      left: 80px !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .phone-container[data-variant="default"] .phone-right {
+      right: 30px !important;
+    }
+    .phone-container[data-variant="default"] .phone-left {
+      left: 80px !important;
+    }
+  }
+</style>

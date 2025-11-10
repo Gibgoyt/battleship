@@ -1,0 +1,241 @@
+---
+export const prerender = true;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Learn More - SplitDo</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+  </head>
+  <body>
+    <main
+      class="min-h-screen overflow-y-auto"
+      style="background: linear-gradient(to bottom right, #6b4e3d, #564740, #304445);"
+    >
+      <!-- Header -->
+      <div class="sticky top-0 z-50 bg-[#564740]/95 backdrop-blur-sm border-b border-[#f07d40]/20">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <a href="/k-app-dark" class="text-white/70 hover:text-white transition-colors">
+            ← Back
+          </a>
+          <img src="/splitdo/logo_light.svg" alt="SplitDo Logo" class="h-10 dark:hidden">
+          <img src="/splitdo/logo_dark.svg" alt="SplitDo Logo" class="h-10 hidden dark:block">
+          <div class="w-16"></div>
+        </div>
+      </div>
+
+      <section class="max-w-4xl mx-auto px-4 py-12 pb-24">
+
+        <!-- Hero Section -->
+        <div class="text-center mb-12">
+          <h1 class="text-4xl md:text-5xl font-bold mb-4">
+            <span class="text-[#f07d40]">Split Bills Instantly.</span><br>
+            <span class="text-[#47a49e]">Settle Up on Solana.</span>
+          </h1>
+          <p class="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
+            The fastest way to split expenses and settle balances. Powered by Solana for near-zero fees and instant transfers.
+          </p>
+        </div>
+
+        <!-- Feature Cards -->
+        <div class="space-y-6 mb-12">
+
+          <!-- Feature 1: Smart Expense Calculations -->
+          <div class="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
+            <h2 class="text-2xl font-bold text-[#564740] mb-4">Smart Expense Calculations</h2>
+            <p class="text-gray-700 mb-4">
+              Our intelligent algorithms don't just split bills—they understand context. Handle complex scenarios like unequal shares, tips, taxes, and custom distributions with mathematical precision.
+            </p>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-[#f07d40] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-gray-700">Handles complex splitting scenarios and custom rules</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-[#f07d40] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-gray-700">Automatic tax and tip distribution calculations</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-[#f07d40] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-gray-700">Real-time balance updates and debt optimization</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-[#f07d40] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-gray-700">Supports all major currencies and payment methods</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Feature 2: Solana Blockchain Integration -->
+          <div class="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
+            <h2 class="text-2xl font-bold text-[#564740] mb-4">Solana Blockchain Integration</h2>
+            <p class="text-gray-700 mb-4">
+              Leverage the speed and low costs of Solana blockchain for instant settlements. Connect your wallet and settle debts with minimal fees.
+            </p>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-[#47a49e] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-gray-700">Lightning-fast transaction processing</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-[#47a49e] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-gray-700">Minimal transaction fees (fractions of a penny)</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-[#47a49e] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-gray-700">Support for USDC, SOL, and major tokens</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-[#47a49e] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-gray-700">Secure, non-custodial wallet integration</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Feature 3: Group Management -->
+          <div class="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
+            <h2 class="text-2xl font-bold text-[#564740] mb-4">Group Management System</h2>
+            <p class="text-gray-700 mb-4">
+              Create and manage expense groups with advanced permission controls, member management, and detailed activity tracking.
+            </p>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-[#f07d40] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-gray-700">Role-based permissions for group administrators</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-[#f07d40] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-gray-700">Easy member invites and management</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-[#f07d40] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-gray-700">Comprehensive activity logs and expense history</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-[#f07d40] mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-gray-700">Export reports and transaction summaries</span>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- Use Cases -->
+        <div class="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl mb-12">
+          <h2 class="text-2xl font-bold text-[#564740] mb-4">Perfect For</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#f07d40] flex-shrink-0">
+                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                <path d="M2 12h5"/>
+                <path d="M17 5h5"/>
+                <path d="M12 2v3"/>
+                <path d="m4.22 4.22 2.12 2.12"/>
+              </svg>
+              <div>
+                <h3 class="font-semibold text-gray-900">Traveling with Friends</h3>
+                <p class="text-sm text-gray-600">Split hotel rooms, dinners, and activities</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#47a49e] flex-shrink-0">
+                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+              <div>
+                <h3 class="font-semibold text-gray-900">Roommates</h3>
+                <p class="text-sm text-gray-600">Manage rent, utilities, and household expenses</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-500 flex-shrink-0">
+                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+                <path d="M7 2v20"/>
+                <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
+              </svg>
+              <div>
+                <h3 class="font-semibold text-gray-900">Group Dinners</h3>
+                <p class="text-sm text-gray-600">Easy bill splitting with automatic tip calculation</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500 flex-shrink-0">
+                <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+              </svg>
+              <div>
+                <h3 class="font-semibold text-gray-900">DAO Treasury</h3>
+                <p class="text-sm text-gray-600">Manage shared crypto expenses transparently</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="text-center">
+          <div class="bg-gradient-to-br from-[#f07d40] to-[#47a49e] rounded-2xl p-8 shadow-xl">
+            <h2 class="text-3xl font-bold text-white mb-4">Ready to Get Started?</h2>
+            <p class="text-white/90 mb-6 text-lg">Join thousands of users splitting expenses seamlessly on Solana</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="/k-app-dark/create-account"
+                class="px-8 py-4 bg-white text-[#564740] font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+              >
+                Create Free Account
+              </a>
+              <a
+                href="/k-app-dark/sign-in"
+                class="px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl hover:bg-white/10 transform hover:scale-105 transition-all"
+              >
+                Sign In
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Website Link -->
+        <div class="text-center mt-8">
+          <p class="text-white/70 mb-3">Want to learn more about SplitDo?</p>
+          <a
+            href="/"
+            class="inline-flex items-center gap-2 text-[#47a49e] hover:text-[#f07d40] font-semibold transition-colors"
+          >
+            <span>Visit our full website</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 7h10v10"/>
+              <path d="M7 17 17 7"/>
+            </svg>
+          </a>
+        </div>
+
+      </section>
+    </main>
+  </body>
+</html>
