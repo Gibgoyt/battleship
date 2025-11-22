@@ -68,14 +68,6 @@ const { title } = Astro.props;
             background-color: var(--background);
         }
 
-        /* Footer background colors for light and dark modes - matches bottom nav */
-        footer {
-            background-color: #f07d40 !important;
-        }
-        html.dark footer {
-            background-color: #564740 !important;
-        }
-
         /* Darken images in dark mode */
         .dark-mode-img {
             transition: filter 0.3s ease;
@@ -260,9 +252,9 @@ const { title } = Astro.props;
 </nav>
 
 <!-- FOOTER: Added after slot and styled using custom CSS -->
-<footer class="border-t-4 border-[#564740] dark:border-[#f07d40] py-12">
+<footer class="border-t-4 border-[#564740] dark:border-[#f07d40] py-8 bg-white dark:bg-black">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center text-white dark:text-gray-200">
+        <div class="text-center text-black dark:text-gray-200">
             <p>&copy; 2025 SplitDo. All rights reserved.</p>
         </div>
     </div>
