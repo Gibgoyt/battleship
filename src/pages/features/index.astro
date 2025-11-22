@@ -17,6 +17,17 @@ export const prerender = true
 					--color-primary: #f07d40;
 					--color-secondary: #47a49e;
 				}
+
+				/* Dark mode filter for feature hero image */
+				.feature-hero-img {
+					transition: filter 0.3s ease;
+				}
+				html.dark .feature-hero-img {
+					filter: brightness(0.7) grayscale(0.3) contrast(0.9) !important;
+				}
+				.dark .feature-hero-img {
+					filter: brightness(0.7) grayscale(0.3) contrast(0.9) !important;
+				}
 			</style>
 
 			<div class="relative px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 overflow-visible"
@@ -96,7 +107,7 @@ export const prerender = true
 								</div>
 								<!-- Right Column: Image -->
 								<div class="order-1 lg:order-2 flex justify-center lg:justify-end">
-									<img src="/splitdo/Features_page_Hero_Image.webp" alt="Smart Expense Calculations Illustration" class="max-w-full h-auto rounded-2xl shadow-xl">
+									<img src="/splitdo/Features_page_Hero_Image.webp" alt="Smart Expense Calculations Illustration" class="max-w-full h-auto rounded-2xl shadow-xl feature-hero-img">
 								</div>
 							</div>
 						</div>

@@ -1,21 +1,52 @@
 ---
 import Layout from 'src/layouts/Layout.astro';
+import WhitePhoneHero from 'src/components/WhitePhoneHero.astro';
 
 // export static HTML
-export const prerender = true 
+export const prerender = true
 ---
 
 <Layout title="About SplitDo - Revolutionizing Expense Splitting">
 
 	<main>
-		<!-- Hero Section -->
-		<section class="bg-[var(--color-background)] text-white py-20 text-center border-b-4 border-[#47a49e]">
- 			<div class="max-w-4xl mx-auto px-6">
-  				  <h1 class="text-4xl font-bold mb-4 bg-clip-text text-transparent" style="background-image: linear-gradient(to right, var(--color-primary), var(--color-secondary));">About SplitDo</h1>
-  				  <p class="text-lg text-white dark:text-gray-200 max-w-2xl mx-auto">
-  				    We're on a mission to eliminate the hassle of splitting expenses through blockchain technology and smart automation.
-  				  </p>
-  			</div>
+		<!-- Hero Section - Side by Side (Text Left, Phones Right) -->
+		<section class="w-full overflow-visible border-b-[10px] border-[#47a49e] dark:border-[#368179]">
+			<style>
+				:root {
+					--color-background: #564740;
+					--color-primary: #f07d40;
+					--color-secondary: #47a49e;
+				}
+			</style>
+
+			<div class="relative px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 overflow-visible"
+				 style="background: linear-gradient(to bottom right, #6b4e3d, #564740, #304445);">
+
+				<!-- Content container - Flex row with text left and phones right -->
+				<div class="flex flex-col lg:flex-row items-center justify-center gap-2 sm:gap-3 lg:gap-4 relative max-w-7xl mx-auto">
+
+					<!-- Left side: Text -->
+					<div class="flex flex-col items-center justify-center w-full lg:w-auto lg:flex-1">
+						<div class="flex flex-col gap-1.5 w-full text-center">
+							<h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-extrabold text-[#f07d40] dark:text-[#c8632f] tracking-normal sm:tracking-wide">
+								About SplitDo
+							</h1>
+							<h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-extrabold text-[#47a49e] dark:text-[#368179] tracking-normal sm:tracking-wide">
+								Revolutionizing Expense Splitting
+							</h1>
+							<p class="text-sm sm:text-base lg:text-lg mt-3 leading-relaxed text-white dark:text-gray-300 text-balance">
+								We're on a mission to eliminate the hassle of splitting expenses through blockchain technology and smart automation.
+							</p>
+						</div>
+					</div>
+
+					<!-- Right side: Phones container - two phones (scaled smaller) -->
+					<div class="flex justify-center items-center overflow-visible w-full lg:w-auto lg:flex-1">
+						<WhitePhoneHero variant="compact" />
+					</div>
+
+				</div>
+			</div>
 		</section>
 
 		<!-- Story Section -->
