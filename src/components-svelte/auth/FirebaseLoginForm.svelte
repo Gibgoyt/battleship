@@ -141,15 +141,6 @@
 			showError(errorMsg);
 		}
 	}
-
-	onMount(() => {
-		const urlParams = new URLSearchParams(window.location.search);
-		const emailParam = urlParams.get('email');
-		const passwordParam = urlParams.get('password');
-
-		if (emailParam) email = emailParam;
-		if (passwordParam) password = passwordParam;
-	});
 </script>
 
 <main>
