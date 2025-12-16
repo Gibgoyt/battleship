@@ -18,7 +18,7 @@ export const onRequest = defineMiddleware(async (
 
   const isProtectedRoute: boolean = [
     '/test-auth/private',
-    '/app', // Protect all /app routes
+    // '/app', // Protect all /app routes - MOVED TO PAGE LEVEL
     '/admin' // Protect all /admin routes
   ].some((item: string): boolean => {
     return (url.pathname.startsWith(item))

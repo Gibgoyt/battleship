@@ -1,7 +1,104 @@
 ---
 import 'src/styles/global.css'
+import { jwtValidator } from 'src/lib/auth/jwt-validator'
+import { firebaseJwtValidator } from 'src/lib/auth/firebase-jwt-validator'
+import { createLogger } from 'src/lib/logger'
 
 export const prerender = false;
+
+const logger = createLogger('APP_PROTECTION')
+
+// ==== AUTH PROTECTION LOGIC ====
+logger.debug('Processing protected app route', { pathname: Astro.url.pathname })
+
+const cognitoAuthToken = Astro.cookies.get('cognito-auth-token')
+const firebaseAuthToken = Astro.cookies.get('firebase-auth-token')
+
+logger.debug('Cookie inspection', {
+  hasCognitoToken: Boolean(cognitoAuthToken?.value),
+  hasFirebaseToken: Boolean(firebaseAuthToken?.value)
+})
+
+// If no auth token is present, redirect to sign-in
+if ((!cognitoAuthToken || !cognitoAuthToken.value) && (!firebaseAuthToken || !firebaseAuthToken.value)) {
+  logger.info('No auth token found for protected route, redirecting to sign-in')
+  return Astro.redirect('/auth/sign-in', 302)
+}
+
+try {
+  logger.debug('Validating token for protected route access')
+  
+  let validation: any = { isValid: false, isExpired: false };
+  let provider = 'none';
+
+  // Try Cognito first
+  if (cognitoAuthToken && cognitoAuthToken.value) {
+      validation = jwtValidator.validateTokenBasic(cognitoAuthToken.value);
+      provider = 'cognito';
+      logger.debug('Validated with Cognito');
+  } 
+  // If Cognito invalid or missing, try Firebase
+  if ((!validation.isValid || validation.isExpired) && firebaseAuthToken && firebaseAuthToken.value) {
+      validation = firebaseJwtValidator.validateTokenBasic(firebaseAuthToken.value);
+      provider = 'firebase';
+      logger.debug('Validated with Firebase');
+  }
+
+  logger.debug('Token validation result', {
+    provider,
+    isValid: validation.isValid,
+    isExpired: validation.isExpired
+  })
+  
+  if (!validation.isValid) {
+    throw new Error(validation.error || 'Invalid token')
+  }
+
+  if (validation.isExpired) {
+    throw new Error('Token has expired')
+  }
+
+  // Store user info in locals for use in pages
+  if (validation.payload) {
+    if (provider === 'cognito') {
+        Astro.locals.user = {
+          sub: validation.payload.sub,
+          email: validation.payload.email,
+          username: validation.payload['cognito:username'] || validation.payload.username,
+          emailVerified: validation.payload.email_verified || false,
+          groups: validation.payload['cognito:groups'] || [],
+          tokenUse: validation.payload.token_use
+        }
+    } else if (provider === 'firebase') {
+          Astro.locals.user = {
+          sub: validation.payload.sub,
+          email: validation.payload.email,
+          username: validation.payload.name || validation.payload.email,
+          emailVerified: validation.payload.email_verified || false,
+          groups: [], 
+          tokenUse: 'id'
+        }
+    }
+    
+    logger.debug('User info stored in locals', {
+      email: Astro.locals.user?.email,
+      provider
+    })
+  }
+
+  logger.debug('Protected route access granted')
+  // Token exists and is valid, allow access
+} catch (error) {
+  logger.error('Protected route validation failed', error)
+  // Invalid token, clear it and redirect to sign-in
+  // Clear both to be safe/clean
+  if (cognitoAuthToken) Astro.cookies.delete('cognito-auth-token', { path: '/' })
+  if (firebaseAuthToken) Astro.cookies.delete('firebase-auth-token', { path: '/' })
+  
+  logger.info('Redirecting to sign-in due to validation failure')
+  return Astro.redirect('/auth/sign-in', 302)
+}
+// ==== END AUTH PROTECTION LOGIC ====
 ---
 <!DOCTYPE html>
 <html lang="en" class="h-full bg-zinc-900"> {/* Added bg-zinc-900 here */}
