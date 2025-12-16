@@ -1,44 +1,40 @@
 ---
-import {
-  App
-} from 'src/applications-qwik/app/App.tsx'
 import 'src/styles/global.css'
-import { jwtValidator } from 'src/lib/auth/jwt-validator'
+import { firebaseJwtValidator } from 'src/lib/auth/firebase-jwt-validator'
+import { createLogger } from 'src/lib/logger'
+
+export const prerender = false;
+
+const logger = createLogger('APP_PROTECTION')
 
 // ==== AUTH PROTECTION LOGIC ====
-// This route requires authentication - validate JWT token
-console.log('🔒 [APP SPA] Processing protected route:', Astro.url.pathname)
+logger.debug('Processing protected app route', { pathname: Astro.url.pathname })
 
-// Get the Cognito auth token from cookies
-const authToken = Astro.cookies.get('cognito-auth-token')
-console.log('🍪 [APP SPA] Cookie inspection:', {
-  hasCognitoToken: Boolean(authToken?.value),
-  cognitoTokenValue: authToken?.value ? 'PRESENT' : 'MISSING',
-  authStatusCookie: Astro.cookies.get('auth-status')?.value ? 'PRESENT' : 'MISSING'
+const firebaseAuthToken = Astro.cookies.get('firebase-auth-token')
+
+logger.debug('Cookie inspection', {
+  hasFirebaseToken: Boolean(firebaseAuthToken?.value)
 })
 
-// If no auth token is present, redirect to sign-in
-if (!authToken || !authToken.value) {
-  console.log('❌ [APP SPA] No auth token found for protected route, redirecting to sign-in')
+// If no Firebase auth token is present, redirect to sign-in
+if (!firebaseAuthToken || !firebaseAuthToken.value) {
+  logger.info('No Firebase auth token found for protected route, redirecting to sign-in')
   return Astro.redirect('/auth/sign-in', 302)
 }
 
 try {
-  console.log('🔍 [APP SPA] Validating token for protected route access...')
+  logger.debug('Validating token for protected route access')
   
-  // Validate the Cognito JWT token
-  const validation = jwtValidator.validateTokenBasic(authToken.value)
-  console.log('🔍 [APP SPA] Protected route token validation:', {
+  let validation: any = { isValid: false, isExpired: false };
+  let provider = 'firebase'; // Only Firebase is allowed here
+
+  validation = firebaseJwtValidator.validateTokenBasic(firebaseAuthToken.value);
+  logger.debug('Validated with Firebase');
+  
+  logger.debug('Token validation result', {
+    provider,
     isValid: validation.isValid,
-    isExpired: validation.isExpired,
-    hasPayload: Boolean(validation.payload),
-    error: validation.error,
-    payloadPreview: validation.payload ? {
-      sub: validation.payload.sub?.substring(0, 8) + '...',
-      email: validation.payload.email,
-      tokenUse: validation.payload.token_use,
-      exp: new Date(validation.payload.exp * 1000).toISOString()
-    } : null
+    isExpired: validation.isExpired
   })
   
   if (!validation.isValid) {
@@ -54,182 +50,52 @@ try {
     Astro.locals.user = {
       sub: validation.payload.sub,
       email: validation.payload.email,
-      username: validation.payload['cognito:username'] || validation.payload.username,
+      username: validation.payload.name || validation.payload.email,
       emailVerified: validation.payload.email_verified || false,
-      groups: validation.payload['cognito:groups'] || [],
-      tokenUse: validation.payload.token_use
+      groups: [], 
+      tokenUse: 'id'
     }
     
-    console.log('👤 [APP SPA] User info stored in locals:', {
-      email: Astro.locals.user.email,
-      username: Astro.locals.user.username,
-      tokenUse: Astro.locals.user.tokenUse
+    logger.debug('User info stored in locals', {
+      email: Astro.locals.user?.email,
+      provider
     })
   }
 
-  console.log('✅ [APP SPA] Protected route access granted')
+  logger.debug('Protected route access granted')
+  // Token exists and is valid, allow access
 } catch (error) {
-  console.error('❌ [APP SPA] Protected route validation failed:', error)
+  logger.error('Protected route validation failed', error)
   // Invalid token, clear it and redirect to sign-in
-  Astro.cookies.delete('cognito-auth-token', {
-    path: '/',
-  })
-  console.log('🔄 [APP SPA] Redirecting to sign-in due to validation failure')
+  Astro.cookies.delete('firebase-auth-token', { path: '/' })
+  
+  logger.info('Redirecting to sign-in due to validation failure')
   return Astro.redirect('/auth/sign-in', 302)
 }
-
 // ==== END AUTH PROTECTION LOGIC ====
-
-// ==== INITIAL APP DATA LOADING ====
-// Single comprehensive load to minimize Cloudflare server requests (100k daily limit)
-// Qwik SPA handles all subsequent interactions client-side
-let initialAppData = null
-
-try {
-  // Environment variables for backend API
-  const BACKEND_API_URL = import.meta.env.BACKEND_API_URL || 'https://192.168.0.6:3000'
-  
-  console.log('🔄 [APP SPA] Loading initial app data from backend:', `${BACKEND_API_URL}/api/spa-load/app`)
-  
-  // Single comprehensive API call to load ALL app data
-  const response = await fetch(`${BACKEND_API_URL}/api/spa-load/app`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${authToken.value}`,
-      'Content-Type': 'application/json',
-      'User-Agent': 'DocForge-Frontend/1.0'
-    }
-  })
-
-  if (response.ok) {
-    initialAppData = await response.json()
-    console.log('✅ [APP SPA] Initial app data loaded successfully:', {
-      repositoriesCount: initialAppData?.repositories?.length || 0,
-      documentationCount: initialAppData?.documentation?.length || 0
-    })
-  } else {
-    console.warn('⚠️ [APP SPA] Backend API request failed:', {
-      status: response.status,
-      statusText: response.statusText
-    })
-  }
-} catch (error) {
-  console.warn('⚠️ [APP SPA] Failed to load initial app data from backend:', error)
-  // Continue with null data - frontend will show fallbacks for initial load
-}
-
-console.log('🎯 [APP SPA] Final initial app data state (minimizing Cloudflare requests):', {
-  hasInitialData: Boolean(initialAppData),
-  repositories: initialAppData?.repositories?.length || 0,
-  documentation: initialAppData?.documentation?.length || 0
-})
-
-// ==== END INITIAL APP DATA LOADING ====
-
-// Define valid routes for type safety
-type ValidRoute = '/' | '/connect' | '/repositories' | '/documentation'
-
-// Get the route from URL params
-const routeSegment = Astro.params.all || 'connect'
-const requestedRoute = routeSegment === '' ? '/connect' : `/${routeSegment}`
-
-// Validate route against known routes
-const validRoutes: ValidRoute[] = ['/', '/connect', '/repositories', '/documentation']
-const initialRoute: ValidRoute = validRoutes.includes(requestedRoute as ValidRoute) 
-  ? (requestedRoute as ValidRoute)
-  : '/connect' // fallback to connect for unknown routes
-
-// Detect theme from cookies or headers
-let initialTheme: 'light' | 'dark' = 'dark' // default
-
-// Try to get theme from cookie first
-const themeCookie = Astro.cookies.get('theme')
-if (themeCookie && (themeCookie.value === 'light' || themeCookie.value === 'dark')) {
-  initialTheme = themeCookie.value
-}
-
-// Enhanced mobile detection with multiple methods
-const userAgent = Astro.request.headers.get('user-agent') || ''
-const viewport = Astro.request.headers.get('sec-ch-viewport-width') || ''
-const deviceMemory = Astro.request.headers.get('device-memory') || ''
-// Check various indicators
-const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
-const isMobileViewport = viewport && parseInt(viewport) < 1024
-const isLowMemory = deviceMemory && parseFloat(deviceMemory) <= 4
-const hasMobileKeyword = userAgent.includes('Mobile') || userAgent.includes('mobile')
-
-// Check if this looks like a narrow screen (Chrome DevTools simulation)
-// Chrome DevTools often sends desktop user agents but with mobile-like characteristics
-const isLikelyMobileSimulation = userAgent.includes('Chrome') && !userAgent.includes('Mobile') && viewport && parseInt(viewport) < 768
-
-// Be very aggressive about mobile detection - if ANY indicator suggests mobile, treat as mobile
-const isMobileDevice = isMobileUA || isMobileViewport || hasMobileKeyword || isLikelyMobileSimulation
-
-console.log('🔍 [ASTRO SSR /app] Enhanced Mobile Detection:', {
-  userAgent: userAgent.substring(0, 100),
-  viewport,
-  deviceMemory,
-  isMobileUA,
-  isMobileViewport,
-  isLowMemory,
-  hasMobileKeyword,
-  isLikelyMobileSimulation,
-  finalResult: isMobileDevice,
-  url: Astro.url.pathname
-})
-
-// Detect sidebar state from cookies
-let initialSidebarOpen: boolean = false // default closed
-const sidebarCookie = Astro.cookies.get('sidebarOpen')
-
-if (isMobileDevice) {
-  // Mobile behavior: start closed, but respect if user explicitly opened it
-  if (sidebarCookie && sidebarCookie.value === 'true') {
-    initialSidebarOpen = true // User explicitly opened it
-  }
-  // If cookie is 'false' or doesn't exist, keep closed (default false)
-} else {
-  // Desktop behavior: respect cookie or default to open
-  if (sidebarCookie && (sidebarCookie.value === 'true' || sidebarCookie.value === 'false')) {
-    initialSidebarOpen = sidebarCookie.value === 'true'
-  } else {
-    initialSidebarOpen = true // default open on desktop
-  }
-}
-
-console.log('🎛️ [ASTRO SSR /app] Sidebar State:', {
-  sidebarCookie: sidebarCookie?.value,
-  initialSidebarOpen,
-  isMobileDevice,
-  logic: isMobileDevice ? 'mobile' : 'desktop'
-})
-
-// Apply theme class to HTML element for SSR
-const htmlClass = `h-full ${initialTheme === 'dark' ? 'dark' : ''}`
-const bodyClass = `h-full ${initialTheme === 'dark' ? 'bg-zinc-900' : 'bg-gray-50'}`
 ---
-
 <!DOCTYPE html>
-<html lang="en" class={htmlClass}>
+<html lang="en" class="h-full bg-zinc-900"> {/* Added bg-zinc-900 here */}
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Qwik SPA</title>
-  <meta name="theme-color" content="#18181b">
-  <meta name="color-scheme" content="dark light">
-</head>
-<body class={bodyClass}>
-<div id="qwik-root" class="h-full">
-  <App 
-    client:load 
-    initialRoute={initialRoute}
-    initialTheme={initialTheme}
-    initialSidebarOpen={initialSidebarOpen}
-    initialIsMobile={!!isMobileDevice}
-    initialAppData={initialAppData}
-  />
-</div>
+  <title>SolidJS SPA</title>
 
-<!-- No longer need the theme detection script since we pass it as props -->
+
+  <meta name="theme-color" content="#18181b">
+  <meta name="color-scheme" content="dark">
+</head>
+<body class="h-full bg-zinc-900 text-zinc-100 overflow-x-hidden"> {/* This is good */}
+<div id="root-solid" class="w-full h-full"></div> {/* This will fill the body */}
+
+<script>
+  import { render } from 'solid-js/web';
+  import App from 'src/applications-solid/app/App.tsx'
+
+  const root = document.getElementById('root-solid');
+  if (root) {
+    render(() => App({}), root);
+  }
+</script>
 </body>
 </html>

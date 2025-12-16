@@ -8,7 +8,10 @@ const customColors = {
     primary: '#f07d40',    // Primary Orange Accent
     secondary: '#47a49e',  // Secondary Teal Accent
     // A slightly darker shade of primary for hover state
-    primaryDark: '#d86e37', 
+    primaryDark: '#d86e37',
+    // Darker shades for dark mode
+    primaryDarkMode: '#c8632f',  // Darker Orange for dark mode
+    secondaryDarkMode: '#368179', // Darker Teal for dark mode
 };
 
 // opt into SSG
@@ -38,7 +41,7 @@ const { title } = Astro.props;
             --color-primary: var(--primary);
             --color-secondary: var(--secondary);
             --color-primary-dark: var(--primaryDark);
-            
+
             /* Add custom utility classes for the header colors */
             .dark .bg-header-dark {
                 background-color: var(--color-background);
@@ -62,7 +65,18 @@ const { title } = Astro.props;
         }
         /* Now uses the CSS variable --background for the dark mode body color */
         .dark body {
-            background-color: var(--background); 
+            background-color: var(--background);
+        }
+
+        /* Darken images in dark mode */
+        .dark-mode-img {
+            transition: filter 0.3s ease;
+        }
+        html.dark .dark-mode-img {
+            filter: brightness(0.5) grayscale(0.4) !important;
+        }
+        .dark .dark-mode-img {
+            filter: brightness(0.5) grayscale(0.4) !important;
         }
     </style>
     
@@ -106,9 +120,8 @@ const { title } = Astro.props;
                 <a href="/download" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">Download</a>
                 <a href="/about" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">About Us</a>
                                 
-                <a href="/app/dashboard" 
-                   class="px-4 py-2 text-white rounded-lg transition-colors shadow-md bg-primary-hover"
-                   style={`background-color: ${customColors.primary};`}>
+                <a href="/app/dashboard"
+                   class="px-4 py-2 text-white rounded-lg transition-colors shadow-md bg-[#564740] dark:bg-[#f07d40] hover:bg-[#4a3d37] dark:hover:bg-[#d86e37]">
                     Go To App
                 </a>
             </div>
@@ -146,8 +159,7 @@ const { title } = Astro.props;
                 <a href="/privacy" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Privacy</a>
                 
                 <a href="/app/dashboard"
-                   class="block mx-3 my-2 px-4 py-2 text-white rounded-lg transition-colors text-center shadow-md bg-primary-hover"
-                   style={`background-color: ${customColors.primary};`}>
+                   class="block mx-3 my-2 px-4 py-2 text-white rounded-lg transition-colors text-center shadow-md bg-[#564740] dark:bg-[#f07d40] hover:bg-[#4a3d37] dark:hover:bg-[#d86e37]">
                     Go To App
                 </a>
             </div>
@@ -162,18 +174,94 @@ const { title } = Astro.props;
     <DarkModeToggle client:load />
 </div>
 
-<!-- FOOTER: Added after slot and styled using CSS variables -->
-<footer class="border-t dark:border-gray-800 py-12" 
-        style="background-color: var(--color-primary); border-color: var(--color-background);">
+<!-- BOTTOM NAVIGATION: Matches the top navigation exactly -->
+<nav class="border-t-4 border-[#564740] dark:border-[#f07d40] bg-[#f07d40] dark:bg-[#564740] shadow-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center text-white dark:text-gray-200">
+        <div class="flex justify-between items-center h-16">
+            <div class="flex items-center space-x-4">
+                <a href="/" class="flex items-center gap-2">
+                    <!-- Light mode logo -->
+                    <img src="/splitdo/logo_light.svg" alt="SplitDo Logo" class="h-12 w-auto dark:hidden">
+                    <!-- Dark mode logo -->
+                    <img src="/splitdo/logo_dark.svg" alt="SplitDo Logo" class="h-12 w-auto hidden dark:block">
+                    <!-- Text with vertical stretch -->
+                    <span class="font-bold text-2xl tracking-wide" style="font-family: 'houschka-rounded', sans-serif; font-weight: 700; transform: scaleY(1.1); transform-origin: center;">
+                        <!-- Light mode text -->
+                        <span class="dark:hidden">
+                            <span style="color: #564740;">SPLIT</span><span style="color: #47a49e;">DO</span>
+                        </span>
+                        <!-- Dark mode text -->
+                        <span class="hidden dark:inline">
+                            <span style="color: #47a49e;">SPLIT</span><span style="color: #f07d40;">DO</span>
+                        </span>
+                    </span>
+                </a>
+            </div>
+
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="/" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">Home</a>
+                <a href="/features" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">Features</a>
+                <a href="/download" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">Download</a>
+                <a href="/about" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">About Us</a>
+
+                <a href="/app/dashboard"
+                   class="px-4 py-2 text-white rounded-lg transition-colors shadow-md bg-[#564740] dark:bg-[#f07d40] hover:bg-[#4a3d37] dark:hover:bg-[#d86e37]">
+                    Go To App
+                </a>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <div class="hidden md:block">
+                    <DarkModeToggle client:load />
+                </div>
+                <div class="md:hidden">
+                    <button
+                        id="mobile-menu-button-bottom"
+                        type="button"
+                        class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus-ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-800 p-2"
+                        aria-controls="mobile-menu-bottom"
+                        aria-expanded="false"
+                    >
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" id="menu-icon-bottom" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg class="h-6 w-6 hidden" id="close-icon-bottom" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:hidden hidden" id="mobile-menu-bottom">
+            <div class="px-2 pt-2 pb-3 space-y-1 border-t border-[#47a49e] dark:border-[#f07d40] bg-[#f07d40] dark:bg-[#564740]">
+                <a href="/" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Home</a>
+                <a href="/features" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Features</a>
+                <a href="/download" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Download</a>
+                <a href="/about" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">About</a>
+                <a href="/privacy" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Privacy</a>
+
+                <a href="/app/dashboard"
+                   class="block mx-3 my-2 px-4 py-2 text-white rounded-lg transition-colors text-center shadow-md bg-[#564740] dark:bg-[#f07d40] hover:bg-[#4a3d37] dark:hover:bg-[#d86e37]">
+                    Go To App
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- FOOTER: Added after slot and styled using custom CSS -->
+<footer class="border-t-4 border-[#564740] dark:border-[#f07d40] py-8 bg-[#368179]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center text-black dark:text-gray-200">
             <p>&copy; 2025 SplitDo. All rights reserved.</p>
         </div>
     </div>
 </footer>
 
 <script>
-    // Mobile menu toggle functionality... (rest of the script is unchanged)
+    // Top mobile menu toggle functionality
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
     const menuIcon = document.getElementById('menu-icon');
@@ -195,6 +283,32 @@ const { title } = Astro.props;
                 menuIcon.classList.add('hidden');
                 closeIcon.classList.remove('hidden');
                 mobileMenuButton.setAttribute('aria-expanded', 'true');
+            }
+        });
+    }
+
+    // Bottom mobile menu toggle functionality
+    const mobileMenuButtonBottom = document.getElementById('mobile-menu-button-bottom');
+    const mobileMenuBottom = document.getElementById('mobile-menu-bottom');
+    const menuIconBottom = document.getElementById('menu-icon-bottom');
+    const closeIconBottom = document.getElementById('close-icon-bottom');
+
+    if (mobileMenuButtonBottom && mobileMenuBottom && menuIconBottom && closeIconBottom) {
+        mobileMenuButtonBottom.addEventListener('click', () => {
+            const isOpen = !mobileMenuBottom.classList.contains('hidden');
+
+            if (isOpen) {
+                // Close menu
+                mobileMenuBottom.classList.add('hidden');
+                menuIconBottom.classList.remove('hidden');
+                closeIconBottom.classList.add('hidden');
+                mobileMenuButtonBottom.setAttribute('aria-expanded', 'false');
+            } else {
+                // Open menu
+                mobileMenuBottom.classList.remove('hidden');
+                menuIconBottom.classList.add('hidden');
+                closeIconBottom.classList.remove('hidden');
+                mobileMenuButtonBottom.setAttribute('aria-expanded', 'true');
             }
         });
     }
