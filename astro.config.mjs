@@ -35,7 +35,7 @@ export default defineConfig({
   ],
   adapter: cloudflare({
     platformProxy: {
-      enabled: true,
+      enabled: false,
     },
   }),
   vite: {

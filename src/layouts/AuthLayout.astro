@@ -34,8 +34,10 @@ const { title } = Astro.props;
 	<!-- Auth Header with Logo -->
 	<header class="absolute top-0 left-0 w-full z-40 p-6">
 		<div class="flex justify-between items-center">
-			<a href="/" class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-				DocForge AI
+			<a href="/" class="flex items-center gap-2">
+				<img src="/splitdo/logo_light.svg" alt="SplitDo Logo" class="h-8 w-auto dark:hidden">
+				<img src="/splitdo/logo_dark.svg" alt="SplitDo Logo" class="h-8 w-auto hidden dark:block">
+				<span class="text-2xl font-bold text-[#f07d40] dark:text-[#c8632f]">SplitDo</span>
 			</a>
 			<!-- Optional: Add a back to home link -->
 			<a href="/" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors text-sm">
