@@ -1,6 +1,6 @@
 import type { Component } from 'solid-js';
 
-export type Page = 'dashboard' | 'counter';
+export type Page = 'dashboard' | 'counter' | 'profile' | 'wallet';
 
 interface NavigationProps {
   currentPage: Page;
@@ -34,6 +34,26 @@ const Navigation: Component<NavigationProps> = (props) => {
           }`}
         >
           Counter
+        </button>
+        <button
+          onClick={() => props.onPageChange('profile')}
+          class={`w-full text-left px-4 py-2 rounded-md transition-colors ${
+            props.currentPage === 'profile'
+              ? props.isDark ? 'bg-zinc-800 text-white' : 'bg-gray-100 text-gray-900'
+              : props.isDark ? 'text-gray-400 hover:text-white hover:bg-zinc-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+          }`}
+        >
+          Profile
+        </button>
+        <button
+          onClick={() => props.onPageChange('wallet')}
+          class={`w-full text-left px-4 py-2 rounded-md transition-colors ${
+            props.currentPage === 'wallet'
+              ? props.isDark ? 'bg-zinc-800 text-white' : 'bg-gray-100 text-gray-900'
+              : props.isDark ? 'text-gray-400 hover:text-white hover:bg-zinc-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+          }`}
+        >
+          Wallet
         </button>
       </div>
     </nav>
