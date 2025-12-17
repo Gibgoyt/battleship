@@ -30,28 +30,28 @@ const { title } = Astro.props;
         }
     </script>
 </head>
-<body class="bg-[#1a1410] text-white">
+<body class="bg-[#0f0a1e] text-white">
 
 <!-- Navigation -->
-<header class="fixed top-0 left-0 right-0 z-50 bg-[#564740]/90 backdrop-blur-lg border-b border-[#f07d40]/10">
+<header class="fixed top-0 left-0 right-0 z-50 bg-[#2d1b4e]/90 backdrop-blur-lg border-b border-[#00d9ff]/10">
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-20">
             <!-- Logo -->
             <a href="/" class="flex items-center gap-3 group">
-                <div class="w-10 h-10 bg-gradient-to-r from-[#f07d40] to-[#47a49e] rounded-lg flex items-center justify-center">
+                <div class="w-10 h-10 bg-gradient-to-r from-[#00d9ff] to-[#6b46c1] rounded-lg flex items-center justify-center">
                     <span class="text-white font-bold text-xl">$</span>
                 </div>
                 <span class="text-2xl font-bold">
-                    <span class="text-white">SPLIT</span><span class="text-[#f07d40]">DO</span>
+                    <span class="text-white">SPLIT</span><span class="text-[#00d9ff]">DO</span>
                 </span>
             </a>
 
             <!-- Desktop Navigation -->
             <div class="hidden md:flex items-center space-x-8">
-                <a href="/" class="text-gray-200 hover:text-[#f07d40] transition-colors">Home</a>
-                <a href="#tokenomics" class="text-gray-200 hover:text-[#f07d40] transition-colors">Tokenomics</a>
-                <a href="#about" class="text-gray-200 hover:text-[#f07d40] transition-colors">About</a>
-                <button class="px-6 py-2.5 bg-[#f07d40] text-white font-bold rounded-lg hover:bg-[#c8632f] transition-all transform hover:scale-105">
+                <a href="/" class="text-gray-200 hover:text-[#00d9ff] transition-colors">Home</a>
+                <a href="#tokenomics" class="text-gray-200 hover:text-[#00d9ff] transition-colors">Tokenomics</a>
+                <a href="#about" class="text-gray-200 hover:text-[#00d9ff] transition-colors">About</a>
+                <button class="px-6 py-2.5 bg-[#00d9ff] text-white font-bold rounded-lg hover:bg-[#00b8d4] transition-all transform hover:scale-105">
                     Claim Airdrop
                 </button>
             </div>
@@ -78,11 +78,11 @@ const { title } = Astro.props;
 
         <!-- Mobile Menu -->
         <div class="md:hidden hidden" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 bg-[#564740] rounded-lg mt-2 mb-4">
-                <a href="/" class="block px-3 py-2 text-gray-200 hover:text-[#f07d40] hover:bg-[#47a49e]/20 rounded-md transition-colors">Home</a>
-                <a href="#tokenomics" class="block px-3 py-2 text-gray-200 hover:text-[#f07d40] hover:bg-[#47a49e]/20 rounded-md transition-colors">Tokenomics</a>
-                <a href="#about" class="block px-3 py-2 text-gray-200 hover:text-[#f07d40] hover:bg-[#47a49e]/20 rounded-md transition-colors">About</a>
-                <button class="w-full mt-2 px-6 py-2.5 bg-[#f07d40] text-white font-bold rounded-lg hover:bg-[#c8632f] transition-all">
+            <div class="px-2 pt-2 pb-3 space-y-1 bg-[#2d1b4e] rounded-lg mt-2 mb-4">
+                <a href="/" class="block px-3 py-2 text-gray-200 hover:text-[#00d9ff] hover:bg-[#6b46c1]/20 rounded-md transition-colors">Home</a>
+                <a href="#tokenomics" class="block px-3 py-2 text-gray-200 hover:text-[#00d9ff] hover:bg-[#6b46c1]/20 rounded-md transition-colors">Tokenomics</a>
+                <a href="#about" class="block px-3 py-2 text-gray-200 hover:text-[#00d9ff] hover:bg-[#6b46c1]/20 rounded-md transition-colors">About</a>
+                <button class="w-full mt-2 px-6 py-2.5 bg-[#00d9ff] text-white font-bold rounded-lg hover:bg-[#00b8d4] transition-all">
                     Claim Airdrop
                 </button>
             </div>
@@ -96,17 +96,17 @@ const { title } = Astro.props;
 <slot />
 
 <!-- Footer -->
-<footer class="bg-[#564740] border-t border-[#f07d40]/10 py-12">
+<footer class="bg-[#2d1b4e] border-t border-[#00d9ff]/10 py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <!-- Brand -->
             <div class="col-span-1 md:col-span-2">
                 <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-gradient-to-r from-[#f07d40] to-[#47a49e] rounded-lg flex items-center justify-center">
+                    <div class="w-10 h-10 bg-gradient-to-r from-[#00d9ff] to-[#6b46c1] rounded-lg flex items-center justify-center">
                         <span class="text-white font-bold text-xl">$</span>
                     </div>
                     <span class="text-2xl font-bold">
-                        <span class="text-white">SPLIT</span><span class="text-[#f07d40]">DO</span>
+                        <span class="text-white">SPLIT</span><span class="text-[#00d9ff]">DO</span>
                     </span>
                 </div>
                 <p class="text-gray-300 text-sm max-w-md">
@@ -118,9 +118,9 @@ const { title } = Astro.props;
             <div>
                 <h4 class="text-white font-semibold mb-4">Quick Links</h4>
                 <ul class="space-y-2">
-                    <li><a href="/" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">Home</a></li>
-                    <li><a href="#tokenomics" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">Tokenomics</a></li>
-                    <li><a href="#about" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">About</a></li>
+                    <li><a href="/" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Home</a></li>
+                    <li><a href="#tokenomics" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Tokenomics</a></li>
+                    <li><a href="#about" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">About</a></li>
                 </ul>
             </div>
 
@@ -128,19 +128,19 @@ const { title } = Astro.props;
             <div>
                 <h4 class="text-white font-semibold mb-4">Community</h4>
                 <ul class="space-y-2">
-                    <li><a href="#" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">Twitter</a></li>
-                    <li><a href="#" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">Discord</a></li>
-                    <li><a href="#" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">Telegram</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Twitter</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Discord</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Telegram</a></li>
                 </ul>
             </div>
         </div>
 
-        <div class="border-t border-[#f07d40]/10 pt-8">
+        <div class="border-t border-[#00d9ff]/10 pt-8">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <p class="text-gray-300 text-sm">&copy; 2025 SPLITDO. All rights reserved.</p>
                 <div class="flex gap-6 mt-4 md:mt-0">
-                    <a href="/privacy" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">Privacy Policy</a>
-                    <a href="/terms" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">Terms of Service</a>
+                    <a href="/privacy" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Privacy Policy</a>
+                    <a href="/terms" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Terms of Service</a>
                 </div>
             </div>
         </div>

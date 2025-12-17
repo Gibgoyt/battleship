@@ -6,31 +6,32 @@
 @theme {
   --color-mode: light dark;
 
-  /* SplitDo original colors */
-  --color-primary-orange: #f07d40;
-  --color-primary-orange-dark: #c8632f;
-  --color-primary-teal: #47a49e;
-  --color-primary-teal-dark: #368179;
-  --color-primary-brown: #564740;
+  /* Deep Purple & Cyan color scheme */
+  --color-primary-purple: #6b46c1;
+  --color-primary-purple-dark: #553c9a;
+  --color-primary-purple-deep: #2d1b4e;
+  --color-primary-cyan: #00d9ff;
+  --color-primary-cyan-dark: #00b8d4;
+  --color-accent-violet: #b857ff;
 
   /* Dark backgrounds */
-  --color-dark-bg: #1a1410;
-  --color-dark-bg-secondary: #2a2420;
-  --color-dark-bg-card: #3a3430;
+  --color-dark-bg: #0f0a1e;
+  --color-dark-bg-secondary: #1a0f2e;
+  --color-dark-bg-card: #2d1b4e;
 }
 
 /* Use class-based dark mode */
 @custom-variant dark (.dark &);
 
 :root {
-  --color-bg: #1a1410;
+  --color-bg: #0f0a1e;
   --color-text: #ffffff;
-  --gradient-primary: linear-gradient(135deg, #f07d40 0%, #47a49e 100%);
-  --gradient-hero: linear-gradient(180deg, #564740 0%, #47a49e 100%);
+  --gradient-primary: linear-gradient(135deg, #00d9ff 0%, #b857ff 100%);
+  --gradient-hero: linear-gradient(180deg, #1a0f2e 0%, #2d1b4e 100%);
 }
 
 .dark {
-  --color-bg: #1a1410;
+  --color-bg: #0f0a1e;
   --color-text: #ffffff;
 }
 
@@ -51,25 +52,25 @@ body {
 
 /* Glowing button effect */
 .glow-button {
-  box-shadow: 0 0 20px rgba(240, 125, 64, 0.3);
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
   transition: box-shadow 0.3s ease;
 }
 
 .glow-button:hover {
-  box-shadow: 0 0 30px rgba(240, 125, 64, 0.5);
+  box-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
 }
 
 /* Card with subtle gradient border */
 .card-glow {
   position: relative;
-  background: #3a3430;
+  background: #2d1b4e;
   border-radius: 1rem;
   padding: 2px;
-  background: linear-gradient(135deg, rgba(240, 125, 64, 0.2), rgba(71, 164, 158, 0.2));
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(184, 87, 255, 0.2));
 }
 
 .card-glow-inner {
-  background: #3a3430;
+  background: #2d1b4e;
   border-radius: calc(1rem - 2px);
   padding: 1.5rem;
 }
