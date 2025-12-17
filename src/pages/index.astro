@@ -1,447 +1,629 @@
 ---
 import Layout from 'src/layouts/Layout.astro';
-import HeroPhones from 'src/components/HeroPhones.astro';
-import WhitePhoneHero from 'src/components/WhitePhoneHero.astro';
+import humansImage from 'src/assets/Humans.jpeg';
 
-// export static HTML
 export const prerender = true
 ---
 
-<Layout title="SplitDo - Split Expenses Seamlessly on Solana">
+<Layout title="SPLITDO Token Airdrop - Claim Your Share">
+	<main class="min-h-screen">
 
-	<main>
-<!-- Hero Section - Side by Side (Text Left, Phones Right) -->
-    <section class="w-full overflow-visible border-b-[10px] border-[#47a49e] dark:border-[#368179]">
-      <style>
-        :root {
-            --color-background: #564740; /* Dark Background */
-            --color-primary: #f07d40;    /* Primary Orange Accent */
-            --color-secondary: #47a49e;  /* Secondary Teal Accent */
-        }
-      </style>
+		<!-- Hero Section -->
+		<section class="relative overflow-hidden" style="background: linear-gradient(180deg, #564740 0%, #47a49e 100%);">
+			<div class="absolute inset-0 opacity-10">
+				<div class="absolute top-0 left-1/4 w-96 h-96 bg-[#f07d40] rounded-full filter blur-3xl"></div>
+				<div class="absolute bottom-0 right-1/4 w-96 h-96 bg-[#47a49e] rounded-full filter blur-3xl"></div>
+			</div>
 
-      <div class="relative px-6 sm:px-8 lg:px-12 py-8 sm:py-10 lg:py-12 pb-16 sm:pb-20 lg:pb-24 overflow-visible"
-           style="background: linear-gradient(to right, #564740, #55534C, #535F58, #4F766F, #47a49e);">
+			<div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+					<!-- Left: Text Content -->
+					<div class="text-center lg:text-left">
+						<!-- Badge -->
+						<div class="inline-flex items-center px-4 py-2 rounded-full bg-[#564740] border border-[#f07d40]/30 mb-8">
+							<span class="w-2 h-2 bg-[#f07d40] rounded-full mr-2 animate-pulse"></span>
+							<span class="text-[#f07d40] text-sm font-semibold">AIRDROP LIVE NOW</span>
+						</div>
 
-        <!-- Content container - Flex row with text left and phones right -->
-        <div class="flex flex-col lg:flex-row items-center justify-center gap-8 relative max-w-7xl mx-auto">
+						<!-- Main Heading -->
+						<h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6">
+							<span class="text-white">Claim Your</span><br/>
+							<span class="gradient-text">$SPLITDO Tokens</span>
+						</h1>
 
-          <!-- Left side: Logo and Text -->
-          <div class="flex flex-col items-center justify-center gap-4 sm:gap-6 lg:gap-8 mt-2 sm:mt-4 w-full lg:w-auto lg:flex-1">
-  
-            <!-- Text -->
-            <div class="flex flex-col gap-2 w-full text-center">
-              <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#f07d40] dark:text-[#c8632f] tracking-normal sm:tracking-wide lg:tracking-wider">
-                Split Solana Bills Instantly.
-              </h2>
-              <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#47a49e] dark:text-[#368179] tracking-normal sm:tracking-wide lg:tracking-wider">
-                Settle Up on Solana.
-              </h2>
-              <p class="text-base sm:text-lg lg:text-xl mt-4 leading-relaxed text-white dark:text-gray-300 text-balance">
-               The fastest way to split expenses and settle balances. Powered by Solana for near-zero fees and instant transfer.
-              </p>
-            </div>
-               <div class="flex flex-col sm:flex-row gap-4 justify-center">
+						<!-- Subheading -->
+						<p class="text-xl md:text-2xl text-gray-200 mb-12">
+							Join the revolution in decentralized expense splitting. Get your share of 1,000,000,000 $SPLITDO tokens before it's too late.
+						</p>
 
-              <a href="/groups/new"
-                class="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 text-white dark:text-gray-300 text-base sm:text-lg font-semibold rounded-xl transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform bg-[#f07d40] dark:bg-[#c8632f]">
-                <span class="hidden sm:inline">Start Splitting Bills (It's Free)</span>
-                <span class="sm:hidden">Get Started Free</span>
-              </a>
+						<!-- CTA Buttons -->
+						<div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
+							<button class="group relative px-8 py-4 bg-[#f07d40] text-white text-lg font-bold rounded-xl hover:bg-[#c8632f] transition-all transform hover:scale-105 glow-button">
+								<span class="relative z-10">Claim Airdrop Now</span>
+							</button>
+							<button class="px-8 py-4 bg-transparent border-2 border-[#f07d40]/30 text-white text-lg font-bold rounded-xl hover:bg-[#f07d40]/10 transition-all">
+								Learn More
+							</button>
+						</div>
 
-                <a href="/how-it-works"
-                   class="px-6 py-3 sm:px-8 sm:py-4 bg-white dark:bg-gray-300 text-black text-base sm:text-lg font-medium rounded-xl hover:white dark:hover:bg-gray-300 transition-colors shadow-lg hover:shadow-xl border border-gray-300 transform hover:scale-105 transition-transform">
-                    Learn How It Works
-                </a>
-            </div>
-          </div>
+						<!-- Countdown Timer -->
+						<div class="max-w-2xl mx-auto lg:mx-0">
+							<p class="text-gray-200 mb-4 text-sm uppercase tracking-wider">Airdrop Phase 1 Ends In</p>
+							<div id="countdown" class="grid grid-cols-4 gap-4">
+								<div class="bg-[#564740] border border-[#f07d40]/20 rounded-xl p-4">
+									<div class="text-3xl md:text-4xl font-bold text-[#f07d40]" id="days">00</div>
+									<div class="text-xs text-gray-300 uppercase mt-1">Days</div>
+								</div>
+								<div class="bg-[#564740] border border-[#f07d40]/20 rounded-xl p-4">
+									<div class="text-3xl md:text-4xl font-bold text-[#f07d40]" id="hours">00</div>
+									<div class="text-xs text-gray-300 uppercase mt-1">Hours</div>
+								</div>
+								<div class="bg-[#564740] border border-[#f07d40]/20 rounded-xl p-4">
+									<div class="text-3xl md:text-4xl font-bold text-[#f07d40]" id="minutes">00</div>
+									<div class="text-xs text-gray-300 uppercase mt-1">Minutes</div>
+								</div>
+								<div class="bg-[#564740] border border-[#f07d40]/20 rounded-xl p-4">
+									<div class="text-3xl md:text-4xl font-bold text-[#f07d40]" id="seconds">00</div>
+									<div class="text-xs text-gray-300 uppercase mt-1">Seconds</div>
+								</div>
+							</div>
+						</div>
+					</div>
 
-          <!-- Right side: Phones container - two phones -->
-          <div class="flex justify-center items-center overflow-visible w-full lg:w-auto lg:flex-1">
-            <WhitePhoneHero />
-          </div>
+					<!-- Right: Phone Mockup -->
+					<div class="flex justify-center lg:justify-end">
+						<div class="relative max-w-[320px] sm:max-w-[380px] w-full">
+							<div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[600px] mx-auto glow-button">
+								<div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-[#2E2B29] rounded-b-2xl flex justify-center items-center z-10">
+									<div class="w-10 h-1.5 bg-black rounded-full"></div>
+								</div>
+								<div class="flex items-center justify-center h-full p-4">
+									<div class="bg-white dark:bg-gray-300 rounded-[2.2rem] w-full h-full overflow-hidden">
+										<img
+											src="/phone_screens/WalletScreen_LIGHT.png"
+											alt="SplitDo App Wallet Screen"
+											class="w-full h-full object-cover object-top dark:hidden"
+										/>
+										<img
+											src="/phone_screens/WalletScreen_DARK.png"
+											alt="SplitDo App Wallet Screen"
+											class="w-full h-full object-cover object-top hidden dark:block"
+										/>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
 
-        </div>
-      </div>
-    </section>
-
-<section class="w-full border-b-[10px] border-[#564740] dark:border-[#f07d40]">
-
-<div class="w-full">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-0">
-
-  <!-- 1. Smart Group Management (BROWN) -->
-  <div class="flex flex-col items-center">
-    <div class="pt-10 px-10 lg:pt-12 lg:px-12 text-white dark:text-gray-300 min-h-64 flex flex-col justify-center items-center bg-[#564740] w-full">
-      
-      <!-- Icon -->
-      <div class="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-        <svg class="w-8 h-8" style="color: white dark:gray-300;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
-          </path>
-        </svg>
-      </div>
-
-      <!-- Heading -->
-      <h3 class="text-2xl font-semibold mb-3 text-center">Smart Group Management</h3>
-
-      <!-- Description -->
-      <p class="text-base text-white dark:text-gray-300 text-center mb-10">
-        Create expense groups with friends, roommates, or colleagues. Add members, set spending rules,
-        and manage permissions effortlessly.
-      </p>
-
-      <!-- Phone Mockup -->
-      <div class="relative overflow-hidden max-w-[280px] sm:max-w-[340px] lg:max-w-[380px] w-full h-[350px] mx-auto">
-        <div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[520px] mx-auto">
-
-          <!-- Top bar -->
-          <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-[#2E2B29] rounded-b-2xl flex justify-center items-center z-10">
-            <div class="w-10 h-1.5 bg-black rounded-full"></div>
-          </div>
-
-          <!-- Phone screen -->
-          <div class="flex items-center justify-center h-full p-4">
-            <div class="bg-white dark:bg-gray-300 rounded-[2.2rem] w-full h-full overflow-hidden">
-              <img
-                src="/phone_screens/GroupsTab_LIGHT.png"
-                alt="SplitDo App Groups Tab Screenshot Light Mode"
-                class="w-full h-full object-cover object-top dark:hidden"
-              />
-              <img
-                src="/phone_screens/GroupsTab_DARK.png"
-                alt="SplitDo App Groups Tab Screenshot Dark Mode"
-                class="w-full h-full object-cover object-top hidden dark:block"
-              />
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- 2. Solana Integration (ORANGE) -->
-  <div class="flex flex-col items-center">
-    <div class="pt-10 px-10 lg:pt-12 lg:px-12 text-white dark:text-gray-300 min-h-64 flex flex-col justify-center items-center bg-[#f07d40] dark:bg-[#c8632f] w-full">
-      
-      <!-- Icon -->
-      <div class="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-        <svg class="w-8 h-8" style="color: white dark:gray-300;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 13h2m8 0h8m-11-2v2m1-1v-4a1 1 0 011-1h6a1 1 0 011 1v4a1 1 0 01-1 1h-6a1 1 0 01-1-1zM7 7l4-4 4 4M7 17l4 4 4-4"></path>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 13l-4 4M15 7l-4 4"></path>
-        </svg>
-      </div>
-
-      <!-- Heading -->
-      <h3 class="text-2xl font-semibold mb-3 text-center">Solana Integration</h3>
-
-      <!-- Description -->
-      <p class="text-base text-white dark:text-gray-300 text-center mb-10">
-       Lightning-fast settlements with minimal fees. Connect your Solana wallet and settle debts instantly on the blockchain.
-      </p>
-
-      <!-- Phone Mockup -->
-      <div class="relative overflow-hidden max-w-[280px] sm:max-w-[340px] lg:max-w-[380px] w-full h-[350px] mx-auto">
-        <div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[520px] mx-auto">
-
-          <!-- Top bar -->
-          <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-[#2E2B29] rounded-b-2xl flex justify-center items-center z-10">
-            <div class="w-10 h-1.5 bg-black rounded-full"></div>
-          </div>
-
-          <!-- Phone screen -->
-          <div class="flex items-center justify-center h-full p-4">
-            <div class="bg-white dark:bg-gray-300 rounded-[2.2rem] w-full h-full overflow-hidden">
-              <img
-                src="/phone_screens/WalletScreen_LIGHT.png"
-                alt="SplitDo App Wallet Screen Screenshot Light Mode"
-                class="w-full h-full object-cover object-top dark:hidden"
-              />
-              <img
-                src="/phone_screens/WalletScreen_DARK.png"
-                alt="SplitDo App Wallet Screen Screenshot Dark Mode"
-                class="w-full h-full object-cover object-top hidden dark:block"
-              />
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-
-        <!-- 3. Auto-Split Calculations (TEAL) -->
-  <div class="flex flex-col items-center">
-    <div class="pt-10 px-10 lg:pt-12 lg:px-12 text-white dark:text-gray-300 min-h-64 flex flex-col justify-center items-center bg-[#47a49e] dark:bg-[#368179] w-full">
-      
-      <!-- Icon -->
-      <div class="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-        <svg class="w-8 h-8" style="color: white dark:gray-300;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v4m-7 0v-4M16 10v4"></path>
-                </svg>
-      </div>
-
-      <!-- Heading -->
-      <h3 class="text-2xl font-semibold mb-3 text-center">Intelligent Auto-Split Calculations</h3>
-
-      <!-- Description -->
-      <p class="text-base text-white dark:text-gray-300 text-center mb-10">
-Intelligent algorithms automatically calculate fair splits. Handle unequal shares, tips, taxes, and complex expense scenarios with precision.  </p>
-
-      <!-- Phone Mockup -->
-      <div class="relative overflow-hidden max-w-[280px] sm:max-w-[340px] lg:max-w-[380px] w-full h-[350px] mx-auto">
-        <div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[520px] mx-auto">
-          
-          <!-- Top bar -->
-          <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-[#2E2B29] rounded-b-2xl flex justify-center items-center z-10">
-            <div class="w-10 h-1.5 bg-black rounded-full"></div>
-          </div>
-
-          <!-- Phone screen -->
-          <div class="flex items-center justify-center h-full p-4">
-            <div class="bg-white dark:bg-gray-300 rounded-[2.2rem] w-full h-full overflow-hidden">
-              <img
-                src="/phone_screens/GroupSettle_LIGHT.png"
-                alt="SplitDo App Group Settlement Screen Screenshot Light Mode"
-                class="w-full h-full object-cover object-top dark:hidden"
-              />
-              <img
-                src="/phone_screens/GroupSettle_DARK.png"
-                alt="SplitDo App Group Settlement Screen Screenshot Dark Mode"
-                class="w-full h-full object-cover object-top hidden dark:block"
-              />
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- 4. Real-time Balances (BROWN) -->
-  <div class="flex flex-col items-center">
-    <div class="pt-10 px-10 lg:pt-12 lg:px-12 text-white dark:text-gray-300 min-h-64 flex flex-col justify-center items-center bg-[#564740] w-full">
-      
-      <!-- Icon -->
-      <div class="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-        <svg class="w-8 h-8" style="color: white dark:gray-300;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-
-      </div>
-
-      <!-- Heading -->
-      <h3 class="text-2xl font-semibold mb-3 text-center">Real-Time Balances</h3>
-
-      <!-- Description -->
-      <p class="text-base text-white dark:text-gray-300 text-center mb-10"> 
-       See exactly who owes what in real-time. Track individual balances and get notifications the moment payments are due.
-      </p>
-
-      <!-- Phone Mockup -->
-      <div class="relative overflow-hidden max-w-[280px] sm:max-w-[340px] lg:max-w-[380px] w-full h-[350px] mx-auto">
-        <div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[520px] mx-auto">
-          
-          <!-- Top bar -->
-          <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-[#2E2B29] rounded-b-2xl flex justify-center items-center z-10">
-            <div class="w-10 h-1.5 bg-black rounded-full"></div>
-          </div>
-
-          <!-- Phone screen -->
-          <div class="flex items-center justify-center h-full p-4">
-            <div class="bg-white dark:bg-gray-300 rounded-[2.2rem] w-full h-full overflow-hidden">
-              <img
-                src="/phone_screens/BalanceOverview_LIGHT.png"
-                alt="SplitDo App Balance Overview Screen Screenshot Light Mode"
-                class="w-full h-full object-cover object-top dark:hidden"
-              />
-              <img
-                src="/phone_screens/BalanceOverview_DARK.png"
-                alt="SplitDo App Balance Overview Screen Screenshot Dark Mode"
-                class="w-full h-full object-cover object-top hidden dark:block"
-              />
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- 5. Wallet Integration (ORANGE) -->
-  <div class="flex flex-col items-center">
-    <div class="pt-10 px-10 lg:pt-12 lg:px-12 text-white dark:text-gray-300 min-h-64 flex flex-col justify-center items-center bg-[#f07d40] dark:bg-[#c8632f] w-full">
-      
-      <!-- Icon -->
-      <div class="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-        <svg class="w-8 h-8" style="color: white dark:gray-300;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-        </svg>
-      </div>
-
-      <!-- Heading -->
-      <h3 class="text-2xl font-semibold mb-3 text-center">Wallet Integration</h3>
-
-      <!-- Description -->
-      <p class="text-base text-white dark:text-gray-300 text-center mb-10">
-		Seamlessly connect popular Solana wallets like Phantom, Solflare, and Backpack for secure, non-custodial payments.      
-	  </p>
-
-      <!-- Phone Mockup -->
-      <div class="relative overflow-hidden max-w-[280px] sm:max-w-[340px] lg:max-w-[380px] w-full h-[350px] mx-auto">
-        <div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[520px] mx-auto">
-          
-          <!-- Top bar -->
-          <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-[#2E2B29] rounded-b-2xl flex justify-center items-center z-10">
-            <div class="w-10 h-1.5 bg-black rounded-full"></div>
-          </div>
-
-          <!-- Phone screen -->
-          <div class="flex items-center justify-center h-full p-4">
-		<div class="bg-white dark:bg-gray-300 rounded-[2.2rem] w-full h-full overflow-hidden">
-			<img
-				src="/phone_screens/WalletIntegration_LIGHT.png"
-				alt="SplitDo App Wallet Integration Screen Screenshot Light mode"
-				class="w-full h-full object-cover object-top dark:hidden"
-			/>
-			<img
-				src="/phone_screens/WalletIntegration_DARK.png"
-				alt="SplitDo App Wallet Integration Screen Screenshot Dark mode"
-				class="w-full h-full object-cover object-top dark:block"
-				/>
-		</div>
-	  </div>
-
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-        <!-- 6. Settlement Tracking (TEAL) -->
-  <div class="flex flex-col items-center">
-    <div class="pt-10 px-10 lg:pt-12 lg:px-12 text-white dark:text-gray-300 min-h-64 flex flex-col justify-center items-center bg-[#47a49e] dark:bg-[#368179] w-full">
-      
-      <!-- Icon -->
-      <div class="w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-        <svg class="w-8 h-8" style="color: white dark:gray-300;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h.01M12 15h.01"></path>
-        </svg>
-      </div>
-
-      <!-- Heading -->
-      <h3 class="text-2xl font-semibold mb-3 text-center">Complete Settlement History</h3>
-
-      <!-- Description -->
-      <p class="text-base text-white dark:text-gray-300 text-center mb-10">
-         Monitor payment history and settlement status. Get detailed transaction records and export reports for your records.
-	  </p>
-
-      <!-- Phone Mockup -->
-      <div class="relative overflow-hidden max-w-[280px] sm:max-w-[340px] lg:max-w-[380px] w-full h-[350px] mx-auto">
-        <div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[520px] mx-auto">
-          
-          <!-- Top bar -->
-          <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-[#2E2B29] rounded-b-2xl flex justify-center items-center z-10">
-            <div class="w-10 h-1.5 bg-black rounded-full"></div>
-          </div>
-
-          <!-- Phone screen -->
-          <div class="flex items-center justify-center h-full p-4">
-		<div class="bg-white dark:bg-gray-300 rounded-[2.2rem] w-full h-full overflow-hidden">
-			<img
-				src="/phone_screens/ExpensesScreen_LIGHT.png"
-				alt="SplitDo App Wallet Integration Screen Screenshot Light mode"
-				class="w-full h-full object-cover object-top dark:hidden"
-			/>
-			<img
-				src="/phone_screens/ExpensesScreen_DARK.png"
-				alt="SplitDo App Wallet Integration Screen Screenshot Dark mode"
-				class="w-full h-full object-cover object-top dark:block"
-				/>
-		</div>
-	  </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-</div>
-</section>
-
-		<!-- How It Works Section -->
-		<section class="py-16 lg:py-24 bg-[#f07d40] dark:bg-[#564740] border-b-[10px] border-[#564740] dark:border-[#f07d40]">
+		<!-- Stats Section with Animated Counters -->
+		<section class="bg-[#564740] py-16 border-y border-[#f07d40]/10">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="text-center mb-12">
-					<h2 class="text-3xl lg:text-4xl font-bold mb-4 text-black dark:text-gray-300">
-						How SplitDo Works
+				<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+					<div class="text-center">
+						<div class="text-4xl font-bold text-[#f07d40] mb-2 counter" data-target="1000000000">1B+</div>
+						<div class="text-gray-300 text-sm">Total Tokens</div>
+					</div>
+					<div class="text-center">
+						<div class="text-4xl font-bold text-[#f07d40] mb-2 counter" data-target="500000000">500M</div>
+						<div class="text-gray-300 text-sm">Available for Airdrop</div>
+					</div>
+					<div class="text-center">
+						<div class="text-4xl font-bold text-[#f07d40] mb-2 counter" data-target="50000">50K+</div>
+						<div class="text-gray-300 text-sm">Early Participants</div>
+					</div>
+					<div class="text-center">
+						<div class="text-4xl font-bold text-[#f07d40] mb-2">$0.001</div>
+						<div class="text-gray-300 text-sm">Initial Token Price</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Community Section with Humans Image -->
+		<section class="bg-[#47a49e] py-24">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+					<div>
+						<h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
+							Join Our <span class="text-[#f07d40]">Community</span>
+						</h2>
+						<p class="text-xl text-gray-100 mb-8">
+							Thousands of users worldwide are already part of the SplitDo revolution. Join our growing community and be part of the future of decentralized expense management.
+						</p>
+						<div class="grid grid-cols-2 gap-6">
+							<div class="bg-[#564740]/30 backdrop-blur-sm rounded-xl p-6">
+								<div class="text-3xl font-bold text-[#f07d40] mb-2 counter" data-target="15000">15K+</div>
+								<div class="text-gray-100 text-sm">Discord Members</div>
+							</div>
+							<div class="bg-[#564740]/30 backdrop-blur-sm rounded-xl p-6">
+								<div class="text-3xl font-bold text-[#f07d40] mb-2 counter" data-target="25000">25K+</div>
+								<div class="text-gray-100 text-sm">Twitter Followers</div>
+							</div>
+						</div>
+					</div>
+					<div class="flex justify-center">
+						<img src={humansImage.src} alt="SplitDo Community" class="rounded-2xl shadow-2xl max-w-full h-auto"/>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Token Features -->
+		<section class="bg-[#564740] py-24">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="text-center mb-16">
+					<h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
+						Why <span class="gradient-text">$SPLITDO</span>?
 					</h2>
-					<p class="text-lg text-black dark:text-gray-300">
-						Three simple steps to split expenses and settle debts on the blockchain
-					</p>
+					<p class="text-gray-300 text-lg">The future of decentralized expense management on Solana</p>
 				</div>
 
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-					<div class="text-center">
-						<div class="w-20 h-20 bg-[#47a49e] dark:bg-[#368179] text-black dark:text-gray-300 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+					<!-- Feature 1 -->
+					<div class="card-glow">
+						<div class="card-glow-inner">
+							<div class="w-14 h-14 bg-[#f07d40]/10 rounded-xl flex items-center justify-center mb-4">
+								<svg class="w-8 h-8 text-[#f07d40]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+								</svg>
+							</div>
+							<h3 class="text-xl font-bold text-white mb-3">Lightning Fast</h3>
+							<p class="text-gray-300">Built on Solana for instant transactions and near-zero fees</p>
+						</div>
+					</div>
+
+					<!-- Feature 2 -->
+					<div class="card-glow">
+						<div class="card-glow-inner">
+							<div class="w-14 h-14 bg-[#47a49e]/10 rounded-xl flex items-center justify-center mb-4">
+								<svg class="w-8 h-8 text-[#47a49e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+								</svg>
+							</div>
+							<h3 class="text-xl font-bold text-white mb-3">Secure & Transparent</h3>
+							<p class="text-gray-300">Fully audited smart contracts and decentralized governance</p>
+						</div>
+					</div>
+
+					<!-- Feature 3 -->
+					<div class="card-glow">
+						<div class="card-glow-inner">
+							<div class="w-14 h-14 bg-[#f07d40]/10 rounded-xl flex items-center justify-center mb-4">
+								<svg class="w-8 h-8 text-[#f07d40]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+								</svg>
+							</div>
+							<h3 class="text-xl font-bold text-white mb-3">Community Driven</h3>
+							<p class="text-gray-300">Governed by token holders for the community</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- App Features with Phones -->
+		<section class="bg-[#47a49e] py-24">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="text-center mb-16">
+					<h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
+						<span class="text-[#f07d40]">Experience</span> the App
+					</h2>
+					<p class="text-gray-100 text-lg">See how easy it is to manage your tokens</p>
+				</div>
+
+				<!-- Feature 1: Group Management -->
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-24">
+					<div class="order-2 lg:order-1">
+						<div class="flex items-center gap-3 mb-6">
+							<div class="w-12 h-12 bg-[#f07d40]/20 rounded-xl flex items-center justify-center">
+								<svg class="w-7 h-7 text-[#f07d40]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+								</svg>
+							</div>
+							<span class="text-[#f07d40] font-semibold uppercase text-sm">Smart Management</span>
+						</div>
+						<h3 class="text-3xl md:text-4xl font-bold text-white mb-4">Manage Your Groups</h3>
+						<p class="text-gray-100 text-lg mb-6">
+							Create and manage expense groups with ease. Track balances, split costs, and settle up using $SPLITDO tokens on Solana.
+						</p>
+						<ul class="space-y-3">
+							<li class="flex items-start gap-3">
+								<svg class="w-6 h-6 text-[#f07d40] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+								</svg>
+								<span class="text-white">Real-time balance tracking</span>
+							</li>
+							<li class="flex items-start gap-3">
+								<svg class="w-6 h-6 text-[#f07d40] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+								</svg>
+								<span class="text-white">Automatic split calculations</span>
+							</li>
+							<li class="flex items-start gap-3">
+								<svg class="w-6 h-6 text-[#f07d40] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+								</svg>
+								<span class="text-white">Instant settlements on Solana</span>
+							</li>
+						</ul>
+					</div>
+					<div class="order-1 lg:order-2 flex justify-center">
+						<div class="relative max-w-[300px] sm:max-w-[350px] w-full">
+							<div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[580px]">
+								<div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-[#2E2B29] rounded-b-2xl flex justify-center items-center z-10">
+									<div class="w-10 h-1.5 bg-black rounded-full"></div>
+								</div>
+								<div class="flex items-center justify-center h-full p-4">
+									<div class="bg-white dark:bg-gray-300 rounded-[2.2rem] w-full h-full overflow-hidden">
+										<img src="/phone_screens/GroupsTab_LIGHT.png" alt="Groups Management" class="w-full h-full object-cover object-top dark:hidden"/>
+										<img src="/phone_screens/GroupsTab_DARK.png" alt="Groups Management" class="w-full h-full object-cover object-top hidden dark:block"/>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Feature 2: Wallet Integration -->
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-24">
+					<div class="flex justify-center">
+						<div class="relative max-w-[300px] sm:max-w-[350px] w-full">
+							<div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[580px]">
+								<div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-[#2E2B29] rounded-b-2xl flex justify-center items-center z-10">
+									<div class="w-10 h-1.5 bg-black rounded-full"></div>
+								</div>
+								<div class="flex items-center justify-center h-full p-4">
+									<div class="bg-white dark:bg-gray-300 rounded-[2.2rem] w-full h-full overflow-hidden">
+										<img src="/phone_screens/WalletIntegration_LIGHT.png" alt="Wallet Integration" class="w-full h-full object-cover object-top dark:hidden"/>
+										<img src="/phone_screens/WalletIntegration_DARK.png" alt="Wallet Integration" class="w-full h-full object-cover object-top hidden dark:block"/>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div>
+						<div class="flex items-center gap-3 mb-6">
+							<div class="w-12 h-12 bg-[#f07d40]/20 rounded-xl flex items-center justify-center">
+								<svg class="w-7 h-7 text-[#f07d40]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+								</svg>
+							</div>
+							<span class="text-[#f07d40] font-semibold uppercase text-sm">Seamless Integration</span>
+						</div>
+						<h3 class="text-3xl md:text-4xl font-bold text-white mb-4">Connect Your Wallet</h3>
+						<p class="text-gray-100 text-lg mb-6">
+							Seamlessly integrate with popular Solana wallets. Keep full control of your tokens with non-custodial, secure connections.
+						</p>
+						<ul class="space-y-3">
+							<li class="flex items-start gap-3">
+								<svg class="w-6 h-6 text-[#f07d40] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+								</svg>
+								<span class="text-white">Support for Phantom, Solflare, Backpack</span>
+							</li>
+							<li class="flex items-start gap-3">
+								<svg class="w-6 h-6 text-[#f07d40] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+								</svg>
+								<span class="text-white">Non-custodial & fully secure</span>
+							</li>
+							<li class="flex items-start gap-3">
+								<svg class="w-6 h-6 text-[#f07d40] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+								</svg>
+								<span class="text-white">One-click connection</span>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<!-- Feature 3: Settlement History -->
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+					<div class="order-2 lg:order-1">
+						<div class="flex items-center gap-3 mb-6">
+							<div class="w-12 h-12 bg-[#f07d40]/20 rounded-xl flex items-center justify-center">
+								<svg class="w-7 h-7 text-[#f07d40]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h.01M12 15h.01"></path>
+								</svg>
+							</div>
+							<span class="text-[#f07d40] font-semibold uppercase text-sm">Complete History</span>
+						</div>
+						<h3 class="text-3xl md:text-4xl font-bold text-white mb-4">Track Everything</h3>
+						<p class="text-gray-100 text-lg mb-6">
+							Monitor all your transactions and settlements in one place. Export reports and keep complete records of all expenses.
+						</p>
+						<ul class="space-y-3">
+							<li class="flex items-start gap-3">
+								<svg class="w-6 h-6 text-[#f07d40] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+								</svg>
+								<span class="text-white">Complete transaction history</span>
+							</li>
+							<li class="flex items-start gap-3">
+								<svg class="w-6 h-6 text-[#f07d40] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+								</svg>
+								<span class="text-white">Exportable reports</span>
+							</li>
+							<li class="flex items-start gap-3">
+								<svg class="w-6 h-6 text-[#f07d40] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+								</svg>
+								<span class="text-white">On-chain verification</span>
+							</li>
+						</ul>
+					</div>
+					<div class="order-1 lg:order-2 flex justify-center">
+						<div class="relative max-w-[300px] sm:max-w-[350px] w-full">
+							<div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[580px]">
+								<div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-[#2E2B29] rounded-b-2xl flex justify-center items-center z-10">
+									<div class="w-10 h-1.5 bg-black rounded-full"></div>
+								</div>
+								<div class="flex items-center justify-center h-full p-4">
+									<div class="bg-white dark:bg-gray-300 rounded-[2.2rem] w-full h-full overflow-hidden">
+										<img src="/phone_screens/ExpensesScreen_LIGHT.png" alt="Settlement History" class="w-full h-full object-cover object-top dark:hidden"/>
+										<img src="/phone_screens/ExpensesScreen_DARK.png" alt="Settlement History" class="w-full h-full object-cover object-top hidden dark:block"/>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- How to Participate -->
+		<section class="bg-[#564740] py-24 border-y border-[#f07d40]/10">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="text-center mb-16">
+					<h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
+						How to <span class="gradient-text">Participate</span>
+					</h2>
+					<p class="text-gray-300 text-lg">Claim your tokens in 3 simple steps</p>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+					<div class="relative text-center">
+						<div class="w-16 h-16 bg-gradient-to-r from-[#f07d40] to-[#47a49e] rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6">
 							1
 						</div>
-						<h3 class="text-xl font-semibold mb-3 text-black dark:text-gray-300">Create Your Group</h3>
-						<p class="text-black dark:text-gray-300">
-							Set up an expense group with friends, roommates, or colleagues. Add members and customize splitting rules.
-						</p>
+						<h3 class="text-xl font-bold text-white mb-3">Connect Wallet</h3>
+						<p class="text-gray-300">Connect your Solana wallet (Phantom, Solflare, or Backpack)</p>
 					</div>
 
-					<div class="text-center">
-						<div class="w-20 h-20 bg-[#47a49e] dark:bg-[#368179] text-black dark:text-gray-300 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+					<div class="relative text-center">
+						<div class="w-16 h-16 bg-gradient-to-r from-[#f07d40] to-[#47a49e] rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6">
 							2
 						</div>
-						<h3 class="text-xl font-semibold mb-3 text-black dark:text-gray-300">Add & Track Expenses</h3>
-						<p class="text-black dark:text-gray-300">
-							Log purchases, receipts, and shared costs. Our smart algorithms automatically calculate fair splits for everyone.
-						</p>
+						<h3 class="text-xl font-bold text-white mb-3">Verify Eligibility</h3>
+						<p class="text-gray-300">Check if your wallet qualifies for the airdrop distribution</p>
 					</div>
 
-					<div class="text-center">
-						<div class="w-20 h-20 bg-[#47a49e] dark:bg-[#368179] text-black dark:text-gray-300 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+					<div class="relative text-center">
+						<div class="w-16 h-16 bg-gradient-to-r from-[#f07d40] to-[#47a49e] rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6">
 							3
 						</div>
-						<h3 class="text-xl font-semibold mb-3 text-black dark:text-gray-300">Settle via Solana</h3>
-						<p class="text-black dark:text-gray-300">
-							Connect your Solana wallet and settle debts instantly. Fast transactions with minimal fees on the blockchain.
-						</p>
+						<h3 class="text-xl font-bold text-white mb-3">Claim Tokens</h3>
+						<p class="text-gray-300">Claim your $SPLITDO tokens directly to your wallet</p>
+					</div>
+				</div>
+
+				<!-- Final CTA -->
+				<div class="text-center mt-16">
+					<button class="px-12 py-5 bg-[#f07d40] text-white text-xl font-bold rounded-xl hover:bg-[#c8632f] transition-all transform hover:scale-105 glow-button">
+						Start Claiming Now
+					</button>
+					<p class="text-gray-400 text-sm mt-4">No gas fees · Instant claim · Secure & verified</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Tokenomics -->
+		<section class="bg-[#47a49e] py-24">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="text-center mb-16">
+					<h2 class="text-4xl md:text-5xl font-bold text-white mb-4">
+						<span class="text-[#f07d40]">Tokenomics</span>
+					</h2>
+					<p class="text-gray-100 text-lg">Fair distribution for sustainable growth</p>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+					<div class="bg-[#564740] border border-[#f07d40]/20 rounded-xl p-6">
+						<div class="text-3xl font-bold text-[#f07d40] mb-2">50%</div>
+						<div class="text-white font-semibold mb-1">Airdrop & Rewards</div>
+						<div class="text-gray-300 text-sm">500M tokens for community</div>
+					</div>
+
+					<div class="bg-[#564740] border border-[#f07d40]/20 rounded-xl p-6">
+						<div class="text-3xl font-bold text-[#f07d40] mb-2">20%</div>
+						<div class="text-white font-semibold mb-1">Liquidity Pool</div>
+						<div class="text-gray-300 text-sm">200M tokens for DEX liquidity</div>
+					</div>
+
+					<div class="bg-[#564740] border border-[#f07d40]/20 rounded-xl p-6">
+						<div class="text-3xl font-bold text-[#f07d40] mb-2">20%</div>
+						<div class="text-white font-semibold mb-1">Development</div>
+						<div class="text-gray-300 text-sm">200M tokens vested 24 months</div>
+					</div>
+
+					<div class="bg-[#564740] border border-[#f07d40]/20 rounded-xl p-6">
+						<div class="text-3xl font-bold text-[#f07d40] mb-2">10%</div>
+						<div class="text-white font-semibold mb-1">Marketing</div>
+						<div class="text-gray-300 text-sm">100M tokens for growth</div>
 					</div>
 				</div>
 			</div>
 		</section>
 
-		<!-- CTA Section -->
-		<section class="py-16 lg:py-24 bg-gradient-to-br from-[#564740] to-[#47a49e] dark:from-[#564740] dark:to-[#368179]">
-			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white dark:text-gray-300">
-				<h2 class="text-3xl lg:text-4xl font-bold mb-4">
-					Ready to Split Expenses?
-				</h2>
-				<p class="text-xl mb-8 opacity-90">
-					Join thousands of groups using SplitDo to manage expenses and settle debts seamlessly on Solana.
-				</p>
-				<div class="flex flex-col sm:flex-row gap-4 justify-center">
-					<a href="/groups/new" class="px-8 py-4 bg-white dark:bg-gray-300 text-[#f07d40] dark:text-[#c8632f] text-lg rounded-lg hover:scale-105 transition-transform shadow-lg hover:shadow-xl font-semibold">
-						Start Splitting Expenses
-					</a>
-					<a href="/demo" class="px-8 py-4 bg-transparent text-white dark:text-gray-300 text-lg rounded-lg hover:bg-white/10 transition-colors border-2 border-white dark:border-gray-300">
-						See How It Works
-					</a>
-				</div>
-			</div>
-		</section>
 	</main>
 
+	<!-- Sticky Bottom Bar -->
+	<div id="stickyBar" class="fixed bottom-0 left-0 right-0 bg-[#564740] border-t-2 border-[#f07d40] shadow-2xl transform translate-y-full transition-transform duration-300 z-50">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+			<div class="flex flex-col md:flex-row items-center justify-between gap-4">
+				<!-- Current Price -->
+				<div class="flex items-center gap-4">
+					<div class="text-sm">
+						<span class="text-gray-300">Current price</span>
+						<span class="text-2xl font-bold text-white ml-2">$0.001</span>
+						<span class="text-[#f07d40] font-semibold ml-2">+73.5%</span>
+					</div>
+				</div>
+
+				<!-- Countdown Timer Mini -->
+				<div class="flex items-center gap-2">
+					<span class="text-gray-300 text-sm mr-2">Price up in</span>
+					<div class="flex gap-1">
+						<div class="bg-[#47a49e] rounded px-3 py-1">
+							<div class="text-lg font-bold text-white" id="days-sticky">01</div>
+							<div class="text-[10px] text-gray-200">DAY</div>
+						</div>
+						<div class="text-white self-center">:</div>
+						<div class="bg-[#47a49e] rounded px-3 py-1">
+							<div class="text-lg font-bold text-white" id="hours-sticky">13</div>
+							<div class="text-[10px] text-gray-200">HOUR</div>
+						</div>
+						<div class="text-white self-center">:</div>
+						<div class="bg-[#47a49e] rounded px-3 py-1">
+							<div class="text-lg font-bold text-white" id="minutes-sticky">47</div>
+							<div class="text-[10px] text-gray-200">MIN</div>
+						</div>
+						<div class="text-white self-center">:</div>
+						<div class="bg-[#47a49e] rounded px-3 py-1">
+							<div class="text-lg font-bold text-white" id="seconds-sticky">01</div>
+							<div class="text-[10px] text-gray-200">SEC</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- CTA Button -->
+				<button class="px-8 py-3 bg-[#f07d40] text-white font-bold rounded-lg hover:bg-[#c8632f] transition-all glow-button whitespace-nowrap">
+					Buy $SPLITDO Now
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Countdown Timer
+		const countdownDate = new Date('2025-12-31T23:59:59').getTime();
+
+		function updateCountdown() {
+			const now = new Date().getTime();
+			const distance = countdownDate - now;
+
+			const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+			const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+			const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+			const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+			// Main countdown
+			const daysEl = document.getElementById('days');
+			const hoursEl = document.getElementById('hours');
+			const minutesEl = document.getElementById('minutes');
+			const secondsEl = document.getElementById('seconds');
+
+			if (daysEl) daysEl.textContent = String(days).padStart(2, '0');
+			if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
+			if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+			if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
+
+			// Sticky bar countdown
+			const daysStickyEl = document.getElementById('days-sticky');
+			const hoursStickyEl = document.getElementById('hours-sticky');
+			const minutesStickyEl = document.getElementById('minutes-sticky');
+			const secondsStickyEl = document.getElementById('seconds-sticky');
+
+			if (daysStickyEl) daysStickyEl.textContent = String(days).padStart(2, '0');
+			if (hoursStickyEl) hoursStickyEl.textContent = String(hours).padStart(2, '0');
+			if (minutesStickyEl) minutesStickyEl.textContent = String(minutes).padStart(2, '0');
+			if (secondsStickyEl) secondsStickyEl.textContent = String(seconds).padStart(2, '0');
+
+			if (distance < 0) {
+				if (daysEl) daysEl.textContent = '00';
+				if (hoursEl) hoursEl.textContent = '00';
+				if (minutesEl) minutesEl.textContent = '00';
+				if (secondsEl) secondsEl.textContent = '00';
+				if (daysStickyEl) daysStickyEl.textContent = '00';
+				if (hoursStickyEl) hoursStickyEl.textContent = '00';
+				if (minutesStickyEl) minutesStickyEl.textContent = '00';
+				if (secondsStickyEl) secondsStickyEl.textContent = '00';
+			}
+		}
+
+		updateCountdown();
+		setInterval(updateCountdown, 1000);
+
+		// Sticky Bar Show/Hide on Scroll
+		let lastScroll = 0;
+		const stickyBar = document.getElementById('stickyBar');
+
+		window.addEventListener('scroll', () => {
+			const currentScroll = window.pageYOffset;
+
+			if (currentScroll > 300) {
+				stickyBar?.classList.remove('translate-y-full');
+			} else {
+				stickyBar?.classList.add('translate-y-full');
+			}
+
+			lastScroll = currentScroll;
+		});
+
+		// Animated Counters
+		const observerOptions = {
+			threshold: 0.5,
+			rootMargin: '0px'
+		};
+
+		const animateCounter = (element: Element) => {
+			const target = parseInt(element.getAttribute('data-target') || '0');
+			const duration = 2000;
+			const increment = target / (duration / 16);
+			let current = 0;
+
+			const updateCounter = () => {
+				current += increment;
+				if (current < target) {
+					if (target > 1000000) {
+						element.textContent = (current / 1000000).toFixed(0) + 'M';
+					} else if (target > 1000) {
+						element.textContent = (current / 1000).toFixed(0) + 'K+';
+					} else {
+						element.textContent = Math.floor(current).toString();
+					}
+					requestAnimationFrame(updateCounter);
+				} else {
+					if (target === 1000000000) {
+						element.textContent = '1B+';
+					} else if (target === 500000000) {
+						element.textContent = '500M';
+					} else if (target > 1000) {
+						element.textContent = (target / 1000).toFixed(0) + 'K+';
+					} else {
+						element.textContent = target.toString();
+					}
+				}
+			};
+
+			updateCounter();
+		};
+
+		const counterObserver = new IntersectionObserver((entries) => {
+			entries.forEach((entry) => {
+				if (entry.isIntersecting && entry.target.classList.contains('counter')) {
+					animateCounter(entry.target);
+					counterObserver.unobserve(entry.target);
+				}
+			});
+		}, observerOptions);
+
+		document.querySelectorAll('.counter').forEach((counter) => {
+			counterObserver.observe(counter);
+		});
+	</script>
 </Layout>

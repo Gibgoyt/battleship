@@ -2,19 +2,6 @@
 import DarkModeToggle from 'src/components-qwik/DarkModeToggle';
 import 'src/styles/global.css';
 
-// Define custom colors as a data object for use in the template
-const customColors = {
-    background: '#564740', // Dark Background (YOUR COLOR)
-    primary: '#f07d40',    // Primary Orange Accent
-    secondary: '#47a49e',  // Secondary Teal Accent
-    // A slightly darker shade of primary for hover state
-    primaryDark: '#d86e37',
-    // Darker shades for dark mode
-    primaryDarkMode: '#c8632f',  // Darker Orange for dark mode
-    secondaryDarkMode: '#368179', // Darker Teal for dark mode
-};
-
-// opt into SSG
 export const prerender = true
 
 export interface Props {
@@ -32,54 +19,7 @@ const { title } = Astro.props;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
-    <link rel="stylesheet" href="https://use.typekit.net/zog4rto.css">
 
-    <style define:vars={customColors}>
-        /* Define custom CSS variables globally from the passed frontmatter variables */
-        :root {
-            --color-background: var(--background); /* Exposing background color as a variable */
-            --color-primary: var(--primary);
-            --color-secondary: var(--secondary);
-            --color-primary-dark: var(--primaryDark);
-
-            /* Add custom utility classes for the header colors */
-            .dark .bg-header-dark {
-                background-color: var(--color-background);
-            }
-            .dark .border-header-dark {
-                border-color: var(--color-secondary); /* Using secondary for dark mode border */
-            }
-            .focus-ring-primary:focus {
-                --tw-ring-color: var(--color-primary);
-            }
-        }
-
-        /* Custom Tailwind class to use CSS variable for smooth hover */
-        .bg-primary-hover:hover {
-            background-color: var(--color-primary-dark) !important;
-        }
-
-        /* Apply a subtle dark theme to the base body for consistency */
-        body {
-            background-color: #f7f7f7; /* Light background for light mode */
-        }
-        /* Now uses the CSS variable --background for the dark mode body color */
-        .dark body {
-            background-color: var(--background);
-        }
-
-        /* Darken images in dark mode */
-        .dark-mode-img {
-            transition: filter 0.3s ease;
-        }
-        html.dark .dark-mode-img {
-            filter: brightness(0.5) grayscale(0.4) !important;
-        }
-        .dark .dark-mode-img {
-            filter: brightness(0.5) grayscale(0.4) !important;
-        }
-    </style>
-    
     <script is:inline>
         // Prevent flash of light mode
         const isDarkMode = localStorage.getItem('darkMode') === 'true' ||
@@ -90,178 +30,125 @@ const { title } = Astro.props;
         }
     </script>
 </head>
-<body class="text-gray-900 dark:text-gray-100 transition-colors duration-300">
-<header class="border-b-4 border-[#47a49e] dark:border-[#f07d40] bg-[#f07d40] dark:bg-[#564740] shadow-md">
+<body class="bg-[#1a1410] text-white">
+
+<!-- Navigation -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-[#564740]/90 backdrop-blur-lg border-b border-[#f07d40]/10">
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-            <div class="flex items-center space-x-4">
-                <a href="/" class="flex items-center gap-2">
-                    <!-- Light mode logo -->
-                    <img src="/splitdo/logo_light.svg" alt="SplitDo Logo" class="h-12 w-auto dark:hidden">
-                    <!-- Dark mode logo -->
-                    <img src="/splitdo/logo_dark.svg" alt="SplitDo Logo" class="h-12 w-auto hidden dark:block">
-                    <!-- Text with vertical stretch -->
-                    <span class="font-bold text-2xl tracking-wide" style="font-family: 'houschka-rounded', sans-serif; font-weight: 700; transform: scaleY(1.1); transform-origin: center;">
-                        <!-- Light mode text -->
-                        <span class="dark:hidden">
-                            <span style="color: #564740;">SPLIT</span><span style="color: #47a49e;">DO</span>
-                        </span>
-                        <!-- Dark mode text -->
-                        <span class="hidden dark:inline">
-                            <span style="color: #47a49e;">SPLIT</span><span style="color: #f07d40;">DO</span>
-                        </span>
-                    </span>
-                </a>
-            </div>
+        <div class="flex justify-between items-center h-20">
+            <!-- Logo -->
+            <a href="/" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 bg-gradient-to-r from-[#f07d40] to-[#47a49e] rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">$</span>
+                </div>
+                <span class="text-2xl font-bold">
+                    <span class="text-white">SPLIT</span><span class="text-[#f07d40]">DO</span>
+                </span>
+            </a>
 
+            <!-- Desktop Navigation -->
             <div class="hidden md:flex items-center space-x-8">
-                <a href="/" class="text-black dark:text-gray-200 over:scale-120 transition-transform">Home</a>
-                <a href="/features" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">Features</a>
-                <a href="/download" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">Download</a>
-                <a href="/about" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">About Us</a>
-                                
-                <a href="/app/dashboard"
-                   class="px-4 py-2 text-white rounded-lg transition-colors shadow-md bg-[#564740] dark:bg-[#f07d40] hover:bg-[#4a3d37] dark:hover:bg-[#d86e37]">
-                    Go To App
-                </a>
+                <a href="/" class="text-gray-200 hover:text-[#f07d40] transition-colors">Home</a>
+                <a href="#tokenomics" class="text-gray-200 hover:text-[#f07d40] transition-colors">Tokenomics</a>
+                <a href="#about" class="text-gray-200 hover:text-[#f07d40] transition-colors">About</a>
+                <button class="px-6 py-2.5 bg-[#f07d40] text-white font-bold rounded-lg hover:bg-[#c8632f] transition-all transform hover:scale-105">
+                    Claim Airdrop
+                </button>
             </div>
 
-            <div class="flex items-center space-x-2">
-                <div class="hidden md:block">
-                    <DarkModeToggle client:load />
-                </div>
-                <div class="md:hidden">
-                    <button
-                        id="mobile-menu-button"
-                        type="button"
-                        class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus-ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-800 p-2"
-                        aria-controls="mobile-menu"
-                        aria-expanded="false"
-                    >
-                        <span class="sr-only">Open main menu</span>
-                        <svg class="h-6 w-6" id="menu-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <svg class="h-6 w-6 hidden" id="close-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button
+                    id="mobile-menu-button"
+                    type="button"
+                    class="text-gray-300 hover:text-white p-2"
+                    aria-controls="mobile-menu"
+                    aria-expanded="false"
+                >
+                    <span class="sr-only">Open main menu</span>
+                    <svg class="h-6 w-6" id="menu-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg class="h-6 w-6 hidden" id="close-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
         </div>
 
+        <!-- Mobile Menu -->
         <div class="md:hidden hidden" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 border-t border-[#47a49e] dark:border-[#f07d40] bg-[#f07d40] dark:bg-[#564740]">
-                <a href="/" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Home</a>
-                <a href="/features" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Features</a>
-                <a href="/download" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Download</a>
-                <a href="/about" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">About</a>
-                <a href="/privacy" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Privacy</a>
-                
-                <a href="/app/dashboard"
-                   class="block mx-3 my-2 px-4 py-2 text-white rounded-lg transition-colors text-center shadow-md bg-[#564740] dark:bg-[#f07d40] hover:bg-[#4a3d37] dark:hover:bg-[#d86e37]">
-                    Go To App
-                </a>
+            <div class="px-2 pt-2 pb-3 space-y-1 bg-[#564740] rounded-lg mt-2 mb-4">
+                <a href="/" class="block px-3 py-2 text-gray-200 hover:text-[#f07d40] hover:bg-[#47a49e]/20 rounded-md transition-colors">Home</a>
+                <a href="#tokenomics" class="block px-3 py-2 text-gray-200 hover:text-[#f07d40] hover:bg-[#47a49e]/20 rounded-md transition-colors">Tokenomics</a>
+                <a href="#about" class="block px-3 py-2 text-gray-200 hover:text-[#f07d40] hover:bg-[#47a49e]/20 rounded-md transition-colors">About</a>
+                <button class="w-full mt-2 px-6 py-2.5 bg-[#f07d40] text-white font-bold rounded-lg hover:bg-[#c8632f] transition-all">
+                    Claim Airdrop
+                </button>
             </div>
         </div>
     </nav>
 </header>
 
+<!-- Add padding to prevent content from hiding behind fixed header -->
+<div class="h-20"></div>
+
 <slot />
 
-<!-- Fixed Dark Mode Toggle for Mobile - Bottom Right -->
-<div class="md:hidden fixed bottom-8 right-4 z-50">
-    <DarkModeToggle client:load />
-</div>
-
-<!-- BOTTOM NAVIGATION: Matches the top navigation exactly -->
-<nav class="border-t-4 border-[#564740] dark:border-[#f07d40] bg-[#f07d40] dark:bg-[#564740] shadow-md">
+<!-- Footer -->
+<footer class="bg-[#564740] border-t border-[#f07d40]/10 py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-            <div class="flex items-center space-x-4">
-                <a href="/" class="flex items-center gap-2">
-                    <!-- Light mode logo -->
-                    <img src="/splitdo/logo_light.svg" alt="SplitDo Logo" class="h-12 w-auto dark:hidden">
-                    <!-- Dark mode logo -->
-                    <img src="/splitdo/logo_dark.svg" alt="SplitDo Logo" class="h-12 w-auto hidden dark:block">
-                    <!-- Text with vertical stretch -->
-                    <span class="font-bold text-2xl tracking-wide" style="font-family: 'houschka-rounded', sans-serif; font-weight: 700; transform: scaleY(1.1); transform-origin: center;">
-                        <!-- Light mode text -->
-                        <span class="dark:hidden">
-                            <span style="color: #564740;">SPLIT</span><span style="color: #47a49e;">DO</span>
-                        </span>
-                        <!-- Dark mode text -->
-                        <span class="hidden dark:inline">
-                            <span style="color: #47a49e;">SPLIT</span><span style="color: #f07d40;">DO</span>
-                        </span>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <!-- Brand -->
+            <div class="col-span-1 md:col-span-2">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 bg-gradient-to-r from-[#f07d40] to-[#47a49e] rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-xl">$</span>
+                    </div>
+                    <span class="text-2xl font-bold">
+                        <span class="text-white">SPLIT</span><span class="text-[#f07d40]">DO</span>
                     </span>
-                </a>
+                </div>
+                <p class="text-gray-300 text-sm max-w-md">
+                    The future of decentralized expense management. Join the $SPLITDO revolution today.
+                </p>
             </div>
 
-            <div class="hidden md:flex items-center space-x-8">
-                <a href="/" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">Home</a>
-                <a href="/features" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">Features</a>
-                <a href="/download" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">Download</a>
-                <a href="/about" class="text-black dark:text-gray-200 hover:scale-120 transition-transform">About Us</a>
-
-                <a href="/app/dashboard"
-                   class="px-4 py-2 text-white rounded-lg transition-colors shadow-md bg-[#564740] dark:bg-[#f07d40] hover:bg-[#4a3d37] dark:hover:bg-[#d86e37]">
-                    Go To App
-                </a>
+            <!-- Quick Links -->
+            <div>
+                <h4 class="text-white font-semibold mb-4">Quick Links</h4>
+                <ul class="space-y-2">
+                    <li><a href="/" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">Home</a></li>
+                    <li><a href="#tokenomics" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">Tokenomics</a></li>
+                    <li><a href="#about" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">About</a></li>
+                </ul>
             </div>
 
-            <div class="flex items-center space-x-2">
-                <div class="hidden md:block">
-                    <DarkModeToggle client:load />
-                </div>
-                <div class="md:hidden">
-                    <button
-                        id="mobile-menu-button-bottom"
-                        type="button"
-                        class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus-ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-800 p-2"
-                        aria-controls="mobile-menu-bottom"
-                        aria-expanded="false"
-                    >
-                        <span class="sr-only">Open main menu</span>
-                        <svg class="h-6 w-6" id="menu-icon-bottom" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <svg class="h-6 w-6 hidden" id="close-icon-bottom" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+            <!-- Community -->
+            <div>
+                <h4 class="text-white font-semibold mb-4">Community</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">Twitter</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">Discord</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">Telegram</a></li>
+                </ul>
             </div>
         </div>
 
-        <div class="md:hidden hidden" id="mobile-menu-bottom">
-            <div class="px-2 pt-2 pb-3 space-y-1 border-t border-[#47a49e] dark:border-[#f07d40] bg-[#f07d40] dark:bg-[#564740]">
-                <a href="/" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Home</a>
-                <a href="/features" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Features</a>
-                <a href="/download" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Download</a>
-                <a href="/about" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">About</a>
-                <a href="/privacy" class="block px-3 py-2 text-black dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">Privacy</a>
-
-                <a href="/app/dashboard"
-                   class="block mx-3 my-2 px-4 py-2 text-white rounded-lg transition-colors text-center shadow-md bg-[#564740] dark:bg-[#f07d40] hover:bg-[#4a3d37] dark:hover:bg-[#d86e37]">
-                    Go To App
-                </a>
+        <div class="border-t border-[#f07d40]/10 pt-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-300 text-sm">&copy; 2025 SPLITDO. All rights reserved.</p>
+                <div class="flex gap-6 mt-4 md:mt-0">
+                    <a href="/privacy" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">Privacy Policy</a>
+                    <a href="/terms" class="text-gray-300 hover:text-[#f07d40] text-sm transition-colors">Terms of Service</a>
+                </div>
             </div>
-        </div>
-    </div>
-</nav>
-
-<!-- FOOTER: Added after slot and styled using custom CSS -->
-<footer class="border-t-4 border-[#564740] dark:border-[#f07d40] py-8 bg-[#368179]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center text-black dark:text-gray-200">
-            <p>&copy; 2025 SplitDo. All rights reserved.</p>
         </div>
     </div>
 </footer>
 
 <script>
-    // Top mobile menu toggle functionality
+    // Mobile menu toggle functionality
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
     const menuIcon = document.getElementById('menu-icon');
@@ -272,43 +159,15 @@ const { title } = Astro.props;
             const isOpen = !mobileMenu.classList.contains('hidden');
 
             if (isOpen) {
-                // Close menu
                 mobileMenu.classList.add('hidden');
                 menuIcon.classList.remove('hidden');
                 closeIcon.classList.add('hidden');
                 mobileMenuButton.setAttribute('aria-expanded', 'false');
             } else {
-                // Open menu
                 mobileMenu.classList.remove('hidden');
                 menuIcon.classList.add('hidden');
                 closeIcon.classList.remove('hidden');
                 mobileMenuButton.setAttribute('aria-expanded', 'true');
-            }
-        });
-    }
-
-    // Bottom mobile menu toggle functionality
-    const mobileMenuButtonBottom = document.getElementById('mobile-menu-button-bottom');
-    const mobileMenuBottom = document.getElementById('mobile-menu-bottom');
-    const menuIconBottom = document.getElementById('menu-icon-bottom');
-    const closeIconBottom = document.getElementById('close-icon-bottom');
-
-    if (mobileMenuButtonBottom && mobileMenuBottom && menuIconBottom && closeIconBottom) {
-        mobileMenuButtonBottom.addEventListener('click', () => {
-            const isOpen = !mobileMenuBottom.classList.contains('hidden');
-
-            if (isOpen) {
-                // Close menu
-                mobileMenuBottom.classList.add('hidden');
-                menuIconBottom.classList.remove('hidden');
-                closeIconBottom.classList.add('hidden');
-                mobileMenuButtonBottom.setAttribute('aria-expanded', 'false');
-            } else {
-                // Open menu
-                mobileMenuBottom.classList.remove('hidden');
-                menuIconBottom.classList.add('hidden');
-                closeIconBottom.classList.remove('hidden');
-                mobileMenuButtonBottom.setAttribute('aria-expanded', 'true');
             }
         });
     }

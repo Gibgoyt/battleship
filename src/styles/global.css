@@ -1,39 +1,91 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Configure dark mode for Tailwind CSS v4 */
 @theme {
   --color-mode: light dark;
-  
-  /* Custom colors - Tailwind v4 syntax */
-  --color-ooga: #ff6b9d;
-  
-  /* Booga color palette (100-900) */
-  --color-booga-100: #e3f2fd;
-  --color-booga-200: #bbdefb;
-  --color-booga-300: #90caf9;
-  --color-booga-400: #64b5f6;
-  --color-booga-500: #42a5f5;
-  --color-booga-600: #2196f3;
-  --color-booga-700: #1e88e5;
-  --color-booga-800: #1976d2;
-  --color-booga-900: #1565c0;
+
+  /* SplitDo original colors */
+  --color-primary-orange: #f07d40;
+  --color-primary-orange-dark: #c8632f;
+  --color-primary-teal: #47a49e;
+  --color-primary-teal-dark: #368179;
+  --color-primary-brown: #564740;
+
+  /* Dark backgrounds */
+  --color-dark-bg: #1a1410;
+  --color-dark-bg-secondary: #2a2420;
+  --color-dark-bg-card: #3a3430;
 }
 
 /* Use class-based dark mode */
 @custom-variant dark (.dark &);
 
 :root {
-  --color-bg: theme('colors.white');
-  --color-text: theme('colors.gray.900');
+  --color-bg: #1a1410;
+  --color-text: #ffffff;
+  --gradient-primary: linear-gradient(135deg, #f07d40 0%, #47a49e 100%);
+  --gradient-hero: linear-gradient(180deg, #564740 0%, #47a49e 100%);
 }
 
 .dark {
-  --color-bg: theme('colors.gray.900');
-  --color-text: theme('colors.gray.100');
+  --color-bg: #1a1410;
+  --color-text: #ffffff;
 }
 
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
   transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Gradient text effect */
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glowing button effect */
+.glow-button {
+  box-shadow: 0 0 20px rgba(240, 125, 64, 0.3);
+  transition: box-shadow 0.3s ease;
+}
+
+.glow-button:hover {
+  box-shadow: 0 0 30px rgba(240, 125, 64, 0.5);
+}
+
+/* Card with subtle gradient border */
+.card-glow {
+  position: relative;
+  background: #3a3430;
+  border-radius: 1rem;
+  padding: 2px;
+  background: linear-gradient(135deg, rgba(240, 125, 64, 0.2), rgba(71, 164, 158, 0.2));
+}
+
+.card-glow-inner {
+  background: #3a3430;
+  border-radius: calc(1rem - 2px);
+  padding: 1.5rem;
+}
+
+/* Animated counter */
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.counter {
+  animation: countUp 0.5s ease-out;
 }
