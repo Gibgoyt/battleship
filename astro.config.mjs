@@ -9,6 +9,10 @@ import mdx from '@astrojs/mdx';
 // https://astro.build/config
 export default defineConfig({
   output: 'server',
+	server: {
+	port: 8443,
+	host: true
+  },
   adapter: cloudflare(),
   integrations: [solidJs(), tailwind(), svelte(), qwik(), mdx()],
   compressHTML: false

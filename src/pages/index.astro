@@ -15,55 +15,55 @@ export const prerender = true
 				<div class="absolute bottom-0 right-1/4 w-96 h-96 bg-gray-50 dark:bg-[#0f1419] rounded-full filter blur-3xl"></div>
 			</div>
 
-			<div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
-				<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+			<div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16 lg:py-32">
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
 					<!-- Left: Text Content -->
 					<div class="text-center lg:text-left">
 						<!-- Badge -->
-						<div class="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 dark:bg-[#12171f] border border-[#00d9ff]/30 mb-8">
+						<div class="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 dark:bg-[#12171f] border border-[#00d9ff]/30 mb-4 sm:mb-8">
 							<span class="w-2 h-2 bg-[#00d9ff] rounded-full mr-2 animate-pulse"></span>
 							<span class="text-[#00d9ff] text-sm font-semibold">PRESALE LIVE NOW</span>
 						</div>
 
 						<!-- Main Heading -->
-						<h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6">
+						<h1 class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-3 sm:mb-6">
 							<span class="text-gray-900 dark:text-white">Secure Your</span><br/>
 							<span class="gradient-text">$SPLITDO Tokens</span>
 						</h1>
 
 						<!-- Subheading -->
-						<p class="text-xl md:text-2xl text-gray-700 dark:text-gray-200 mb-12">
+						<p class="text-base sm:text-xl md:text-2xl text-gray-700 dark:text-gray-200 mb-6 sm:mb-12">
 							Join the revolution in decentralized expense splitting. Secure your $SPLITDO tokens at presale price before public launch.
 						</p>
 
 						<!-- CTA Buttons -->
-						<div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
-							<button class="group relative px-8 py-4 bg-[#00d9ff] text-gray-900 dark:text-white text-lg font-bold rounded-xl hover:bg-[#00b8d4] transition-all transform hover:scale-105 glow-button">
+						<div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-6 sm:mb-12">
+							<button class="group relative px-6 sm:px-8 py-3 sm:py-4 bg-[#00d9ff] text-gray-900 dark:text-white text-base sm:text-lg font-bold rounded-xl hover:bg-[#00b8d4] transition-all transform hover:scale-105 glow-button">
 								<span class="relative z-10">Join Presale Now</span>
 							</button>
-							<button class="px-8 py-4 bg-transparent border-2 border-[#00d9ff]/30 text-gray-900 dark:text-white text-lg font-bold rounded-xl hover:bg-[#00d9ff]/10 transition-all">
+							<button class="px-6 sm:px-8 py-3 sm:py-4 bg-transparent border-2 border-[#00d9ff]/30 text-gray-900 dark:text-white text-base sm:text-lg font-bold rounded-xl hover:bg-[#00d9ff]/10 transition-all">
 								Learn More
 							</button>
 						</div>
 
 						<!-- Countdown Timer -->
 						<div class="max-w-2xl mx-auto lg:mx-0">
-							<p class="text-gray-700 dark:text-gray-200 mb-4 text-sm uppercase tracking-wider">Presale Phase 1 Ends In</p>
-							<div id="countdown" class="grid grid-cols-4 gap-4">
-								<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/20 rounded-xl p-4">
-									<div class="text-3xl md:text-4xl font-bold text-[#00d9ff]" id="days">00</div>
+							<p class="text-gray-700 dark:text-gray-200 mb-2 sm:mb-4 text-xs sm:text-sm uppercase tracking-wider">Presale Phase 1 Ends In</p>
+							<div id="countdown" class="grid grid-cols-4 gap-1.5 sm:gap-4">
+								<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/20 rounded-lg sm:rounded-xl p-2 sm:p-4">
+									<div class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#00d9ff]" id="days">00</div>
 									<div class="text-xs text-gray-600 dark:text-gray-300 uppercase mt-1">Days</div>
 								</div>
-								<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/20 rounded-xl p-4">
-									<div class="text-3xl md:text-4xl font-bold text-[#00d9ff]" id="hours">00</div>
+								<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/20 rounded-lg sm:rounded-xl p-2 sm:p-4">
+									<div class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#00d9ff]" id="hours">00</div>
 									<div class="text-xs text-gray-600 dark:text-gray-300 uppercase mt-1">Hours</div>
 								</div>
-								<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/20 rounded-xl p-4">
-									<div class="text-3xl md:text-4xl font-bold text-[#00d9ff]" id="minutes">00</div>
+								<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/20 rounded-lg sm:rounded-xl p-2 sm:p-4">
+									<div class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#00d9ff]" id="minutes">00</div>
 									<div class="text-xs text-gray-600 dark:text-gray-300 uppercase mt-1">Minutes</div>
 								</div>
-								<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/20 rounded-xl p-4">
-									<div class="text-3xl md:text-4xl font-bold text-[#00d9ff]" id="seconds">00</div>
+								<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/20 rounded-lg sm:rounded-xl p-2 sm:p-4">
+									<div class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#00d9ff]" id="seconds">00</div>
 									<div class="text-xs text-gray-600 dark:text-gray-300 uppercase mt-1">Seconds</div>
 								</div>
 							</div>
@@ -71,9 +71,9 @@ export const prerender = true
 					</div>
 
 					<!-- Right: Phone Mockup -->
-					<div class="flex justify-center lg:justify-end">
-						<div class="relative max-w-[320px] sm:max-w-[380px] w-full">
-							<div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[600px] mx-auto glow-button">
+					<div class="flex justify-center lg:justify-end mt-4 lg:mt-0">
+						<div class="relative max-w-[240px] sm:max-w-[300px] lg:max-w-[380px] w-full">
+							<div class="relative bg-[#2E2B29] rounded-[3rem] border-[4px] sm:border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[420px] sm:h-[520px] lg:h-[600px] mx-auto glow-button">
 								<div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-[#2E2B29] rounded-b-2xl flex justify-center items-center z-10">
 									<div class="w-10 h-1.5 bg-black rounded-full"></div>
 								</div>
@@ -99,9 +99,9 @@ export const prerender = true
 		</section>
 
 		<!-- Stats Section with Animated Counters -->
-		<section class="bg-gray-100 dark:bg-[#12171f] py-16 border-y border-gray-200 dark:border-[#00d9ff]/10">
+		<section class="bg-gray-100 dark:bg-[#12171f] py-8 sm:py-12 lg:py-16 border-y border-gray-200 dark:border-[#00d9ff]/10">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+				<div class="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
 					<div class="text-center">
 						<div class="text-4xl font-bold text-[#00d9ff] mb-2 counter" data-target="100000000">100M</div>
 						<div class="text-gray-600 dark:text-gray-300 text-sm">Total Supply</div>
@@ -123,45 +123,45 @@ export const prerender = true
 		</section>
 
 		<!-- Community Section with Humans Image -->
-		<section class="bg-gray-50 dark:bg-[#0f1419] py-24">
-			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-					<div>
-						<h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+		<section class="bg-gray-50 dark:bg-[#0f1419] pt-8 pb-0 sm:py-12 lg:py-24 overflow-hidden">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 lg:gap-12 items-center w-full max-w-full">
+					<div class="w-full max-w-full">
+						<h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 break-words">
 							Join Our <span class="text-[#00d9ff]">Community</span>
 						</h2>
-						<p class="text-xl text-gray-700 dark:text-gray-100 mb-8">
+						<p class="text-base sm:text-lg lg:text-xl text-gray-700 dark:text-gray-100 mb-6 sm:mb-8 break-words">
 							Thousands of users worldwide are already part of the SplitDo revolution. Join our growing community and be part of the future of decentralized expense management.
 						</p>
-						<div class="grid grid-cols-2 gap-6">
-							<div class="bg-gray-100 dark:bg-[#12171f]/30 backdrop-blur-sm rounded-xl p-6">
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 w-full max-w-full">
+							<div class="bg-gray-100 dark:bg-[#12171f]/30 backdrop-blur-sm rounded-xl p-4 sm:p-6">
 								<div class="text-3xl font-bold text-[#00d9ff] mb-2 counter" data-target="15000">15K+</div>
 								<div class="text-gray-700 dark:text-gray-100 text-sm">Discord Members</div>
 							</div>
-							<div class="bg-gray-100 dark:bg-[#12171f]/30 backdrop-blur-sm rounded-xl p-6">
+							<div class="bg-gray-100 dark:bg-[#12171f]/30 backdrop-blur-sm rounded-xl p-4 sm:p-6">
 								<div class="text-3xl font-bold text-[#00d9ff] mb-2 counter" data-target="25000">25K+</div>
 								<div class="text-gray-700 dark:text-gray-100 text-sm">Twitter Followers</div>
 							</div>
 						</div>
 					</div>
-					<div class="flex justify-center feature-phone">
-						<img src={humansImage.src} alt="SplitDo Community" class="rounded-2xl shadow-2xl max-w-full h-auto"/>
+					<div class="flex justify-center w-full max-w-full overflow-hidden">
+						<img src={humansImage.src} alt="SplitDo Community" class="rounded-2xl shadow-2xl max-w-full w-full h-auto object-contain"/>
 					</div>
 				</div>
 			</div>
 		</section>
 
 		<!-- Token Features -->
-		<section class="bg-gray-100 dark:bg-[#12171f] py-24">
-			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="text-center mb-16">
-					<h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+		<section class="bg-gray-100 dark:bg-[#12171f] pt-0 pb-8 sm:py-12 lg:py-24 overflow-hidden">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-full">
+				<div class="text-center mb-8 sm:mb-12 lg:mb-16 mt-8">
+					<h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
 						Why <span class="gradient-text">$SPLITDO</span>?
 					</h2>
-					<p class="text-gray-600 dark:text-gray-300 text-lg">The future of decentralized expense management on Solana</p>
+					<p class="text-gray-600 dark:text-gray-300 text-base sm:text-lg">The future of decentralized expense management on Solana</p>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
 					<!-- Feature 1 -->
 					<div class="card-glow">
 						<div class="card-glow-inner">
@@ -190,17 +190,17 @@ export const prerender = true
 		</section>
 
 		<!-- App Features with Phones - Scroll-Controlled -->
-		<section id="scroll-experience" class="bg-gray-50 dark:bg-[#0f1419] relative" style="height: 400vh;">
-			<div class="sticky top-0 left-0 w-full h-screen flex flex-col items-center justify-center">
-				<div class="text-center mb-8">
-					<h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+		<section id="scroll-experience" class="bg-gray-50 dark:bg-[#0f1419] relative pt-12 sm:pt-16 lg:pt-24" style="height: 400vh;">
+			<div class="sticky top-0 left-0 w-full h-screen flex flex-col items-center justify-start pt-16 sm:pt-20 lg:justify-center lg:pt-0 max-w-full overflow-x-hidden">
+				<div class="text-center mb-2 sm:mb-4 lg:mb-8 w-full max-w-full px-4">
+					<h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 lg:mb-4">
 						<span class="text-[#00d9ff]">Experience</span> the App
 					</h2>
-					<p class="text-gray-700 dark:text-gray-100 text-lg">Scroll to explore features</p>
+					<p class="text-gray-700 dark:text-gray-100 text-sm sm:text-base lg:text-lg">Scroll to explore features</p>
 				</div>
 
-				<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-					<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl w-full mx-auto">
+				<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-full">
+					<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-12 items-center max-w-6xl w-full mx-auto max-w-full">
 
 							<!-- Text content (changes based on scroll) -->
 							<div id="feature-content" class="order-2 lg:order-1 relative min-h-[500px]">
@@ -315,8 +315,8 @@ export const prerender = true
 
 							<!-- Phone mockup (rotates based on scroll) -->
 							<div class="order-1 lg:order-2 flex justify-center">
-								<div id="rotating-phone" class="relative max-w-[300px] sm:max-w-[350px] w-full">
-									<div class="relative bg-[#2E2B29] rounded-[3rem] border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[580px]">
+								<div id="rotating-phone" class="relative max-w-[240px] sm:max-w-[280px] lg:max-w-[350px] w-full">
+									<div class="relative bg-[#2E2B29] rounded-[3rem] border-[4px] sm:border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[450px] sm:h-[520px] lg:h-[580px]">
 										<div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-[#2E2B29] rounded-b-2xl flex justify-center items-center z-10">
 											<div class="w-10 h-1.5 bg-black rounded-full"></div>
 										</div>
@@ -335,16 +335,16 @@ export const prerender = true
 		</section>
 
 		<!-- How to Participate -->
-		<section class="bg-gray-100 dark:bg-[#12171f] py-24 border-y border-gray-200 dark:border-[#00d9ff]/10">
+		<section class="bg-gray-100 dark:bg-[#12171f] py-12 sm:py-16 lg:py-24 border-y border-gray-200 dark:border-[#00d9ff]/10">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="text-center mb-16">
-					<h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+				<div class="text-center mb-8 sm:mb-12 lg:mb-16">
+					<h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
 						How to <span class="gradient-text">Participate</span>
 					</h2>
-					<p class="text-gray-600 dark:text-gray-300 text-lg">Claim your tokens in 3 simple steps</p>
+					<p class="text-gray-600 dark:text-gray-300 text-base sm:text-lg">Claim your tokens in 3 simple steps</p>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
 					<div class="relative text-center">
 						<div class="w-16 h-16 bg-gradient-to-r from-[#00d9ff] to-[#cbd5e1] rounded-full flex items-center justify-center text-2xl font-bold text-gray-900 dark:text-white mx-auto mb-6">
 							1
@@ -371,26 +371,26 @@ export const prerender = true
 				</div>
 
 				<!-- Final CTA -->
-				<div class="text-center mt-16">
-					<button class="px-12 py-5 bg-[#00d9ff] text-gray-900 dark:text-white text-xl font-bold rounded-xl hover:bg-[#00b8d4] transition-all transform hover:scale-105 glow-button">
+				<div class="text-center mt-8 sm:mt-12 lg:mt-16">
+					<button class="px-8 sm:px-10 lg:px-12 py-3 sm:py-4 lg:py-5 bg-[#00d9ff] text-gray-900 dark:text-white text-base sm:text-lg lg:text-xl font-bold rounded-xl hover:bg-[#00b8d4] transition-all transform hover:scale-105 glow-button">
 						Join Presale Now
 					</button>
-					<p class="text-gray-400 text-sm mt-4">No gas fees · Instant claim · Secure & verified</p>
+					<p class="text-gray-400 text-xs sm:text-sm mt-3 sm:mt-4">No gas fees · Instant claim · Secure & verified</p>
 				</div>
 			</div>
 		</section>
 
 		<!-- Tokenomics -->
-		<section class="bg-gray-50 dark:bg-[#0f1419] py-24">
+		<section class="bg-gray-50 dark:bg-[#0f1419] py-12 sm:py-16 lg:py-24">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="text-center mb-16">
-					<h2 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+				<div class="text-center mb-8 sm:mb-12 lg:mb-16">
+					<h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
 						<span class="text-[#00d9ff]">Tokenomics</span>
 					</h2>
-					<p class="text-gray-700 dark:text-gray-100 text-lg">Fair distribution for sustainable growth</p>
+					<p class="text-gray-700 dark:text-gray-100 text-base sm:text-lg">Fair distribution for sustainable growth</p>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
 					<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/20 rounded-xl p-6">
 						<div class="text-3xl font-bold text-[#00d9ff] mb-2">31.5%</div>
 						<div class="text-gray-900 dark:text-white font-semibold mb-1">Strategic/Institutional</div>
@@ -422,46 +422,18 @@ export const prerender = true
 
 	<!-- Sticky Bottom Bar -->
 	<div id="stickyBar" class="fixed bottom-0 left-0 right-0 bg-gray-100 dark:bg-[#12171f] border-t-2 border-[#00d9ff] shadow-2xl transform translate-y-full transition-transform duration-300 z-50">
-		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-			<div class="flex flex-col md:flex-row items-center justify-between gap-4">
+		<div class="max-w-7xl mx-auto px-3 py-2">
+			<div class="flex flex-row items-center justify-between gap-2">
 				<!-- Current Price -->
-				<div class="flex items-center gap-4">
-					<div class="text-sm">
-						<span class="text-gray-600 dark:text-gray-300">Current price</span>
-						<span class="text-2xl font-bold text-gray-900 dark:text-white ml-2">$0.001</span>
-						<span class="text-[#00d9ff] font-semibold ml-2">+73.5%</span>
-					</div>
-				</div>
-
-				<!-- Countdown Timer Mini -->
-				<div class="flex items-center gap-2">
-					<span class="text-gray-600 dark:text-gray-300 text-sm mr-2">Price up in</span>
-					<div class="flex gap-1">
-						<div class="bg-gray-50 dark:bg-[#0f1419] rounded px-3 py-1">
-							<div class="text-lg font-bold text-gray-900 dark:text-white" id="days-sticky">01</div>
-							<div class="text-[10px] text-gray-700 dark:text-gray-200">DAY</div>
-						</div>
-						<div class="text-gray-900 dark:text-white self-center">:</div>
-						<div class="bg-gray-50 dark:bg-[#0f1419] rounded px-3 py-1">
-							<div class="text-lg font-bold text-gray-900 dark:text-white" id="hours-sticky">13</div>
-							<div class="text-[10px] text-gray-700 dark:text-gray-200">HOUR</div>
-						</div>
-						<div class="text-gray-900 dark:text-white self-center">:</div>
-						<div class="bg-gray-50 dark:bg-[#0f1419] rounded px-3 py-1">
-							<div class="text-lg font-bold text-gray-900 dark:text-white" id="minutes-sticky">47</div>
-							<div class="text-[10px] text-gray-700 dark:text-gray-200">MIN</div>
-						</div>
-						<div class="text-gray-900 dark:text-white self-center">:</div>
-						<div class="bg-gray-50 dark:bg-[#0f1419] rounded px-3 py-1">
-							<div class="text-lg font-bold text-gray-900 dark:text-white" id="seconds-sticky">01</div>
-							<div class="text-[10px] text-gray-700 dark:text-gray-200">SEC</div>
-						</div>
-					</div>
+				<div class="flex items-center text-xs">
+					<span class="text-gray-600 dark:text-gray-300">Price:</span>
+					<span class="text-sm font-bold text-gray-900 dark:text-white ml-1">$0.001</span>
+					<span class="text-[#00d9ff] font-semibold ml-1">+73.5%</span>
 				</div>
 
 				<!-- CTA Button -->
-				<button class="px-8 py-3 bg-[#00d9ff] text-gray-900 dark:text-white font-bold rounded-lg hover:bg-[#00b8d4] transition-all glow-button whitespace-nowrap">
-					Buy $SPLITDO Now
+				<button class="px-4 py-1.5 bg-[#00d9ff] text-gray-900 dark:text-white text-xs font-bold rounded-lg hover:bg-[#00b8d4] transition-all whitespace-nowrap">
+					Buy Now
 				</button>
 			</div>
 		</div>
