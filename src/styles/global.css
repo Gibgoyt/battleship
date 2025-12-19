@@ -6,33 +6,50 @@
 @theme {
   --color-mode: light dark;
 
-  /* Deep Purple & Cyan color scheme */
-  --color-primary-purple: #6b46c1;
-  --color-primary-purple-dark: #553c9a;
-  --color-primary-purple-deep: #2d1b4e;
+  /* Electric Cyan & Midnight - Vibrant Premium scheme */
   --color-primary-cyan: #00d9ff;
   --color-primary-cyan-dark: #00b8d4;
-  --color-accent-violet: #b857ff;
+  --color-primary-navy: #1e40af;
+  --color-silver: #64748b;
+  --color-silver-light: #94a3b8;
+  --color-accent-bright: #00f0ff;
 
-  /* Dark backgrounds */
-  --color-dark-bg: #0f0a1e;
-  --color-dark-bg-secondary: #1a0f2e;
-  --color-dark-bg-card: #2d1b4e;
+  /* Light mode colors */
+  --color-light-bg: #ffffff;
+  --color-light-bg-secondary: #f8fafc;
+  --color-light-bg-card: #f1f5f9;
+
+  /* Dark backgrounds - Deep midnight tones */
+  --color-dark-bg: #0a0f1e;
+  --color-dark-bg-secondary: #0f1419;
+  --color-dark-bg-card: #12171f;
 }
 
 /* Use class-based dark mode */
 @custom-variant dark (.dark &);
 
+/* Light mode (default) */
 :root {
-  --color-bg: #0f0a1e;
-  --color-text: #ffffff;
-  --gradient-primary: linear-gradient(135deg, #00d9ff 0%, #b857ff 100%);
-  --gradient-hero: linear-gradient(180deg, #1a0f2e 0%, #2d1b4e 100%);
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f8fafc;
+  --color-bg-card: #f1f5f9;
+  --color-text: #1e293b;
+  --color-text-secondary: #64748b;
+  --color-border: #e2e8f0;
+  --gradient-primary: linear-gradient(135deg, #00d9ff 0%, #00f0ff 100%);
+  --gradient-hero: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
 }
 
+/* Dark mode */
 .dark {
-  --color-bg: #0f0a1e;
+  --color-bg: #0a0f1e;
+  --color-bg-secondary: #0f1419;
+  --color-bg-card: #12171f;
   --color-text: #ffffff;
+  --color-text-secondary: #cbd5e1;
+  --color-border: #1e293b;
+  --gradient-primary: linear-gradient(135deg, #00d9ff 0%, #00f0ff 100%);
+  --gradient-hero: linear-gradient(180deg, #0f1419 0%, #12171f 100%);
 }
 
 body {
@@ -52,27 +69,33 @@ body {
 
 /* Glowing button effect */
 .glow-button {
-  box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
   transition: box-shadow 0.3s ease;
 }
 
 .glow-button:hover {
-  box-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
+  box-shadow: 0 0 30px rgba(0, 217, 255, 0.6);
 }
 
 /* Card with subtle gradient border */
 .card-glow {
   position: relative;
-  background: #2d1b4e;
+  background: var(--color-bg-card);
   border-radius: 1rem;
   padding: 2px;
-  background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(184, 87, 255, 0.2));
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(0, 240, 255, 0.15));
 }
 
 .card-glow-inner {
-  background: #2d1b4e;
+  background: var(--color-bg-card);
   border-radius: calc(1rem - 2px);
   padding: 1.5rem;
+  height: 100%;
+}
+
+/* Dark mode card adjustments */
+.dark .card-glow {
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.3), rgba(0, 240, 255, 0.2));
 }
 
 /* Animated counter */
@@ -89,4 +112,111 @@ body {
 
 .counter {
   animation: countUp 0.5s ease-out;
+}
+
+/* Apple-style Scroll Animations */
+.scroll-fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.scroll-fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.feature-text {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.feature-text.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.feature-phone {
+  opacity: 0;
+  transform: translateX(40px) scale(0.95);
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.feature-phone.visible {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+/* Alternate direction for even rows */
+.feature-row:nth-child(even) .feature-text {
+  transform: translateX(40px);
+}
+
+.feature-row:nth-child(even) .feature-text.visible {
+  transform: translateX(0);
+}
+
+.feature-row:nth-child(even) .feature-phone {
+  transform: translateX(-40px) scale(0.95);
+}
+
+.feature-row:nth-child(even) .feature-phone.visible {
+  transform: translateX(0) scale(1);
+}
+
+/* Scroll-controlled feature content */
+#feature-content {
+  position: relative;
+}
+
+.feature-content-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.feature-content-item.active {
+  pointer-events: auto;
+  /* Opacity controlled by JavaScript for smooth crossfade */
+}
+
+.feature-content-item:first-child {
+  position: relative;
+}
+
+/* Scroll-controlled line-by-line animations with zoom */
+.feature-content-item .flex.items-center,
+.feature-content-item h3,
+.feature-content-item p,
+.feature-content-item ul li {
+  opacity: 0;
+  transform: translateX(-30px) scale(1.5);
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+  transform-origin: left center;
+}
+
+/* Lines become visible and zoom in when given the 'line-visible' class */
+.feature-content-item .flex.items-center.line-visible,
+.feature-content-item h3.line-visible,
+.feature-content-item p.line-visible,
+.feature-content-item ul li.line-visible {
+  opacity: 1;
+  /* Transform handled by JavaScript for smooth scale control */
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
 }

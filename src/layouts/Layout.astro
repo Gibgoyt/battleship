@@ -30,62 +30,90 @@ const { title } = Astro.props;
         }
     </script>
 </head>
-<body class="bg-[#0f0a1e] text-white">
+<body class="bg-white dark:bg-[#0a0f1e] text-gray-900 dark:text-white transition-colors duration-200">
 
 <!-- Navigation -->
-<header class="fixed top-0 left-0 right-0 z-50 bg-[#2d1b4e]/90 backdrop-blur-lg border-b border-[#00d9ff]/10">
-    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-20">
+<header class="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#0f1419]/95 backdrop-blur-xl border-b border-gray-200 dark:border-[#00d9ff]/20 shadow-lg transition-colors duration-200">
+    <nav class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div class="flex justify-between items-center h-24">
             <!-- Logo -->
-            <a href="/" class="flex items-center gap-3 group">
-                <div class="w-10 h-10 bg-gradient-to-r from-[#00d9ff] to-[#6b46c1] rounded-lg flex items-center justify-center">
-                    <span class="text-white font-bold text-xl">$</span>
-                </div>
-                <span class="text-2xl font-bold">
-                    <span class="text-white">SPLIT</span><span class="text-[#00d9ff]">DO</span>
-                </span>
+            <a href="/" class="flex items-center group transition-transform hover:scale-105">
+                <img src="/splitdo/logo.svg" alt="SplitDo Logo" class="h-16 w-auto" />
             </a>
 
             <!-- Desktop Navigation -->
-            <div class="hidden md:flex items-center space-x-8">
-                <a href="/" class="text-gray-200 hover:text-[#00d9ff] transition-colors">Home</a>
-                <a href="/download" class="text-gray-200 hover:text-[#00d9ff] transition-colors">Download</a>
-                <a href="#tokenomics" class="text-gray-200 hover:text-[#00d9ff] transition-colors">Tokenomics</a>
-                <a href="/about" class="text-gray-200 hover:text-[#00d9ff] transition-colors">About</a>
-                <button class="px-6 py-2.5 bg-[#00d9ff] text-white font-bold rounded-lg hover:bg-[#00b8d4] transition-all transform hover:scale-105">
-                    Claim Airdrop
+            <div class="hidden lg:flex items-center gap-10">
+                <a href="/" class="text-base font-medium text-gray-700 dark:text-gray-200 hover:text-[#00d9ff] transition-all duration-200 relative group">
+                    Home
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-[#00d9ff] transition-all duration-200 group-hover:w-full"></span>
+                </a>
+                <a href="/download" class="text-base font-medium text-gray-700 dark:text-gray-200 hover:text-[#00d9ff] transition-all duration-200 relative group">
+                    Download
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-[#00d9ff] transition-all duration-200 group-hover:w-full"></span>
+                </a>
+                <a href="/tokenomics" class="text-base font-medium text-gray-700 dark:text-gray-200 hover:text-[#00d9ff] transition-all duration-200 relative group">
+                    Tokenomics
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-[#00d9ff] transition-all duration-200 group-hover:w-full"></span>
+                </a>
+                <a href="/about" class="text-base font-medium text-gray-700 dark:text-gray-200 hover:text-[#00d9ff] transition-all duration-200 relative group">
+                    About
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-[#00d9ff] transition-all duration-200 group-hover:w-full"></span>
+                </a>
+
+                <!-- Dark Mode Toggle -->
+                <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" aria-label="Toggle dark mode">
+                    <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                    </svg>
+                    <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+
+                <button class="px-8 py-3 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] text-white font-bold rounded-xl hover:shadow-[0_0_25px_rgba(0,217,255,0.5)] transition-all duration-300 transform hover:scale-105">
+                    Join Presale
                 </button>
             </div>
 
-            <!-- Mobile Menu Button -->
-            <div class="md:hidden">
+            <!-- Mobile Menu Button & Theme Toggle -->
+            <div class="lg:hidden flex items-center gap-3">
+                <!-- Dark Mode Toggle (Mobile) -->
+                <button id="theme-toggle-mobile" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" aria-label="Toggle dark mode">
+                    <svg class="theme-toggle-dark-icon hidden w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                    </svg>
+                    <svg class="theme-toggle-light-icon hidden w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+
                 <button
                     id="mobile-menu-button"
                     type="button"
-                    class="text-gray-300 hover:text-white p-2"
+                    class="text-gray-700 dark:text-gray-300 hover:text-[#00d9ff] p-2 transition-colors"
                     aria-controls="mobile-menu"
                     aria-expanded="false"
                 >
                     <span class="sr-only">Open main menu</span>
-                    <svg class="h-6 w-6" id="menu-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    <svg class="h-7 w-7" id="menu-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
-                    <svg class="h-6 w-6 hidden" id="close-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    <svg class="h-7 w-7 hidden" id="close-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
         </div>
 
         <!-- Mobile Menu -->
-        <div class="md:hidden hidden" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 bg-[#2d1b4e] rounded-lg mt-2 mb-4">
-                <a href="/" class="block px-3 py-2 text-gray-200 hover:text-[#00d9ff] hover:bg-[#6b46c1]/20 rounded-md transition-colors">Home</a>
-                <a href="/download" class="block px-3 py-2 text-gray-200 hover:text-[#00d9ff] hover:bg-[#6b46c1]/20 rounded-md transition-colors">Download</a>
-                <a href="#tokenomics" class="block px-3 py-2 text-gray-200 hover:text-[#00d9ff] hover:bg-[#6b46c1]/20 rounded-md transition-colors">Tokenomics</a>
-                <a href="/about" class="block px-3 py-2 text-gray-200 hover:text-[#00d9ff] hover:bg-[#6b46c1]/20 rounded-md transition-colors">About</a>
-                <button class="w-full mt-2 px-6 py-2.5 bg-[#00d9ff] text-white font-bold rounded-lg hover:bg-[#00b8d4] transition-all">
-                    Claim Airdrop
+        <div class="lg:hidden hidden" id="mobile-menu">
+            <div class="px-4 pt-4 pb-6 space-y-3 bg-gray-50/95 dark:bg-[#0f1419]/95 backdrop-blur-xl rounded-2xl mt-4 mb-4 border border-gray-200 dark:border-[#00d9ff]/20 shadow-xl transition-colors duration-200">
+                <a href="/" class="block px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-200 hover:text-[#00d9ff] hover:bg-gray-200 dark:hover:bg-[#00d9ff]/20 rounded-xl transition-all">Home</a>
+                <a href="/download" class="block px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-200 hover:text-[#00d9ff] hover:bg-gray-200 dark:hover:bg-[#00d9ff]/20 rounded-xl transition-all">Download</a>
+                <a href="/tokenomics" class="block px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-200 hover:text-[#00d9ff] hover:bg-gray-200 dark:hover:bg-[#00d9ff]/20 rounded-xl transition-all">Tokenomics</a>
+                <a href="/about" class="block px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-200 hover:text-[#00d9ff] hover:bg-gray-200 dark:hover:bg-[#00d9ff]/20 rounded-xl transition-all">About</a>
+                <button class="w-full mt-2 px-8 py-3 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] text-white font-bold rounded-xl hover:shadow-[0_0_25px_rgba(0,217,255,0.5)] transition-all">
+                    Join Presale
                 </button>
             </div>
         </div>
@@ -93,57 +121,52 @@ const { title } = Astro.props;
 </header>
 
 <!-- Add padding to prevent content from hiding behind fixed header -->
-<div class="h-20"></div>
+<div class="h-24"></div>
 
 <slot />
 
 <!-- Footer -->
-<footer class="bg-[#2d1b4e] border-t border-[#00d9ff]/10 py-12">
+<footer class="bg-gray-50 dark:bg-[#0f1419] border-t border-gray-200 dark:border-[#00d9ff]/10 py-12 transition-colors duration-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <!-- Brand -->
             <div class="col-span-1 md:col-span-2">
                 <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-gradient-to-r from-[#00d9ff] to-[#6b46c1] rounded-lg flex items-center justify-center">
-                        <span class="text-white font-bold text-xl">$</span>
-                    </div>
-                    <span class="text-2xl font-bold">
-                        <span class="text-white">SPLIT</span><span class="text-[#00d9ff]">DO</span>
-                    </span>
+                    <img src="/splitdo/logo.svg" alt="SplitDo Logo" class="h-10 w-auto" />
                 </div>
-                <p class="text-gray-300 text-sm max-w-md">
+                <p class="text-gray-600 dark:text-gray-300 text-sm max-w-md">
                     The future of decentralized expense management. Join the $SPLITDO revolution today.
                 </p>
             </div>
 
             <!-- Quick Links -->
             <div>
-                <h4 class="text-white font-semibold mb-4">Quick Links</h4>
+                <h4 class="text-gray-900 dark:text-white font-semibold mb-4">Quick Links</h4>
                 <ul class="space-y-2">
-                    <li><a href="/" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Home</a></li>
-                    <li><a href="/download" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Download</a></li>
-                    <li><a href="#tokenomics" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Tokenomics</a></li>
-                    <li><a href="/about" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">About</a></li>
+                    <li><a href="/" class="text-gray-600 dark:text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Home</a></li>
+                    <li><a href="/download" class="text-gray-600 dark:text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Download</a></li>
+                    <li><a href="#tokenomics" class="text-gray-600 dark:text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Tokenomics</a></li>
+                    <li><a href="/about" class="text-gray-600 dark:text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">About</a></li>
                 </ul>
             </div>
 
             <!-- Community -->
             <div>
-                <h4 class="text-white font-semibold mb-4">Community</h4>
+                <h4 class="text-gray-900 dark:text-white font-semibold mb-4">Community</h4>
                 <ul class="space-y-2">
-                    <li><a href="#" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Twitter</a></li>
-                    <li><a href="#" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Discord</a></li>
-                    <li><a href="#" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Telegram</a></li>
+                    <li><a href="#" class="text-gray-600 dark:text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Twitter</a></li>
+                    <li><a href="#" class="text-gray-600 dark:text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Discord</a></li>
+                    <li><a href="#" class="text-gray-600 dark:text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Telegram</a></li>
                 </ul>
             </div>
         </div>
 
-        <div class="border-t border-[#00d9ff]/10 pt-8">
+        <div class="border-t border-gray-200 dark:border-[#00d9ff]/10 pt-8">
             <div class="flex flex-col md:flex-row justify-between items-center">
-                <p class="text-gray-300 text-sm">&copy; 2025 SPLITDO. All rights reserved.</p>
+                <p class="text-gray-600 dark:text-gray-300 text-sm">&copy; 2025 SPLITDO. All rights reserved.</p>
                 <div class="flex gap-6 mt-4 md:mt-0">
-                    <a href="/privacy" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Privacy Policy</a>
-                    <a href="/terms" class="text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Terms of Service</a>
+                    <a href="/privacy" class="text-gray-600 dark:text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Privacy Policy</a>
+                    <a href="/terms" class="text-gray-600 dark:text-gray-300 hover:text-[#00d9ff] text-sm transition-colors">Terms of Service</a>
                 </div>
             </div>
         </div>
@@ -174,6 +197,71 @@ const { title } = Astro.props;
             }
         });
     }
+
+    // Theme toggle functionality
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeToggleMobileBtn = document.getElementById('theme-toggle-mobile');
+    const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+    const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+    const themeToggleDarkIcons = document.querySelectorAll('.theme-toggle-dark-icon');
+    const themeToggleLightIcons = document.querySelectorAll('.theme-toggle-light-icon');
+
+    // Function to update icon visibility
+    function updateThemeIcons() {
+        const isDark = document.documentElement.classList.contains('dark');
+
+        // Update desktop icons
+        if (themeToggleDarkIcon && themeToggleLightIcon) {
+            if (isDark) {
+                themeToggleDarkIcon.classList.remove('hidden');
+                themeToggleLightIcon.classList.add('hidden');
+            } else {
+                themeToggleDarkIcon.classList.add('hidden');
+                themeToggleLightIcon.classList.remove('hidden');
+            }
+        }
+
+        // Update mobile icons
+        themeToggleDarkIcons.forEach(icon => {
+            if (isDark) {
+                icon.classList.remove('hidden');
+            } else {
+                icon.classList.add('hidden');
+            }
+        });
+
+        themeToggleLightIcons.forEach(icon => {
+            if (isDark) {
+                icon.classList.add('hidden');
+            } else {
+                icon.classList.remove('hidden');
+            }
+        });
+    }
+
+    // Function to toggle theme
+    function toggleTheme() {
+        if (document.documentElement.classList.contains('dark')) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('darkMode', 'false');
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('darkMode', 'true');
+        }
+        updateThemeIcons();
+    }
+
+    // Add event listeners
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', toggleTheme);
+    }
+
+    if (themeToggleMobileBtn) {
+        themeToggleMobileBtn.addEventListener('click', toggleTheme);
+    }
+
+    // Initialize icon state
+    updateThemeIcons();
 </script>
 </body>
 </html>

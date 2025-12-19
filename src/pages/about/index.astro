@@ -8,11 +8,10 @@ export const prerender = true
 
 <Layout title="About SplitDo - Revolutionizing Expense Splitting">
 
-	<main class="bg-[#0f0a1e]">
+	<main class="bg-white dark:bg-[#0a0f1e]">
 		<!-- Hero Section - Side by Side (Text Left, Phones Right) -->
-		<section class="w-full overflow-visible border-b-2 border-[#00d9ff]/20">
-			<div class="relative px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 overflow-visible"
-  		         style="background: linear-gradient(135deg, #2d1b4e 0%, #6b46c1 100%);">
+		<section class="w-full overflow-visible border-b-2 border-gray-200 dark:border-[#00d9ff]/20">
+			<div class="relative px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 overflow-visible bg-gradient-to-br from-gray-100 to-gray-50 dark:from-[#12171f] dark:to-[#1a2030]">
 
 				<!-- Content container - Flex row with text left and phones right -->
 				<div class="flex flex-col lg:flex-row items-center justify-center gap-6 sm:gap-8 lg:gap-12 relative max-w-7xl mx-auto">
@@ -20,13 +19,13 @@ export const prerender = true
 					<!-- Left side: Text -->
 					<div class="flex flex-col items-center justify-center w-full lg:w-auto lg:flex-1">
 						<div class="flex flex-col gap-4 w-full text-center">
-							<h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight">
+							<h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white tracking-tight">
 								About <span class="text-[#00d9ff]">SplitDo</span>
 							</h1>
-							<h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-[#b857ff] tracking-normal">
+							<h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-[#cbd5e1] tracking-normal">
 								Revolutionizing Expense Splitting
 							</h2>
-							<p class="text-base sm:text-lg lg:text-xl mt-3 leading-relaxed text-gray-200 text-balance max-w-2xl mx-auto">
+							<p class="text-base sm:text-lg lg:text-xl mt-3 leading-relaxed text-gray-700 dark:text-gray-200 text-balance max-w-2xl mx-auto">
 								We're on a mission to eliminate the hassle of splitting expenses through blockchain technology and smart automation.
 							</p>
 						</div>
@@ -42,31 +41,31 @@ export const prerender = true
 		</section>
 
 		<!-- Story Section -->
-		<section class="py-16 lg:py-24 bg-[#1a0f2e] border-b-2 border-[#00d9ff]/20">
+		<section class="py-16 lg:py-24 bg-gray-100 dark:bg-[#12171f] border-b-2 border-gray-200 dark:border-[#00d9ff]/20">
 			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div class="prose prose-lg mx-auto">
-					<h2 class="text-3xl font-bold mb-8 text-white">Our Story</h2>
-					<p class="text-gray-300 mb-6 text-lg leading-relaxed">
+					<h2 class="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Our Story</h2>
+					<p class="text-gray-600 dark:text-gray-300 mb-6 text-lg leading-relaxed">
 						SplitDo was born from a frustrating dinner with friends. After a great evening out, the joy was quickly dampened by the awkward dance of splitting the bill, calculating tips, and figuring out who owed what. Traditional payment apps charged fees, required multiple transactions, and someone always forgot to pay.
 					</p>
-					<p class="text-gray-300 mb-6 text-lg leading-relaxed">
+					<p class="text-gray-600 dark:text-gray-300 mb-6 text-lg leading-relaxed">
 						As fintech entrepreneurs with experience in blockchain technology, we realized there was a better way. The Solana blockchain offered lightning-fast transactions with minimal fees—perfect for the micro-payments that group expenses require.
 					</p>
-					<p class="text-gray-300 mb-8 text-lg leading-relaxed">
+					<p class="text-gray-600 dark:text-gray-300 mb-8 text-lg leading-relaxed">
 						We built SplitDo to make group expense management as simple as sending a text message. By combining AI-powered receipt scanning, smart splitting algorithms, and blockchain settlements, we've created the first truly seamless expense splitting experience.
 					</p>
 
-					<h2 class="text-3xl font-bold mb-8 mt-16 text-white">The Problem We Solve</h2>
+					<h2 class="text-3xl font-bold mb-8 mt-16 text-gray-900 dark:text-white">The Problem We Solve</h2>
 					<div class="card-glow mb-8">
-						<div class="card-glow-inner bg-[#2d1b4e]">
+						<div class="card-glow-inner bg-gray-100 dark:bg-[#12171f]">
 							<ul class="space-y-6">
 								<li class="flex items-start gap-4">
 									<svg class="w-6 h-6 text-red-400 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
 										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
 									</svg>
 									<div>
-										<strong class="text-white text-lg">85% of people</strong>
-										<p class="text-gray-300 mt-1">Avoid group activities due to payment complexity and awkwardness</p>
+										<strong class="text-gray-900 dark:text-white text-lg">85% of people</strong>
+										<p class="text-gray-600 dark:text-gray-300 mt-1">Avoid group activities due to payment complexity and awkwardness</p>
 									</div>
 								</li>
 								<li class="flex items-start gap-4">
@@ -74,8 +73,8 @@ export const prerender = true
 										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
 									</svg>
 									<div>
-										<strong class="text-white text-lg">$2.3 billion annually</strong>
-										<p class="text-gray-300 mt-1">Lost in uncollected group expenses and forgotten IOUs</p>
+										<strong class="text-gray-900 dark:text-white text-lg">$2.3 billion annually</strong>
+										<p class="text-gray-600 dark:text-gray-300 mt-1">Lost in uncollected group expenses and forgotten IOUs</p>
 									</div>
 								</li>
 								<li class="flex items-start gap-4">
@@ -83,93 +82,90 @@ export const prerender = true
 										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
 									</svg>
 									<div>
-										<strong class="text-white text-lg">Average 45 minutes</strong>
-										<p class="text-gray-300 mt-1">Spent calculating and chasing payments per group event</p>
+										<strong class="text-gray-900 dark:text-white text-lg">Average 45 minutes</strong>
+										<p class="text-gray-600 dark:text-gray-300 mt-1">Spent calculating and chasing payments per group event</p>
 									</div>
 								</li>
 							</ul>
 						</div>
 					</div>
 
-					<h2 class="text-3xl font-bold mb-8 mt-16 text-white">Our Approach</h2>
+					<h2 class="text-3xl font-bold mb-8 mt-16 text-gray-900 dark:text-white">Our Approach</h2>
 					<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
 						<div class="card-glow">
-							<div class="card-glow-inner bg-[#2d1b4e] text-center">
-								<div class="w-20 h-20 bg-gradient-to-r from-[#00d9ff] to-[#6b46c1] rounded-full flex items-center justify-center mx-auto mb-4">
-									<svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<div class="card-glow-inner bg-gray-100 dark:bg-[#12171f] text-center">
+								<div class="w-20 h-20 bg-gradient-to-r from-[#00d9ff] to-[#cbd5e1] rounded-full flex items-center justify-center mx-auto mb-4">
+									<svg class="w-10 h-10 text-gray-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
 									</svg>
 								</div>
-								<h3 class="text-xl font-semibold mb-3 text-white">Blockchain Settlement</h3>
-								<p class="text-gray-300">Solana integration for instant, low-fee payments that make micro-transactions viable</p>
+								<h3 class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Blockchain Settlement</h3>
+								<p class="text-gray-600 dark:text-gray-300">Solana integration for instant, low-fee payments that make micro-transactions viable</p>
 							</div>
 						</div>
 						<div class="card-glow">
-							<div class="card-glow-inner bg-[#2d1b4e] text-center">
-								<div class="w-20 h-20 bg-gradient-to-r from-[#00d9ff] to-[#6b46c1] rounded-full flex items-center justify-center mx-auto mb-4">
-									<svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<div class="card-glow-inner bg-gray-100 dark:bg-[#12171f] text-center">
+								<div class="w-20 h-20 bg-gradient-to-r from-[#00d9ff] to-[#cbd5e1] rounded-full flex items-center justify-center mx-auto mb-4">
+									<svg class="w-10 h-10 text-gray-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
 									</svg>
 								</div>
-								<h3 class="text-xl font-semibold mb-3 text-white">Smart Calculations</h3>
-								<p class="text-gray-300">AI-powered receipt scanning and automatic splitting with tax, tip, and custom distribution</p>
+								<h3 class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Smart Calculations</h3>
+								<p class="text-gray-600 dark:text-gray-300">AI-powered receipt scanning and automatic splitting with tax, tip, and custom distribution</p>
 							</div>
 						</div>
 						<div class="card-glow">
-							<div class="card-glow-inner bg-[#2d1b4e] text-center">
-								<div class="w-20 h-20 bg-gradient-to-r from-[#00d9ff] to-[#6b46c1] rounded-full flex items-center justify-center mx-auto mb-4">
-									<svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<div class="card-glow-inner bg-gray-100 dark:bg-[#12171f] text-center">
+								<div class="w-20 h-20 bg-gradient-to-r from-[#00d9ff] to-[#cbd5e1] rounded-full flex items-center justify-center mx-auto mb-4">
+									<svg class="w-10 h-10 text-gray-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
 									</svg>
 								</div>
-								<h3 class="text-xl font-semibold mb-3 text-white">Group Intelligence</h3>
-								<p class="text-gray-300">Advanced permission management, expense tracking, and real-time balance updates</p>
+								<h3 class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Group Intelligence</h3>
+								<p class="text-gray-600 dark:text-gray-300">Advanced permission management, expense tracking, and real-time balance updates</p>
 							</div>
 						</div>
 					</div>
 
-					<h2 class="text-3xl font-bold mb-8 mt-16 text-white">Our Values</h2>
+					<h2 class="text-3xl font-bold mb-8 mt-16 text-gray-900 dark:text-white">Our Values</h2>
 					<div class="space-y-6">
 						<div class="card-glow">
-							<div class="card-glow-inner bg-[#2d1b4e]">
-								<h3 class="text-xl font-semibold mb-3 flex items-center text-white">
-									<span class="text-3xl mr-3">💰</span>
+							<div class="card-glow-inner bg-gray-100 dark:bg-[#12171f]">
+								<h3 class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
 									Financial Transparency
 								</h3>
-								<p class="text-gray-300">
+								<p class="text-gray-600 dark:text-gray-300">
 									Every transaction is visible and trackable. No hidden fees, no surprises—just clear, real-time expense tracking that everyone can trust.
 								</p>
 							</div>
 						</div>
 						<div class="card-glow">
-							<div class="card-glow-inner bg-[#2d1b4e]">
-								<h3 class="text-xl font-semibold mb-3 flex items-center text-white">
-									<span class="text-3xl mr-3">🔒</span>
+							<div class="card-glow-inner bg-gray-100 dark:bg-[#12171f]">
+								<h3 class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
 									Security & Privacy
 								</h3>
-								<p class="text-gray-300">
+								<p class="text-gray-600 dark:text-gray-300">
 									Your money stays in your non-custodial wallet. We never hold your funds, and all data is encrypted end-to-end. Your financial privacy is paramount.
 								</p>
 							</div>
 						</div>
 						<div class="card-glow">
-							<div class="card-glow-inner bg-[#2d1b4e]">
-								<h3 class="text-xl font-semibold mb-3 flex items-center text-white">
-									<span class="text-3xl mr-3">🚀</span>
+							<div class="card-glow-inner bg-gray-100 dark:bg-[#12171f]">
+								<h3 class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
 									Accessibility
 								</h3>
-								<p class="text-gray-300">
+								<p class="text-gray-600 dark:text-gray-300">
 									Blockchain technology shouldn't be intimidating. We've built the simplest possible UX that makes crypto payments as easy as traditional apps.
 								</p>
 							</div>
 						</div>
 					</div>
 
-					<h2 class="text-3xl font-bold mb-6 mt-16 text-white">The Team</h2>
-					<p class="text-gray-300 mb-6 text-lg leading-relaxed">
+					<h2 class="text-3xl font-bold mb-6 mt-16 text-gray-900 dark:text-white">The Team</h2>
+					<p class="text-gray-600 dark:text-gray-300 mb-6 text-lg leading-relaxed">
 						SplitDo is built by a team of fintech engineers and blockchain specialists who've experienced the payment problem firsthand. We come from companies like Square, Stripe, Coinbase, and Solana Labs, where we've seen how seamless payments can transform social interactions.
 					</p>
-					<p class="text-gray-300 mb-8 text-lg leading-relaxed">
+					<p class="text-gray-600 dark:text-gray-300 mb-8 text-lg leading-relaxed">
 						Our diverse backgrounds in blockchain engineering, payment systems, and user experience design come together to create a product that brings Web3 technology to everyday social scenarios—making it both powerful and delightfully simple to use.
 					</p>
 				</div>
@@ -177,19 +173,19 @@ export const prerender = true
 		</section>
 
 		<!-- CTA Section -->
-		<section class="py-16 lg:py-24 text-white" style="background: linear-gradient(135deg, #2d1b4e 0%, #6b46c1 100%);">
+		<section class="py-16 lg:py-24 text-gray-900 dark:text-white" class="bg-gradient-to-br from-gray-100 to-gray-50 dark:from-[#12171f] dark:to-[#1a2030]">
 			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
 				<h2 class="text-3xl lg:text-4xl font-bold mb-4">
 					Join the Future of Group Payments
 				</h2>
-				<p class="text-xl mb-8 text-gray-200">
+				<p class="text-xl mb-8 text-gray-700 dark:text-gray-200">
 					Experience the simplest way to split expenses and settle debts instantly.
 				</p>
 				<div class="flex flex-col sm:flex-row gap-4 justify-center">
-					<a href="/download" class="px-8 py-4 bg-[#00d9ff] text-white text-lg font-bold rounded-lg hover:bg-[#00b8d4] transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
+					<a href="/download" class="px-8 py-4 bg-[#00d9ff] text-gray-900 dark:text-white text-lg font-bold rounded-lg hover:bg-[#00b8d4] transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
 						Download SplitDo
 					</a>
-					<a href="/app" class="px-8 py-4 bg-transparent text-white text-lg rounded-lg hover:bg-white/10 transition-colors border-2 border-white font-semibold">
+					<a href="/app" class="px-8 py-4 bg-transparent text-gray-900 dark:text-white text-lg rounded-lg hover:bg-white/10 transition-colors border-2 border-white font-semibold">
 						Try Web App
 					</a>
 				</div>
