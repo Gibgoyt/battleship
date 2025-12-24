@@ -572,19 +572,27 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
     return { success: false, error: 'No authentication token available' };
   }
 
-  // Get the current wallet provider
-  const provider = walletConnectService.getCurrentWallet();
-  if (!provider) {
-    return { success: false, error: 'No wallet provider available' };
+  // Get the Phantom provider directly from the window object
+  if (typeof window === 'undefined') {
+    return { success: false, error: 'Not in browser environment' };
+  }
+
+  const phantomProvider = (window as any).phantom?.solana;
+  if (!phantomProvider || !phantomProvider.isPhantom) {
+    return { success: false, error: 'Phantom wallet not available' };
+  }
+
+  if (!phantomProvider.isConnected) {
+    return { success: false, error: 'Phantom wallet not connected' };
   }
 
   setSplitdoATA(prev => ({ ...prev, status: 'creating' }));
 
   try {
-    console.log('[ReactiveWalletStore] Creating SPLITDO ATA with real provider...');
+    console.log('[ReactiveWalletStore] Creating SPLITDO ATA with Phantom provider...');
 
-    // Use the enhanced solana service with wallet provider
-    const ataResult = await solanaService.createSplitdoATA(provider);
+    // Use the enhanced solana service with Phantom provider
+    const ataResult = await solanaService.createSplitdoATA(phantomProvider);
 
     if (!ataResult.success) {
       setSplitdoATA(prev => ({
