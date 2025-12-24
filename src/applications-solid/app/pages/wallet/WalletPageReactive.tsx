@@ -6,17 +6,43 @@ import {
   useWallet,
   useWalletConnection,
   useWalletBalances
-} from 'src/lib/wallet/wallet-context';
+} from 'src/lib/wallet/wallet-reactive-store';
 import WalletModal from '../../components/WalletModal';
 import TestModal from '../../components/TestModal';
 
 const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
-  // SolidJS Wallet Context Hooks
-  const { splitdoATA, createSplitdoATA, isCreatingATA } = useSplitdoATA();
+  // SolidJS Reactive Store Hooks
+  const { splitdoATA, checkSplitdoBalance } = useSplitdoATA();
   const { openModal, closeModal, isModalOpen } = useWalletModal();
   const { wallet, connectionStatus, connectionError } = useWallet();
   const { connectWallet, disconnectWallet } = useWalletConnection();
   const { solBalance, refreshBalances } = useWalletBalances();
+
+  // Local state for ATA creation
+  const [isCreatingATA, setIsCreatingATA] = createSignal(false);
+
+  // Create ATA function placeholder (will implement properly)
+  const createSplitdoATA = async (): Promise<{ success: boolean; signature?: string; error?: string }> => {
+    setIsCreatingATA(true);
+
+    try {
+      // TODO: Implement real ATA creation using solana service
+      console.log('[WalletPageReactive] Creating SPLITDO ATA...');
+
+      // For now, simulate creation
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Mock success
+      return { success: true, signature: 'mock_signature' };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Creation failed'
+      };
+    } finally {
+      setIsCreatingATA(false);
+    }
+  };
 
   // Debug modal state - this should now trigger!
   createEffect(() => {
@@ -27,8 +53,11 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
     console.log('[WalletPageReactive] Connection status changed:', connectionStatus());
   });
 
-  // Note: SPLITDO account status is automatically checked by wallet context
-  // when wallet connects or refreshBalances() is called
+  // Check SPLITDO account status on page load
+  createEffect(() => {
+    console.log('[WalletPageReactive] Checking SPLITDO balance on page load');
+    checkSplitdoBalance();
+  });
 
   // Refresh balances when wallet is connected
   createEffect(() => {
@@ -226,7 +255,7 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
                 {splitdoATA().error}
               </p>
               <button
-                onClick={() => refreshBalances()}
+                onClick={() => checkSplitdoBalance()}
                 class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
                 🔄 Retry
