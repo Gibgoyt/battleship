@@ -50,14 +50,14 @@ export default defineConfig({
       "import.meta.env.PUBLIC_COGNITO_REGION": JSON.stringify(process.env.PUBLIC_COGNITO_REGION),
       "import.meta.env.PUBLIC_COGNITO_USER_POOL_ID": JSON.stringify(process.env.PUBLIC_COGNITO_USER_POOL_ID),
       "import.meta.env.PUBLIC_COGNITO_CLIENT_ID": JSON.stringify(process.env.PUBLIC_COGNITO_CLIENT_ID),
-      
+
       // Claude API Configuration (server-side variables)
       "process.env.CLAUDE_API_KEY": JSON.stringify(process.env.CLAUDE_API_KEY),
       "process.env.CLAUDE_MODEL": JSON.stringify(process.env.CLAUDE_MODEL),
       "process.env.CLAUDE_MAX_TOKENS": JSON.stringify(process.env.CLAUDE_MAX_TOKENS),
       "process.env.ANTHROPIC_VERSION": JSON.stringify(process.env.ANTHROPIC_VERSION),
-      
-      // Fix for AWS Cognito SDK Node.js polyfills in browser
+
+      // Fix for Node.js polyfills in browser (AWS Cognito + Solana)
       global: 'globalThis',
     },
     resolve: {
@@ -67,6 +67,13 @@ export default defineConfig({
         'browser',
         'default'
       ],
+    },
+    optimizeDeps: {
+      include: [
+        'buffer',
+        '@solana/web3.js',
+        '@solana/spl-token'
+      ]
     },
     ssr: {
       external: [
