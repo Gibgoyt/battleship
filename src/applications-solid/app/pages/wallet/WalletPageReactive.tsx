@@ -6,13 +6,13 @@ import {
   useWallet,
   useWalletConnection,
   useWalletBalances
-} from 'src/lib/wallet/wallet-reactive-store';
+} from 'src/lib/wallet/wallet-context';
 import WalletModal from '../../components/WalletModal';
 import TestModal from '../../components/TestModal';
 
 const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
-  // SolidJS Reactive Store Hooks
-  const { splitdoATA, checkSplitdoBalance } = useSplitdoATA();
+  // SolidJS Wallet Context Hooks
+  const { splitdoATA, createSplitdoATA, isCreatingATA } = useSplitdoATA();
   const { openModal, closeModal, isModalOpen } = useWalletModal();
   const { wallet, connectionStatus, connectionError } = useWallet();
   const { connectWallet, disconnectWallet } = useWalletConnection();
@@ -27,11 +27,8 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
     console.log('[WalletPageReactive] Connection status changed:', connectionStatus());
   });
 
-  // Check SPLITDO account status on page load
-  createEffect(() => {
-    console.log('[WalletPageReactive] Checking SPLITDO balance on page load');
-    checkSplitdoBalance();
-  });
+  // Note: SPLITDO account status is automatically checked by wallet context
+  // when wallet connects or refreshBalances() is called
 
   // Refresh balances when wallet is connected
   createEffect(() => {
@@ -139,18 +136,50 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
               <p class={`text-lg ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 🚫 No SPLITDO Account
               </p>
-              <button
-                onClick={() => {
-                  console.log('[WalletPageReactive] Create account button clicked');
-                  openModal();
-                }}
-                class="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium"
+              <Show
+                when={connectionStatus() === 'connected' && wallet()}
+                fallback={
+                  <div class="space-y-2">
+                    <button
+                      onClick={() => {
+                        console.log('[WalletPageReactive] Connect wallet to create account');
+                        openModal();
+                      }}
+                      class="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium"
+                    >
+                      🔗 Connect Wallet First
+                    </button>
+                    <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                      Connect your wallet to create and manage your SPLITDO tokens
+                    </p>
+                  </div>
+                }
               >
-                🚀 Create SPLITDO Token Account
-              </button>
-              <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                Connect your wallet to create and manage your SPLITDO tokens
-              </p>
+                <button
+                  onClick={async () => {
+                    console.log('[WalletPageReactive] Create SPLITDO account button clicked');
+                    try {
+                      const result = await createSplitdoATA();
+                      if (result.success) {
+                        console.log('[WalletPageReactive] ATA created successfully:', result.signature);
+                      } else {
+                        console.error('[WalletPageReactive] ATA creation failed:', result.error);
+                      }
+                    } catch (error) {
+                      console.error('[WalletPageReactive] ATA creation error:', error);
+                    }
+                  }}
+                  disabled={isCreatingATA()}
+                  class="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Show when={!isCreatingATA()} fallback="🔄 Creating...">
+                    🚀 Create SPLITDO Token Account
+                  </Show>
+                </button>
+                <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  This will create an Associated Token Account for your SPLITDO tokens
+                </p>
+              </Show>
             </div>
           </Show>
 
@@ -163,7 +192,21 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
                 <div class="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full animate-pulse" style="width: 60%"></div>
               </div>
               <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                Please confirm the transaction in your wallet
+                Please confirm the transaction in your wallet popup
+              </p>
+            </div>
+          </Show>
+
+          <Show when={splitdoATA().status === 'created'}>
+            <div class="space-y-2">
+              <p class={`text-lg text-green-500`}>
+                ✅ Account Created!
+              </p>
+              <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Your SPLITDO token account is ready
+              </p>
+              <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                Account: {formatAddress(splitdoATA().address || '')}
               </p>
             </div>
           </Show>
@@ -183,7 +226,7 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
                 {splitdoATA().error}
               </p>
               <button
-                onClick={() => checkSplitdoBalance()}
+                onClick={() => refreshBalances()}
                 class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
                 🔄 Retry

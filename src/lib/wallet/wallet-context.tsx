@@ -240,45 +240,34 @@ export const WalletProvider: ParentComponent<WalletProviderProps> = (props) => {
     setSplitdoATA({ status: 'checking' });
 
     try {
-      // First try to get program info to get the mint address
-      const programInfo = await solanaService.getProgramInfo();
-      const mintAddress = programInfo.utility_token_mint;
+      const token = firebaseToken();
+      if (!token) {
+        // No Firebase token - can only get ATA address, not check existence
+        const programInfo = await solanaService.getProgramInfo();
+        const mintAddress = programInfo.utility_token_mint;
+        const ataAddress = await solanaService.getAssociatedTokenAddress(walletAddress, mintAddress);
 
-      // Check if ATA exists on blockchain
-      const ataCheck = await solanaService.checkATAExists(walletAddress, mintAddress);
+        setSplitdoATA({
+          status: 'not_found',
+          address: ataAddress
+        });
+        return;
+      }
+
+      // Use the enhanced SPLITDO ATA check that requires Firebase token
+      const ataCheck = await solanaService.checkSplitdoATAExists(walletAddress, token);
 
       if (ataCheck.exists) {
         setSplitdoATA({
           status: 'exists',
           address: ataCheck.address,
-          balance: ataCheck.balance
-        });
-        return;
-      }
-
-      // If no ATA on blockchain, check backend for user registration
-      const token = firebaseToken();
-      if (token) {
-        const backendCheck = await solanaService.checkSplitdoBalance(token);
-
-        if (backendCheck.hasAccount) {
-          // User has account in backend but not on blockchain (shouldn't happen)
-          setSplitdoATA({
-            status: 'exists',
+          balance: ataCheck.balance ? {
             address: ataCheck.address,
-            balance: {
-              address: ataCheck.address,
-              amount: (backendCheck.balance! * 1000000).toString(), // Convert to token units
-              decimals: 6,
-              uiAmount: backendCheck.balance!
-            }
-          });
-        } else {
-          setSplitdoATA({
-            status: 'not_found',
-            address: ataCheck.address
-          });
-        }
+            amount: (ataCheck.balance * 1000000).toString(), // Convert to token units
+            decimals: 6,
+            uiAmount: ataCheck.balance
+          } : undefined
+        });
       } else {
         setSplitdoATA({
           status: 'not_found',

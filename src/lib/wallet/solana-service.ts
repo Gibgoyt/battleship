@@ -266,35 +266,16 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Get token balance for a specific token account
+   * Get token balance for a specific token account (via backend API)
    */
   async getTokenBalance(tokenAccountAddress: string): Promise<TokenBalance> {
     try {
-      const connection = await this.ensureConnection();
-      const publicKey = new PublicKey(tokenAccountAddress);
-      const accountInfo = await connection.getParsedAccountInfo(publicKey);
+      await this.ensureBackendAvailable();
 
-      if (!accountInfo.value || !accountInfo.value.data) {
-        throw new TokenAccountNotFoundError();
-      }
-
-      const data = accountInfo.value.data as any;
-      if (data.program !== 'spl-token') {
-        throw new Error('Not a token account');
-      }
-
-      const tokenData = data.parsed.info;
-
-      return {
-        address: tokenAccountAddress,
-        amount: tokenData.tokenAmount.amount,
-        decimals: tokenData.tokenAmount.decimals,
-        uiAmount: tokenData.tokenAmount.uiAmount
-      };
+      // For now, we'll use the SPLITDO balance endpoint which already exists
+      // In a full implementation, we'd add a generic token balance endpoint
+      throw new Error('Generic token balance not implemented - use checkSplitdoBalance instead');
     } catch (error) {
-      if (error instanceof TokenAccountNotFoundError) {
-        throw new Error(ERROR_MESSAGES.INVALID_ADDRESS);
-      }
       console.error('Error getting token balance:', error);
       throw new Error(ERROR_MESSAGES.NETWORK_ERROR);
     }
@@ -324,34 +305,25 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Check if an Associated Token Account exists
+   * Check if an Associated Token Account exists for SPLITDO (via backend API)
+   * For other tokens, use the respective backend endpoints
    */
-  async checkATAExists(walletAddress: string, mintAddress: string): Promise<{
+  async checkSplitdoATAExists(walletAddress: string, firebaseToken: string): Promise<{
     exists: boolean;
     address: string;
-    balance?: TokenBalance;
+    balance?: number;
   }> {
     try {
-      const ataAddress = await this.getAssociatedTokenAddress(walletAddress, mintAddress);
+      const ataAddress = await this.getAssociatedTokenAddress(walletAddress, await this.getSplitdoMint());
+      const balanceCheck = await this.checkSplitdoBalance(firebaseToken);
 
-      try {
-        const balance = await this.getTokenBalance(ataAddress);
-        return {
-          exists: true,
-          address: ataAddress,
-          balance
-        };
-      } catch (error) {
-        return {
-          exists: false,
-          address: ataAddress
-        };
-      }
+      return {
+        exists: balanceCheck.hasAccount,
+        address: ataAddress,
+        balance: balanceCheck.balance
+      };
     } catch (error) {
-      console.error('Error checking ATA existence:', error);
-      if (error instanceof SolanaBrowserError) {
-        throw error;
-      }
+      console.error('Error checking SPLITDO ATA existence:', error);
       throw new Error(ERROR_MESSAGES.NETWORK_ERROR);
     }
   }
@@ -675,42 +647,12 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Confirm a transaction on the blockchain
+   * Get estimated transaction fee (backend API handles this)
    */
-  async confirmTransaction(signature: string, commitment: Commitment = 'confirmed'): Promise<boolean> {
-    try {
-      const connection = await this.ensureConnection();
-      const latestBlockhash = await connection.getLatestBlockhash();
-
-      const confirmation = await connection.confirmTransaction({
-        signature,
-        blockhash: latestBlockhash.blockhash,
-        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
-      }, commitment);
-
-      return !confirmation.value.err;
-    } catch (error) {
-      console.error('Error confirming transaction:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Estimate transaction fees
-   */
-  async estimateTransactionFee(transaction: Transaction): Promise<number> {
-    try {
-      const connection = await this.ensureConnection();
-      const fee = await connection.getFeeForMessage(
-        transaction.compileMessage(),
-        SPLITDO_CONFIG.commitment
-      );
-
-      return fee ? fee.value || 5000 : 5000; // Default to 5000 lamports if estimation fails
-    } catch (error) {
-      console.error('Error estimating transaction fee:', error);
-      return 5000; // Default fee
-    }
+  getEstimatedTransactionFee(): number {
+    // Return the standard ATA creation fee
+    // Backend handles actual fee calculation
+    return SPLITDO_CONFIG.priorityFee || 5000; // lamports
   }
 
   /**
@@ -727,22 +669,17 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Get connection status and network info
+   * Get network info via backend API
    */
   async getNetworkInfo(): Promise<{
     cluster: string;
-    version: string;
-    slot: number;
+    healthy: boolean;
   }> {
     try {
-      const connection = await this.ensureConnection();
-      const version = await connection.getVersion();
-      const slot = await connection.getSlot();
-
+      const isHealthy = await this.checkNetworkHealth();
       return {
-        cluster: SPLITDO_CONFIG.rpcEndpoint.includes('devnet') ? 'devnet' : 'mainnet',
-        version: version['solana-core'],
-        slot
+        cluster: 'mainnet', // SPLITDO runs on mainnet
+        healthy: isHealthy
       };
     } catch (error) {
       console.error('Error getting network info:', error);
