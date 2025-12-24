@@ -13,6 +13,7 @@ import {
 import { CONNECTION_CONFIG, ERROR_MESSAGES } from './walletconnect-config';
 import { solanaService } from './solana-service';
 import { walletConnectService } from './walletconnect-service';
+import { PhantomWalletProvider } from './wallet-providers';
 
 export type ATAStatus = 'unknown' | 'checking' | 'exists' | 'not_found' | 'creating' | 'created' | 'error';
 
@@ -572,27 +573,28 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
     return { success: false, error: 'No authentication token available' };
   }
 
-  // Get the Phantom provider directly from the window object
+  // Create Phantom wallet provider instance
   if (typeof window === 'undefined') {
     return { success: false, error: 'Not in browser environment' };
   }
 
-  const phantomProvider = (window as any).phantom?.solana;
-  if (!phantomProvider || !phantomProvider.isPhantom) {
+  const phantomWalletProvider = new PhantomWalletProvider();
+
+  if (!phantomWalletProvider.isAvailable()) {
     return { success: false, error: 'Phantom wallet not available' };
   }
 
-  if (!phantomProvider.isConnected) {
+  if (!phantomWalletProvider.isConnected()) {
     return { success: false, error: 'Phantom wallet not connected' };
   }
 
   setSplitdoATA(prev => ({ ...prev, status: 'creating' }));
 
   try {
-    console.log('[ReactiveWalletStore] Creating SPLITDO ATA with Phantom provider...');
+    console.log('[ReactiveWalletStore] Creating SPLITDO ATA with PhantomWalletProvider...');
 
-    // Use the enhanced solana service with Phantom provider
-    const ataResult = await solanaService.createSplitdoATA(phantomProvider);
+    // Use the enhanced solana service with proper wallet provider interface
+    const ataResult = await solanaService.createSplitdoATA(phantomWalletProvider);
 
     if (!ataResult.success) {
       setSplitdoATA(prev => ({
