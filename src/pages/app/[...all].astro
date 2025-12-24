@@ -2,7 +2,7 @@
 import 'src/styles/global.css'
 import { firebaseJwtValidator } from 'src/lib/auth/firebase-jwt-validator'
 import { createLogger } from 'src/lib/logger'
-import StoreTestApp from 'src/applications-solid/app/StoreTestApp.tsx'
+import AppWithStore from 'src/applications-solid/app/AppWithStore.tsx'
 
 export const prerender = false;
 
@@ -88,6 +88,6 @@ try {
 </head>
 <body class="h-full bg-zinc-900 text-zinc-100 overflow-x-hidden">
 <!-- Render SolidJS App with Astro's integration -->
-<StoreTestApp client:only="solid-js" firebaseToken={firebaseAuthToken?.value} />
+<AppWithStore client:only="solid-js" firebaseToken={firebaseAuthToken?.value} />
 </body>
 </html>
