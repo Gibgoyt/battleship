@@ -16,6 +16,16 @@ const WalletModal: Component<WalletModalProps> = (props) => {
 
   console.log('[WalletModal] Rendering with isOpen:', props.isOpen);
 
+  // Enhanced connection status messages with better user guidance
+  const getConnectionStatusMessage = (walletId: string): string => {
+    if (walletId === 'phantom') {
+      return 'Initializing Phantom connection • Check for popup window';
+    } else if (walletId === 'metamask') {
+      return 'Connecting to MetaMask • Check for popup window';
+    }
+    return `Connecting to ${walletId} • Check for popup window`;
+  };
+
   const handleConnect = async (walletId: string) => {
     if (isConnecting()) return; // Prevent double-clicks
 
@@ -30,12 +40,88 @@ const WalletModal: Component<WalletModalProps> = (props) => {
       return;
     }
 
+    // CRITICAL: For Phantom, trigger connect() IMMEDIATELY in user gesture context
+    let phantomConnectionPromise: Promise<any> | null = null;
+    if (walletId === 'phantom') {
+      console.log('[WalletModal] IMMEDIATE Phantom connect trigger in user gesture context');
+
+      // Check if Phantom is available
+      const phantom = (window as any).phantom?.solana;
+      if (phantom?.isPhantom) {
+        // Check Phantom state before calling connect
+        console.log('[WalletModal] Phantom state check:', {
+          isPhantom: phantom.isPhantom,
+          isConnected: phantom.isConnected,
+          publicKey: phantom.publicKey,
+          readyState: phantom.readyState
+        });
+
+        // Check if already connected
+        if (phantom.isConnected && phantom.publicKey) {
+          console.log('[WalletModal] Phantom already connected, skipping connect() call');
+          // Create a resolved promise for already connected state
+          phantomConnectionPromise = Promise.resolve({
+            publicKey: phantom.publicKey
+          });
+        } else {
+          // Trigger popup IMMEDIATELY - this must happen before any state updates
+          console.log('[WalletModal] Calling phantom.connect() IMMEDIATELY');
+
+          try {
+            phantomConnectionPromise = phantom.connect();
+            console.log('[WalletModal] Phantom connect() called - popup should appear now');
+
+            // Add immediate diagnostics
+            setTimeout(() => {
+              console.log('[WalletModal] 🕐 1 second check - popup appeared?');
+              console.log('[WalletModal] Document state:', {
+                hidden: document.hidden,
+                visibilityState: document.visibilityState,
+                hasFocus: document.hasFocus()
+              });
+            }, 1000);
+
+            // Add promise state monitoring
+            let promiseResolved = false;
+            phantomConnectionPromise.then(() => {
+              promiseResolved = true;
+              console.log('[WalletModal] ✅ Phantom connection promise RESOLVED');
+            }).catch((error) => {
+              promiseResolved = true;
+              console.log('[WalletModal] ❌ Phantom connection promise REJECTED:', error);
+            });
+
+            // Monitor if promise never resolves
+            setTimeout(() => {
+              if (!promiseResolved) {
+                console.log('[WalletModal] ⚠️  WARNING: Phantom connection promise still pending after 5 seconds');
+                console.log('[WalletModal] This suggests Phantom is not responding');
+              }
+            }, 5000);
+
+          } catch (error) {
+            console.error('[WalletModal] Error calling phantom.connect():', error);
+            setConnectionError(`Failed to trigger Phantom connection: ${error}`);
+            return;
+          }
+        }
+      } else {
+        setConnectionError('Phantom wallet not found. Please install Phantom and refresh the page.');
+        return;
+      }
+    }
+
     try {
       console.log('[WalletModal] Connecting to wallet:', walletId);
       setIsConnecting(walletId);
       setConnectionError(null);
 
-      await connectWallet(walletId);
+      // Pass the pre-triggered connection promise to the store
+      if (phantomConnectionPromise) {
+        await connectWallet(walletId, phantomConnectionPromise);
+      } else {
+        await connectWallet(walletId);
+      }
 
       // Close modal on successful connection
       props.onClose?.();
@@ -43,9 +129,16 @@ const WalletModal: Component<WalletModalProps> = (props) => {
 
     } catch (error) {
       console.error('[WalletModal] Wallet connection failed:', error);
-      setConnectionError(error instanceof Error ? error.message : 'Connection failed');
-    } finally {
+
+      // Show user-friendly error message
+      const errorMessage = error instanceof Error ? error.message : 'Connection failed';
+      setConnectionError(errorMessage);
+
+      // Stop the connecting animation
       setIsConnecting(null);
+
+      // Don't close modal so user can see the error and try again
+      console.log('[WalletModal] Connection failed, keeping modal open for retry');
     }
   };
 
@@ -138,7 +231,14 @@ const WalletModal: Component<WalletModalProps> = (props) => {
                     </div>
                     <p class={`text-sm mt-1 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                       <Show when={isConnecting() === wallet.id} fallback={wallet.description}>
-                        Connecting to {wallet.name}...
+                        <Show when={wallet.detected} fallback={`Connecting to ${wallet.name}...`}>
+                          <span class="inline-flex items-center space-x-2">
+                            <div class="animate-pulse w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <span>
+                              {getConnectionStatusMessage(wallet.id)}
+                            </span>
+                          </span>
+                        </Show>
                       </Show>
                     </p>
                     <Show when={!wallet.detected}>
