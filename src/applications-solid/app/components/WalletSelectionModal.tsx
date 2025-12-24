@@ -1,6 +1,6 @@
 import type { Component } from 'solid-js';
 import { createSignal } from 'solid-js';
-import { useMultiWallet, useWalletConnection } from '../../../lib/wallet/wallet-context';
+import { useMultiWallet, useWalletConnection } from 'src/lib/wallet/wallet-context';
 
 interface WalletSelectionModalProps {
   isOpen: boolean;

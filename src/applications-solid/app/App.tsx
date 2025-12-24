@@ -16,6 +16,7 @@ import {
   loggingMiddleware,
   authMiddleware
 } from './middleware'
+import { WalletProvider } from 'src/lib/wallet/wallet-context'
 import DashboardPage from './pages/dashboard/index'
 import CounterPage from './pages/counter/index'
 import ProfilePage from './pages/profile/index'
@@ -140,10 +141,12 @@ const AppContent: Component = () => {
   )
 }
 
-const App: Component = () => {
+const App: Component<{ firebaseToken?: string }> = (props) => {
   return (
     <MiddlewareProvider>
-      <AppContent />
+      <WalletProvider firebaseToken={props.firebaseToken}>
+        <AppContent />
+      </WalletProvider>
     </MiddlewareProvider>
   )
 }

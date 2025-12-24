@@ -1,34 +1,35 @@
 import type { Component } from 'solid-js';
-import { createSignal } from 'solid-js';
+import { createSignal, createEffect, Show } from 'solid-js';
+import {
+  useSplitdoATA,
+  useWalletModal,
+  useWallet,
+  useWalletConnection,
+  useWalletBalances
+} from 'src/lib/wallet/wallet-context';
 import WalletSelectionModal from '../../components/WalletSelectionModal';
 
 const WalletPage: Component<{ isDark: boolean }> = (props) => {
-  const [isSwapModalOpen, setIsSwapModalOpen] = createSignal(false);
+  // SolidJS Wallet Context Hooks
+  const { splitdoATA, checkSplitdoBalance } = useSplitdoATA();
+  const { openModal, closeModal, isModalOpen } = useWalletModal();
+  const { wallet, connectionStatus, connectionError } = useWallet();
+  const { connectWallet, disconnectWallet } = useWalletConnection();
+  const { solBalance, refreshBalances } = useWalletBalances();
 
-  // Mock Wallet Data (basierend auf echter API-Struktur)
-  const mockWalletData = {
-    solBalance: {
-      wallet_address: "demo_wallet_address_123abc...",
-      balance_lamports: "2500000000",
-      balance_sol: 2.5,
-      timestamp: Date.now()
-    },
-    splitdoBalance: {
-      user_id: "demo_user_123",
-      token_account_pubkey: "demo_token_account_456def...",
-      token_balance: 1500.50,
-      equivalent_usdc: 1500.50,
-      exchange_rate: 1.0,
-      last_updated: new Date().toISOString()
-    },
-    usdcBalance: 1500.50,
-    transactions: [
-      { id: 'tx_1', type: "Deposit", amount: 1000, timestamp: "2024-12-16", status: "Completed", hash: "abc123..." },
-      { id: 'tx_2', type: "Transfer", amount: -50, timestamp: "2024-12-15", status: "Completed", hash: "def456..." },
-      { id: 'tx_3', type: "Withdrawal", amount: -100, timestamp: "2024-12-14", status: "Pending", hash: "ghi789..." },
-      { id: 'tx_4', type: "Swap", amount: 200, timestamp: "2024-12-13", status: "Completed", hash: "jkl012..." }
-    ]
-  };
+  // Check SPLITDO account status on page load
+  createEffect(() => {
+    console.log('[WalletPage] Checking SPLITDO balance on page load');
+    checkSplitdoBalance();
+  });
+
+  // Refresh balances when wallet is connected
+  createEffect(() => {
+    if (connectionStatus() === 'connected' && wallet()) {
+      console.log('[WalletPage] Wallet connected, refreshing balances');
+      refreshBalances();
+    }
+  });
 
   const formatCurrency = (amount: number, currency: string = 'SPLITDO') => {
     return `${amount.toLocaleString('en-US', {
@@ -66,28 +67,44 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
           Wallet
         </h2>
         <div class="flex space-x-3">
-          <button
-            disabled
-            class={`px-4 py-2 rounded-lg border transition-colors opacity-50 cursor-not-allowed ${
-              props.isDark
-                ? 'border-zinc-600 text-gray-400'
-                : 'border-gray-300 text-gray-500'
-            }`}
+          {/* Show Connect/Disconnect Button */}
+          <Show
+            when={connectionStatus() === 'connected'}
+            fallback={
+              <button
+                onClick={() => openModal()}
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Connect Wallet
+              </button>
+            }
           >
-            Receive
-          </button>
-          <button
-            disabled
-            class={`px-4 py-2 rounded-lg border transition-colors opacity-50 cursor-not-allowed ${
-              props.isDark
-                ? 'border-zinc-600 text-gray-400'
-                : 'border-gray-300 text-gray-500'
-            }`}
-          >
-            Send
-          </button>
+            <button
+              onClick={() => disconnectWallet()}
+              class={`px-4 py-2 rounded-lg border transition-colors ${
+                props.isDark
+                  ? 'border-red-600 text-red-400 hover:bg-red-600 hover:text-white'
+                  : 'border-red-500 text-red-600 hover:bg-red-500 hover:text-white'
+              }`}
+            >
+              Disconnect
+            </button>
+          </Show>
         </div>
       </div>
+
+      {/* Connection Status */}
+      <Show when={connectionStatus() === 'connecting'}>
+        <div class={`p-4 rounded-lg border ${props.isDark ? 'bg-zinc-800 border-zinc-700 text-yellow-400' : 'bg-yellow-50 border-yellow-200 text-yellow-800'}`}>
+          Connecting to wallet...
+        </div>
+      </Show>
+
+      <Show when={connectionStatus() === 'error' && connectionError()}>
+        <div class={`p-4 rounded-lg border ${props.isDark ? 'bg-zinc-800 border-red-700 text-red-400' : 'bg-red-50 border-red-200 text-red-800'}`}>
+          Connection Error: {connectionError()}
+        </div>
+      </Show>
 
       {/* Balance Overview */}
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -101,15 +118,70 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
               <span class="text-white text-sm font-bold">S</span>
             </div>
           </div>
-          <p class={`text-2xl font-bold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-            {formatCurrency(mockWalletData.splitdoBalance.token_balance)}
-          </p>
-          <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-            ≈ {formatCurrency(mockWalletData.splitdoBalance.equivalent_usdc, 'USDC')}
-          </p>
-          <p class={`text-xs mt-2 ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-            Rate: {mockWalletData.splitdoBalance.exchange_rate} USDC
-          </p>
+
+          {/* SPLITDO ATA Status - Reactive SolidJS */}
+          <Show when={splitdoATA().status === 'exists'}>
+            <p class={`text-2xl font-bold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+              {formatCurrency(splitdoATA().balance?.uiAmount || 0)}
+            </p>
+            <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+              Account: {formatAddress(splitdoATA().address || '')}
+            </p>
+          </Show>
+
+          <Show when={splitdoATA().status === 'not_found'}>
+            <div class="space-y-3">
+              <p class={`text-lg ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                No SPLITDO Account
+              </p>
+              <button
+                onClick={() => openModal()}
+                class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Create SPLITDO Token Account
+              </button>
+              <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                Connect wallet to create your SPLITDO token account
+              </p>
+            </div>
+          </Show>
+
+          <Show when={splitdoATA().status === 'creating'}>
+            <div class="space-y-2">
+              <p class={`text-lg text-blue-500`}>
+                Creating Account...
+              </p>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-blue-600 h-2 rounded-full animate-pulse" style="width: 60%"></div>
+              </div>
+              <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                Please confirm transaction in your wallet
+              </p>
+            </div>
+          </Show>
+
+          <Show when={splitdoATA().status === 'checking'}>
+            <p class={`text-lg ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Checking account status...
+            </p>
+          </Show>
+
+          <Show when={splitdoATA().status === 'error' && splitdoATA().error}>
+            <div class="space-y-2">
+              <p class={`text-lg text-red-500`}>
+                Error
+              </p>
+              <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                {splitdoATA().error}
+              </p>
+              <button
+                onClick={() => checkSplitdoBalance()}
+                class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </Show>
         </div>
 
         {/* USDC Balance */}
@@ -123,7 +195,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
             </div>
           </div>
           <p class={`text-2xl font-bold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-            {formatCurrency(mockWalletData.usdcBalance, 'USDC')}
+            {formatCurrency(0, 'USDC')}
           </p>
           <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
             USD Coin
@@ -140,15 +212,29 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
               <span class="text-white text-sm font-bold">◎</span>
             </div>
           </div>
-          <p class={`text-2xl font-bold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-            {formatCurrency(mockWalletData.solBalance.balance_sol, 'SOL')}
-          </p>
-          <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-            For transaction fees
-          </p>
-          <p class={`text-xs mt-2 ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-            {formatAddress(mockWalletData.solBalance.wallet_address)}
-          </p>
+
+          <Show
+            when={connectionStatus() === 'connected' && wallet()}
+            fallback={
+              <div>
+                <p class={`text-lg ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Connect wallet to see balance
+                </p>
+              </div>
+            }
+          >
+            <p class={`text-2xl font-bold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+              {formatCurrency(solBalance()?.sol || 0, 'SOL')}
+            </p>
+            <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+              For transaction fees
+            </p>
+            <Show when={wallet()?.address}>
+              <p class={`text-xs mt-2 ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                {formatAddress(wallet()?.address || '')}
+              </p>
+            </Show>
+          </Show>
         </div>
       </div>
 
@@ -164,10 +250,10 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
             </p>
           </div>
           <button
-            onClick={() => setIsSwapModalOpen(true)}
-            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors btn-animate"
+            disabled
+            class="px-6 py-2 bg-gray-600 text-gray-400 rounded-lg cursor-not-allowed"
           >
-            Swap
+            Swap (Coming Soon)
           </button>
         </div>
 
@@ -219,44 +305,31 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
               </tr>
             </thead>
             <tbody>
-              {mockWalletData.transactions.map((tx) => (
-                <tr class={`border-b transition-colors hover:bg-opacity-50 ${
-                  props.isDark
-                    ? 'border-zinc-700 hover:bg-zinc-700'
-                    : 'border-gray-100 hover:bg-gray-50'
-                }`}>
-                  <td class={`py-3 px-4 ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {tx.type}
-                  </td>
-                  <td class={`py-3 px-4 font-mono ${
-                    tx.amount > 0
-                      ? 'text-green-600'
-                      : 'text-red-600'
-                  }`}>
-                    {tx.amount > 0 ? '+' : ''}{formatCurrency(Math.abs(tx.amount))}
-                  </td>
-                  <td class={`py-3 px-4 ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {formatDate(tx.timestamp)}
-                  </td>
-                  <td class="py-3 px-4">
-                    <span class={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(tx.status)}`}>
-                      {tx.status}
-                    </span>
-                  </td>
-                  <td class={`py-3 px-4 font-mono text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {formatAddress(tx.hash)}
+              <Show
+                when={connectionStatus() === 'connected'}
+                fallback={
+                  <tr>
+                    <td colspan="5" class={`py-8 px-4 text-center ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Connect your wallet to view transaction history
+                    </td>
+                  </tr>
+                }
+              >
+                <tr>
+                  <td colspan="5" class={`py-8 px-4 text-center ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    No transactions yet. Create a SPLITDO token account to get started.
                   </td>
                 </tr>
-              ))}
+              </Show>
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Wallet Selection Modal */}
+      {/* Wallet Selection Modal for ATA Creation */}
       <WalletSelectionModal
-        isOpen={isSwapModalOpen()}
-        onClose={() => setIsSwapModalOpen(false)}
+        isOpen={isModalOpen()}
+        onClose={() => closeModal()}
         isDark={props.isDark}
       />
     </div>

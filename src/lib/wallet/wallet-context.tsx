@@ -79,7 +79,7 @@ interface WalletProviderProps {
   firebaseToken?: string; // Firebase JWT for backend API calls
 }
 
-const WalletContext = createContext<WalletContextState>();
+const WalletContext = createContext<WalletContextState | undefined>();
 
 export const WalletProvider: ParentComponent<WalletProviderProps> = (props) => {
   // Connection signals
