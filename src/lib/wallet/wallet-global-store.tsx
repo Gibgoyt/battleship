@@ -169,6 +169,7 @@ function createWalletGlobalStore(firebaseToken?: string) {
   const openModal = () => {
     console.log('[WalletStore] Opening wallet selection modal');
     setIsModalOpen(true);
+    console.log('[WalletStore] Modal state after opening:', isModalOpen());
   };
 
   const closeModal = () => {
@@ -220,6 +221,7 @@ export const useWallet = (): WalletGlobalState => {
 // Helper hooks for specific functionality
 export const useWalletModal = () => {
   const store = useWallet();
+  console.log('[useWalletModal] Hook called, current modal state:', store.isModalOpen());
   return {
     isModalOpen: store.isModalOpen,
     openModal: store.openModal,

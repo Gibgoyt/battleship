@@ -16,11 +16,11 @@ import {
   loggingMiddleware,
   authMiddleware
 } from './middleware'
-import { initializeWalletStore } from 'src/lib/wallet/wallet-global-store'
+import { initializeWalletStore } from 'src/lib/wallet/wallet-reactive-store'
 import DashboardPage from './pages/dashboard/index'
 import CounterPage from './pages/counter/index'
 import ProfilePage from './pages/profile/index'
-import WalletPageWithStore from './pages/wallet/WalletPageWithStore'
+import WalletPageReactive from './pages/wallet/WalletPageReactive'
 
 const AppContent: Component = () => {
   const [currentPage, setCurrentPage] = createSignal<Page>('dashboard')
@@ -91,7 +91,7 @@ const AppContent: Component = () => {
       case 'profile':
         return <ProfilePage isDark={isDark()} />
       case 'wallet':
-        return <WalletPageWithStore isDark={isDark()} />
+        return <WalletPageReactive isDark={isDark()} />
       default:
         return <DashboardPage isDark={isDark()} />
     }
@@ -129,9 +129,9 @@ const AppContent: Component = () => {
 }
 
 const AppWithStore: Component<{ firebaseToken?: string }> = (props) => {
-  // Initialize wallet store with Firebase token
+  // Initialize reactive wallet store with Firebase token
   onMount(() => {
-    console.log('[AppWithStore] Initializing wallet store with Firebase token:', props.firebaseToken ? 'Present' : 'None');
+    console.log('[AppWithStore] Initializing reactive wallet store with Firebase token:', props.firebaseToken ? 'Present' : 'None');
     initializeWalletStore(props.firebaseToken);
   });
 
