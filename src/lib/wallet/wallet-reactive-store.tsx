@@ -573,7 +573,7 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
   }
 
   // Get the current wallet provider
-  const provider = walletConnectService.getCurrentProvider();
+  const provider = walletConnectService.getCurrentWallet();
   if (!provider) {
     return { success: false, error: 'No wallet provider available' };
   }
