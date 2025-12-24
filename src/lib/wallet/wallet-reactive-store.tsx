@@ -9,6 +9,7 @@ import {
   createEffect,
   type Accessor
 } from 'solid-js';
+import { PublicKey } from '@solana/web3.js';
 
 import { CONNECTION_CONFIG, ERROR_MESSAGES } from './walletconnect-config';
 import { solanaService } from './solana-service';
@@ -573,28 +574,61 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
     return { success: false, error: 'No authentication token available' };
   }
 
-  // Create Phantom wallet provider instance
+  // Use the ALREADY CONNECTED Phantom wallet from window
   if (typeof window === 'undefined') {
     return { success: false, error: 'Not in browser environment' };
   }
 
-  const phantomWalletProvider = new PhantomWalletProvider();
-
-  if (!phantomWalletProvider.isAvailable()) {
-    return { success: false, error: 'Phantom wallet not available' };
+  const phantomProvider = (window as any).phantom?.solana;
+  if (!phantomProvider || !phantomProvider.isPhantom) {
+    return { success: false, error: 'Phantom wallet not found' };
   }
 
-  if (!phantomWalletProvider.isConnected()) {
+  if (!phantomProvider.isConnected) {
     return { success: false, error: 'Phantom wallet not connected' };
+  }
+
+  if (!phantomProvider.publicKey) {
+    return { success: false, error: 'No public key available from connected wallet' };
   }
 
   setSplitdoATA(prev => ({ ...prev, status: 'creating' }));
 
-  try {
-    console.log('[ReactiveWalletStore] Creating SPLITDO ATA with PhantomWalletProvider...');
+  // Create adapter that uses the already connected Phantom provider
+  const phantomAdapter = {
+    id: 'phantom',
+    name: 'Phantom',
+    icon: '🟣',
+    isAvailable: () => true, // Already checked above
+    isConnected: () => phantomProvider.isConnected,
+    getPublicKey: () => {
+      try {
+        return phantomProvider.publicKey ? new PublicKey(phantomProvider.publicKey.toString()) : null;
+      } catch (error) {
+        console.error('[ReactiveWalletStore] Error getting public key:', error);
+        return null;
+      }
+    },
+    signTransaction: async (transaction: any) => {
+      console.log('[ReactiveWalletStore] 🚀 CALLING PHANTOM signTransaction - popup should appear!');
+      return await phantomProvider.signTransaction(transaction);
+    },
+    connect: async () => {
+      const result = await phantomProvider.connect();
+      return { publicKey: new PublicKey(result.publicKey.toString()) };
+    },
+    disconnect: async () => {
+      await phantomProvider.disconnect();
+    }
+  };
 
-    // Use the enhanced solana service with proper wallet provider interface
-    const ataResult = await solanaService.createSplitdoATA(phantomWalletProvider);
+  try {
+    console.log('[ReactiveWalletStore] Creating SPLITDO ATA with connected Phantom wallet...');
+    console.log('[ReactiveWalletStore] Phantom connected?', phantomProvider.isConnected);
+    console.log('[ReactiveWalletStore] Phantom public key:', phantomProvider.publicKey?.toString());
+
+    // Use the enhanced solana service with the adapter
+    const ataResult = await solanaService.createSplitdoATA(phantomAdapter);
 
     if (!ataResult.success) {
       setSplitdoATA(prev => ({
