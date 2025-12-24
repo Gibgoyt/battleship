@@ -180,23 +180,46 @@ export const useSplitdoATA = () => {
 };
 
 export const useMultiWallet = () => {
-  // Mock available wallets
-  const availableWallets = () => [
-    {
+  const [detectedWallets, setDetectedWallets] = createSignal<any[]>([]);
+
+  // Real wallet detection on first call
+  const availableWallets = () => {
+    if (typeof window === 'undefined') return [];
+
+    // Basic wallet detection
+    const wallets = [];
+
+    // Detect Phantom
+    const phantomDetected = !!(window as any).phantom?.solana;
+    wallets.push({
       id: 'phantom',
       name: 'Phantom',
       icon: '🟣',
-      description: 'Popular Solana wallet with DeFi support',
-      detected: true
-    },
-    {
+      description: phantomDetected
+        ? 'Popular Solana wallet with DeFi support'
+        : 'Install Phantom to connect your Solana wallet',
+      detected: phantomDetected,
+      installUrl: 'https://phantom.app/'
+    });
+
+    // Detect MetaMask
+    const metamaskDetected = !!(window as any).ethereum?.isMetaMask;
+    wallets.push({
       id: 'metamask',
       name: 'MetaMask',
       icon: '🦊',
-      description: 'Most popular Ethereum wallet',
-      detected: true
-    }
-  ];
+      description: metamaskDetected
+        ? 'Most popular Ethereum wallet'
+        : 'Install MetaMask to connect your Ethereum wallet',
+      detected: metamaskDetected,
+      installUrl: 'https://metamask.io/'
+    });
+
+    console.log('[ReactiveWalletStore] Wallet detection results:',
+      wallets.map(w => ({ name: w.name, detected: w.detected })));
+
+    return wallets;
+  };
 
   return {
     availableWallets

@@ -19,6 +19,17 @@ const WalletModal: Component<WalletModalProps> = (props) => {
   const handleConnect = async (walletId: string) => {
     if (isConnecting()) return; // Prevent double-clicks
 
+    const wallet = multiWallet.availableWallets().find(w => w.id === walletId);
+
+    // If wallet not detected, open installation page
+    if (!wallet?.detected) {
+      console.log('[WalletModal] Wallet not detected, opening installation page:', walletId);
+      if (wallet?.installUrl) {
+        window.open(wallet.installUrl, '_blank');
+      }
+      return;
+    }
+
     try {
       console.log('[WalletModal] Connecting to wallet:', walletId);
       setIsConnecting(walletId);
@@ -83,133 +94,83 @@ const WalletModal: Component<WalletModalProps> = (props) => {
           </div>
         </Show>
 
-        {/* Wallet List */}
+        {/* Dynamic Wallet List */}
         <div class="space-y-3">
-          {/* Phantom Wallet */}
-          <button
-            onClick={() => handleConnect('phantom')}
-            disabled={!!isConnecting()}
-            class={`w-full p-4 rounded-lg border transition-all duration-200 text-left ${
-              props.isDark
-                ? 'border-zinc-600 bg-zinc-700 hover:bg-zinc-600'
-                : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
-            } ${isConnecting() ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${
-              isConnecting() === 'phantom' ? 'animate-pulse' : ''
-            }`}
-          >
-            <div class="flex items-center space-x-4">
-              <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-2xl">
-                🟣
-              </div>
-              <div class="flex-1">
-                <div class="flex items-center space-x-2">
-                  <h3 class="font-semibold text-lg">Phantom</h3>
-                  <span class={`px-2 py-1 rounded-full text-xs font-medium ${
-                    props.isDark ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'
+          <For each={multiWallet.availableWallets()}>
+            {(wallet) => (
+              <button
+                onClick={() => handleConnect(wallet.id)}
+                disabled={!!isConnecting()}
+                class={`w-full p-4 rounded-lg border transition-all duration-200 text-left ${
+                  props.isDark
+                    ? 'border-zinc-600 bg-zinc-700 hover:bg-zinc-600'
+                    : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+                } ${isConnecting() ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${
+                  isConnecting() === wallet.id ? 'animate-pulse' : ''
+                } ${!wallet.detected ? 'border-dashed' : ''}`}
+              >
+                <div class="flex items-center space-x-4">
+                  <div class={`w-12 h-12 rounded-xl flex items-center justify-center text-white text-2xl ${
+                    wallet.id === 'phantom'
+                      ? 'bg-gradient-to-br from-purple-500 to-pink-500'
+                      : 'bg-gradient-to-br from-orange-500 to-yellow-500'
                   }`}>
-                    Popular
-                  </span>
+                    {wallet.icon}
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                      <h3 class="font-semibold text-lg">{wallet.name}</h3>
+                      <Show when={wallet.detected} fallback={
+                        <span class={`px-2 py-1 rounded-full text-xs font-medium ${
+                          props.isDark ? 'bg-red-900 text-red-200' : 'bg-red-100 text-red-800'
+                        }`}>
+                          Not Installed
+                        </span>
+                      }>
+                        <span class={`px-2 py-1 rounded-full text-xs font-medium ${
+                          wallet.id === 'phantom'
+                            ? (props.isDark ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800')
+                            : (props.isDark ? 'bg-orange-900 text-orange-200' : 'bg-orange-100 text-orange-800')
+                        }`}>
+                          {wallet.id === 'phantom' ? 'Popular' : 'Widely Used'}
+                        </span>
+                      </Show>
+                    </div>
+                    <p class={`text-sm mt-1 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <Show when={isConnecting() === wallet.id} fallback={wallet.description}>
+                        Connecting to {wallet.name}...
+                      </Show>
+                    </p>
+                    <Show when={!wallet.detected}>
+                      <p class={`text-xs mt-1 ${props.isDark ? 'text-yellow-400' : 'text-yellow-600'}`}>
+                        Click to install • Opens {wallet.name} website
+                      </p>
+                    </Show>
+                    <Show when={wallet.detected}>
+                      <p class={`text-xs mt-1 ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                        {wallet.id === 'phantom' ? 'Best for Solana and SPLITDO tokens' : 'For Ethereum and cross-chain tokens'}
+                      </p>
+                    </Show>
+                  </div>
+                  <div class="text-right">
+                    <Show when={isConnecting() === wallet.id} fallback={
+                      <Show when={wallet.detected} fallback={
+                        <svg class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                      }>
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                        </svg>
+                      </Show>
+                    }>
+                      <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-current"></div>
+                    </Show>
+                  </div>
                 </div>
-                <p class={`text-sm mt-1 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {isConnecting() === 'phantom'
-                    ? 'Connecting to Phantom...'
-                    : 'Popular Solana wallet with DeFi support'
-                  }
-                </p>
-                <p class={`text-xs mt-1 ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                  Best for Solana and SPLITDO tokens
-                </p>
-              </div>
-              <div class="text-right">
-                <Show when={isConnecting() === 'phantom'} fallback={
-                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                  </svg>
-                }>
-                  <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-current"></div>
-                </Show>
-              </div>
-            </div>
-          </button>
-
-          {/* MetaMask Wallet */}
-          <button
-            onClick={() => handleConnect('metamask')}
-            disabled={!!isConnecting()}
-            class={`w-full p-4 rounded-lg border transition-all duration-200 text-left ${
-              props.isDark
-                ? 'border-zinc-600 bg-zinc-700 hover:bg-zinc-600'
-                : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
-            } ${isConnecting() ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${
-              isConnecting() === 'metamask' ? 'animate-pulse' : ''
-            }`}
-          >
-            <div class="flex items-center space-x-4">
-              <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center text-white text-2xl">
-                🦊
-              </div>
-              <div class="flex-1">
-                <div class="flex items-center space-x-2">
-                  <h3 class="font-semibold text-lg">MetaMask</h3>
-                  <span class={`px-2 py-1 rounded-full text-xs font-medium ${
-                    props.isDark ? 'bg-orange-900 text-orange-200' : 'bg-orange-100 text-orange-800'
-                  }`}>
-                    Widely Used
-                  </span>
-                </div>
-                <p class={`text-sm mt-1 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {isConnecting() === 'metamask'
-                    ? 'Connecting to MetaMask...'
-                    : 'Most popular Ethereum wallet'
-                  }
-                </p>
-                <p class={`text-xs mt-1 ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                  For Ethereum and cross-chain tokens
-                </p>
-              </div>
-              <div class="text-right">
-                <Show when={isConnecting() === 'metamask'} fallback={
-                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                  </svg>
-                }>
-                  <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-current"></div>
-                </Show>
-              </div>
-            </div>
-          </button>
-
-          {/* Solflare Wallet - Coming Soon */}
-          <button
-            disabled
-            class={`w-full p-4 rounded-lg border transition-all duration-200 text-left opacity-50 cursor-not-allowed ${
-              props.isDark
-                ? 'border-zinc-600 bg-zinc-700'
-                : 'border-gray-200 bg-gray-50'
-            }`}
-          >
-            <div class="flex items-center space-x-4">
-              <div class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center text-white text-2xl">
-                ☀️
-              </div>
-              <div class="flex-1">
-                <div class="flex items-center space-x-2">
-                  <h3 class="font-semibold text-lg">Solflare</h3>
-                  <span class={`px-2 py-1 rounded-full text-xs font-medium ${
-                    props.isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-600'
-                  }`}>
-                    Coming Soon
-                  </span>
-                </div>
-                <p class={`text-sm mt-1 ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                  Native Solana wallet with staking
-                </p>
-                <p class={`text-xs mt-1 ${props.isDark ? 'text-gray-600' : 'text-gray-500'}`}>
-                  Support coming in next update
-                </p>
-              </div>
-            </div>
-          </button>
+              </button>
+            )}
+          </For>
         </div>
 
         {/* Footer */}
@@ -218,6 +179,9 @@ const WalletModal: Component<WalletModalProps> = (props) => {
         }`}>
           <p class="text-sm mb-2">
             🚀 Connect your wallet to create a SPLITDO token account
+          </p>
+          <p class="text-xs mb-1">
+            Don't have a wallet? Click any "Not Installed" option to install
           </p>
           <p class="text-xs">
             Your wallet will be used to sign transactions on the Solana blockchain
