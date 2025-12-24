@@ -11,6 +11,8 @@ import {
 } from 'solid-js';
 
 import { CONNECTION_CONFIG, ERROR_MESSAGES } from './walletconnect-config';
+import { solanaService } from './solana-service';
+import { walletConnectService } from './walletconnect-service';
 
 export type ATAStatus = 'unknown' | 'checking' | 'exists' | 'not_found' | 'creating' | 'created' | 'error';
 
@@ -557,6 +559,103 @@ const refreshBalances = async () => {
   setSolBalance({ sol: 0.05 });
 };
 
+// Real SPLITDO ATA creation function
+const createSplitdoATA = async (): Promise<{ success: boolean; signature?: string; error?: string }> => {
+  const currentWallet = wallet();
+  const token = firebaseToken;
+
+  if (!currentWallet) {
+    return { success: false, error: 'No wallet connected' };
+  }
+
+  if (!token) {
+    return { success: false, error: 'No authentication token available' };
+  }
+
+  // Get the current wallet provider
+  const provider = walletConnectService.getCurrentProvider();
+  if (!provider) {
+    return { success: false, error: 'No wallet provider available' };
+  }
+
+  setSplitdoATA(prev => ({ ...prev, status: 'creating' }));
+
+  try {
+    console.log('[ReactiveWalletStore] Creating SPLITDO ATA with real provider...');
+
+    // Use the enhanced solana service with wallet provider
+    const ataResult = await solanaService.createSplitdoATA(provider);
+
+    if (!ataResult.success) {
+      setSplitdoATA(prev => ({
+        ...prev,
+        status: 'error',
+        error: ataResult.error
+      }));
+      return {
+        success: false,
+        error: ataResult.error
+      };
+    }
+
+    if (!ataResult.signature) {
+      // ATA already exists
+      setSplitdoATA({
+        status: 'exists',
+        address: ataResult.ataAddress
+      });
+      return { success: true, signature: 'already_exists' };
+    }
+
+    // Submit signed transaction to backend
+    const submitResult = await solanaService.submitSignedATATransaction(
+      token,
+      currentWallet.address,
+      ataResult.ataAddress!,
+      ataResult.signature
+    );
+
+    if (submitResult.success) {
+      setSplitdoATA({
+        status: 'created',
+        address: ataResult.ataAddress,
+        balance: {
+          uiAmount: 0
+        }
+      });
+
+      // Refresh balances after creation
+      setTimeout(() => refreshBalances(), 2000);
+
+      return {
+        success: true,
+        signature: submitResult.transactionSignature
+      };
+    } else {
+      setSplitdoATA(prev => ({
+        ...prev,
+        status: 'error',
+        error: submitResult.error
+      }));
+      return {
+        success: false,
+        error: submitResult.error
+      };
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Transaction failed';
+    setSplitdoATA(prev => ({
+      ...prev,
+      status: 'error',
+      error: errorMessage
+    }));
+    return {
+      success: false,
+      error: errorMessage
+    };
+  }
+};
+
 const openModal = () => {
   console.log('[ReactiveWalletStore] Opening wallet selection modal');
   setIsModalOpen(true);
@@ -602,7 +701,8 @@ export const useWalletBalances = () => {
 export const useSplitdoATA = () => {
   return {
     splitdoATA,
-    checkSplitdoBalance
+    checkSplitdoBalance,
+    createSplitdoATA
   };
 };
 

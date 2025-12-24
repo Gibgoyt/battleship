@@ -12,7 +12,7 @@ import TestModal from '../../components/TestModal';
 
 const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
   // SolidJS Reactive Store Hooks
-  const { splitdoATA, checkSplitdoBalance } = useSplitdoATA();
+  const { splitdoATA, checkSplitdoBalance, createSplitdoATA: createSplitdoATAStore } = useSplitdoATA();
   const { openModal, closeModal, isModalOpen } = useWalletModal();
   const { wallet, connectionStatus, connectionError } = useWallet();
   const { connectWallet, disconnectWallet } = useWalletConnection();
@@ -21,19 +21,15 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
   // Local state for ATA creation
   const [isCreatingATA, setIsCreatingATA] = createSignal(false);
 
-  // Create ATA function placeholder (will implement properly)
+  // Create ATA function using real reactive store implementation
   const createSplitdoATA = async (): Promise<{ success: boolean; signature?: string; error?: string }> => {
     setIsCreatingATA(true);
+    console.log('[WalletPageReactive] Creating SPLITDO ATA...');
 
     try {
-      // TODO: Implement real ATA creation using solana service
-      console.log('[WalletPageReactive] Creating SPLITDO ATA...');
-
-      // For now, simulate creation
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Mock success
-      return { success: true, signature: 'mock_signature' };
+      // Use the real reactive store createSplitdoATA method
+      const result = await createSplitdoATAStore();
+      return result;
     } catch (error) {
       return {
         success: false,
