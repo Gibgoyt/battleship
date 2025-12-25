@@ -5,10 +5,14 @@ import {
   useWalletModal,
   useWallet,
   useWalletConnection,
-  useWalletBalances
+  useWalletBalances,
+  useExchangeModal,
+  useExchange
 } from 'src/lib/wallet/wallet-reactive-store';
 import WalletModal from '../../components/WalletModal';
 import TestModal from '../../components/TestModal';
+import { ExchangeSection } from '../../components/ExchangeSection';
+import { ExchangeModal } from '../../components/ExchangeModal';
 
 const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
   // SolidJS Reactive Store Hooks
@@ -376,6 +380,12 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
           />
         );
       })()}
+
+      {/* Exchange Section - Only show if user has SPLITDO account */}
+      <ExchangeSection isDark={props.isDark} />
+
+      {/* Exchange Modal */}
+      <ExchangeModal isDark={props.isDark} />
     </div>
   );
 };

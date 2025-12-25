@@ -42,6 +42,11 @@ const [isModalOpen, setIsModalOpen] = createSignal(false);
 const [solBalance, setSolBalance] = createSignal<SolanaBalance | null>(null);
 const [splitdoATA, setSplitdoATA] = createSignal<ATAInfo>({ status: 'unknown' });
 
+// Exchange-related signals
+const [isExchangeModalOpen, setIsExchangeModalOpen] = createSignal(false);
+const [exchangeStatus, setExchangeStatus] = createSignal<'idle' | 'loading' | 'success' | 'error'>('idle');
+const [exchangeError, setExchangeError] = createSignal<string | null>(null);
+
 // Store Firebase token
 let firebaseToken: string | undefined = undefined;
 
@@ -823,4 +828,135 @@ export const useMultiWallet = () => {
   return {
     availableWallets
   };
+};
+
+// ===============================
+// EXCHANGE FUNCTIONALITY
+// ===============================
+
+export type ExchangeResult = {
+  success: boolean;
+  data?: any;
+  error?: string;
+};
+
+// Exchange Modal Hook
+export const useExchangeModal = () => {
+  return {
+    isExchangeModalOpen,
+    openExchangeModal: () => {
+      console.log('[ReactiveWalletStore] Opening exchange modal');
+      setIsExchangeModalOpen(true);
+    },
+    closeExchangeModal: () => {
+      console.log('[ReactiveWalletStore] Closing exchange modal');
+      setIsExchangeModalOpen(false);
+      // Reset exchange state when modal closes
+      setExchangeStatus('idle');
+      setExchangeError(null);
+    }
+  };
+};
+
+// Exchange Operations Hook
+export const useExchange = () => {
+  return {
+    exchangeStatus,
+    exchangeError,
+    executeExchange
+  };
+};
+
+// Execute SOL to SPLITDO exchange
+const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
+  console.log('[ReactiveWalletStore] Starting SOL to SPLITDO exchange:', solAmount);
+  setExchangeStatus('loading');
+  setExchangeError(null);
+
+  try {
+    // 1. Validate user has SPLITDO account
+    const currentATA = splitdoATA();
+    if (currentATA.status !== 'exists') {
+      throw new Error('SPLITDO account required. Please create your SPLITDO account first.');
+    }
+
+    // 2. Validate SOL amount
+    if (solAmount < 0.05) {
+      throw new Error('Minimum exchange amount is 0.05 SOL');
+    }
+
+    // 3. Get SOL vault address from backend
+    console.log('[ReactiveWalletStore] Fetching vault address...');
+    const vaultResponse = await fetch('/api/splitdo-token/exchange/solana/vault');
+    if (!vaultResponse.ok) {
+      throw new Error('Failed to fetch vault address');
+    }
+
+    const vaultData = await vaultResponse.json();
+    const solVaultAddress = vaultData.data.sol_vault_address;
+    console.log('[ReactiveWalletStore] Got vault address:', solVaultAddress);
+
+    // 4. Get current wallet provider
+    const currentProvider = walletConnectService.getCurrentProvider();
+    if (!currentProvider || !currentProvider.isConnected()) {
+      throw new Error('Wallet not connected');
+    }
+
+    // 5. Create SOL transfer transaction
+    const lamports = Math.floor(solAmount * 1000000000); // Convert SOL to lamports
+    const { Transaction, SystemProgram, PublicKey } = await import('@solana/web3.js');
+
+    const transaction = new Transaction().add(
+      SystemProgram.transfer({
+        fromPubkey: currentProvider.publicKey!,
+        toPubkey: new PublicKey(solVaultAddress),
+        lamports: lamports
+      })
+    );
+
+    console.log('[ReactiveWalletStore] Created transaction for', lamports, 'lamports');
+
+    // 6. Sign transaction with wallet
+    console.log('[ReactiveWalletStore] Signing transaction with wallet...');
+    const signedTransaction = await currentProvider.signTransaction(transaction);
+
+    // 7. Submit to backend exchange endpoint
+    const serializedTransaction = Buffer.from(signedTransaction.serialize()).toString('base64');
+
+    const exchangeResponse = await fetch('/api/splitdo-token/exchange/solana', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${firebaseToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        sol_amount: lamports,
+        signed_transaction: serializedTransaction
+      })
+    });
+
+    if (!exchangeResponse.ok) {
+      const errorData = await exchangeResponse.json();
+      throw new Error(errorData.message || 'Exchange failed');
+    }
+
+    const result = await exchangeResponse.json();
+    console.log('[ReactiveWalletStore] Exchange successful:', result.data);
+
+    setExchangeStatus('success');
+
+    // Refresh wallet data after successful exchange
+    setTimeout(() => {
+      refreshBalances();
+      checkSplitdoBalance();
+    }, 1000);
+
+    return { success: true, data: result.data };
+
+  } catch (error: any) {
+    console.error('[ReactiveWalletStore] Exchange failed:', error);
+    setExchangeStatus('error');
+    setExchangeError(error.message || 'Exchange failed');
+    return { success: false, error: error.message || 'Exchange failed' };
+  }
 };
