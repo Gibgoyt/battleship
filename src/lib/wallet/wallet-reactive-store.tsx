@@ -881,8 +881,9 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
     }
 
     // 2. Validate SOL amount
-    if (solAmount < 0.05) {
-      throw new Error('Minimum exchange amount is 0.05 SOL');
+    // TODO: RE-ADD MINIMUM 0.05 SOLANA AFTER TESTING INTEGRATIONS
+    if (solAmount < 0.001) { // Changed from 0.05 for testing
+      throw new Error('Minimum exchange amount is 0.001 SOL');
     }
 
     // 3. Get SOL vault address from backend
@@ -896,11 +897,32 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
     const solVaultAddress = vaultData.data.sol_vault_address;
     console.log('[ReactiveWalletStore] Got vault address:', solVaultAddress);
 
-    // 4. Get current wallet provider
-    const currentProvider = walletConnectService.getCurrentProvider();
-    if (!currentProvider || !currentProvider.isConnected()) {
-      throw new Error('Wallet not connected');
+    // 4. Get current wallet provider using direct Phantom access (working pattern from createSplitdoATA)
+    if (typeof window === 'undefined') {
+      throw new Error('Not in browser environment');
     }
+
+    const phantomProvider = (window as any).phantom?.solana;
+    if (!phantomProvider || !phantomProvider.isPhantom) {
+      throw new Error('Phantom wallet not found');
+    }
+
+    if (!phantomProvider.isConnected) {
+      throw new Error('Phantom wallet not connected');
+    }
+
+    if (!phantomProvider.publicKey) {
+      throw new Error('No public key available from connected wallet');
+    }
+
+    // Create adapter using working pattern from createSplitdoATA
+    const currentProvider = {
+      publicKey: phantomProvider.publicKey,
+      signTransaction: async (transaction: any) => {
+        console.log('[ReactiveWalletStore] 🚀 CALLING PHANTOM signTransaction for exchange');
+        return await phantomProvider.signTransaction(transaction);
+      }
+    };
 
     // 5. Create SOL transfer transaction
     const lamports = Math.floor(solAmount * 1000000000); // Convert SOL to lamports
@@ -908,7 +930,7 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
 
     const transaction = new Transaction().add(
       SystemProgram.transfer({
-        fromPubkey: currentProvider.publicKey!,
+        fromPubkey: phantomProvider.publicKey,
         toPubkey: new PublicKey(solVaultAddress),
         lamports: lamports
       })

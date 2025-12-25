@@ -208,7 +208,8 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
   });
 
   const isValidAmount = createMemo(() => {
-    return solAmountNum() >= 0.05;
+    // TODO: RE-ADD MINIMUM 0.05 SOLANA AFTER TESTING INTEGRATIONS
+    return solAmountNum() >= 0.001; // Changed from 0.05 for testing
   });
 
   const splitdoAmount = createMemo(() => {
@@ -243,8 +244,8 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
           type="number"
           value={props.solAmount}
           onInput={(e) => props.setSolAmount(e.currentTarget.value)}
-          placeholder="Enter SOL amount (min 0.05)"
-          min="0.05"
+          placeholder="Enter SOL amount (min 0.001)"
+          min="0.001"
           step="0.01"
           class={`w-full px-4 py-3 rounded-lg border transition-colors duration-200 ${
             props.isDark
@@ -254,7 +255,7 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
         />
         <Show when={props.solAmount && !isValidAmount()}>
           <p class="text-red-500 text-sm mt-1">
-            Minimum amount is 0.05 SOL
+            Minimum amount is 0.001 SOL
           </p>
         </Show>
       </div>
