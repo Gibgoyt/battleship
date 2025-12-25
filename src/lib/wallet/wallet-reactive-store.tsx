@@ -887,7 +887,7 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
 
     // 3. Get SOL vault address from backend
     console.log('[ReactiveWalletStore] Fetching vault address...');
-    const vaultResponse = await fetch('/api/splitdo-token/exchange/solana/vault');
+    const vaultResponse = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/exchange/solana/vault');
     if (!vaultResponse.ok) {
       throw new Error('Failed to fetch vault address');
     }
@@ -923,7 +923,7 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
     // 7. Submit to backend exchange endpoint
     const serializedTransaction = Buffer.from(signedTransaction.serialize()).toString('base64');
 
-    const exchangeResponse = await fetch('/api/splitdo-token/exchange/solana', {
+    const exchangeResponse = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/exchange/solana', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${firebaseToken}`,

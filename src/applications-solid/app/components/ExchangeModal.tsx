@@ -1,6 +1,6 @@
 import type { Component } from 'solid-js';
 import { Show, createSignal, createMemo } from 'solid-js';
-import { useExchangeModal, useExchange, useWallet } from 'src/lib/wallet/wallet-reactive-store';
+import { useExchangeModal, useExchange, useWallet, useWalletConnection } from 'src/lib/wallet/wallet-reactive-store';
 
 export interface ExchangeModalProps {
   isDark: boolean;
@@ -10,9 +10,11 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
   const { isExchangeModalOpen, closeExchangeModal } = useExchangeModal();
   const { exchangeStatus, exchangeError, executeExchange } = useExchange();
   const { connectionStatus } = useWallet();
+  const { connectWallet } = useWalletConnection();
 
   const [step, setStep] = createSignal<'wallet' | 'exchange'>('wallet');
   const [solAmount, setSolAmount] = createSignal('');
+  const [isConnecting, setIsConnecting] = createSignal(false);
 
   const handleClose = () => {
     closeExchangeModal();
@@ -77,7 +79,24 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
           <WalletSelection
             isDark={props.isDark}
             connectionStatus={connectionStatus()}
-            onSelectPhantom={() => setStep('exchange')}
+            isConnecting={isConnecting()}
+            onSelectPhantom={async () => {
+              if (connectionStatus() === 'connected') {
+                // Already connected, go to exchange
+                setStep('exchange');
+              } else {
+                // Need to connect wallet first
+                setIsConnecting(true);
+                try {
+                  await connectWallet('phantom');
+                  setStep('exchange');
+                } catch (error) {
+                  console.error('Failed to connect wallet:', error);
+                } finally {
+                  setIsConnecting(false);
+                }
+              }
+            }}
           />
         </Show>
       </div>
@@ -90,6 +109,7 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
 interface WalletSelectionProps {
   isDark: boolean;
   connectionStatus: string;
+  isConnecting: boolean;
   onSelectPhantom: () => void;
 }
 
@@ -105,15 +125,15 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
       {/* Phantom Wallet Option */}
       <button
         onClick={props.onSelectPhantom}
-        disabled={props.connectionStatus !== 'connected'}
+        disabled={props.isConnecting}
         class={`w-full p-4 rounded-lg border-2 transition-all duration-200 flex items-center gap-4 ${
-          props.connectionStatus === 'connected'
-            ? `hover:border-blue-500 cursor-pointer ${
+          props.isConnecting
+            ? 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-200'
+            : `hover:border-blue-500 cursor-pointer ${
                 props.isDark
                   ? 'bg-zinc-700 border-zinc-600 hover:bg-zinc-600'
                   : 'bg-gray-50 border-gray-300 hover:bg-gray-100'
               }`
-            : 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-200'
         }`}
       >
         <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
@@ -124,15 +144,20 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
             Phantom Wallet
           </div>
           <div class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            {props.connectionStatus === 'connected'
+            {props.isConnecting
+              ? 'Connecting...'
+              : props.connectionStatus === 'connected'
               ? 'Connected and ready to exchange'
-              : 'Connect your wallet first'
+              : 'Click to connect and exchange'
             }
           </div>
         </div>
-        {props.connectionStatus === 'connected' && (
+        <Show when={props.isConnecting}>
+          <div class="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </Show>
+        <Show when={!props.isConnecting && props.connectionStatus === 'connected'}>
           <div class="text-green-500 text-lg">✓</div>
-        )}
+        </Show>
       </button>
 
       {/* MetaMask Option (Coming Soon) */}
