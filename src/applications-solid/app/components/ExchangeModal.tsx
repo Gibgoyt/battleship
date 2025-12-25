@@ -14,9 +14,6 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
   const [step, setStep] = createSignal<'wallet' | 'exchange'>('wallet');
   const [solAmount, setSolAmount] = createSignal('');
 
-  // Don't render modal if not open
-  if (!isExchangeModalOpen()) return null;
-
   const handleClose = () => {
     closeExchangeModal();
     setStep('wallet');
@@ -30,6 +27,7 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
   };
 
   return (
+    <Show when={isExchangeModalOpen()}>
     <div
       class="fixed inset-0 z-50 flex items-center justify-center"
       onClick={handleBackdropClick}
@@ -84,6 +82,7 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
         </Show>
       </div>
     </div>
+    </Show>
   );
 };
 
