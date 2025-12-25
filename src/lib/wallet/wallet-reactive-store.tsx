@@ -521,25 +521,52 @@ const disconnectWallet = () => {
 };
 
 const checkSplitdoBalance = async () => {
-  const currentWallet = wallet();
-  if (!currentWallet || !firebaseToken) {
-    console.log('[ReactiveWalletStore] Skipping SPLITDO balance check - no wallet or token');
+  // Only need Firebase token, NOT wallet connection!
+  if (!firebaseToken) {
+    console.log('[ReactiveWalletStore] Skipping SPLITDO balance check - no Firebase token');
     return;
   }
 
   try {
-    console.log('[ReactiveWalletStore] Checking SPLITDO ATA status');
+    console.log('[ReactiveWalletStore] Checking SPLITDO balance with Firebase token');
     setSplitdoATA({ status: 'checking' });
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Mock "not found" response for testuser1
-    setSplitdoATA({
-      status: 'not_found'
+    // Call REAL API endpoint with Firebase JWT
+    const response = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/balance', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${firebaseToken}`,
+        'Content-Type': 'application/json'
+      }
     });
 
-    console.log('[ReactiveWalletStore] SPLITDO ATA check complete: not_found');
+    if (!response.ok) {
+      if (response.status === 404) {
+        // Account doesn't exist
+        setSplitdoATA({ status: 'not_found' });
+        console.log('[ReactiveWalletStore] SPLITDO ATA check complete: not_found');
+        return;
+      }
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.data.token_account_pubkey) {
+      // Account exists - show balance
+      setSplitdoATA({
+        status: 'exists',
+        address: data.data.token_account_pubkey,
+        balance: {
+          uiAmount: data.data.token_balance
+        }
+      });
+      console.log('[ReactiveWalletStore] SPLITDO ATA found:', data.data.token_account_pubkey, 'Balance:', data.data.token_balance);
+    } else {
+      // API returned but no account
+      setSplitdoATA({ status: 'not_found' });
+      console.log('[ReactiveWalletStore] SPLITDO ATA check complete: not_found');
+    }
   } catch (error) {
     console.error('[ReactiveWalletStore] SPLITDO ATA check failed:', error);
     setSplitdoATA({
