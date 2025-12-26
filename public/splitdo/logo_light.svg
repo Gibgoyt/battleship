@@ -7,14 +7,14 @@
   </defs>
 
   <!-- Circle (head) -->
-  <circle cx="200" cy="120" r="80" fill="#47a49e"/>
+  <circle cx="200" cy="120" r="80" fill="#6b46c1"/>
 
   <!-- Split square (body) with clip path for rounded corners -->
   <g clip-path="url(#rounded-clip)">
-    <!-- Teal background -->
-    <rect x="80" y="240" width="240" height="240" fill="#47a49e"/>
+    <!-- Purple background -->
+    <rect x="80" y="240" width="240" height="240" fill="#6b46c1"/>
 
-    <!-- Brown triangle (bottom-right half) -->
-    <path d="M 320 240 L 320 480 L 80 480 Z" fill="#564740"/>
+    <!-- Deep purple triangle (bottom-right half) -->
+    <path d="M 320 240 L 320 480 L 80 480 Z" fill="#2d1b4e"/>
   </g>
 </svg>

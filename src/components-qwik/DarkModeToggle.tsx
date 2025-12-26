@@ -5,11 +5,13 @@ export default component$(() => {
   const isDark = useSignal(false);
 
   const updateDarkMode = $((dark: boolean) => {
+    console.log('🎯 Qwik updateDarkMode called with:', dark);
     if (dark) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
+    console.log('🎯 After update - dark class exists:', document.documentElement.classList.contains('dark'));
   });
 
   useVisibleTask$(() => {
@@ -21,10 +23,19 @@ export default component$(() => {
   });
 
   const toggleDarkMode = $(() => {
+    console.log('🚀 Qwik toggleDarkMode clicked!');
+    console.log('🚀 Current isDark value:', isDark.value);
     const newDarkMode = !isDark.value;
+    console.log('🚀 New darkMode will be:', newDarkMode);
     isDark.value = newDarkMode;
     localStorage.setItem('darkMode', newDarkMode.toString());
     updateDarkMode(newDarkMode);
+
+    // Check phone images
+    const lightImg = document.querySelector('img[src="/phone_screens/WalletScreen_LIGHT.png"]');
+    const darkImg = document.querySelector('img[src="/phone_screens/WalletScreen_DARK.png"]');
+    console.log('🚀 Light image element:', lightImg);
+    console.log('🚀 Dark image element:', darkImg);
   });
 
   return (

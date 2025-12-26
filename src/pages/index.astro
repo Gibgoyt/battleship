@@ -77,10 +77,20 @@ export const prerender = true
 									<div class="w-10 h-1.5 bg-black rounded-full"></div>
 								</div>
 								<div class="flex items-center justify-center h-full p-3">
+									<!-- Light theme phone screen -->
 									<img
-										src="/phone_screens/WalletScreen_DARK.png"
-										alt="SplitDo Wallet Screen"
-										class="w-full h-full object-cover rounded-[2.5rem]"
+										id="light-phone-img"
+										src="/phone_screens/WalletScreen_LIGHT.png?v=2"
+										alt="SplitDo Wallet Screen - Light Mode"
+										class="phone-light w-full h-full object-cover rounded-[2.5rem] border-4 border-blue-500"
+									/>
+
+									<!-- Dark theme phone screen -->
+									<img
+										id="dark-phone-img"
+										src="/phone_screens/WalletScreen_DARK.png?v=2"
+										alt="SplitDo Wallet Screen - Dark Mode"
+										class="phone-dark w-full h-full object-cover rounded-[2.5rem] border-4 border-red-500"
 									/>
 								</div>
 							</div>
