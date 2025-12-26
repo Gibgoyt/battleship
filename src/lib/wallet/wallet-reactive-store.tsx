@@ -938,32 +938,107 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
 
     console.log('[ReactiveWalletStore] Created transaction for', lamports, 'lamports');
 
-    // 6. Sign transaction with wallet
-    console.log('[ReactiveWalletStore] Signing transaction with wallet...');
-    const signedTransaction = await currentProvider.signTransaction(transaction);
+    // 5.5. Get recent blockhash from backend (same as createSplitdoATA pattern)
+    console.log('[ReactiveWalletStore] Fetching recent blockhash...');
+    const blockhashResponse = await fetch('https://devbackend.splitdo.app:8443/api/solana/network/recent-blockhash');
+    if (!blockhashResponse.ok) {
+      throw new Error('Failed to fetch recent blockhash');
+    }
+
+    const blockhashData = await blockhashResponse.json();
+    if (!blockhashData.success || !blockhashData.blockhash) {
+      throw new Error('Invalid response from backend blockhash API');
+    }
+
+    transaction.recentBlockhash = blockhashData.blockhash;
+    transaction.feePayer = phantomProvider.publicKey;
+    console.log('[ReactiveWalletStore] Set blockhash and fee payer on transaction');
+
+    // 6. Sign transaction with wallet (with timeout protection)
+    console.log('[ReactiveWalletStore] 🚀 Signing transaction with timeout protection...');
+
+    // Add timeout protection (matching createSplitdoATA pattern)
+    let timeoutId: NodeJS.Timeout;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        console.log('[ReactiveWalletStore] ⏰ Exchange signing timeout - Phantom not responding');
+        reject(new Error('Transaction signing timed out. Check for Phantom popup window.'));
+      }, 10000);
+    });
+
+    const signedTransaction = await Promise.race([
+      currentProvider.signTransaction(transaction),
+      timeoutPromise
+    ]);
+
+    // Clear the timeout since signing succeeded
+    clearTimeout(timeoutId);
+
+    console.log('[ReactiveWalletStore] ✅ Transaction signed successfully');
 
     // 7. Submit to backend exchange endpoint
     const serializedTransaction = Buffer.from(signedTransaction.serialize()).toString('base64');
 
+    // Enhanced request logging
+    const requestPayload = {
+      sol_amount: lamports,
+      signed_transaction: serializedTransaction
+    };
+
+    const authHeader = `Bearer ${firebaseToken}`;
+
+    console.log('[ReactiveWalletStore] 🔍 Token Debug Info:', JSON.stringify({
+      firebaseToken: firebaseToken,
+      tokenType: typeof firebaseToken,
+      tokenLength: firebaseToken?.length,
+      authorizationHeader: authHeader
+    }, null, 2));
+
+    console.log('[ReactiveWalletStore] 📤 Submitting to backend:', JSON.stringify({
+      endpoint: 'POST /api/splitdo-token/exchange/solana',
+      solAmount: solAmount,
+      lamports: lamports,
+      serializedTxLength: serializedTransaction.length,
+      hasFirebaseToken: !!firebaseToken,
+      fullRequestPayload: requestPayload
+    }, null, 2));
+
     const exchangeResponse = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/exchange/solana', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${firebaseToken}`,
+        'Authorization': authHeader,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        sol_amount: lamports,
-        signed_transaction: serializedTransaction
-      })
+      body: JSON.stringify(requestPayload)
     });
+
+    // Enhanced response logging
+    console.log('[ReactiveWalletStore] 📥 Backend response:', JSON.stringify({
+      status: exchangeResponse.status,
+      ok: exchangeResponse.ok,
+      statusText: exchangeResponse.statusText,
+      headers: Object.fromEntries(exchangeResponse.headers.entries())
+    }, null, 2));
 
     if (!exchangeResponse.ok) {
       const errorData = await exchangeResponse.json();
+      console.error('[ReactiveWalletStore] ❌ Backend error:', JSON.stringify({
+        status: exchangeResponse.status,
+        errorData: errorData,
+        requestPayload: { sol_amount: lamports, signed_transaction: `${serializedTransaction.substring(0, 50)}...` }
+      }, null, 2));
       throw new Error(errorData.message || 'Exchange failed');
     }
 
     const result = await exchangeResponse.json();
-    console.log('[ReactiveWalletStore] Exchange successful:', result.data);
+    console.log('[ReactiveWalletStore] 📥 Full Backend Response Body:', JSON.stringify(result, null, 2));
+    console.log('[ReactiveWalletStore] ✅ Exchange result analysis:', JSON.stringify({
+      transactionSignature: result.data?.transaction_signature,
+      splitdoReceived: result.data?.splitdo_amount,
+      exchangeRate: result.data?.exchange_rate,
+      fullResponse: result.data,
+      rawResult: result
+    }, null, 2));
 
     setExchangeStatus('success');
 
@@ -976,9 +1051,32 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
     return { success: true, data: result.data };
 
   } catch (error: any) {
-    console.error('[ReactiveWalletStore] Exchange failed:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Exchange failed';
+    console.error('[ReactiveWalletStore] Exchange failed:', {
+      error: errorMessage,
+      errorType: error.constructor.name,
+      timestamp: new Date().toISOString(),
+      solAmount: solAmount,
+      walletAddress: phantomProvider.publicKey?.toString()
+    });
+
+    // Classify error types for better user feedback
+    let userFriendlyMessage = errorMessage;
+
+    if (errorMessage.includes('timeout') || errorMessage.includes('timed out')) {
+      userFriendlyMessage = 'Transaction signing timed out. Please ensure Phantom popup appears and approve the transaction. If no popup appears, try refreshing the page.';
+    } else if (errorMessage.includes('User rejected') || errorMessage.includes('user rejected') || errorMessage.includes('rejected')) {
+      userFriendlyMessage = 'Transaction was cancelled. Please try again and approve the transaction in Phantom.';
+    } else if (errorMessage.includes('Network') || errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch')) {
+      userFriendlyMessage = 'Network error during exchange. Please check your connection and try again.';
+    } else if (errorMessage.includes('Insufficient SOL') || errorMessage.includes('balance')) {
+      userFriendlyMessage = 'Insufficient SOL balance for transaction fees. Please add more SOL to your wallet.';
+    } else if (errorMessage.includes('Phantom wallet not found') || errorMessage.includes('not connected')) {
+      userFriendlyMessage = 'Phantom wallet is not properly connected. Please refresh the page and connect your wallet.';
+    }
+
     setExchangeStatus('error');
-    setExchangeError(error.message || 'Exchange failed');
-    return { success: false, error: error.message || 'Exchange failed' };
+    setExchangeError(userFriendlyMessage);
+    return { success: false, error: userFriendlyMessage };
   }
 };
