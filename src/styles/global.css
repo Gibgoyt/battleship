@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@theme {
+  --color-mode: light dark;
+}
+
 /* Light mode (default) */
 :root {
   --color-bg: #ffffff;
@@ -39,6 +43,23 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Phone image theme switching - CUSTOM CSS */
+.phone-light {
+  display: block;
+}
+
+.phone-dark {
+  display: none;
+}
+
+.dark .phone-light {
+  display: none !important;
+}
+
+.dark .phone-dark {
+  display: block !important;
 }
 
 /* Glowing button effect */
