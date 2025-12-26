@@ -8,11 +8,10 @@ export const prerender = true
 
 <Layout title="About SplitDo - Revolutionizing Expense Splitting">
 
-	<main class="bg-[#0f0a1e]">
+	<main class="bg-white dark:bg-[#0a0f1e]">
 		<!-- Hero Section - Side by Side (Text Left, Phones Right) -->
-		<section class="w-full overflow-visible border-b-2 border-[#00d9ff]/20">
-			<div class="relative px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 overflow-visible"
-  		         style="background: linear-gradient(135deg, #2d1b4e 0%, #6b46c1 100%);">
+		<section class="w-full overflow-visible border-b-2 border-gray-200 dark:border-[#00d9ff]/20">
+			<div class="relative px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 overflow-visible bg-gradient-to-br from-gray-100 to-gray-50 dark:from-[#12171f] dark:to-[#1a2030]">
 
 				<!-- Content container - Flex row with text left and phones right -->
 				<div class="flex flex-col lg:flex-row items-center justify-center gap-6 sm:gap-8 lg:gap-12 relative max-w-7xl mx-auto">
@@ -20,21 +19,21 @@ export const prerender = true
 					<!-- Left side: Text -->
 					<div class="flex flex-col items-center justify-center w-full lg:w-auto lg:flex-1">
 						<div class="flex flex-col gap-4 w-full text-center">
-							<h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight">
+							<h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white tracking-tight">
 								About <span class="text-[#00d9ff]">SplitDo</span>
 							</h1>
-							<h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-[#b857ff] tracking-normal">
+							<h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold text-[#cbd5e1] tracking-normal">
 								Revolutionizing Expense Splitting
 							</h2>
-							<p class="text-base sm:text-lg lg:text-xl mt-3 leading-relaxed text-gray-200 text-balance max-w-2xl mx-auto">
+							<p class="text-base sm:text-lg lg:text-xl mt-3 leading-relaxed text-gray-700 dark:text-gray-200 text-balance max-w-2xl mx-auto">
 								We're on a mission to eliminate the hassle of splitting expenses through blockchain technology and smart automation.
 							</p>
 						</div>
 					</div>
 
-					<!-- Right side: Phone Hero -->
-					<div class="relative w-full lg:w-auto lg:flex-1 flex justify-center overflow-visible">
-						<WhitePhoneHero />
+					<!-- Right side: Phones container - two phones (scaled smaller) -->
+					<div class="flex justify-center items-center overflow-visible w-full lg:w-auto lg:flex-1">
+						<WhitePhoneHero variant="compact" />
 					</div>
 
 				</div>
@@ -42,85 +41,32 @@ export const prerender = true
 		</section>
 
 		<!-- Story Section -->
-		<section class="py-16 sm:py-20 lg:py-24 bg-gradient-to-r from-[#0f0a1e] to-[#1a0b2e]">
-			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+		<section class="py-16 lg:py-24 bg-gray-100 dark:bg-[#12171f] border-b-2 border-gray-200 dark:border-[#00d9ff]/20">
+			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="prose prose-lg mx-auto">
+					<h2 class="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Our Story</h2>
+					<p class="text-gray-600 dark:text-gray-300 mb-6 text-lg leading-relaxed">
+						SplitDo was born from a frustrating dinner with friends. After a great evening out, the joy was quickly dampened by the awkward dance of splitting the bill, calculating tips, and figuring out who owed what. Traditional payment apps charged fees, required multiple transactions, and someone always forgot to pay.
+					</p>
+					<p class="text-gray-600 dark:text-gray-300 mb-6 text-lg leading-relaxed">
+						We knew there had to be a better way. What if we could split expenses automatically, settle instantly, and track everything transparently? What if technology could handle the tedious parts so people could focus on what matters - enjoying time together?
+					</p>
+					<p class="text-gray-600 dark:text-gray-300 mb-6 text-lg leading-relaxed">
+						That's when SplitDo was born. Using blockchain technology and smart contracts, we created a platform that makes expense splitting as simple as taking a photo of a receipt. No more IOUs, no more forgotten payments, no more awkward conversations about money.
+					</p>
 
-					<!-- Left: Text Content -->
-					<div class="space-y-8">
-						<div>
-							<div class="inline-flex items-center px-3 py-1 rounded-full bg-[#6b46c1]/20 border border-[#b857ff]/30 mb-6">
-								<span class="w-2 h-2 bg-[#b857ff] rounded-full mr-2 animate-pulse"></span>
-								<span class="text-[#b857ff] text-sm font-medium">OUR STORY</span>
-							</div>
-
-							<h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-								Born from Real <span class="text-[#00d9ff]">Frustration</span>
-							</h2>
-
-							<p class="text-lg text-gray-300 leading-relaxed mb-6">
-								We've all been there: dinner with friends, a group vacation, or shared office expenses. Someone pays, you promise to "settle up later," and then... it gets complicated.
-							</p>
-
-							<p class="text-lg text-gray-300 leading-relaxed">
-								Traditional payment apps require manual calculations, tracking who owes what to whom, and multiple transfers. SplitDo eliminates all of that friction with blockchain-powered automation.
-							</p>
+					<div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+						<div class="bg-white dark:bg-[#0a0f1e] rounded-xl p-6 border border-gray-200 dark:border-[#00d9ff]/20">
+							<div class="text-3xl font-bold text-[#00d9ff] mb-2">10M+</div>
+							<div class="text-gray-600 dark:text-gray-300">Transactions Processed</div>
 						</div>
-
-						<div class="grid grid-cols-2 gap-6">
-							<div class="bg-[#2d1b4e]/40 p-6 rounded-xl border border-[#6b46c1]/30">
-								<div class="text-2xl font-bold text-[#00d9ff] mb-2">10M+</div>
-								<div class="text-sm text-gray-300">Transactions Processed</div>
-							</div>
-							<div class="bg-[#2d1b4e]/40 p-6 rounded-xl border border-[#6b46c1]/30">
-								<div class="text-2xl font-bold text-[#b857ff] mb-2">50K+</div>
-								<div class="text-sm text-gray-300">Active Users</div>
-							</div>
+						<div class="bg-white dark:bg-[#0a0f1e] rounded-xl p-6 border border-gray-200 dark:border-[#00d9ff]/20">
+							<div class="text-3xl font-bold text-[#00d9ff] mb-2">50K+</div>
+							<div class="text-gray-600 dark:text-gray-300">Active Users</div>
 						</div>
-					</div>
-
-					<!-- Right: Feature List -->
-					<div class="space-y-6">
-						<div class="bg-gradient-to-br from-[#2d1b4e]/60 to-[#6b46c1]/20 p-8 rounded-2xl border border-[#6b46c1]/30">
-							<div class="flex items-start space-x-4">
-								<div class="flex-shrink-0 w-12 h-12 bg-[#00d9ff]/20 rounded-lg flex items-center justify-center">
-									<svg class="w-6 h-6 text-[#00d9ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-									</svg>
-								</div>
-								<div>
-									<h3 class="text-xl font-semibold text-white mb-2">Instant Splits</h3>
-									<p class="text-gray-300">Split any expense instantly among any number of people with smart contracts.</p>
-								</div>
-							</div>
-						</div>
-
-						<div class="bg-gradient-to-br from-[#2d1b4e]/60 to-[#6b46c1]/20 p-8 rounded-2xl border border-[#6b46c1]/30">
-							<div class="flex items-start space-x-4">
-								<div class="flex-shrink-0 w-12 h-12 bg-[#b857ff]/20 rounded-lg flex items-center justify-center">
-									<svg class="w-6 h-6 text-[#b857ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-									</svg>
-								</div>
-								<div>
-									<h3 class="text-xl font-semibold text-white mb-2">Blockchain Security</h3>
-									<p class="text-gray-300">All transactions are secured by Solana blockchain with transparent, immutable records.</p>
-								</div>
-							</div>
-						</div>
-
-						<div class="bg-gradient-to-br from-[#2d1b4e]/60 to-[#6b46c1]/20 p-8 rounded-2xl border border-[#6b46c1]/30">
-							<div class="flex items-start space-x-4">
-								<div class="flex-shrink-0 w-12 h-12 bg-[#00d9ff]/20 rounded-lg flex items-center justify-center">
-									<svg class="w-6 h-6 text-[#00d9ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-									</svg>
-								</div>
-								<div>
-									<h3 class="text-xl font-semibold text-white mb-2">Zero Hassle</h3>
-									<p class="text-gray-300">No manual calculations, no tracking spreadsheets, no awkward follow-ups. Just split and done.</p>
-								</div>
-							</div>
+						<div class="bg-white dark:bg-[#0a0f1e] rounded-xl p-6 border border-gray-200 dark:border-[#00d9ff]/20">
+							<div class="text-3xl font-bold text-[#00d9ff] mb-2">99.9%</div>
+							<div class="text-gray-600 dark:text-gray-300">Uptime</div>
 						</div>
 					</div>
 				</div>
@@ -128,62 +74,125 @@ export const prerender = true
 		</section>
 
 		<!-- Mission Section -->
-		<section class="py-16 sm:py-20 lg:py-24 bg-gradient-to-r from-[#1a0b2e] to-[#0f0a1e]">
-			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-				<div class="inline-flex items-center px-3 py-1 rounded-full bg-[#6b46c1]/20 border border-[#00d9ff]/30 mb-8">
-					<span class="w-2 h-2 bg-[#00d9ff] rounded-full mr-2 animate-pulse"></span>
-					<span class="text-[#00d9ff] text-sm font-medium">OUR MISSION</span>
+		<section class="py-16 lg:py-24 bg-white dark:bg-[#0a0f1e]">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="text-center mb-16">
+					<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">Our Mission</h2>
+					<p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+						To create a world where sharing expenses is effortless, transparent, and fair for everyone involved.
+					</p>
 				</div>
 
-				<h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-8">
-					Making Money <span class="text-[#b857ff]">Social</span> Again
-				</h2>
-
-				<p class="text-xl text-gray-300 leading-relaxed mb-8">
-					Money shouldn't complicate friendships. Our mission is to remove all friction from shared expenses so you can focus on what matters most - spending time with the people you care about.
-				</p>
-
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+					<!-- Transparency -->
 					<div class="text-center">
-						<div class="w-16 h-16 bg-gradient-to-br from-[#00d9ff] to-[#6b46c1] rounded-full mx-auto mb-4 flex items-center justify-center">
-							<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+						<div class="w-20 h-20 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-xl flex items-center justify-center mx-auto mb-6">
+							<svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
 							</svg>
 						</div>
-						<h3 class="text-xl font-semibold text-white mb-2">Simplicity First</h3>
-						<p class="text-gray-300">Complex problems deserve elegant solutions.</p>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Transparency</h3>
+						<p class="text-gray-600 dark:text-gray-300">
+							Every transaction is recorded on the blockchain, providing complete visibility and accountability for all participants.
+						</p>
 					</div>
 
+					<!-- Fairness -->
 					<div class="text-center">
-						<div class="w-16 h-16 bg-gradient-to-br from-[#b857ff] to-[#00d9ff] rounded-full mx-auto mb-4 flex items-center justify-center">
-							<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+						<div class="w-20 h-20 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-xl flex items-center justify-center mx-auto mb-6">
+							<svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16l-3-9m3 9l3-9"/>
 							</svg>
 						</div>
-						<h3 class="text-xl font-semibold text-white mb-2">Trust & Transparency</h3>
-						<p class="text-gray-300">Every transaction is visible and verified on-chain.</p>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Fairness</h3>
+						<p class="text-gray-600 dark:text-gray-300">
+							Smart contracts ensure that expenses are split exactly as agreed, with no manipulation or favoritism possible.
+						</p>
 					</div>
 
+					<!-- Simplicity -->
 					<div class="text-center">
-						<div class="w-16 h-16 bg-gradient-to-br from-[#6b46c1] to-[#b857ff] rounded-full mx-auto mb-4 flex items-center justify-center">
-							<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+						<div class="w-20 h-20 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-xl flex items-center justify-center mx-auto mb-6">
+							<svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
 							</svg>
 						</div>
-						<h3 class="text-xl font-semibold text-white mb-2">Lightning Fast</h3>
-						<p class="text-gray-300">Powered by Solana for near-instant settlements.</p>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Simplicity</h3>
+						<p class="text-gray-600 dark:text-gray-300">
+							Complex blockchain technology hidden behind an intuitive interface that anyone can use effortlessly.
+						</p>
 					</div>
 				</div>
 			</div>
 		</section>
+
+		<!-- Team Section -->
+		<section class="py-16 lg:py-24 bg-gray-50 dark:bg-[#0f1419]">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="text-center mb-16">
+					<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">Our Team</h2>
+					<p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+						A passionate team of engineers, designers, and blockchain experts working to revolutionize expense management.
+					</p>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+					<div class="text-center bg-white dark:bg-[#12171f] rounded-xl p-6 border border-gray-200 dark:border-[#00d9ff]/20">
+						<div class="w-24 h-24 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-full mx-auto mb-4 flex items-center justify-center">
+							<span class="text-white font-bold text-xl">AD</span>
+						</div>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Alex Developer</h3>
+						<p class="text-[#00d9ff] font-medium mb-3">Co-Founder & CTO</p>
+						<p class="text-gray-600 dark:text-gray-300 text-sm">
+							10+ years in blockchain development, previously at Ethereum Foundation and ConsenSys.
+						</p>
+					</div>
+
+					<div class="text-center bg-white dark:bg-[#12171f] rounded-xl p-6 border border-gray-200 dark:border-[#00d9ff]/20">
+						<div class="w-24 h-24 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-full mx-auto mb-4 flex items-center justify-center">
+							<span class="text-white font-bold text-xl">SM</span>
+						</div>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Sarah Manager</h3>
+						<p class="text-[#00d9ff] font-medium mb-3">Co-Founder & CEO</p>
+						<p class="text-gray-600 dark:text-gray-300 text-sm">
+							Former product lead at Venmo, expert in fintech and user experience design.
+						</p>
+					</div>
+
+					<div class="text-center bg-white dark:bg-[#12171f] rounded-xl p-6 border border-gray-200 dark:border-[#00d9ff]/20">
+						<div class="w-24 h-24 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-full mx-auto mb-4 flex items-center justify-center">
+							<span class="text-white font-bold text-xl">MK</span>
+						</div>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Mike Kim</h3>
+						<p class="text-[#00d9ff] font-medium mb-3">Head of Security</p>
+						<p class="text-gray-600 dark:text-gray-300 text-sm">
+							Cybersecurity specialist with focus on smart contract auditing and DeFi protocols.
+						</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Contact Section -->
+		<section class="py-16 lg:py-24 bg-white dark:bg-[#0a0f1e]">
+			<div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+				<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+					Ready to Join the Revolution?
+				</h2>
+				<p class="text-xl text-gray-600 dark:text-gray-300 mb-8">
+					Experience the future of expense splitting. Download SplitDo today and see why thousands of users have made the switch.
+				</p>
+				<div class="flex flex-col sm:flex-row gap-4 justify-center">
+					<a href="/download" class="px-8 py-4 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] text-white text-lg font-bold rounded-xl hover:shadow-[0_0_25px_rgba(0,217,255,0.5)] transition-all duration-300 transform hover:scale-105">
+						Download Now
+					</a>
+					<a href="/tokenomics" class="px-8 py-4 bg-transparent border-2 border-[#00d9ff] text-[#00d9ff] text-lg font-bold rounded-xl hover:bg-[#00d9ff]/10 transition-all">
+						Learn About $SPLITDO
+					</a>
+				</div>
+			</div>
+		</section>
+
 	</main>
 </Layout>
-
-<style>
-	.gradient-text {
-		background: linear-gradient(135deg, #00d9ff 0%, #b857ff 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-	}
-</style>

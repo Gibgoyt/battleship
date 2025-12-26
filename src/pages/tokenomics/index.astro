@@ -1,0 +1,460 @@
+---
+import Layout from 'src/layouts/Layout.astro';
+
+export const prerender = true;
+---
+
+<Layout title="Tokenomics - SplitDo">
+	<main class="bg-white dark:bg-[#0a0f1e]">
+
+		<!-- Hero Section -->
+		<section class="relative overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-[#12171f] dark:to-[#0a0f1e] border-b border-gray-200 dark:border-[#00d9ff]/20">
+			<div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+				<div class="text-center max-w-4xl mx-auto">
+					<h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 text-gray-900 dark:text-white">
+						$SPLITDO Tokenomics
+					</h1>
+					<p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8">
+						A utility-first token designed for real-world settlement infrastructure
+					</p>
+					<div class="flex flex-wrap justify-center gap-4 text-sm">
+						<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/30 rounded-xl px-6 py-3">
+							<div class="text-gray-600 dark:text-gray-400 text-xs mb-1">Total Supply</div>
+							<div class="text-2xl font-bold text-[#00d9ff]">100M</div>
+						</div>
+						<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/30 rounded-xl px-6 py-3">
+							<div class="text-gray-600 dark:text-gray-400 text-xs mb-1">Token Type</div>
+							<div class="text-2xl font-bold text-[#00d9ff]">Utility</div>
+						</div>
+						<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/30 rounded-xl px-6 py-3">
+							<div class="text-gray-600 dark:text-gray-400 text-xs mb-1">Blockchain</div>
+							<div class="text-2xl font-bold text-[#00d9ff]">Solana</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Token Purpose -->
+		<section class="py-16 lg:py-20 bg-white dark:bg-[#0a0f1e]">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="max-w-3xl mx-auto text-center mb-12">
+					<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+						Token Purpose
+					</h2>
+					<p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+						The SplitDo token is not the product. It's a coordination tool. Its role is simple: reduce platform fees, reward genuine usage, enable limited governance, and support ecosystem growth.
+					</p>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+					<!-- Fee Reduction -->
+					<div class="text-center p-6 bg-gray-50 dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20">
+						<div class="w-16 h-16 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-xl flex items-center justify-center mx-auto mb-4">
+							<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+							</svg>
+						</div>
+						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Fee Reduction</h3>
+						<p class="text-gray-600 dark:text-gray-300 text-sm">Pay transaction fees in $SPLITDO tokens for up to 50% discount</p>
+					</div>
+
+					<!-- Usage Rewards -->
+					<div class="text-center p-6 bg-gray-50 dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20">
+						<div class="w-16 h-16 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-xl flex items-center justify-center mx-auto mb-4">
+							<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+							</svg>
+						</div>
+						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Usage Rewards</h3>
+						<p class="text-gray-600 dark:text-gray-300 text-sm">Earn tokens for authentic platform usage and referrals</p>
+					</div>
+
+					<!-- Governance -->
+					<div class="text-center p-6 bg-gray-50 dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20">
+						<div class="w-16 h-16 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-xl flex items-center justify-center mx-auto mb-4">
+							<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+							</svg>
+						</div>
+						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Governance</h3>
+						<p class="text-gray-600 dark:text-gray-300 text-sm">Vote on protocol upgrades and ecosystem decisions</p>
+					</div>
+
+					<!-- Ecosystem Growth -->
+					<div class="text-center p-6 bg-gray-50 dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20">
+						<div class="w-16 h-16 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-xl flex items-center justify-center mx-auto mb-4">
+							<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+							</svg>
+						</div>
+						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Ecosystem Growth</h3>
+						<p class="text-gray-600 dark:text-gray-300 text-sm">Support partnerships, integrations, and community initiatives</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Token Distribution -->
+		<section class="py-16 lg:py-20 bg-gray-50 dark:bg-[#0f1419]">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="text-center max-w-3xl mx-auto mb-12">
+					<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+						Token Distribution
+					</h2>
+					<p class="text-lg text-gray-600 dark:text-gray-300">
+						100 million total tokens distributed across strategic sales, liquidity, development, and ecosystem growth
+					</p>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+					<!-- Strategic Sale -->
+					<div class="bg-white dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20 p-6">
+						<div class="text-center">
+							<div class="text-4xl font-bold text-[#00d9ff] mb-2">31.5M</div>
+							<div class="text-2xl font-bold text-gray-900 dark:text-white mb-4">31.5%</div>
+							<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Strategic Sale</h3>
+							<ul class="text-sm text-gray-600 dark:text-gray-300 space-y-2">
+								<li>• Early investors</li>
+								<li>• Strategic partnerships</li>
+								<li>• Institutional backers</li>
+								<li>• Vested over 24 months</li>
+							</ul>
+						</div>
+					</div>
+
+					<!-- Liquidity -->
+					<div class="bg-white dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20 p-6">
+						<div class="text-center">
+							<div class="text-4xl font-bold text-[#00d9ff] mb-2">25M</div>
+							<div class="text-2xl font-bold text-gray-900 dark:text-white mb-4">25%</div>
+							<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Liquidity</h3>
+							<ul class="text-sm text-gray-600 dark:text-gray-300 space-y-2">
+								<li>• DEX liquidity pools</li>
+								<li>• Market making</li>
+								<li>• Exchange listings</li>
+								<li>• Trading stability</li>
+							</ul>
+						</div>
+					</div>
+
+					<!-- Development -->
+					<div class="bg-white dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20 p-6">
+						<div class="text-center">
+							<div class="text-4xl font-bold text-[#00d9ff] mb-2">23.5M</div>
+							<div class="text-2xl font-bold text-gray-900 dark:text-white mb-4">23.5%</div>
+							<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Development</h3>
+							<ul class="text-sm text-gray-600 dark:text-gray-300 space-y-2">
+								<li>• Core team</li>
+								<li>• Technical advisors</li>
+								<li>• Ongoing development</li>
+								<li>• Vested over 36 months</li>
+							</ul>
+						</div>
+					</div>
+
+					<!-- Ecosystem -->
+					<div class="bg-white dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20 p-6">
+						<div class="text-center">
+							<div class="text-4xl font-bold text-[#00d9ff] mb-2">20M</div>
+							<div class="text-2xl font-bold text-gray-900 dark:text-white mb-4">20%</div>
+							<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Ecosystem</h3>
+							<ul class="text-sm text-gray-600 dark:text-gray-300 space-y-2">
+								<li>• Community rewards</li>
+								<li>• Marketing initiatives</li>
+								<li>• Partnership incentives</li>
+								<li>• User acquisition</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+
+				<!-- Distribution Chart -->
+				<div class="mt-16 max-w-4xl mx-auto">
+					<div class="bg-white dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20 p-8">
+						<h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">Token Allocation</h3>
+						<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+							<div class="flex items-center">
+								<div class="w-4 h-4 bg-[#00d9ff] rounded mr-3"></div>
+								<span class="text-sm text-gray-600 dark:text-gray-300">Strategic Sale (31.5%)</span>
+							</div>
+							<div class="flex items-center">
+								<div class="w-4 h-4 bg-[#00b8d4] rounded mr-3"></div>
+								<span class="text-sm text-gray-600 dark:text-gray-300">Liquidity (25%)</span>
+							</div>
+							<div class="flex items-center">
+								<div class="w-4 h-4 bg-[#0891b2] rounded mr-3"></div>
+								<span class="text-sm text-gray-600 dark:text-gray-300">Development (23.5%)</span>
+							</div>
+							<div class="flex items-center">
+								<div class="w-4 h-4 bg-[#0e7490] rounded mr-3"></div>
+								<span class="text-sm text-gray-600 dark:text-gray-300">Ecosystem (20%)</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Vesting Schedule -->
+		<section class="py-16 lg:py-20 bg-white dark:bg-[#0a0f1e]">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="text-center max-w-3xl mx-auto mb-12">
+					<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+						Vesting Schedule
+					</h2>
+					<p class="text-lg text-gray-600 dark:text-gray-300">
+						Transparent vesting ensures long-term commitment and prevents sudden market dumps
+					</p>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+					<!-- Strategic Sale Vesting -->
+					<div class="bg-gray-50 dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20 p-6">
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Strategic Sale</h3>
+						<ul class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+							<li class="flex justify-between">
+								<span>TGE Unlock:</span>
+								<span class="text-[#00d9ff] font-medium">10%</span>
+							</li>
+							<li class="flex justify-between">
+								<span>6-month cliff:</span>
+								<span class="text-[#00d9ff] font-medium">0%</span>
+							</li>
+							<li class="flex justify-between">
+								<span>Linear vesting:</span>
+								<span class="text-[#00d9ff] font-medium">24 months</span>
+							</li>
+							<li class="flex justify-between">
+								<span>Monthly release:</span>
+								<span class="text-[#00d9ff] font-medium">3.75%</span>
+							</li>
+						</ul>
+					</div>
+
+					<!-- Team Vesting -->
+					<div class="bg-gray-50 dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20 p-6">
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Team & Advisors</h3>
+						<ul class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+							<li class="flex justify-between">
+								<span>TGE Unlock:</span>
+								<span class="text-[#00d9ff] font-medium">0%</span>
+							</li>
+							<li class="flex justify-between">
+								<span>12-month cliff:</span>
+								<span class="text-[#00d9ff] font-medium">0%</span>
+							</li>
+							<li class="flex justify-between">
+								<span>Linear vesting:</span>
+								<span class="text-[#00d9ff] font-medium">36 months</span>
+							</li>
+							<li class="flex justify-between">
+								<span>Monthly release:</span>
+								<span class="text-[#00d9ff] font-medium">2.78%</span>
+							</li>
+						</ul>
+					</div>
+
+					<!-- Ecosystem Vesting -->
+					<div class="bg-gray-50 dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20 p-6">
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Ecosystem & Marketing</h3>
+						<ul class="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+							<li class="flex justify-between">
+								<span>TGE Unlock:</span>
+								<span class="text-[#00d9ff] font-medium">20%</span>
+							</li>
+							<li class="flex justify-between">
+								<span>No cliff:</span>
+								<span class="text-[#00d9ff] font-medium">Immediate</span>
+							</li>
+							<li class="flex justify-between">
+								<span>Linear vesting:</span>
+								<span class="text-[#00d9ff] font-medium">18 months</span>
+							</li>
+							<li class="flex justify-between">
+								<span>Monthly release:</span>
+								<span class="text-[#00d9ff] font-medium">4.44%</span>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Utility & Economics -->
+		<section class="py-16 lg:py-20 bg-gray-50 dark:bg-[#0f1419]">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="text-center max-w-3xl mx-auto mb-12">
+					<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+						Token Utility & Economics
+					</h2>
+					<p class="text-lg text-gray-600 dark:text-gray-300">
+						Real utility drives demand while deflationary mechanics support long-term value
+					</p>
+				</div>
+
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+					<!-- Utility Features -->
+					<div>
+						<h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-8">Primary Utilities</h3>
+						<div class="space-y-6">
+							<div class="flex items-start gap-4">
+								<div class="w-10 h-10 bg-[#00d9ff]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+									<svg class="w-5 h-5 text-[#00d9ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+									</svg>
+								</div>
+								<div>
+									<h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Transaction Fees</h4>
+									<p class="text-gray-600 dark:text-gray-300">Pay platform fees with $SPLITDO tokens for up to 50% discount on all transactions.</p>
+								</div>
+							</div>
+
+							<div class="flex items-start gap-4">
+								<div class="w-10 h-10 bg-[#00d9ff]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+									<svg class="w-5 h-5 text-[#00d9ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+									</svg>
+								</div>
+								<div>
+									<h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Staking Rewards</h4>
+									<p class="text-gray-600 dark:text-gray-300">Stake tokens to earn yield while contributing to network security and governance.</p>
+								</div>
+							</div>
+
+							<div class="flex items-start gap-4">
+								<div class="w-10 h-10 bg-[#00d9ff]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+									<svg class="w-5 h-5 text-[#00d9ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+									</svg>
+								</div>
+								<div>
+									<h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Governance Rights</h4>
+									<p class="text-gray-600 dark:text-gray-300">Vote on protocol upgrades, fee structures, and ecosystem proposals.</p>
+								</div>
+							</div>
+
+							<div class="flex items-start gap-4">
+								<div class="w-10 h-10 bg-[#00d9ff]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+									<svg class="w-5 h-5 text-[#00d9ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+									</svg>
+								</div>
+								<div>
+									<h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Premium Features</h4>
+									<p class="text-gray-600 dark:text-gray-300">Access advanced features like detailed analytics, custom integrations, and priority support.</p>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Economic Model -->
+					<div>
+						<h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-8">Economic Model</h3>
+						<div class="space-y-6">
+							<div class="bg-white dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20 p-6">
+								<h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Fee Burning Mechanism</h4>
+								<p class="text-gray-600 dark:text-gray-300 mb-3">50% of all fees paid in $SPLITDO tokens are permanently burned, creating deflationary pressure.</p>
+								<ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+									<li>• Transaction fees: 50% burned</li>
+									<li>• Premium subscriptions: 50% burned</li>
+									<li>• Partnership revenues: 25% burned</li>
+								</ul>
+							</div>
+
+							<div class="bg-white dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20 p-6">
+								<h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Staking Economics</h4>
+								<p class="text-gray-600 dark:text-gray-300 mb-3">Staked tokens earn rewards from protocol revenues and ecosystem growth incentives.</p>
+								<ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+									<li>• Base APY: 8-12%</li>
+									<li>• Minimum stake: 30 days</li>
+									<li>• Governance power: 1 token = 1 vote</li>
+								</ul>
+							</div>
+
+							<div class="bg-white dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20 p-6">
+								<h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Growth Incentives</h4>
+								<p class="text-gray-600 dark:text-gray-300 mb-3">Token rewards for ecosystem growth, user acquisition, and platform adoption.</p>
+								<ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+									<li>• Referral rewards: Up to 5% bonus</li>
+									<li>• Early adopter bonuses</li>
+									<li>• Community contribution rewards</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Security & Audits -->
+		<section class="py-16 lg:py-20 bg-white dark:bg-[#0a0f1e]">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="text-center max-w-3xl mx-auto mb-12">
+					<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+						Security & Compliance
+					</h2>
+					<p class="text-lg text-gray-600 dark:text-gray-300">
+						Built with security-first principles and audited by leading blockchain security firms
+					</p>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+					<!-- Smart Contract Audits -->
+					<div class="text-center p-6 bg-gray-50 dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20">
+						<div class="w-16 h-16 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-xl flex items-center justify-center mx-auto mb-4">
+							<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+							</svg>
+						</div>
+						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Smart Contract Audits</h3>
+						<p class="text-gray-600 dark:text-gray-300 text-sm">Comprehensive audits by CertiK and Quantstamp ensuring contract security</p>
+					</div>
+
+					<!-- Multi-Sig Treasury -->
+					<div class="text-center p-6 bg-gray-50 dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20">
+						<div class="w-16 h-16 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-xl flex items-center justify-center mx-auto mb-4">
+							<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+							</svg>
+						</div>
+						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Multi-Sig Treasury</h3>
+						<p class="text-gray-600 dark:text-gray-300 text-sm">5-of-7 multi-signature wallet protecting ecosystem funds with community oversight</p>
+					</div>
+
+					<!-- Legal Compliance -->
+					<div class="text-center p-6 bg-gray-50 dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20">
+						<div class="w-16 h-16 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-xl flex items-center justify-center mx-auto mb-4">
+							<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16l-3-9m3 9l3-9"/>
+							</svg>
+						</div>
+						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3">Legal Compliance</h3>
+						<p class="text-gray-600 dark:text-gray-300 text-sm">Utility token classification with legal opinion from top blockchain law firms</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Call to Action -->
+		<section class="py-16 lg:py-20 bg-gradient-to-b from-gray-50 to-white dark:from-[#12171f] dark:to-[#0a0f1e]">
+			<div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+				<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+					Ready to Join the $SPLITDO Ecosystem?
+				</h2>
+				<p class="text-lg text-gray-600 dark:text-gray-300 mb-8">
+					Get your tokens now during our strategic sale and become part of the future of decentralized expense management.
+				</p>
+				<div class="flex flex-col sm:flex-row gap-4 justify-center">
+					<button class="px-8 py-4 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] text-white text-lg font-bold rounded-xl hover:shadow-[0_0_25px_rgba(0,217,255,0.5)] transition-all duration-300 transform hover:scale-105 glow-button">
+						Join Presale Now
+					</button>
+					<a href="/download" class="px-8 py-4 bg-transparent border-2 border-[#00d9ff] text-[#00d9ff] text-lg font-bold rounded-xl hover:bg-[#00d9ff]/10 transition-all">
+						Download App
+					</a>
+				</div>
+			</div>
+		</section>
+
+	</main>
+</Layout>
