@@ -2,6 +2,22 @@
 import Layout from 'src/layouts/Layout.astro';
 
 export const prerender = true
+
+// Fetch presale price at build time
+let formattedPrice = '$0.001'; // fallback
+try {
+  const response = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/program/info');
+  if (response.ok) {
+    const data = await response.json();
+    if (data.success && data.data?.exchange_rate) {
+      const price = data.data.exchange_rate;
+      formattedPrice = price >= 1 ? `$${price.toFixed(2)}` : `$${price.toFixed(3)}`;
+      console.info(`✅ Presale price fetched: ${formattedPrice}`);
+    }
+  }
+} catch (error) {
+  console.warn('Failed to fetch presale price, using fallback:', error);
+}
 ---
 
 <Layout title="SPLITDO Token Presale - Join Early Access">
@@ -117,7 +133,7 @@ export const prerender = true
 						<div class="text-sm lg:text-base text-gray-600 dark:text-gray-300">Early Users</div>
 					</div>
 					<div class="text-center">
-						<div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#00d9ff] mb-2 counter">$0.001</div>
+						<div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#00d9ff] mb-2 counter">{formattedPrice}</div>
 						<div class="text-sm lg:text-base text-gray-600 dark:text-gray-300">Presale Price</div>
 					</div>
 				</div>
@@ -392,7 +408,7 @@ export const prerender = true
 		<div class="flex items-center justify-between">
 			<div>
 				<div class="text-sm font-medium text-gray-900 dark:text-white">Presale Price</div>
-				<div class="text-lg font-bold text-[#00d9ff]">$0.001</div>
+				<div class="text-lg font-bold text-[#00d9ff]">{formattedPrice}</div>
 			</div>
 			<button class="px-6 py-2 bg-[#00d9ff] text-white font-bold rounded-lg hover:bg-[#00b8d4] transition-colors">
 				Join Now
