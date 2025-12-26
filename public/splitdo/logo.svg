@@ -1,20 +1,29 @@
 <svg width="400" height="600" viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Define clip path for rounded corners -->
+  <!-- Define clip path for rounded corners and gradients -->
   <defs>
     <clipPath id="rounded-clip">
       <rect x="80" y="240" width="240" height="240" rx="30"/>
     </clipPath>
+    <!-- Primary brand gradient -->
+    <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d9ff"/>
+      <stop offset="100%" style="stop-color:#00f0ff"/>
+    </linearGradient>
+    <!-- Cyan glow filter for dark mode -->
+    <filter id="cyanGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#00d9ff" flood-opacity="0.4"/>
+    </filter>
   </defs>
 
-  <!-- Circle (head) -->
-  <circle cx="200" cy="120" r="80" fill="#f07d40"/>
+  <!-- Circle (head) with primary gradient and glow -->
+  <circle cx="200" cy="120" r="80" fill="url(#primaryGradient)" filter="url(#cyanGlow)"/>
 
   <!-- Split square (body) with clip path for rounded corners -->
   <g clip-path="url(#rounded-clip)">
-    <!-- Orange background -->
-    <rect x="80" y="240" width="240" height="240" fill="#f07d40"/>
+    <!-- Purple background -->
+    <rect x="80" y="240" width="240" height="240" fill="#6b46c1"/>
 
-    <!-- Teal triangle (bottom-right half) -->
-    <path d="M 320 240 L 320 480 L 80 480 Z" fill="#47a49e"/>
+    <!-- Bright violet triangle (bottom-right half) -->
+    <path d="M 320 240 L 320 480 L 80 480 Z" fill="#b857ff"/>
   </g>
 </svg>
