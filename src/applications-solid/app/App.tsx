@@ -16,8 +16,11 @@ import {
   loggingMiddleware,
   authMiddleware
 } from './middleware'
+import { WalletProvider } from 'src/lib/wallet/wallet-context'
 import DashboardPage from './pages/dashboard/index'
 import CounterPage from './pages/counter/index'
+import ProfilePage from './pages/profile/index'
+import WalletPage from './pages/wallet/index'
 
 const AppContent: Component = () => {
   const [currentPage, setCurrentPage] = createSignal<Page>('dashboard')
@@ -50,7 +53,7 @@ const AppContent: Component = () => {
       ? pathSegments[1] 
       : 'dashboard'
     
-    if (['dashboard', 'counter'].includes(pageName)) {
+    if (['dashboard', 'counter', 'profile', 'wallet'].includes(pageName)) {
       setCurrentPage(pageName as Page)
     }
   })
@@ -71,7 +74,7 @@ const AppContent: Component = () => {
       ? pathSegments[1] 
       : 'dashboard'
     
-    if (['dashboard', 'counter'].includes(pageName)) {
+    if (['dashboard', 'counter', 'profile', 'wallet'].includes(pageName)) {
       setCurrentPage(pageName as Page)
     }
   })
@@ -93,6 +96,10 @@ const AppContent: Component = () => {
         return <DashboardPage isDark={isDark()} />
       case 'counter':
         return <CounterPage isDark={isDark()} />
+      case 'profile':
+        return <ProfilePage isDark={isDark()} />
+      case 'wallet':
+        return <WalletPage isDark={isDark()} />
       default:
         return <DashboardPage isDark={isDark()} />
     }
@@ -134,10 +141,12 @@ const AppContent: Component = () => {
   )
 }
 
-const App: Component = () => {
+const App: Component<{ firebaseToken?: string }> = (props) => {
   return (
     <MiddlewareProvider>
-      <AppContent />
+      <WalletProvider firebaseToken={props.firebaseToken}>
+        <AppContent />
+      </WalletProvider>
     </MiddlewareProvider>
   )
 }

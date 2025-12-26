@@ -1,6 +1,5 @@
 ---
 import Layout from 'src/layouts/Layout.astro';
-import humansImage from 'src/assets/Humans.jpeg';
 
 export const prerender = true
 ---
@@ -77,18 +76,109 @@ export const prerender = true
 								<div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-[#2E2B29] rounded-b-2xl flex justify-center items-center z-10">
 									<div class="w-10 h-1.5 bg-black rounded-full"></div>
 								</div>
-								<div class="flex items-center justify-center h-full p-4">
-									<div class="bg-white dark:bg-gray-300 rounded-[2.2rem] w-full h-full overflow-hidden">
-										<img
-											src="/phone_screens/WalletScreen_LIGHT.png"
-											alt="SplitDo App Wallet Screen"
-											class="w-full h-full object-cover object-top dark:hidden"
-										/>
-										<img
-											src="/phone_screens/WalletScreen_DARK.png"
-											alt="SplitDo App Wallet Screen"
-											class="w-full h-full object-cover object-top hidden dark:block"
-										/>
+								<div class="flex items-center justify-center h-full p-3">
+									<img
+										src="/phone_screens/WalletScreen_DARK.png"
+										alt="SplitDo Wallet Screen"
+										class="w-full h-full object-cover rounded-[2.5rem]"
+									/>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Key Stats Section -->
+		<section class="py-8 sm:py-16 bg-white dark:bg-[#0a0f1e] border-b border-gray-200 dark:border-[#00d9ff]/10">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+					<div class="text-center">
+						<div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#00d9ff] mb-2 counter">100M</div>
+						<div class="text-sm lg:text-base text-gray-600 dark:text-gray-300">Total Supply</div>
+					</div>
+					<div class="text-center">
+						<div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#00d9ff] mb-2 counter">31.5M</div>
+						<div class="text-sm lg:text-base text-gray-600 dark:text-gray-300">Strategic Sale</div>
+					</div>
+					<div class="text-center">
+						<div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#00d9ff] mb-2 counter">50K+</div>
+						<div class="text-sm lg:text-base text-gray-600 dark:text-gray-300">Early Users</div>
+					</div>
+					<div class="text-center">
+						<div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#00d9ff] mb-2 counter">$0.001</div>
+						<div class="text-sm lg:text-base text-gray-600 dark:text-gray-300">Presale Price</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Community Section -->
+		<section class="py-8 sm:py-16 lg:py-20 bg-gray-50 dark:bg-[#0f1419]">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
+					<!-- Left: Community Image -->
+					<div class="relative">
+						<div class="relative overflow-hidden rounded-2xl">
+							<img
+								src="/Humans.jpeg"
+								alt="SplitDo Community"
+								class="w-full h-64 sm:h-80 lg:h-[500px] object-cover"
+								loading="lazy"
+							/>
+							<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+							<div class="absolute bottom-6 left-6 right-6">
+								<div class="text-white font-bold text-lg sm:text-xl mb-2">Join Our Growing Community</div>
+								<div class="text-gray-200 text-sm">Connect with thousands of users revolutionizing expense splitting</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Right: Community Content -->
+					<div>
+						<div class="max-w-lg">
+							<h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+								Built by the Community,<br/>For the Community
+							</h2>
+							<p class="text-base lg:text-lg text-gray-700 dark:text-gray-300 mb-8">
+								SplitDo isn't just an app – it's a movement. Join thousands of users who are already transforming how they handle group expenses, from restaurant bills to vacation costs.
+							</p>
+
+							<div class="space-y-6">
+								<div class="flex items-start gap-4">
+									<div class="w-10 h-10 bg-[#00d9ff]/10 rounded-lg flex items-center justify-center">
+										<svg class="w-5 h-5 text-[#00d9ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-2-2V8a2 2 0 012-2h2m-3 9l3-3 3 3m-6 0h6"/>
+										</svg>
+									</div>
+									<div>
+										<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Active Community</h3>
+										<p class="text-gray-600 dark:text-gray-300 text-sm">Join discussions, share feedback, and help shape the future of SplitDo.</p>
+									</div>
+								</div>
+
+								<div class="flex items-start gap-4">
+									<div class="w-10 h-10 bg-[#00d9ff]/10 rounded-lg flex items-center justify-center">
+										<svg class="w-5 h-5 text-[#00d9ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+										</svg>
+									</div>
+									<div>
+										<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Early Adopter Benefits</h3>
+										<p class="text-gray-600 dark:text-gray-300 text-sm">Get exclusive access to new features and special token rewards.</p>
+									</div>
+								</div>
+
+								<div class="flex items-start gap-4">
+									<div class="w-10 h-10 bg-[#00d9ff]/10 rounded-lg flex items-center justify-center">
+										<svg class="w-5 h-5 text-[#00d9ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"/>
+										</svg>
+									</div>
+									<div>
+										<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Governance Rights</h3>
+										<p class="text-gray-600 dark:text-gray-300 text-sm">Help decide the future direction of the platform through token governance.</p>
 									</div>
 								</div>
 							</div>
@@ -98,630 +188,248 @@ export const prerender = true
 			</div>
 		</section>
 
-		<!-- Stats Section with Animated Counters -->
-		<section class="bg-gray-100 dark:bg-[#12171f] py-8 sm:py-12 lg:py-16 border-y border-gray-200 dark:border-[#00d9ff]/10">
+		<!-- Token Features Section -->
+		<section class="py-8 sm:py-16 lg:py-20 bg-white dark:bg-[#0a0f1e]">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-					<div class="text-center">
-						<div class="text-4xl font-bold text-[#00d9ff] mb-2 counter" data-target="100000000">100M</div>
-						<div class="text-gray-600 dark:text-gray-300 text-sm">Total Supply</div>
-					</div>
-					<div class="text-center">
-						<div class="text-4xl font-bold text-[#00d9ff] mb-2 counter" data-target="31500000">31.5M</div>
-						<div class="text-gray-600 dark:text-gray-300 text-sm">Strategic/Institutional</div>
-					</div>
-					<div class="text-center">
-						<div class="text-4xl font-bold text-[#00d9ff] mb-2 counter" data-target="50000">50K+</div>
-						<div class="text-gray-600 dark:text-gray-300 text-sm">Early Participants</div>
-					</div>
-					<div class="text-center">
-						<div class="text-4xl font-bold text-[#00d9ff] mb-2">Solana</div>
-						<div class="text-gray-600 dark:text-gray-300 text-sm">Blockchain</div>
-					</div>
-				</div>
-			</div>
-		</section>
-
-		<!-- Community Section with Humans Image -->
-		<section class="bg-gray-50 dark:bg-[#0f1419] pt-8 pb-0 sm:py-12 lg:py-24 overflow-hidden">
-			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-				<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 lg:gap-12 items-center w-full max-w-full">
-					<div class="w-full max-w-full">
-						<h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 break-words">
-							Join Our <span class="text-[#00d9ff]">Community</span>
-						</h2>
-						<p class="text-base sm:text-lg lg:text-xl text-gray-700 dark:text-gray-100 mb-6 sm:mb-8 break-words">
-							Thousands of users worldwide are already part of the SplitDo revolution. Join our growing community and be part of the future of decentralized expense management.
-						</p>
-						<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 w-full max-w-full">
-							<div class="bg-gray-100 dark:bg-[#12171f]/30 backdrop-blur-sm rounded-xl p-4 sm:p-6">
-								<div class="text-3xl font-bold text-[#00d9ff] mb-2 counter" data-target="15000">15K+</div>
-								<div class="text-gray-700 dark:text-gray-100 text-sm">Discord Members</div>
-							</div>
-							<div class="bg-gray-100 dark:bg-[#12171f]/30 backdrop-blur-sm rounded-xl p-4 sm:p-6">
-								<div class="text-3xl font-bold text-[#00d9ff] mb-2 counter" data-target="25000">25K+</div>
-								<div class="text-gray-700 dark:text-gray-100 text-sm">Twitter Followers</div>
-							</div>
-						</div>
-					</div>
-					<div class="flex justify-center w-full max-w-full overflow-hidden">
-						<img src={humansImage.src} alt="SplitDo Community" class="rounded-2xl shadow-2xl max-w-full w-full h-auto object-contain"/>
-					</div>
-				</div>
-			</div>
-		</section>
-
-		<!-- Token Features -->
-		<section class="bg-gray-100 dark:bg-[#12171f] pt-0 pb-8 sm:py-12 lg:py-24 overflow-hidden">
-			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-full">
-				<div class="text-center mb-8 sm:mb-12 lg:mb-16 mt-8">
-					<h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
-						Why <span class="gradient-text">$SPLITDO</span>?
+				<div class="text-center max-w-3xl mx-auto mb-8 lg:mb-16">
+					<h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+						Why Choose $SPLITDO?
 					</h2>
-					<p class="text-gray-600 dark:text-gray-300 text-base sm:text-lg">The future of decentralized expense management on Solana</p>
+					<p class="text-base lg:text-lg text-gray-700 dark:text-gray-300">
+						More than just a token – it's your key to a revolutionary expense management ecosystem.
+					</p>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
 					<!-- Feature 1 -->
 					<div class="card-glow">
-						<div class="card-glow-inner">
-							<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Lightning Fast</h3>
-							<p class="text-gray-600 dark:text-gray-300">Built on Solana for instant transactions and near-zero fees</p>
+						<div class="card-glow-inner text-center">
+							<div class="w-16 h-16 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-xl flex items-center justify-center mx-auto mb-6">
+								<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+								</svg>
+							</div>
+							<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Reduced Fees</h3>
+							<p class="text-gray-600 dark:text-gray-300">
+								Use $SPLITDO tokens to pay significantly lower transaction fees and access premium features.
+							</p>
 						</div>
 					</div>
 
 					<!-- Feature 2 -->
 					<div class="card-glow">
-						<div class="card-glow-inner">
-							<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Secure & Transparent</h3>
-							<p class="text-gray-600 dark:text-gray-300">Fully audited smart contracts and decentralized governance</p>
+						<div class="card-glow-inner text-center">
+							<div class="w-16 h-16 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-xl flex items-center justify-center mx-auto mb-6">
+								<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+								</svg>
+							</div>
+							<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Governance Power</h3>
+							<p class="text-gray-600 dark:text-gray-300">
+								Participate in platform decisions and vote on new features, integrations, and protocol updates.
+							</p>
 						</div>
 					</div>
 
 					<!-- Feature 3 -->
 					<div class="card-glow">
-						<div class="card-glow-inner">
-							<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Community Driven</h3>
-							<p class="text-gray-600 dark:text-gray-300">Governed by token holders for the community</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
-
-		<!-- App Features with Phones - Scroll-Controlled -->
-		<section id="scroll-experience" class="bg-gray-50 dark:bg-[#0f1419] relative pt-12 sm:pt-16 lg:pt-24" style="height: 400vh;">
-			<div class="sticky top-0 left-0 w-full h-screen flex flex-col items-center justify-start pt-16 sm:pt-20 lg:justify-center lg:pt-0 max-w-full overflow-x-hidden">
-				<div class="text-center mb-2 sm:mb-4 lg:mb-8 w-full max-w-full px-4">
-					<h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 lg:mb-4">
-						<span class="text-[#00d9ff]">Experience</span> the App
-					</h2>
-					<p class="text-gray-700 dark:text-gray-100 text-sm sm:text-base lg:text-lg">Scroll to explore features</p>
-				</div>
-
-				<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-full">
-					<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-12 items-center max-w-6xl w-full mx-auto max-w-full">
-
-							<!-- Text content (changes based on scroll) -->
-							<div id="feature-content" class="order-2 lg:order-1 relative min-h-[500px]">
-								<!-- Feature 1: Group Management -->
-								<div class="feature-content-item active" data-feature="0">
-									<div class="flex items-center gap-3 mb-6">
-										<div class="w-12 h-12 bg-[#00d9ff]/20 rounded-xl flex items-center justify-center">
-											<svg class="w-7 h-7 text-[#00d9ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-											</svg>
-										</div>
-										<span class="text-[#00d9ff] font-semibold uppercase text-sm">Smart Management</span>
-									</div>
-									<h3 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Manage Your Groups</h3>
-									<p class="text-gray-700 dark:text-gray-100 text-lg mb-6">
-										Create and manage expense groups with ease. Track balances, split costs, and settle up using $SPLITDO tokens on Solana.
-									</p>
-									<ul class="space-y-3">
-										<li class="flex items-start gap-3">
-											<svg class="w-6 h-6 text-[#00d9ff] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-											</svg>
-											<span class="text-gray-900 dark:text-white">Real-time balance tracking</span>
-										</li>
-										<li class="flex items-start gap-3">
-											<svg class="w-6 h-6 text-[#00d9ff] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-											</svg>
-											<span class="text-gray-900 dark:text-white">Automatic split calculations</span>
-										</li>
-										<li class="flex items-start gap-3">
-											<svg class="w-6 h-6 text-[#00d9ff] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-											</svg>
-											<span class="text-gray-900 dark:text-white">Instant settlements on Solana</span>
-										</li>
-									</ul>
-								</div>
-
-								<!-- Feature 2: Wallet Integration -->
-								<div class="feature-content-item" data-feature="1">
-									<div class="flex items-center gap-3 mb-6">
-										<div class="w-12 h-12 bg-[#00d9ff]/20 rounded-xl flex items-center justify-center">
-											<svg class="w-7 h-7 text-[#00d9ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-											</svg>
-										</div>
-										<span class="text-[#00d9ff] font-semibold uppercase text-sm">Seamless Integration</span>
-									</div>
-									<h3 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Connect Your Wallet</h3>
-									<p class="text-gray-700 dark:text-gray-100 text-lg mb-6">
-										Seamlessly integrate with popular Solana wallets. Keep full control of your tokens with non-custodial, secure connections.
-									</p>
-									<ul class="space-y-3">
-										<li class="flex items-start gap-3">
-											<svg class="w-6 h-6 text-[#00d9ff] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-											</svg>
-											<span class="text-gray-900 dark:text-white">Support for Phantom, Solflare, Backpack</span>
-										</li>
-										<li class="flex items-start gap-3">
-											<svg class="w-6 h-6 text-[#00d9ff] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-											</svg>
-											<span class="text-gray-900 dark:text-white">Non-custodial & fully secure</span>
-										</li>
-										<li class="flex items-start gap-3">
-											<svg class="w-6 h-6 text-[#00d9ff] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-											</svg>
-											<span class="text-gray-900 dark:text-white">One-click connection</span>
-										</li>
-									</ul>
-								</div>
-
-								<!-- Feature 3: Settlement History -->
-								<div class="feature-content-item" data-feature="2">
-									<div class="flex items-center gap-3 mb-6">
-										<div class="w-12 h-12 bg-[#00d9ff]/20 rounded-xl flex items-center justify-center">
-											<svg class="w-7 h-7 text-[#00d9ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h.01M12 15h.01"></path>
-											</svg>
-										</div>
-										<span class="text-[#00d9ff] font-semibold uppercase text-sm">Complete History</span>
-									</div>
-									<h3 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Track Everything</h3>
-									<p class="text-gray-700 dark:text-gray-100 text-lg mb-6">
-										Monitor all your transactions and settlements in one place. Export reports and keep complete records of all expenses.
-									</p>
-									<ul class="space-y-3">
-										<li class="flex items-start gap-3">
-											<svg class="w-6 h-6 text-[#00d9ff] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-											</svg>
-											<span class="text-gray-900 dark:text-white">Complete transaction history</span>
-										</li>
-										<li class="flex items-start gap-3">
-											<svg class="w-6 h-6 text-[#00d9ff] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-											</svg>
-											<span class="text-gray-900 dark:text-white">Exportable reports</span>
-										</li>
-										<li class="flex items-start gap-3">
-											<svg class="w-6 h-6 text-[#00d9ff] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-											</svg>
-											<span class="text-gray-900 dark:text-white">On-chain verification</span>
-										</li>
-									</ul>
-								</div>
+						<div class="card-glow-inner text-center">
+							<div class="w-16 h-16 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] rounded-xl flex items-center justify-center mx-auto mb-6">
+								<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+								</svg>
 							</div>
-
-							<!-- Phone mockup (rotates based on scroll) -->
-							<div class="order-1 lg:order-2 flex justify-center">
-								<div id="rotating-phone" class="relative max-w-[240px] sm:max-w-[280px] lg:max-w-[350px] w-full">
-									<div class="relative bg-[#2E2B29] rounded-[3rem] border-[4px] sm:border-[6px] border-[#3D3530] shadow-2xl overflow-hidden w-full h-[450px] sm:h-[520px] lg:h-[580px]">
-										<div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-[#2E2B29] rounded-b-2xl flex justify-center items-center z-10">
-											<div class="w-10 h-1.5 bg-black rounded-full"></div>
-										</div>
-										<div class="flex items-center justify-center h-full p-4">
-											<div class="bg-white dark:bg-gray-300 rounded-[2.2rem] w-full h-full overflow-hidden">
-												<!-- Phone screens will change based on scroll -->
-												<img id="phone-screen-light" src="/phone_screens/GroupsTab_LIGHT.png" alt="Groups Management" class="w-full h-full object-cover object-top dark:hidden"/>
-												<img id="phone-screen-dark" src="/phone_screens/GroupsTab_DARK.png" alt="Groups Management" class="w-full h-full object-cover object-top hidden dark:block"/>
-											</div>
-										</div>
-									</div>
-								</div>
+							<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Staking Rewards</h3>
+							<p class="text-gray-600 dark:text-gray-300">
+								Stake your tokens to earn rewards while supporting network security and decentralization.
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
 		</section>
 
-		<!-- How to Participate -->
-		<section class="bg-gray-100 dark:bg-[#12171f] py-12 sm:py-16 lg:py-24 border-y border-gray-200 dark:border-[#00d9ff]/10">
+		<!-- How to Participate Section -->
+		<section class="py-8 sm:py-16 lg:py-20 bg-gray-50 dark:bg-[#0f1419]">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="text-center mb-8 sm:mb-12 lg:mb-16">
-					<h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
-						How to <span class="gradient-text">Participate</span>
+				<div class="text-center max-w-3xl mx-auto mb-8 lg:mb-16">
+					<h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+						How to Join the Presale
 					</h2>
-					<p class="text-gray-600 dark:text-gray-300 text-base sm:text-lg">Claim your tokens in 3 simple steps</p>
+					<p class="text-base lg:text-lg text-gray-700 dark:text-gray-300">
+						Getting your $SPLITDO tokens is simple. Follow these three easy steps.
+					</p>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-					<div class="relative text-center">
-						<div class="w-16 h-16 bg-gradient-to-r from-[#00d9ff] to-[#cbd5e1] rounded-full flex items-center justify-center text-2xl font-bold text-gray-900 dark:text-white mx-auto mb-6">
-							1
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-12">
+					<!-- Step 1 -->
+					<div class="text-center">
+						<div class="relative mx-auto w-20 h-20 mb-6">
+							<div class="absolute inset-0 bg-[#00d9ff]/20 rounded-full"></div>
+							<div class="relative w-20 h-20 bg-[#00d9ff] rounded-full flex items-center justify-center">
+								<span class="text-2xl font-bold text-white">1</span>
+							</div>
 						</div>
-						<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Connect Wallet</h3>
-						<p class="text-gray-600 dark:text-gray-300">Connect your Solana wallet (Phantom, Solflare, or Backpack)</p>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Connect Wallet</h3>
+						<p class="text-gray-600 dark:text-gray-300">
+							Connect your Solana wallet (Phantom, Solflare, or any compatible wallet) to get started.
+						</p>
 					</div>
 
-					<div class="relative text-center">
-						<div class="w-16 h-16 bg-gradient-to-r from-[#00d9ff] to-[#cbd5e1] rounded-full flex items-center justify-center text-2xl font-bold text-gray-900 dark:text-white mx-auto mb-6">
-							2
+					<!-- Step 2 -->
+					<div class="text-center">
+						<div class="relative mx-auto w-20 h-20 mb-6">
+							<div class="absolute inset-0 bg-[#00d9ff]/20 rounded-full"></div>
+							<div class="relative w-20 h-20 bg-[#00d9ff] rounded-full flex items-center justify-center">
+								<span class="text-2xl font-bold text-white">2</span>
+							</div>
 						</div>
-						<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Choose Your Allocation</h3>
-						<p class="text-gray-600 dark:text-gray-300">Select how many tokens you want to purchase at presale price</p>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Choose Amount</h3>
+						<p class="text-gray-600 dark:text-gray-300">
+							Select how many $SPLITDO tokens you want to purchase during the presale period.
+						</p>
 					</div>
 
-					<div class="relative text-center">
-						<div class="w-16 h-16 bg-gradient-to-r from-[#00d9ff] to-[#cbd5e1] rounded-full flex items-center justify-center text-2xl font-bold text-gray-900 dark:text-white mx-auto mb-6">
-							3
+					<!-- Step 3 -->
+					<div class="text-center">
+						<div class="relative mx-auto w-20 h-20 mb-6">
+							<div class="absolute inset-0 bg-[#00d9ff]/20 rounded-full"></div>
+							<div class="relative w-20 h-20 bg-[#00d9ff] rounded-full flex items-center justify-center">
+								<span class="text-2xl font-bold text-white">3</span>
+							</div>
 						</div>
-						<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Purchase Tokens</h3>
-						<p class="text-gray-600 dark:text-gray-300">Buy your $SPLITDO tokens directly to your wallet</p>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Complete Purchase</h3>
+						<p class="text-gray-600 dark:text-gray-300">
+							Confirm your transaction and receive your $SPLITDO tokens directly to your wallet.
+						</p>
 					</div>
-				</div>
-
-				<!-- Final CTA -->
-				<div class="text-center mt-8 sm:mt-12 lg:mt-16">
-					<button class="px-8 sm:px-10 lg:px-12 py-3 sm:py-4 lg:py-5 bg-[#00d9ff] text-gray-900 dark:text-white text-base sm:text-lg lg:text-xl font-bold rounded-xl hover:bg-[#00b8d4] transition-all transform hover:scale-105 glow-button">
-						Join Presale Now
-					</button>
-					<p class="text-gray-400 text-xs sm:text-sm mt-3 sm:mt-4">No gas fees · Instant claim · Secure & verified</p>
 				</div>
 			</div>
 		</section>
 
-		<!-- Tokenomics -->
-		<section class="bg-gray-50 dark:bg-[#0f1419] py-12 sm:py-16 lg:py-24">
+		<!-- Tokenomics Preview Section -->
+		<section class="py-8 sm:py-16 lg:py-20 bg-white dark:bg-[#0a0f1e]">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="text-center mb-8 sm:mb-12 lg:mb-16">
-					<h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
-						<span class="text-[#00d9ff]">Tokenomics</span>
+				<div class="text-center max-w-3xl mx-auto mb-8 lg:mb-16">
+					<h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+						Token Distribution
 					</h2>
-					<p class="text-gray-700 dark:text-gray-100 text-base sm:text-lg">Fair distribution for sustainable growth</p>
+					<p class="text-base lg:text-lg text-gray-700 dark:text-gray-300">
+						A fair and transparent distribution designed to support long-term growth and community involvement.
+					</p>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-					<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/20 rounded-xl p-6">
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+					<!-- Strategic Sale -->
+					<div class="text-center p-6 bg-gray-50 dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20">
 						<div class="text-3xl font-bold text-[#00d9ff] mb-2">31.5%</div>
-						<div class="text-gray-900 dark:text-white font-semibold mb-1">Strategic/Institutional</div>
-						<div class="text-gray-600 dark:text-gray-300 text-sm">31.5M tokens</div>
+						<div class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Strategic Sale</div>
+						<div class="text-sm text-gray-600 dark:text-gray-300">Early investors and strategic partnerships</div>
 					</div>
 
-					<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/20 rounded-xl p-6">
+					<!-- Liquidity -->
+					<div class="text-center p-6 bg-gray-50 dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20">
+						<div class="text-3xl font-bold text-[#00d9ff] mb-2">25%</div>
+						<div class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Liquidity</div>
+						<div class="text-sm text-gray-600 dark:text-gray-300">DEX liquidity pools and market making</div>
+					</div>
+
+					<!-- Development -->
+					<div class="text-center p-6 bg-gray-50 dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20">
+						<div class="text-3xl font-bold text-[#00d9ff] mb-2">23.5%</div>
+						<div class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Development</div>
+						<div class="text-sm text-gray-600 dark:text-gray-300">Team, advisors, and ongoing development</div>
+					</div>
+
+					<!-- Ecosystem -->
+					<div class="text-center p-6 bg-gray-50 dark:bg-[#12171f] rounded-xl border border-gray-200 dark:border-[#00d9ff]/20">
 						<div class="text-3xl font-bold text-[#00d9ff] mb-2">20%</div>
-						<div class="text-gray-900 dark:text-white font-semibold mb-1">Liquidity & Market</div>
-						<div class="text-gray-600 dark:text-gray-300 text-sm">20M tokens</div>
-					</div>
-
-					<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/20 rounded-xl p-6">
-						<div class="text-3xl font-bold text-[#00d9ff] mb-2">10%</div>
-						<div class="text-gray-900 dark:text-white font-semibold mb-1">Team & Advisors</div>
-						<div class="text-gray-600 dark:text-gray-300 text-sm">10M tokens vested</div>
-					</div>
-
-					<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/20 rounded-xl p-6">
-						<div class="text-3xl font-bold text-[#00d9ff] mb-2">38.5%</div>
-						<div class="text-gray-900 dark:text-white font-semibold mb-1">Other Allocations</div>
-						<div class="text-gray-600 dark:text-gray-300 text-sm">38.5M tokens</div>
+						<div class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ecosystem</div>
+						<div class="text-sm text-gray-600 dark:text-gray-300">Community rewards, partnerships, marketing</div>
 					</div>
 				</div>
+
+				<div class="text-center mt-8 lg:mt-12">
+					<a href="/tokenomics" class="inline-flex items-center px-6 py-3 bg-transparent border-2 border-[#00d9ff] text-[#00d9ff] font-semibold rounded-xl hover:bg-[#00d9ff]/10 transition-all">
+						View Full Tokenomics
+						<svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+						</svg>
+					</a>
+				</div>
+			</div>
+		</section>
+
+		<!-- Final CTA Section -->
+		<section class="py-8 sm:py-16 lg:py-20 bg-gradient-to-b from-gray-50 to-white dark:from-[#12171f] dark:to-[#0a0f1e]">
+			<div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+				<h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+					Don't Miss Out on the Future of<br/>Expense Management
+				</h2>
+				<p class="text-base lg:text-lg text-gray-700 dark:text-gray-300 mb-8">
+					Join thousands of early adopters securing their $SPLITDO tokens at presale prices. This opportunity won't last long.
+				</p>
+				<button class="px-8 py-4 bg-gradient-to-r from-[#00d9ff] to-[#00b8d4] text-white text-lg font-bold rounded-xl hover:shadow-[0_0_25px_rgba(0,217,255,0.5)] transition-all duration-300 transform hover:scale-105 glow-button">
+					Join Presale Now
+				</button>
 			</div>
 		</section>
 
 	</main>
 
-	<!-- Sticky Bottom Bar -->
-	<div id="stickyBar" class="fixed bottom-0 left-0 right-0 bg-gray-100 dark:bg-[#12171f] border-t-2 border-[#00d9ff] shadow-2xl transform translate-y-full transition-transform duration-300 z-50">
-		<div class="max-w-7xl mx-auto px-3 py-2">
-			<div class="flex flex-row items-center justify-between gap-2">
-				<!-- Current Price -->
-				<div class="flex items-center text-xs">
-					<span class="text-gray-600 dark:text-gray-300">Price:</span>
-					<span class="text-sm font-bold text-gray-900 dark:text-white ml-1">$0.001</span>
-					<span class="text-[#00d9ff] font-semibold ml-1">+73.5%</span>
-				</div>
-
-				<!-- CTA Button -->
-				<button class="px-4 py-1.5 bg-[#00d9ff] text-gray-900 dark:text-white text-xs font-bold rounded-lg hover:bg-[#00b8d4] transition-all whitespace-nowrap">
-					Buy Now
-				</button>
+	<!-- Sticky Bottom Bar (Mobile) -->
+	<div class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0f1419]/95 backdrop-blur-xl border-t border-gray-200 dark:border-[#00d9ff]/20 p-4 sm:hidden">
+		<div class="flex items-center justify-between">
+			<div>
+				<div class="text-sm font-medium text-gray-900 dark:text-white">Presale Price</div>
+				<div class="text-lg font-bold text-[#00d9ff]">$0.001</div>
 			</div>
+			<button class="px-6 py-2 bg-[#00d9ff] text-white font-bold rounded-lg hover:bg-[#00b8d4] transition-colors">
+				Join Now
+			</button>
 		</div>
 	</div>
 
 	<script>
 		// Countdown Timer
-		const countdownDate = new Date('2025-12-31T23:59:59').getTime();
-
 		function updateCountdown() {
+			const targetDate = new Date('2024-12-31T23:59:59').getTime();
 			const now = new Date().getTime();
-			const distance = countdownDate - now;
+			const distance = targetDate - now;
 
-			const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-			const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-			const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-			const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+			if (distance > 0) {
+				const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+				const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+				const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+				const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-			// Main countdown
-			const daysEl = document.getElementById('days');
-			const hoursEl = document.getElementById('hours');
-			const minutesEl = document.getElementById('minutes');
-			const secondsEl = document.getElementById('seconds');
-
-			if (daysEl) daysEl.textContent = String(days).padStart(2, '0');
-			if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
-			if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
-			if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
-
-			// Sticky bar countdown
-			const daysStickyEl = document.getElementById('days-sticky');
-			const hoursStickyEl = document.getElementById('hours-sticky');
-			const minutesStickyEl = document.getElementById('minutes-sticky');
-			const secondsStickyEl = document.getElementById('seconds-sticky');
-
-			if (daysStickyEl) daysStickyEl.textContent = String(days).padStart(2, '0');
-			if (hoursStickyEl) hoursStickyEl.textContent = String(hours).padStart(2, '0');
-			if (minutesStickyEl) minutesStickyEl.textContent = String(minutes).padStart(2, '0');
-			if (secondsStickyEl) secondsStickyEl.textContent = String(seconds).padStart(2, '0');
-
-			if (distance < 0) {
-				if (daysEl) daysEl.textContent = '00';
-				if (hoursEl) hoursEl.textContent = '00';
-				if (minutesEl) minutesEl.textContent = '00';
-				if (secondsEl) secondsEl.textContent = '00';
-				if (daysStickyEl) daysStickyEl.textContent = '00';
-				if (hoursStickyEl) hoursStickyEl.textContent = '00';
-				if (minutesStickyEl) minutesStickyEl.textContent = '00';
-				if (secondsStickyEl) secondsStickyEl.textContent = '00';
+				document.getElementById('days').textContent = days.toString().padStart(2, '0');
+				document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+				document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+				document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
 			}
 		}
 
-		updateCountdown();
+		// Update countdown every second
 		setInterval(updateCountdown, 1000);
+		updateCountdown(); // Initial call
 
-		// Sticky Bar Show/Hide on Scroll
-		let lastScroll = 0;
-		const stickyBar = document.getElementById('stickyBar');
-
-		window.addEventListener('scroll', () => {
-			const currentScroll = window.pageYOffset;
-
-			if (currentScroll > 300) {
-				stickyBar?.classList.remove('translate-y-full');
-			} else {
-				stickyBar?.classList.add('translate-y-full');
-			}
-
-			lastScroll = currentScroll;
-		});
-
-		// Animated Counters
-		const observerOptions = {
-			threshold: 0.5,
-			rootMargin: '0px'
-		};
-
-		const animateCounter = (element: Element) => {
-			const target = parseInt(element.getAttribute('data-target') || '0');
-			const duration = 2000;
-			const increment = target / (duration / 16);
-			let current = 0;
-
-			const updateCounter = () => {
-				current += increment;
-				if (current < target) {
-					if (target > 1000000) {
-						element.textContent = (current / 1000000).toFixed(0) + 'M';
-					} else if (target > 1000) {
-						element.textContent = (current / 1000).toFixed(0) + 'K+';
-					} else {
-						element.textContent = Math.floor(current).toString();
+		// Initialize counter animation on scroll
+		function animateCounters() {
+			const counters = document.querySelectorAll('.counter');
+			const observer = new IntersectionObserver((entries) => {
+				entries.forEach(entry => {
+					if (entry.isIntersecting) {
+						entry.target.classList.add('visible');
 					}
-					requestAnimationFrame(updateCounter);
-				} else {
-					if (target === 1000000000) {
-						element.textContent = '1B+';
-					} else if (target === 500000000) {
-						element.textContent = '500M';
-					} else if (target > 1000) {
-						element.textContent = (target / 1000).toFixed(0) + 'K+';
-					} else {
-						element.textContent = target.toString();
-					}
-				}
-			};
+				});
+			}, { threshold: 0.5 });
 
-			updateCounter();
-		};
-
-		const counterObserver = new IntersectionObserver((entries) => {
-			entries.forEach((entry) => {
-				if (entry.isIntersecting && entry.target.classList.contains('counter')) {
-					animateCounter(entry.target);
-					counterObserver.unobserve(entry.target);
-				}
+			counters.forEach(counter => {
+				observer.observe(counter);
 			});
-		}, observerOptions);
-
-		document.querySelectorAll('.counter').forEach((counter) => {
-			counterObserver.observe(counter);
-		});
-	</script>
-
-	<!-- Scroll-Controlled Phone Rotation -->
-	<script>
-		// Phone screens for each feature
-		const featureScreens = [
-			{ light: '/phone_screens/GroupsTab_LIGHT.png', dark: '/phone_screens/GroupsTab_DARK.png' },
-			{ light: '/phone_screens/WalletIntegration_LIGHT.png', dark: '/phone_screens/WalletIntegration_DARK.png' },
-			{ light: '/phone_screens/ExpensesScreen_LIGHT.png', dark: '/phone_screens/ExpensesScreen_DARK.png' }
-		];
-
-		function updateScrollExperience() {
-			const section = document.getElementById('scroll-experience');
-			const phone = document.getElementById('rotating-phone');
-			const phoneLightScreen = document.getElementById('phone-screen-light');
-			const phoneDarkScreen = document.getElementById('phone-screen-dark');
-			const contentItems = document.querySelectorAll('.feature-content-item');
-
-			if (!section || !phone) return;
-
-			// Get section position
-			const rect = section.getBoundingClientRect();
-			const sectionHeight = section.offsetHeight;
-			const viewportHeight = window.innerHeight;
-
-			// Calculate how far we've scrolled through the section
-			// rect.top starts at some positive value, goes to 0, then negative
-			// When rect.top = 0, section just entered viewport from top
-			// When rect.top = -sectionHeight + viewportHeight, section is about to leave
-			const scrollStart = rect.top;
-			const scrollEnd = rect.bottom - viewportHeight;
-			const totalScroll = sectionHeight - viewportHeight;
-
-			// Progress from 0 (start) to 1 (end)
-			let progress = -scrollStart / totalScroll;
-			progress = Math.max(0, Math.min(1, progress));
-
-			// Determine which feature (0, 1, or 2) with smooth transitions
-			// Add transition zones for crossfade effect
-			const transitionWidth = 0.08; // 8% transition zone
-			let featureIndex;
-			let localProgress; // Progress within current feature (0 to 1)
-
-			// Calculate feature opacities for smooth crossfade
-			const feature0Opacity = progress < 0.25 ? 1 :
-			                       progress < 0.33 ? 1 - ((progress - 0.25) / transitionWidth) : 0;
-			const feature1Opacity = progress < 0.25 ? 0 :
-			                       progress < 0.33 ? (progress - 0.25) / transitionWidth :
-			                       progress < 0.58 ? 1 :
-			                       progress < 0.66 ? 1 - ((progress - 0.58) / transitionWidth) : 0;
-			const feature2Opacity = progress < 0.58 ? 0 :
-			                       progress < 0.66 ? (progress - 0.58) / transitionWidth : 1;
-
-			// Determine primary feature
-			if (progress < 0.33) {
-				featureIndex = 0;
-				localProgress = progress / 0.33;
-			} else if (progress < 0.66) {
-				featureIndex = 1;
-				localProgress = (progress - 0.33) / 0.33;
-			} else {
-				featureIndex = 2;
-				localProgress = (progress - 0.66) / 0.34;
-			}
-
-			// Subtle rotation based on feature (phone stays normal size)
-			let rotation;
-			if (featureIndex === 0) {
-				rotation = localProgress * 10; // 0° to 10°
-			} else if (featureIndex === 1) {
-				rotation = 10 - (localProgress * 20); // 10° to -10°
-			} else {
-				rotation = -10 + (localProgress * 10); // -10° to 0°
-			}
-
-			// Apply phone rotation (NO SCALE)
-			phone.style.transform = `perspective(1000px) rotateY(${rotation}deg)`;
-			phone.style.transition = 'transform 0.1s ease-out';
-
-			// Update text content visibility with crossfade
-			const featureOpacities = [feature0Opacity, feature1Opacity, feature2Opacity];
-
-			contentItems.forEach((item, index) => {
-				const opacity = featureOpacities[index];
-				const isActive = opacity > 0;
-
-				// Set overall feature opacity for crossfade
-				item.style.opacity = opacity;
-
-				if (isActive) {
-					item.classList.add('active');
-
-					// Only animate lines for the primary feature
-					if (index === featureIndex) {
-						// Get all lines to animate
-						const badge = item.querySelector('.flex.items-center'); // Icon badge
-						const heading = item.querySelector('h3');
-						const paragraph = item.querySelector('p');
-						const listItems = item.querySelectorAll('ul li');
-
-						const lines = [badge, heading, paragraph, ...listItems].filter(Boolean);
-						const totalLines = lines.length;
-
-						lines.forEach((line, lineIndex) => {
-							// Each line appears at a different scroll threshold
-							const lineThreshold = (lineIndex / totalLines);
-
-							if (localProgress >= lineThreshold) {
-								line.classList.add('line-visible');
-								// Calculate scale for this line (starts big, ends normal)
-								const lineProgress = Math.min(1, (localProgress - lineThreshold) / (1 / totalLines));
-								const lineScale = 1.5 - (lineProgress * 0.5); // 1.5 → 1.0
-								line.style.transform = `translateX(0) scale(${lineScale})`;
-							} else {
-								line.classList.remove('line-visible');
-								line.style.transform = 'translateX(-30px) scale(1.5)';
-							}
-						});
-					}
-				} else {
-					item.classList.remove('active');
-					// Reset all lines when not active
-					const allLines = item.querySelectorAll('.flex.items-center, h3, p, ul li');
-					allLines.forEach(line => {
-						line.classList.remove('line-visible');
-						line.style.transform = 'translateX(-30px) scale(1.5)';
-					});
-				}
-			});
-
-			// Update phone screen with fade transition
-			if (phoneLightScreen && phoneDarkScreen && featureScreens[featureIndex]) {
-				const lightSrc = featureScreens[featureIndex].light;
-				const darkSrc = featureScreens[featureIndex].dark;
-
-				if (!phoneLightScreen.src.endsWith(lightSrc)) {
-					// Fade out, change image, fade in
-					const phoneContainer = phone.querySelector('.bg-white');
-					if (phoneContainer) {
-						phoneContainer.style.transition = 'opacity 0.3s ease-out';
-						phoneContainer.style.opacity = '0.7';
-						setTimeout(() => {
-							phoneLightScreen.src = lightSrc;
-							phoneDarkScreen.src = darkSrc;
-							phoneContainer.style.opacity = '1';
-						}, 150);
-					}
-				}
-			}
 		}
 
-		// Throttled scroll handler
-		let ticking = false;
-		window.addEventListener('scroll', () => {
-			if (!ticking) {
-				window.requestAnimationFrame(() => {
-					updateScrollExperience();
-					ticking = false;
-				});
-				ticking = true;
-			}
-		}, { passive: true });
-
-		// Initial update
-		window.addEventListener('load', updateScrollExperience);
-		updateScrollExperience();
+		document.addEventListener('DOMContentLoaded', animateCounters);
 	</script>
-
 </Layout>

@@ -155,11 +155,11 @@
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.5-7 1.5 1.5 2.5 4 2.5 7 0 .5 0 1 .5 1.5a3.5 3.5 0 015 0c-.5-.5-.5-1-.5-1.5 0-3 1-5.5 2.5-7 2 2 2.5 5 2.5 7 2-1 2.657-2.343 2.657-2.343A8 8 0 0117.657 18.657z"/>
 						</svg>
 					</div>
-					<h2 class="mt-6 text-3xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
-						Sign in with Firebase
+					<h2 class="mt-6 text-3xl font-bold bg-gradient-to-r from-orange-600 to-teal-600 bg-clip-text text-transparent">
+						Sign in to SplitDo
 					</h2>
 					<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-						Welcome back to Fig Clerk
+						Welcome back! Split expenses seamlessly on Solana.
 					</p>
 				</div>
 

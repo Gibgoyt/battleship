@@ -1,32 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Configure dark mode for Tailwind CSS v4 */
-@theme {
-  --color-mode: light dark;
-
-  /* Electric Cyan & Midnight - Vibrant Premium scheme */
-  --color-primary-cyan: #00d9ff;
-  --color-primary-cyan-dark: #00b8d4;
-  --color-primary-navy: #1e40af;
-  --color-silver: #64748b;
-  --color-silver-light: #94a3b8;
-  --color-accent-bright: #00f0ff;
-
-  /* Light mode colors */
-  --color-light-bg: #ffffff;
-  --color-light-bg-secondary: #f8fafc;
-  --color-light-bg-card: #f1f5f9;
-
-  /* Dark backgrounds - Deep midnight tones */
-  --color-dark-bg: #0a0f1e;
-  --color-dark-bg-secondary: #0f1419;
-  --color-dark-bg-card: #12171f;
-}
-
-/* Use class-based dark mode */
-@custom-variant dark (.dark &);
+@import "tailwindcss";
 
 /* Light mode (default) */
 :root {
