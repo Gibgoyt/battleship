@@ -1,0 +1,27 @@
+{
+  "name": "SPLITDO",
+  "symbol": "SPLIT",
+  "description": "SPLITDO utility token for expense splitting and payments",
+  "image": "https://splitdo.app/splitdo/logo.png",
+  "external_url": "https://splitdo.app",
+  "seller_fee_basis_points": 0,
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Utility Token"
+    },
+    {
+      "trait_type": "Use Case",
+      "value": "Expense Splitting"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://splitdo.app/splitdo/logo.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "utility"
+  }
+}
