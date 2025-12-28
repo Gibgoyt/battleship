@@ -65,7 +65,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Get next display_order if not provided
     let display_order = data.display_order;
-    if (display_order === undefined) {
+    if (display_order === undefined || display_order === null) {
       const nextOrder = await projectStageQueries.getNextDisplayOrder(db);
       display_order = nextOrder?.next_order || 1;
     }
