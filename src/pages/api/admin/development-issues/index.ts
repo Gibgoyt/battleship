@@ -54,11 +54,43 @@ export const POST: APIRoute = async ({ request, locals }) => {
       );
     }
 
+    // Validate created_by exists in TeamMembers, use fallback if invalid
+    let validatedCreatedBy = data.created_by;
+    try {
+      const teamMemberCheck = await db
+        .prepare('SELECT id FROM TeamMembers WHERE id = ?')
+        .bind(data.created_by)
+        .first();
+
+      if (!teamMemberCheck) {
+        // created_by doesn't exist, get the first available team member
+        const fallbackMember = await db
+          .prepare('SELECT id FROM TeamMembers ORDER BY id LIMIT 1')
+          .first<{ id: number }>();
+
+        if (fallbackMember) {
+          validatedCreatedBy = fallbackMember.id;
+          console.warn(`Invalid created_by ${data.created_by}, using fallback: ${validatedCreatedBy}`);
+        } else {
+          return new Response(
+            JSON.stringify({ error: 'No valid team members found in database' }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    } catch (validationError) {
+      console.error('Error validating created_by:', validationError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to validate team member' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     const result = await developmentIssueQueries.create(db, {
       roadmap_stage_id: data.roadmap_stage_id,
       title: data.title,
       description: data.description,
-      created_by: data.created_by,
+      created_by: validatedCreatedBy,
     });
 
     return new Response(
