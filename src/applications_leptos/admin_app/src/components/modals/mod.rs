@@ -1,10 +1,12 @@
 mod create_project_stage;
 mod create_product_issue;
 mod create_development_issue;
+mod connect_whatsapp_modal;
 
 pub use create_project_stage::CreateProjectStageModal;
 pub use create_product_issue::CreateProductIssueModal;
 pub use create_development_issue::CreateDevelopmentIssueModal;
+pub use connect_whatsapp_modal::ConnectWhatsAppModal;
 
 use leptos::*;
 

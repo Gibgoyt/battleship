@@ -33,6 +33,23 @@ pub struct ConnectionState {
     pub app_state_synced: Option<bool>,
 }
 
+// Request/Response types for creating WhatsApp accounts
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct CreateWhatsAppAccountRequest {
+    pub device_name: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct QrCodeResponse {
+    pub success: bool,
+    pub message: String,
+    pub qr_code: String,
+    pub device_name: String,
+    pub expires_in_seconds: u32,
+    pub instructions: String,
+    pub user_id: String,
+}
+
 // JS interop - call window.adminApiFetch which automatically adds auth headers
 #[wasm_bindgen]
 extern "C" {
@@ -93,4 +110,62 @@ pub async fn fetch_whatsapp_accounts_dev() -> Result<Vec<WhatsAppAccount>, Strin
     // Use localhost for development if needed
     let response: WhatsAppAccountsResponse = whatsapp_api_fetch("http://localhost:2087/api/v1/whatsapp/accounts", "GET").await?;
     Ok(response.accounts)
+}
+
+// Create a new WhatsApp account and get QR code for connection
+pub async fn create_whatsapp_account(device_name: String) -> Result<QrCodeResponse, String> {
+    web_sys::console::log_1(&"Creating WhatsApp account...".into());
+
+    // Create request body
+    let request = CreateWhatsAppAccountRequest { device_name };
+
+    // Create fetch options for POST with JSON body
+    let opts = js_sys::Object::new();
+    js_sys::Reflect::set(&opts, &"method".into(), &"POST".into())
+        .map_err(|_| "Failed to set method".to_string())?;
+
+    // Set headers
+    let headers = js_sys::Object::new();
+    js_sys::Reflect::set(&headers, &"Content-Type".into(), &"application/json".into())
+        .map_err(|_| "Failed to set content type".to_string())?;
+    js_sys::Reflect::set(&opts, &"headers".into(), &headers)
+        .map_err(|_| "Failed to set headers".to_string())?;
+
+    // Serialize request body
+    let body = serde_json::to_string(&request)
+        .map_err(|e| format!("Failed to serialize request: {:?}", e))?;
+    js_sys::Reflect::set(&opts, &"body".into(), &body.into())
+        .map_err(|_| "Failed to set body".to_string())?;
+
+    // Call the endpoint using existing whatsapp_api_fetch helper
+    let response_value = admin_api_fetch_js("https://socials.splitdo.app:2087/api/v1/whatsapp/accounts/new", opts.into())
+        .await
+        .map_err(|e| format!("Fetch error: {:?}", e))?;
+
+    // Convert JsValue to web_sys::Response
+    let response: web_sys::Response = response_value
+        .dyn_into()
+        .map_err(|_| "Failed to convert to Response".to_string())?;
+
+    // Check if response is ok
+    if !response.ok() {
+        return Err(format!("HTTP error: {} - {}", response.status(), response.status_text()));
+    }
+
+    // Get JSON from response
+    let json_promise = response
+        .json()
+        .map_err(|_| "Failed to call .json()".to_string())?;
+
+    let json_value = wasm_bindgen_futures::JsFuture::from(json_promise)
+        .await
+        .map_err(|e| format!("JSON parse error: {:?}", e))?;
+
+    // Convert to Rust type
+    let qr_response: QrCodeResponse = serde_wasm_bindgen::from_value(json_value)
+        .map_err(|e| format!("Deserialization error: {:?}", e))?;
+
+    web_sys::console::log_1(&format!("Created WhatsApp account: {}", qr_response.device_name).into());
+
+    Ok(qr_response)
 }
