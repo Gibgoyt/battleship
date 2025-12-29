@@ -143,11 +143,11 @@ pub fn Sidebar() -> impl IntoView {
                     <span>"Development"</span>
                 </A>
 
-                <A href="/admin/protocol-demo" class=move || link_class("/admin/protocol-demo") on:click=close_sidebar_on_nav>
+                <A href="/admin/community-support" class=move || link_class("/admin/community-support") on:click=close_sidebar_on_nav>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path>
                     </svg>
-                    <span>"Protocol Demo"</span>
+                    <span>"Community Support"</span>
                 </A>
             </nav>
 

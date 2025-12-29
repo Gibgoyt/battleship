@@ -93,7 +93,7 @@ async fn fetch_json_with_body<T: DeserializeOwned, B: Serialize>(
     let body_str = serde_json::to_string(body)
         .map_err(|e| format!("JSON serialize error: {}", e))?;
 
-    let mut request = match method {
+    let request = match method {
         "POST" => Request::post(url),
         "PUT" => Request::put(url),
         "DELETE" => Request::delete(url),
