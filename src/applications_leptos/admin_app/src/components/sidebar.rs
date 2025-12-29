@@ -4,11 +4,21 @@ use leptos_router::*;
 #[derive(Clone, Copy)]
 pub struct DarkMode(pub RwSignal<bool>);
 
+#[derive(Clone, Copy)]
+pub struct SidebarState(pub RwSignal<bool>);
+
 pub fn use_dark_mode() -> (ReadSignal<bool>, WriteSignal<bool>) {
     let dark_mode = use_context::<DarkMode>()
         .expect("DarkMode context not found")
         .0;
     dark_mode.split()
+}
+
+pub fn use_sidebar_state() -> (ReadSignal<bool>, WriteSignal<bool>) {
+    let sidebar_state = use_context::<SidebarState>()
+        .expect("SidebarState context not found")
+        .0;
+    sidebar_state.split()
 }
 
 pub fn update_theme(is_dark: bool) {
@@ -34,10 +44,18 @@ pub fn update_theme(is_dark: bool) {
 #[component]
 pub fn Sidebar() -> impl IntoView {
     let (is_dark, set_dark) = use_dark_mode();
+    let (sidebar_open, set_sidebar_open) = use_sidebar_state();
     let location = use_location();
 
-    // Navy blue sidebar - matching the design mockup
-    let sidebar_class = "w-64 h-screen bg-[#0f172a] border-r border-[#1e293b] p-6 flex flex-col";
+    // Responsive sidebar classes - overlay on mobile, sidebar on desktop
+    let sidebar_classes = move || {
+        let base = "fixed md:relative inset-y-0 left-0 z-50 w-64 h-screen bg-[#0f172a] border-r border-[#1e293b] p-6 flex flex-col transform transition-transform duration-300 ease-in-out md:translate-x-0";
+        if sidebar_open.get() {
+            format!("{} translate-x-0", base)
+        } else {
+            format!("{} -translate-x-full", base)
+        }
+    };
 
     let is_active = move |path: &str| {
         let current = location.pathname.get();
@@ -68,7 +86,18 @@ pub fn Sidebar() -> impl IntoView {
     let button_class = "w-full p-3 mb-2 rounded-lg transition-colors hover:bg-[#1e293b] flex items-center justify-center gap-2 text-gray-300 text-sm";
 
     view! {
-        <aside class=sidebar_class>
+        // Mobile backdrop overlay
+        <div
+            class=move || if sidebar_open.get() {
+                "fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+            } else {
+                "hidden"
+            }
+            on:click=move |_| set_sidebar_open.set(false)
+        />
+
+        // Responsive sidebar
+        <aside class=sidebar_classes>
             // Branding
             <div class="mb-8">
                 <div class="flex items-center gap-2">

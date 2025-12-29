@@ -1,12 +1,18 @@
 use leptos::*;
 use crate::store::AdminStore;
 use crate::api::refresh_all_data;
+use crate::components::sidebar::SidebarState;
 
 #[component]
 pub fn Header() -> impl IntoView {
-    // Get store from context for global refresh
+    // Get store and sidebar state from context
     let store = use_context::<AdminStore>()
         .expect("AdminStore should be provided");
+
+    let sidebar_state = use_context::<SidebarState>()
+        .expect("SidebarState should be provided")
+        .0;
+    let (sidebar_open, set_sidebar_open) = sidebar_state.split();
 
     // Global app refresh handler
     let global_refresh = {
@@ -35,8 +41,18 @@ pub fn Header() -> impl IntoView {
     view! {
         <header class="bg-white dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700 px-6 py-4">
             <div class="flex items-center justify-between">
-                // Search bar
-                <div class="flex-1 max-w-md">
+                // Mobile menu button (hamburger)
+                <button
+                    on:click=move |_| set_sidebar_open.set(!sidebar_open.get())
+                    class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
+                >
+                    <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+
+                // Search bar (hidden on mobile)
+                <div class="hidden sm:block flex-1 max-w-md">
                     <div class="relative">
                         <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -50,7 +66,7 @@ pub fn Header() -> impl IntoView {
                 </div>
 
                 // Right side: Global Refresh, Notifications, Mail, User dropdown
-                <div class="flex items-center gap-4 ml-6">
+                <div class="flex items-center gap-2 sm:gap-4 ml-2 sm:ml-6">
                     // Global Refresh Button (circular arrows)
                     <button
                         on:click=global_refresh
@@ -91,7 +107,7 @@ pub fn Header() -> impl IntoView {
 
                     // User dropdown
                     <div class="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-zinc-600">
-                        <div class="text-right">
+                        <div class="text-right hidden sm:block">
                             <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">"Josh Sack"</div>
                             <div class="text-xs text-gray-500 dark:text-gray-400">"Administrator"</div>
                         </div>
