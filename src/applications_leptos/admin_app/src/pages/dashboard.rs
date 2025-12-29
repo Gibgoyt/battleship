@@ -8,7 +8,7 @@ pub fn Dashboard() -> impl IntoView {
         .expect("AdminStore should be provided");
 
     view! {
-        <div class="p-8 bg-gray-50 dark:bg-zinc-900 min-h-screen">
+        <div class="p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-zinc-900 min-h-screen">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">"Dashboard"</h2>
                 <p class="text-gray-600 dark:text-gray-400">"Overview of team activity and project status"</p>

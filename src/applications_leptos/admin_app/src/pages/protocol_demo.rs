@@ -41,7 +41,7 @@ pub fn ProtocolDemo() -> impl IntoView {
     };
 
     view! {
-        <div class="p-8 bg-gray-50 dark:bg-zinc-900 min-h-screen">
+        <div class="p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-zinc-900 min-h-screen">
             <div class="max-w-4xl mx-auto">
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
                     "Binary Protocol Demo"

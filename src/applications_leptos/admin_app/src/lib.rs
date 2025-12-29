@@ -9,7 +9,7 @@ mod protocol;
 mod api;
 mod store;
 
-use components::{Sidebar, Header, DarkMode};
+use components::{Sidebar, Header, DarkMode, SidebarState};
 use pages::{Dashboard, Project, Product, Development, ProtocolDemo};
 use store::AdminStore;
 
@@ -47,6 +47,10 @@ fn App() -> impl IntoView {
     let is_dark = initialize_dark_mode();
     let dark_mode = create_rw_signal(is_dark);
     provide_context(DarkMode(dark_mode));
+
+    // Initialize mobile sidebar state (closed by default)
+    let sidebar_open = create_rw_signal(false);
+    provide_context(SidebarState(sidebar_open));
 
     // Initialize global store and load initial data from window
     let store = AdminStore::new();
