@@ -1,6 +1,6 @@
 import type { Component } from 'solid-js';
-import { Show, createSignal, createMemo } from 'solid-js';
-import { useExchangeModal, useExchange, useWallet, useWalletConnection } from 'src/lib/wallet/wallet-reactive-store';
+import { Show, createSignal, createMemo, createEffect } from 'solid-js';
+import { useExchangeModal, useExchange, useWallet, useWalletConnection, useProgramInfo } from 'src/lib/wallet/wallet-reactive-store';
 
 export interface ExchangeModalProps {
   isDark: boolean;
@@ -11,10 +11,18 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
   const { exchangeStatus, exchangeError, executeExchange } = useExchange();
   const { connectionStatus } = useWallet();
   const { connectWallet } = useWalletConnection();
+  const { programInfo, fetchProgramInfo } = useProgramInfo();
 
   const [step, setStep] = createSignal<'wallet' | 'exchange'>('wallet');
   const [solAmount, setSolAmount] = createSignal('');
   const [isConnecting, setIsConnecting] = createSignal(false);
+
+  // Fetch program info when modal opens
+  createEffect(() => {
+    if (isExchangeModalOpen()) {
+      fetchProgramInfo();
+    }
+  });
 
   const handleClose = () => {
     closeExchangeModal();
@@ -73,6 +81,7 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
               exchangeError={exchangeError()}
               executeExchange={executeExchange}
               onBack={() => setStep('wallet')}
+              exchangeRate={programInfo().exchangeRate}
             />
           }
         >
@@ -126,7 +135,7 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
       <button
         onClick={props.onSelectPhantom}
         disabled={props.isConnecting}
-        class={`w-full p-4 rounded-lg border-2 transition-all duration-200 flex items-center gap-4 ${
+        class={`w-full p-4 border-2 transition-all duration-200 flex items-center gap-4 ${
           props.isConnecting
             ? 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-200'
             : `hover:border-blue-500 cursor-pointer ${
@@ -136,19 +145,26 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
               }`
         }`}
       >
-        <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
-          <span class="text-white text-lg">👻</span>
+        <div class="w-10 h-10 flex items-center justify-center">
+          <img
+            src={props.isDark
+              ? "https://mintcdn.com/phantom-e50e2e68/fkWrmnMWhjoXSGZ9/logo/phantom-light.svg?fit=max&auto=format&n=fkWrmnMWhjoXSGZ9&q=85&s=c21a66db70347ca7a31053b98a0b5b0a"
+              : "https://mintcdn.com/phantom-e50e2e68/fkWrmnMWhjoXSGZ9/logo/phantom-dark.svg?fit=max&auto=format&n=fkWrmnMWhjoXSGZ9&q=85&s=af17fb78921412073a894ea97523898c"
+            }
+            alt="Phantom"
+            class="w-10 h-10"
+          />
         </div>
         <div class="flex-1 text-left">
-          <div class={`font-medium ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+          <div class={`font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
             Phantom Wallet
           </div>
           <div class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             {props.isConnecting
               ? 'Connecting...'
               : props.connectionStatus === 'connected'
-              ? 'Connected and ready to exchange'
-              : 'Click to connect and exchange'
+              ? 'Connected - Ready to exchange'
+              : 'Click to connect'
             }
           </div>
         </div>
@@ -156,31 +172,31 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
           <div class="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
         </Show>
         <Show when={!props.isConnecting && props.connectionStatus === 'connected'}>
-          <div class="text-green-500 text-lg">✓</div>
+          <div class="text-green-500 font-bold">✓</div>
         </Show>
       </button>
 
       {/* MetaMask Option (Coming Soon) */}
       <button
         disabled
-        class={`w-full p-4 rounded-lg border-2 opacity-50 cursor-not-allowed flex items-center gap-4 ${
+        class={`w-full p-4 border-2 opacity-50 cursor-not-allowed flex items-center gap-4 ${
           props.isDark
             ? 'bg-zinc-700 border-zinc-600'
             : 'bg-gray-50 border-gray-300'
         }`}
       >
-        <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-          <span class="text-white text-lg">🦊</span>
+        <div class={`w-10 h-10 flex items-center justify-center font-bold ${props.isDark ? 'text-orange-400' : 'text-orange-600'}`}>
+          MM
         </div>
         <div class="flex-1 text-left">
-          <div class={`font-medium ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+          <div class={`font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
             MetaMask
           </div>
           <div class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             Solana support coming soon
           </div>
         </div>
-        <span class={`text-xs px-2 py-1 rounded ${
+        <span class={`text-xs px-2 py-1 ${
           props.isDark ? 'bg-zinc-600 text-gray-300' : 'bg-gray-200 text-gray-600'
         }`}>
           Coming Soon
@@ -199,21 +215,35 @@ interface ExchangeFormProps {
   exchangeError: string | null;
   executeExchange: (amount: number) => Promise<any>;
   onBack: () => void;
+  exchangeRate: number;
 }
 
 const ExchangeForm: Component<ExchangeFormProps> = (props) => {
+  const MIN_SOL_AMOUNT = 0.01;
+
   const solAmountNum = createMemo(() => {
     const num = parseFloat(props.solAmount);
     return isNaN(num) ? 0 : num;
   });
 
   const isValidAmount = createMemo(() => {
-    // TODO: RE-ADD MINIMUM 0.05 SOLANA AFTER TESTING INTEGRATIONS
-    return solAmountNum() >= 0.001; // Changed from 0.05 for testing
+    return solAmountNum() >= MIN_SOL_AMOUNT;
   });
 
   const splitdoAmount = createMemo(() => {
-    return Math.floor(solAmountNum() * 20000); // Approximate rate: 1 SOL = 20,000 SPLITDO
+    // Calculate SPLITDO amount: SOL / exchange_rate
+    // If exchange_rate is 0.11, then 1 SOL = 1/0.11 = ~9.09 SPLITDO
+    if (props.exchangeRate <= 0) return 0;
+    return Math.floor((solAmountNum() / props.exchangeRate) * 100) / 100; // Round to 2 decimals
+  });
+
+  const solPerSplitdo = createMemo(() => {
+    return props.exchangeRate;
+  });
+
+  const splitdoPerSol = createMemo(() => {
+    if (props.exchangeRate <= 0) return 0;
+    return Math.floor((1 / props.exchangeRate) * 100) / 100;
   });
 
   const handleExchange = async () => {
@@ -244,8 +274,8 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
           type="number"
           value={props.solAmount}
           onInput={(e) => props.setSolAmount(e.currentTarget.value)}
-          placeholder="Enter SOL amount (min 0.001)"
-          min="0.001"
+          placeholder={`Enter SOL amount (min ${MIN_SOL_AMOUNT})`}
+          min={MIN_SOL_AMOUNT}
           step="0.01"
           class={`w-full px-4 py-3 rounded-lg border transition-colors duration-200 ${
             props.isDark
@@ -255,7 +285,7 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
         />
         <Show when={props.solAmount && !isValidAmount()}>
           <p class="text-red-500 text-sm mt-1">
-            Minimum amount is 0.001 SOL
+            Minimum amount is {MIN_SOL_AMOUNT} SOL
           </p>
         </Show>
       </div>
@@ -284,7 +314,7 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
                 You receive:
               </span>
               <span class="text-sm font-medium text-green-500">
-                ~{splitdoAmount().toLocaleString()} SPLITDO
+                ~{splitdoAmount().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SPLITDO
               </span>
             </div>
             <div class={`flex justify-between pt-2 border-t ${
@@ -294,7 +324,7 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
                 Exchange rate:
               </span>
               <span class={`text-xs ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                1 SOL ≈ 20,000 SPLITDO
+                1 SOL ≈ {splitdoPerSol()} SPLITDO (${solPerSplitdo()} per token)
               </span>
             </div>
           </div>
@@ -334,9 +364,9 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
       </Show>
 
       <Show when={props.exchangeStatus === 'success'}>
-        <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
-          <p class="text-green-700 text-sm">
-            ✅ Exchange completed successfully! Your SPLITDO tokens will appear in your wallet shortly.
+        <div class="p-3 bg-green-50 border border-green-200">
+          <p class="text-green-700 text-sm font-medium">
+            Exchange completed successfully! Your SPLITDO tokens will appear in your wallet shortly.
           </p>
         </div>
       </Show>

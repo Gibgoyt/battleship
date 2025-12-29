@@ -203,13 +203,29 @@ const WalletModal: Component<WalletModalProps> = (props) => {
                 } ${!wallet.detected ? 'border-dashed' : ''}`}
               >
                 <div class="flex items-center space-x-4">
-                  <div class={`w-12 h-12 rounded-xl flex items-center justify-center text-white text-2xl ${
-                    wallet.id === 'phantom'
-                      ? 'bg-gradient-to-br from-purple-500 to-pink-500'
-                      : 'bg-gradient-to-br from-orange-500 to-yellow-500'
-                  }`}>
-                    {wallet.icon}
-                  </div>
+                  <Show
+                    when={wallet.id === 'phantom'}
+                    fallback={
+                      <div class={`w-12 h-12 rounded-xl flex items-center justify-center text-white text-2xl ${
+                        wallet.id === 'phantom'
+                          ? 'bg-gradient-to-br from-purple-500 to-pink-500'
+                          : 'bg-gradient-to-br from-orange-500 to-yellow-500'
+                      }`}>
+                        {wallet.icon}
+                      </div>
+                    }
+                  >
+                    <div class="w-12 h-12 flex items-center justify-center">
+                      <img
+                        src={props.isDark
+                          ? "https://mintcdn.com/phantom-e50e2e68/fkWrmnMWhjoXSGZ9/logo/phantom-light.svg?fit=max&auto=format&n=fkWrmnMWhjoXSGZ9&q=85&s=c21a66db70347ca7a31053b98a0b5b0a"
+                          : "https://mintcdn.com/phantom-e50e2e68/fkWrmnMWhjoXSGZ9/logo/phantom-dark.svg?fit=max&auto=format&n=fkWrmnMWhjoXSGZ9&q=85&s=af17fb78921412073a894ea97523898c"
+                        }
+                        alt="Phantom"
+                        class="w-12 h-12"
+                      />
+                    </div>
+                  </Show>
                   <div class="flex-1">
                     <div class="flex items-center space-x-2">
                       <h3 class="font-semibold text-lg">{wallet.name}</h3>
@@ -278,7 +294,7 @@ const WalletModal: Component<WalletModalProps> = (props) => {
           props.isDark ? 'border-zinc-600 text-gray-400' : 'border-gray-200 text-gray-600'
         }`}>
           <p class="text-sm mb-2">
-            🚀 Connect your wallet to create a SPLITDO token account
+            Connect your wallet to create a SPLITDO token account
           </p>
           <p class="text-xs mb-1">
             Don't have a wallet? Click any "Not Installed" option to install

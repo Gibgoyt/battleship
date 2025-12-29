@@ -1,6 +1,6 @@
 import type { Component } from 'solid-js';
-import { Show } from 'solid-js';
-import { useSplitdoATA, useExchangeModal } from 'src/lib/wallet/wallet-reactive-store';
+import { Show, createEffect, createMemo } from 'solid-js';
+import { useSplitdoATA, useExchangeModal, useProgramInfo } from 'src/lib/wallet/wallet-reactive-store';
 
 export interface ExchangeSectionProps {
   isDark: boolean;
@@ -9,6 +9,20 @@ export interface ExchangeSectionProps {
 export const ExchangeSection: Component<ExchangeSectionProps> = (props) => {
   const { splitdoATA } = useSplitdoATA();
   const { openExchangeModal } = useExchangeModal();
+  const { programInfo, fetchProgramInfo } = useProgramInfo();
+
+  // Fetch program info when section is mounted and user has SPLITDO account
+  createEffect(() => {
+    if (splitdoATA().status === 'exists') {
+      fetchProgramInfo();
+    }
+  });
+
+  const splitdoPerSol = createMemo(() => {
+    const rate = programInfo().exchangeRate;
+    if (rate <= 0) return 0;
+    return Math.floor((1 / rate) * 100) / 100;
+  });
 
   const handleExchangeClick = () => {
     openExchangeModal();
@@ -17,27 +31,21 @@ export const ExchangeSection: Component<ExchangeSectionProps> = (props) => {
   // Only show exchange section if user has a SPLITDO account
   return (
     <Show when={splitdoATA().status === 'exists'}>
-      <div class={`p-6 rounded-lg border shadow-lg ${
-        props.isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'
+      <div class={`p-6 border-l-4 ${
+        props.isDark ? 'bg-zinc-800/30 border-blue-500' : 'bg-blue-50 border-blue-500'
       }`}>
         {/* Header */}
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h3 class={`text-lg font-semibold ${
-              props.isDark ? 'text-white' : 'text-gray-900'
-            }`}>
-              Exchange Tokens
-            </h3>
-            <p class={`text-sm mt-1 ${
-              props.isDark ? 'text-gray-400' : 'text-gray-600'
-            }`}>
-              Convert SOL to SPLITDO at current market rates
-            </p>
-          </div>
-          {/* Exchange Icon */}
-          <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-            <span class="text-white text-lg">⚡</span>
-          </div>
+        <div class="mb-4">
+          <h2 class={`text-xl font-semibold ${
+            props.isDark ? 'text-white' : 'text-gray-900'
+          }`}>
+            Token Exchange
+          </h2>
+          <p class={`text-sm mt-1 ${
+            props.isDark ? 'text-gray-400' : 'text-gray-600'
+          }`}>
+            Convert SOL to SPLITDO tokens
+          </p>
         </div>
 
         {/* Exchange Info */}
@@ -50,7 +58,9 @@ export const ExchangeSection: Component<ExchangeSectionProps> = (props) => {
                 Exchange Rate
               </div>
               <div class={`text-sm font-medium ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                1 SOL ≈ ~20,000 SPLITDO
+                <Show when={!programInfo().loading} fallback="Loading...">
+                  1 SOL ≈ {splitdoPerSol()} SPLITDO
+                </Show>
               </div>
             </div>
             <div>
@@ -58,7 +68,7 @@ export const ExchangeSection: Component<ExchangeSectionProps> = (props) => {
                 Minimum Amount
               </div>
               <div class={`text-sm font-medium ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                0.05 SOL
+                0.01 SOL
               </div>
             </div>
           </div>
@@ -67,16 +77,16 @@ export const ExchangeSection: Component<ExchangeSectionProps> = (props) => {
         {/* Exchange Button */}
         <button
           onClick={handleExchangeClick}
-          class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          Exchange Tokens
+          Start Token Exchange
         </button>
 
         {/* Additional Info */}
-        <div class={`mt-3 text-xs text-center ${
-          props.isDark ? 'text-gray-500' : 'text-gray-500'
+        <div class={`mt-4 text-xs ${
+          props.isDark ? 'text-gray-500' : 'text-gray-600'
         }`}>
-          Powered by Phantom wallet integration
+          <p>Secure exchange powered by Phantom wallet</p>
         </div>
       </div>
     </Show>

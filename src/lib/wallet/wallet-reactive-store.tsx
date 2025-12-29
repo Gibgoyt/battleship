@@ -46,6 +46,11 @@ const [splitdoATA, setSplitdoATA] = createSignal<ATAInfo>({ status: 'unknown' })
 const [isExchangeModalOpen, setIsExchangeModalOpen] = createSignal(false);
 const [exchangeStatus, setExchangeStatus] = createSignal<'idle' | 'loading' | 'success' | 'error'>('idle');
 const [exchangeError, setExchangeError] = createSignal<string | null>(null);
+const [programInfo, setProgramInfo] = createSignal<{ exchangeRate: number; loading: boolean; error: string | null }>({
+  exchangeRate: 0.11, // Default fallback value
+  loading: false,
+  error: null
+});
 
 // Store Firebase token
 let firebaseToken: string | undefined = undefined;
@@ -797,7 +802,8 @@ export const useMultiWallet = () => {
     wallets.push({
       id: 'phantom',
       name: 'Phantom',
-      icon: '🟣',
+      icon: '🟣', // Fallback emoji
+      iconUrl: 'https://mintcdn.com/phantom-e50e2e68/fkWrmnMWhjoXSGZ9/logo/phantom-light.svg?fit=max&auto=format&n=fkWrmnMWhjoXSGZ9&q=85&s=c21a66db70347ca7a31053b98a0b5b0a',
       description: phantomDetected
         ? 'Popular Solana wallet with DeFi support'
         : 'Install Phantom to connect your Solana wallet',
@@ -858,6 +864,50 @@ export const useExchangeModal = () => {
   };
 };
 
+// Fetch program info including exchange rate
+const fetchProgramInfo = async () => {
+  console.log('[ReactiveWalletStore] Fetching program info...');
+  setProgramInfo({ ...programInfo(), loading: true, error: null });
+
+  try {
+    const response = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/program/info');
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch program info');
+    }
+
+    const result = await response.json();
+
+    if (!result.success || !result.data) {
+      throw new Error('Invalid response from program info API');
+    }
+
+    const exchangeRate = result.data.exchange_rate || 0.11;
+    console.log('[ReactiveWalletStore] Fetched exchange rate:', exchangeRate);
+
+    setProgramInfo({
+      exchangeRate,
+      loading: false,
+      error: null
+    });
+  } catch (error) {
+    console.error('[ReactiveWalletStore] Failed to fetch program info:', error);
+    setProgramInfo({
+      ...programInfo(),
+      loading: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch exchange rate'
+    });
+  }
+};
+
+// Program Info Hook
+export const useProgramInfo = () => {
+  return {
+    programInfo,
+    fetchProgramInfo
+  };
+};
+
 // Exchange Operations Hook
 export const useExchange = () => {
   return {
@@ -881,9 +931,9 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
     }
 
     // 2. Validate SOL amount
-    // TODO: RE-ADD MINIMUM 0.05 SOLANA AFTER TESTING INTEGRATIONS
-    if (solAmount < 0.001) { // Changed from 0.05 for testing
-      throw new Error('Minimum exchange amount is 0.001 SOL');
+    const MIN_SOL_AMOUNT = 0.01;
+    if (solAmount < MIN_SOL_AMOUNT) {
+      throw new Error(`Minimum exchange amount is ${MIN_SOL_AMOUNT} SOL`);
     }
 
     // 3. Get SOL vault address from backend

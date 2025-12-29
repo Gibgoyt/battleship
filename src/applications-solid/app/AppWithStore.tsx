@@ -18,7 +18,6 @@ import {
 } from './middleware'
 import { initializeWalletStore } from 'src/lib/wallet/wallet-reactive-store'
 import DashboardPage from './pages/dashboard/index'
-import CounterPage from './pages/counter/index'
 import ProfilePage from './pages/profile/index'
 import WalletPageReactive from './pages/wallet/WalletPageReactive'
 
@@ -45,7 +44,7 @@ const AppContent: Component = () => {
       ? pathSegments[1]
       : 'dashboard'
 
-    if (['dashboard', 'counter', 'profile', 'wallet'].includes(pageName)) {
+    if (['dashboard', 'profile', 'wallet'].includes(pageName)) {
       setCurrentPage(pageName as Page)
     }
   })
@@ -66,7 +65,7 @@ const AppContent: Component = () => {
       ? pathSegments[1]
       : 'dashboard'
 
-    if (['dashboard', 'counter', 'profile', 'wallet'].includes(pageName)) {
+    if (['dashboard', 'profile', 'wallet'].includes(pageName)) {
       setCurrentPage(pageName as Page)
     }
   })
@@ -86,8 +85,6 @@ const AppContent: Component = () => {
     switch (page) {
       case 'dashboard':
         return <DashboardPage isDark={isDark()} />
-      case 'counter':
-        return <CounterPage isDark={isDark()} />
       case 'profile':
         return <ProfilePage isDark={isDark()} />
       case 'wallet':
