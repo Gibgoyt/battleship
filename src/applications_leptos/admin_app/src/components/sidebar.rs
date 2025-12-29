@@ -83,6 +83,11 @@ pub fn Sidebar() -> impl IntoView {
         }
     };
 
+    // Handler to close sidebar on navigation (for mobile)
+    let close_sidebar_on_nav = move |_| {
+        set_sidebar_open.set(false);
+    };
+
     let button_class = "w-full p-3 mb-2 rounded-lg transition-colors hover:bg-[#1e293b] flex items-center justify-center gap-2 text-gray-300 text-sm";
 
     view! {
@@ -110,35 +115,35 @@ pub fn Sidebar() -> impl IntoView {
 
             // Navigation menu
             <nav class="flex-1">
-                <A href="/admin/dashboard" class=move || link_class("/admin/dashboard")>
+                <A href="/admin/dashboard" class=move || link_class("/admin/dashboard") on:click=close_sidebar_on_nav>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                     </svg>
                     <span>"Dashboard"</span>
                 </A>
 
-                <A href="/admin/project" class=move || link_class("/admin/project")>
+                <A href="/admin/project" class=move || link_class("/admin/project") on:click=close_sidebar_on_nav>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
                     </svg>
                     <span>"Project"</span>
                 </A>
 
-                <A href="/admin/product" class=move || link_class("/admin/product")>
+                <A href="/admin/product" class=move || link_class("/admin/product") on:click=close_sidebar_on_nav>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                     </svg>
                     <span>"Product"</span>
                 </A>
 
-                <A href="/admin/development" class=move || link_class("/admin/development")>
+                <A href="/admin/development" class=move || link_class("/admin/development") on:click=close_sidebar_on_nav>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
                     </svg>
                     <span>"Development"</span>
                 </A>
 
-                <A href="/admin/protocol-demo" class=move || link_class("/admin/protocol-demo")>
+                <A href="/admin/protocol-demo" class=move || link_class("/admin/protocol-demo") on:click=close_sidebar_on_nav>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
