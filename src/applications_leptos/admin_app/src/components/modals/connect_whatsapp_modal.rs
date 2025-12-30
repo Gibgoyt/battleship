@@ -16,8 +16,7 @@ pub fn ConnectWhatsAppModal(
 
     // QR code state
     let (qr_code_data, set_qr_code_data) = create_signal(Option::<String>::None);
-    let (qr_instructions, set_qr_instructions) = create_signal(Option::<String>::None);
-    let (expires_in, set_expires_in) = create_signal(Option::<u32>::None);
+    let (session_id, set_session_id) = create_signal(Option::<String>::None);
 
     // Reset state when modal closes
     create_effect(move |_| {
@@ -26,8 +25,7 @@ pub fn ConnectWhatsAppModal(
             set_loading.set(false);
             set_error_message.set(None);
             set_qr_code_data.set(None);
-            set_qr_instructions.set(None);
-            set_expires_in.set(None);
+            set_session_id.set(None);
         }
     });
 
@@ -51,8 +49,7 @@ pub fn ConnectWhatsAppModal(
 
                     // Set QR code data
                     set_qr_code_data.set(Some(response.qr_code));
-                    set_qr_instructions.set(Some(response.instructions));
-                    set_expires_in.set(Some(response.expires_in_seconds));
+                    set_session_id.set(Some(response.session_id));
 
                     // Start polling for connection status
                     start_connection_polling(on_success);
@@ -87,23 +84,17 @@ pub fn ConnectWhatsAppModal(
                             <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
                                 "Scan this QR code with your WhatsApp mobile app"
                             </p>
-                            {move || if let Some(instructions) = qr_instructions.get() {
-                                view! {
-                                    <p class="text-xs text-gray-500 dark:text-gray-500">
-                                        {instructions}
-                                    </p>
-                                }.into_view()
-                            } else {
-                                view! {}.into_view()
-                            }}
+                            <p class="text-xs text-gray-500 dark:text-gray-500">
+                                "Open WhatsApp > Settings > Linked Devices > Link a Device"
+                            </p>
                         </div>
 
-                        // Expiry notice
-                        {move || if let Some(expires) = expires_in.get() {
+                        // Session info
+                        {move || if let Some(session) = session_id.get() {
                             view! {
-                                <div class="mt-4 px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                                    <p class="text-xs text-yellow-700 dark:text-yellow-300 text-center">
-                                        {format!("QR code expires in {} seconds", expires)}
+                                <div class="mt-4 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                                    <p class="text-xs text-blue-700 dark:text-blue-300 text-center">
+                                        {"Session: "} {session}
                                     </p>
                                 </div>
                             }.into_view()

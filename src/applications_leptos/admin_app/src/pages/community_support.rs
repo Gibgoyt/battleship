@@ -1,7 +1,7 @@
 use leptos::*;
 use wasm_bindgen_futures::spawn_local;
 use crate::api::whatsapp_client::{self, WhatsAppAccount};
-use crate::components::modals::ConnectWhatsAppModal;
+use crate::components::modals::{ConnectWhatsAppModal, AuthenticateWhatsAppModal};
 
 #[derive(Clone, Debug)]
 pub struct MockMessage {
@@ -27,6 +27,10 @@ pub fn CommunitySupport() -> impl IntoView {
 
     // Modal state for connecting WhatsApp accounts
     let (show_connect_modal, set_show_connect_modal) = create_signal(false);
+
+    // Modal state for authenticating WhatsApp accounts
+    let (show_auth_modal, set_show_auth_modal) = create_signal(false);
+    let (auth_account_jid, set_auth_account_jid) = create_signal::<Option<String>>(None);
 
     // Mock messages for each platform
     let mock_messages = vec![
@@ -327,10 +331,13 @@ pub fn CommunitySupport() -> impl IntoView {
                                                 "disconnected"
                                             };
 
+                                            let account_jid = account.jid.clone();
+                                            let is_authenticated = account.authenticated;
+
                                             view! {
                                                 <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
                                                     <div class="flex justify-between items-start mb-2">
-                                                        <div>
+                                                        <div class="flex-1">
                                                             <div class="font-medium text-gray-900 dark:text-white text-sm">
                                                                 {account.device_name.clone()}
                                                             </div>
@@ -345,7 +352,28 @@ pub fn CommunitySupport() -> impl IntoView {
                                                                 {"Platform: "} {account.platform.clone()}
                                                             </div>
                                                         </div>
-                                                        {status_badge(&status)}
+                                                        <div class="flex items-center gap-2">
+                                                            {if !is_authenticated {
+                                                                view! {
+                                                                    <button
+                                                                        on:click=move |_| {
+                                                                            set_auth_account_jid.set(Some(account_jid.clone()));
+                                                                            set_show_auth_modal.set(true);
+                                                                        }
+                                                                        class="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors flex items-center gap-1"
+                                                                        title="Authenticate Account"
+                                                                    >
+                                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                                                        </svg>
+                                                                        "Authenticate"
+                                                                    </button>
+                                                                }.into_view()
+                                                            } else {
+                                                                view! {}.into_view()
+                                                            }}
+                                                            {status_badge(&status)}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             }
@@ -425,6 +453,21 @@ pub fn CommunitySupport() -> impl IntoView {
             on_close=Callback::new(move |_| set_show_connect_modal.set(false))
             on_success=Callback::new(move |_| {
                 set_show_connect_modal.set(false);
+                refresh_whatsapp_accounts();
+            })
+        />
+
+        // Modal for authenticating WhatsApp accounts
+        <AuthenticateWhatsAppModal
+            show=show_auth_modal
+            account_jid=auth_account_jid
+            on_close=Callback::new(move |_| {
+                set_show_auth_modal.set(false);
+                set_auth_account_jid.set(None);
+            })
+            on_success=Callback::new(move |_| {
+                set_show_auth_modal.set(false);
+                set_auth_account_jid.set(None);
                 refresh_whatsapp_accounts();
             })
         />

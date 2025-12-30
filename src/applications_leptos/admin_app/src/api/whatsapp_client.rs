@@ -34,11 +34,23 @@ pub struct CreateWhatsAppAccountRequest {
 pub struct QrCodeResponse {
     pub success: bool,
     pub message: String,
+    pub session_id: String,
     pub qr_code: String,
-    pub device_name: String,
-    pub expires_in_seconds: u32,
-    pub instructions: String,
-    pub user_id: String,
+    pub authenticated: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct QrCodeGetResponse {
+    pub success: bool,
+    pub message: String,
+    pub qr_code: Option<String>,
+    pub authenticated: bool,
+    pub connected: bool,
+    pub expires_at: Option<String>,
+    pub generated_at: Option<String>,
+    pub can_regenerate: bool,
+    pub status: String,
+    pub jid: String,
 }
 
 // JS interop - call window.adminApiFetch which automatically adds auth headers
@@ -156,7 +168,19 @@ pub async fn create_whatsapp_account(device_name: String) -> Result<QrCodeRespon
     let qr_response: QrCodeResponse = serde_wasm_bindgen::from_value(json_value)
         .map_err(|e| format!("Deserialization error: {:?}", e))?;
 
-    web_sys::console::log_1(&format!("Created WhatsApp account: {}", qr_response.device_name).into());
+    web_sys::console::log_1(&format!("Created WhatsApp account with session: {}", qr_response.session_id).into());
 
     Ok(qr_response)
+}
+
+// Get QR code for existing WhatsApp account
+pub async fn get_whatsapp_account_qr(jid: &str) -> Result<QrCodeGetResponse, String> {
+    web_sys::console::log_1(&format!("Getting QR code for account: {}", jid).into());
+
+    let url = format!("https://socials.splitdo.app:2087/api/v1/whatsapp/accounts/{}/qr", urlencoding::encode(jid));
+    let response: QrCodeGetResponse = whatsapp_api_fetch(&url, "GET").await?;
+
+    web_sys::console::log_1(&format!("QR code status: {}", response.status).into());
+
+    Ok(response)
 }
