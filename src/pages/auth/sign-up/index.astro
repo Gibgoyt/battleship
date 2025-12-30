@@ -1,0 +1,10 @@
+---
+import AuthLayout from 'src/layouts/AuthLayout.astro'
+import FirebaseSignUpFlow from 'src/components-svelte/auth/FirebaseSignUpFlow.svelte'
+
+export const prerender = true; // KEEP STATIC - client-side detection handles URL parameters
+---
+
+<AuthLayout title="Sign Up">
+	<FirebaseSignUpFlow client:only="svelte" />
+</AuthLayout>
