@@ -10,7 +10,7 @@ mod api;
 mod store;
 
 use components::{Sidebar, Header, DarkMode, SidebarState};
-use pages::{Dashboard, Project, Product, Development, ProtocolDemo};
+use pages::{Dashboard, Project, Product, Development, CommunitySupport};
 use store::AdminStore;
 
 fn initialize_dark_mode() -> bool {
@@ -80,7 +80,7 @@ fn App() -> impl IntoView {
                                 <Route path="/admin/project" view=Project/>
                                 <Route path="/admin/product" view=Product/>
                                 <Route path="/admin/development" view=Development/>
-                                <Route path="/admin/protocol-demo" view=ProtocolDemo/>
+                                <Route path="/admin/community-support" view=CommunitySupport/>
                             </Routes>
                         </main>
                     </div>
