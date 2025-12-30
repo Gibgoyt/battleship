@@ -1,0 +1,25 @@
+---
+import AuthLayout from 'src/layouts/AuthLayout.astro'
+import FirebaseSignUpForm from 'src/components-svelte/auth/FirebaseSignUpForm.svelte'
+import FirebaseSignUpForm_Step2 from 'src/components-svelte/auth/FirebaseSignUpForm_Step2.svelte'
+
+export const prerender = true;
+
+// Read URL parameters to determine which step to show
+const firebaseUserExists = Astro.url.searchParams.get('firebaseUserExists') === 'true'
+const backendUserExists = Astro.url.searchParams.get('backendUserExists') === 'false'
+
+// Determine which component to show
+const showStep2 = firebaseUserExists && backendUserExists === false
+const showStep1 = !showStep2
+---
+
+<AuthLayout title="Sign Up">
+	{showStep1 && (
+		<FirebaseSignUpForm client:only="svelte" />
+	)}
+
+	{showStep2 && (
+		<FirebaseSignUpForm_Step2 client:only="svelte" />
+	)}
+</AuthLayout>

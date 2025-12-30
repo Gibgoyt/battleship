@@ -63,6 +63,37 @@ try {
     })
   }
 
+  // After Firebase token validation succeeds, check if backend user exists
+  if (validation.isValid && !validation.isExpired) {
+    try {
+      // Check if backend user exists
+      const backendResponse = await fetch('https://devbackend.splitdo.app:8443/api/users/me', {
+        headers: {
+          'Authorization': `Bearer ${firebaseAuthToken.value}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (backendResponse.status === 404) {
+        // Firebase user exists but backend user doesn't
+        logger.info('Firebase user valid but backend user missing, redirecting to sign-up step 2');
+        return Astro.redirect('/auth/sign-up?firebaseUserExists=true&backendUserExists=false', 302);
+      }
+
+      if (!backendResponse.ok) {
+        throw new Error(`Backend user check failed: ${backendResponse.status}`);
+      }
+
+      // Both users exist, proceed normally
+      logger.debug('Both Firebase and backend users exist, proceeding to app');
+
+    } catch (error) {
+      logger.error('Backend user check failed', error);
+      // On error, allow app access but log warning
+      logger.warn('Proceeding to app despite backend check failure');
+    }
+  }
+
   logger.debug('Protected route access granted')
   // Token exists and is valid, allow access
 } catch (error) {
