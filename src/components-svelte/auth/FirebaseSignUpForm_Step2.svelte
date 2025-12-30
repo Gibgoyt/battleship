@@ -59,15 +59,17 @@
 
 	// Username validation
 	function validateUsername() {
-		if (username.length < 3) {
+		const trimmedUsername = username.trim();
+
+		if (trimmedUsername.length < 3) {
 			usernameError = 'Username must be at least 3 characters';
 			return false;
 		}
-		if (username.length > 50) {
+		if (trimmedUsername.length > 50) {
 			usernameError = 'Username must be less than 50 characters';
 			return false;
 		}
-		if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+		if (!/^[a-zA-Z0-9_-]+$/.test(trimmedUsername)) {
 			usernameError = 'Username can only contain letters, numbers, underscores, and dashes';
 			return false;
 		}
@@ -75,8 +77,14 @@
 		return true;
 	}
 
-	// Real-time username validation
-	$: validateUsername();
+	// Real-time username validation - only validate if user has started typing
+	$: {
+		if (username.length > 0) {
+			validateUsername();
+		} else {
+			usernameError = '';
+		}
+	}
 
 	function handleSubmit(e) {
 		e.preventDefault();
@@ -105,8 +113,8 @@
 
 		try {
 			// Get Firebase token from storage
-			const { getTokens } = await import('src/lib/auth/firebase-token-storage.ts');
-			const tokens = getTokens();
+			const { getFirebaseTokens } = await import('src/lib/auth/firebase-token-storage.ts');
+			const tokens = getFirebaseTokens();
 
 			if (!tokens || !tokens.idToken) {
 				showError('Authentication token not found. Please start the sign-up process again.');
@@ -121,7 +129,8 @@
 				method: 'POST',
 				headers: {
 					'Authorization': `Bearer ${tokens.idToken}`,
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					'Origin': 'https://splitdo.app'
 				},
 				body: JSON.stringify({
 					username: username,

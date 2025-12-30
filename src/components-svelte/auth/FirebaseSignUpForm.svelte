@@ -121,7 +121,8 @@
 					const backendResponse = await fetch('https://devbackend.splitdo.app:8443/api/users/me', {
 						headers: {
 							'Authorization': `Bearer ${idToken}`,
-							'Content-Type': 'application/json'
+							'Content-Type': 'application/json',
+							'Origin': 'https://splitdo.app'
 						}
 					});
 
