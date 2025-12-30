@@ -6,31 +6,22 @@ use web_sys::Response;
 // WhatsApp API response structures matching the backend
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct WhatsAppAccountsResponse {
+    pub success: bool,
+    pub message: String,
     pub accounts: Vec<WhatsAppAccount>,
     pub count: usize,
-    pub user_id: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct WhatsAppAccount {
     pub jid: String,
-    pub device_name: Option<String>,
-    pub device_id: Option<u64>,
-    pub user_id: Option<String>,
-    pub platform: Option<String>,
-    pub account_type: Option<String>,
-    pub session_dir: Option<String>,
-    pub registered_at: Option<u64>,
-    pub connection_state: Option<ConnectionState>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct ConnectionState {
-    pub status: String,
-    pub connected: Option<bool>,
-    pub authenticated: Option<bool>,
-    pub ready: Option<bool>,
-    pub app_state_synced: Option<bool>,
+    pub phone_number: Option<String>,
+    pub device_name: String,
+    pub platform: String,
+    pub connected: bool,
+    pub authenticated: bool,
+    pub created_at: String,
+    pub last_seen: String,
 }
 
 // Request/Response types for creating WhatsApp accounts
@@ -99,7 +90,7 @@ pub async fn fetch_whatsapp_accounts() -> Result<Vec<WhatsAppAccount>, String> {
 
     let response: WhatsAppAccountsResponse = whatsapp_api_fetch("https://socials.splitdo.app:2087/api/v1/whatsapp/accounts", "GET").await?;
 
-    web_sys::console::log_1(&format!("Fetched {} WhatsApp accounts for user {}", response.count, response.user_id).into());
+    web_sys::console::log_1(&format!("Fetched {} WhatsApp accounts. {}", response.count, response.message).into());
 
     Ok(response.accounts)
 }

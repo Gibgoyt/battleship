@@ -319,20 +319,30 @@ pub fn CommunitySupport() -> impl IntoView {
                                 view! {
                                     <div class="space-y-3">
                                         {whatsapp_accounts.get().into_iter().map(|account| {
-                                            let status = account.connection_state
-                                                .as_ref()
-                                                .map(|cs| cs.status.clone())
-                                                .unwrap_or("unknown".to_string());
+                                            let status = if account.connected && account.authenticated {
+                                                "ready"
+                                            } else if account.connected {
+                                                "connecting"
+                                            } else {
+                                                "disconnected"
+                                            };
 
                                             view! {
                                                 <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
                                                     <div class="flex justify-between items-start mb-2">
                                                         <div>
                                                             <div class="font-medium text-gray-900 dark:text-white text-sm">
-                                                                {account.device_name.unwrap_or("WhatsApp Bot".to_string())}
+                                                                {account.device_name.clone()}
                                                             </div>
                                                             <div class="text-xs text-gray-500 dark:text-gray-400">
-                                                                {account.jid}
+                                                                {if let Some(phone) = &account.phone_number {
+                                                                    format!("{} ({})", phone, account.jid)
+                                                                } else {
+                                                                    account.jid.clone()
+                                                                }}
+                                                            </div>
+                                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                                {"Platform: "} {account.platform.clone()}
                                                             </div>
                                                         </div>
                                                         {status_badge(&status)}
