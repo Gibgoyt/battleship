@@ -22,10 +22,10 @@ export const ExchangeSection: Component<ExchangeSectionProps> = (props) => {
     }
   });
 
-  const splitdoPerSol = createMemo(() => {
+  const splitdoUsdRate = createMemo(() => {
     const rate = programInfo().exchangeRate;
     if (rate <= 0) return 0;
-    return Math.floor((1 / rate) * 100) / 100;
+    return rate.toFixed(2);
   });
 
   const handleExchangeClick = () => {
@@ -63,7 +63,7 @@ export const ExchangeSection: Component<ExchangeSectionProps> = (props) => {
               </div>
               <div class={`text-sm font-medium ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
                 <Show when={!programInfo().loading} fallback="Loading...">
-                  1 SOL ≈ {splitdoPerSol()} SPLITDO
+                  1 SPLITDO = USDC {splitdoUsdRate()}
                 </Show>
               </div>
             </div>
