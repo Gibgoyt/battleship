@@ -24,6 +24,7 @@ import WalletPageReactive from './pages/wallet/WalletPageReactive'
 const AppContent: Component = () => {
   const [currentPage, setCurrentPage] = createSignal<Page>('dashboard')
   const [isDark, setIsDark] = createSignal(false)
+  const [isSidebarOpen, setIsSidebarOpen] = createSignal(false)
   const middleware = useMiddleware()
 
   // Detect theme from localStorage and DOM class (shared with Astro app)
@@ -54,6 +55,7 @@ const AppContent: Component = () => {
     const newPath = `/app/${page}`
     middleware.navigate(newPath)
     setCurrentPage(page)
+    setIsSidebarOpen(false) // Close sidebar on mobile after navigation
   }
 
   // Listen to route changes
@@ -115,10 +117,32 @@ const AppContent: Component = () => {
         currentPage={currentPage()}
         onPageChange={handlePageChange}
         isDark={isDark()}
+        isOpen={isSidebarOpen()}
+        onClose={() => setIsSidebarOpen(false)}
       />
 
       {/* Main Content */}
-      <main class={`flex-1 overflow-auto ml-64 transition-all duration-300`}>
+      <main class={`flex-1 overflow-auto lg:ml-64 transition-all duration-300`}>
+        {/* Mobile Header with Hamburger */}
+        <div class={`lg:hidden sticky top-0 z-30 flex items-center justify-between p-4 border-b ${
+          isDark() ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-gray-200'
+        }`}>
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            class={`p-2 rounded-md ${
+              isDark() ? 'hover:bg-zinc-800 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
+            }`}
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <h1 class={`text-lg font-bold ${isDark() ? 'text-white' : 'text-gray-900'}`}>
+            {currentPage().charAt(0).toUpperCase() + currentPage().slice(1)}
+          </h1>
+          <div class="w-10" /> {/* Spacer for alignment */}
+        </div>
+
         {renderPage()}
       </main>
     </div>

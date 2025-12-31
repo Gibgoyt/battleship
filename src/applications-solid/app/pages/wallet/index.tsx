@@ -61,19 +61,25 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
   };
 
   return (
-    <div class="p-8 space-y-6">
-      <div class="flex items-center justify-between">
-        <h2 class={`text-2xl font-bold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-          Wallet
-        </h2>
-        <div class="flex space-x-3">
+    <div class="p-4 md:p-8 space-y-8">
+      {/* Header */}
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-gray-200 dark:border-zinc-800">
+        <div>
+          <h2 class={`text-2xl md:text-3xl font-bold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+            Your Wallet
+          </h2>
+          <p class={`text-sm mt-1 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            Manage your SPLITDO tokens and balances
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
           {/* Show Connect/Disconnect Button */}
           <Show
             when={connectionStatus() === 'connected'}
             fallback={
               <button
                 onClick={() => openModal()}
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                class="w-full sm:w-auto px-6 py-3 bg-[#00d9ff] text-white hover:bg-[#00b8d4] transition-colors text-sm md:text-base font-semibold"
               >
                 Connect Wallet
               </button>
@@ -81,7 +87,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
           >
             <button
               onClick={() => disconnectWallet()}
-              class={`px-4 py-2 rounded-lg border transition-colors ${
+              class={`w-full sm:w-auto px-6 py-3 border transition-colors text-sm md:text-base font-semibold ${
                 props.isDark
                   ? 'border-red-600 text-red-400 hover:bg-red-600 hover:text-white'
                   : 'border-red-500 text-red-600 hover:bg-red-500 hover:text-white'
@@ -107,222 +113,235 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
       </Show>
 
       {/* Balance Overview */}
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* SPLITDO Balance */}
-        <div class={`p-6 rounded-lg border shadow-professional card-hover ${props.isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'}`}>
-          <div class="flex items-center justify-between mb-2">
-            <h3 class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-              SPLITDO Token
-            </h3>
-            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-              <span class="text-white text-sm font-bold">S</span>
-            </div>
-          </div>
+      <div class="space-y-6">
+        <h3 class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+          Balances
+        </h3>
 
-          {/* SPLITDO ATA Status - Reactive SolidJS */}
-          <Show when={splitdoATA().status === 'exists'}>
-            <p class={`text-2xl font-bold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-              {formatCurrency(splitdoATA().balance?.uiAmount || 0)}
-            </p>
-            <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-              Account: {formatAddress(splitdoATA().address || '')}
-            </p>
-          </Show>
-
-          <Show when={splitdoATA().status === 'not_found'}>
-            <div class="space-y-3">
-              <p class={`text-lg ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                No SPLITDO Account
-              </p>
-              <button
-                onClick={() => openModal()}
-                class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Create SPLITDO Token Account
-              </button>
-              <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                Connect wallet to create your SPLITDO token account
-              </p>
-            </div>
-          </Show>
-
-          <Show when={splitdoATA().status === 'creating'}>
-            <div class="space-y-2">
-              <p class={`text-lg text-blue-500`}>
-                Creating Account...
-              </p>
-              <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="bg-blue-600 h-2 rounded-full animate-pulse" style="width: 60%"></div>
+        <div class="space-y-4">
+          {/* SPLITDO Balance */}
+          <div class={`p-6 border-l-4 border-[#00d9ff] ${props.isDark ? 'bg-zinc-800/30' : 'bg-gray-50'}`}>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#00d9ff] rounded-full flex items-center justify-center">
+                  <span class="text-white text-lg font-bold">S</span>
+                </div>
+                <div>
+                  <h4 class={`text-sm font-medium uppercase tracking-wider ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    SPLITDO Token
+                  </h4>
+                </div>
               </div>
-              <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                Please confirm transaction in your wallet
-              </p>
             </div>
-          </Show>
 
-          <Show when={splitdoATA().status === 'checking'}>
-            <p class={`text-lg ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Checking account status...
-            </p>
-          </Show>
-
-          <Show when={splitdoATA().status === 'error' && splitdoATA().error}>
-            <div class="space-y-2">
-              <p class={`text-lg text-red-500`}>
-                Error
+            {/* SPLITDO ATA Status - Reactive SolidJS */}
+            <Show when={splitdoATA().status === 'exists'}>
+              <p class={`text-3xl md:text-4xl font-bold mb-2 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+                {formatCurrency(splitdoATA().balance?.uiAmount || 0)}
               </p>
-              <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                {splitdoATA().error}
+              <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+                {formatAddress(splitdoATA().address || '')}
               </p>
-              <button
-                onClick={() => checkSplitdoBalance()}
-                class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                Retry
-              </button>
-            </div>
-          </Show>
-        </div>
+            </Show>
 
-        {/* USDC Balance */}
-        <div class={`p-6 rounded-lg border shadow-professional card-hover ${props.isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'}`}>
-          <div class="flex items-center justify-between mb-2">
-            <h3 class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-              USDC
-            </h3>
-            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-              <span class="text-white text-sm font-bold">$</span>
-            </div>
+            <Show when={splitdoATA().status === 'not_found'}>
+              <div class="space-y-3 mt-4">
+                <p class={`text-lg ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  No Account Found
+                </p>
+                <button
+                  onClick={() => openModal()}
+                  class="px-6 py-2 bg-[#00d9ff] text-white hover:bg-[#00b8d4] transition-colors font-semibold"
+                >
+                  Create Account
+                </button>
+                <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  Connect wallet to create your SPLITDO token account
+                </p>
+              </div>
+            </Show>
+
+            <Show when={splitdoATA().status === 'creating'}>
+              <div class="space-y-2 mt-4">
+                <p class="text-lg text-[#00d9ff] font-semibold">
+                  Creating Account...
+                </p>
+                <div class={`w-full h-2 ${props.isDark ? 'bg-zinc-700' : 'bg-gray-200'}`}>
+                  <div class="bg-[#00d9ff] h-2 animate-pulse" style="width: 60%"></div>
+                </div>
+                <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  Please confirm transaction in your wallet
+                </p>
+              </div>
+            </Show>
+
+            <Show when={splitdoATA().status === 'checking'}>
+              <p class={`text-lg mt-4 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Checking account status...
+              </p>
+            </Show>
+
+            <Show when={splitdoATA().status === 'error' && splitdoATA().error}>
+              <div class="space-y-2 mt-4">
+                <p class="text-lg text-red-500 font-semibold">Error</p>
+                <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {splitdoATA().error}
+                </p>
+                <button
+                  onClick={() => checkSplitdoBalance()}
+                  class="px-6 py-2 bg-gray-600 text-white hover:bg-gray-700 transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            </Show>
           </div>
-          <p class={`text-2xl font-bold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-            {formatCurrency(0, 'USDC')}
-          </p>
-          <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-            USD Coin
-          </p>
-        </div>
 
-        {/* SOL Balance */}
-        <div class={`p-6 rounded-lg border shadow-professional card-hover ${props.isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'}`}>
-          <div class="flex items-center justify-between mb-2">
-            <h3 class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-              Solana
-            </h3>
-            <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-              <span class="text-white text-sm font-bold">◎</span>
+          {/* SOL Balance */}
+          <div class={`p-6 border-l-4 border-purple-500 ${props.isDark ? 'bg-zinc-800/30' : 'bg-purple-50'}`}>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                  <span class="text-white text-lg font-bold">◎</span>
+                </div>
+                <div>
+                  <h4 class={`text-sm font-medium uppercase tracking-wider ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Solana
+                  </h4>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <Show
-            when={connectionStatus() === 'connected' && wallet()}
-            fallback={
-              <div>
+            <Show
+              when={connectionStatus() === 'connected' && wallet()}
+              fallback={
                 <p class={`text-lg ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                   Connect wallet to see balance
                 </p>
-              </div>
-            }
-          >
-            <p class={`text-2xl font-bold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-              {formatCurrency(solBalance()?.sol || 0, 'SOL')}
-            </p>
-            <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-              For transaction fees
-            </p>
-            <Show when={wallet()?.address}>
-              <p class={`text-xs mt-2 ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                {formatAddress(wallet()?.address || '')}
+              }
+            >
+              <p class={`text-3xl md:text-4xl font-bold mb-2 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+                {formatCurrency(solBalance()?.sol || 0, 'SOL')}
               </p>
+              <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+                For transaction fees
+              </p>
+              <Show when={wallet()?.address}>
+                <p class={`text-xs mt-2 ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  {formatAddress(wallet()?.address || '')}
+                </p>
+              </Show>
             </Show>
-          </Show>
+          </div>
         </div>
       </div>
 
-      {/* Swap/Trade Area */}
-      <div class={`p-6 rounded-lg border shadow-professional ${props.isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'}`}>
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h3 class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-              Token Swap
-            </h3>
+      {/* Quick Actions */}
+      <div class="pt-6 border-t border-gray-200 dark:border-zinc-800">
+        <h3 class={`text-lg font-semibold mb-4 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+          Quick Actions
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <button
+            disabled
+            class={`p-6 border-l-4 border-gray-500 text-left ${props.isDark ? 'bg-zinc-800/30' : 'bg-gray-50'} opacity-60 cursor-not-allowed`}
+          >
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+              </div>
+              <div>
+                <h4 class={`font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>Token Swap</h4>
+                <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>Coming Soon</p>
+              </div>
+            </div>
             <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               Swap SOL for SPLITDO tokens
             </p>
-          </div>
+          </button>
+
           <button
             disabled
-            class="px-6 py-2 bg-gray-600 text-gray-400 rounded-lg cursor-not-allowed"
+            class={`p-6 border-l-4 border-gray-500 text-left ${props.isDark ? 'bg-zinc-800/30' : 'bg-gray-50'} opacity-60 cursor-not-allowed`}
           >
-            Swap (Coming Soon)
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h4 class={`font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>Send Tokens</h4>
+                <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>Coming Soon</p>
+              </div>
+            </div>
+            <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Transfer SPLITDO to another wallet
+            </p>
           </button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class={`p-4 rounded-lg border ${props.isDark ? 'border-zinc-600 bg-zinc-700' : 'border-gray-200 bg-gray-50'}`}>
-            <p class={`text-sm font-medium ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-              Current Rate
-            </p>
-            <p class={`text-xl font-bold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-              1 SOL = 1000 SPLITDO
-            </p>
-          </div>
-          <div class={`p-4 rounded-lg border ${props.isDark ? 'border-zinc-600 bg-zinc-700' : 'border-gray-200 bg-gray-50'}`}>
-            <p class={`text-sm font-medium ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-              Minimum Amount
-            </p>
-            <p class={`text-xl font-bold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-              0.1 SOL
-            </p>
-          </div>
         </div>
       </div>
 
       {/* Transaction History */}
-      <div class={`p-6 rounded-lg border shadow-professional ${props.isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-gray-200'}`}>
+      <div class="pt-6 border-t border-gray-200 dark:border-zinc-800">
         <h3 class={`text-lg font-semibold mb-4 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-          Transaction History
+          Recent Activity
         </h3>
 
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr class={`border-b ${props.isDark ? 'border-zinc-700' : 'border-gray-200'}`}>
-                <th class={`text-left py-3 px-4 font-medium ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Type
-                </th>
-                <th class={`text-left py-3 px-4 font-medium ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Amount
-                </th>
-                <th class={`text-left py-3 px-4 font-medium ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Date
-                </th>
-                <th class={`text-left py-3 px-4 font-medium ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Status
-                </th>
-                <th class={`text-left py-3 px-4 font-medium ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Hash
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <Show
-                when={connectionStatus() === 'connected'}
-                fallback={
+        <div class="overflow-x-auto -mx-4 md:mx-0">
+          <div class="inline-block min-w-full align-middle">
+            <table class="min-w-full">
+              <thead class={`border-b-2 ${props.isDark ? 'border-zinc-800' : 'border-gray-200'}`}>
+                <tr>
+                  <th class={`text-left py-3 px-2 md:px-4 font-semibold text-xs uppercase tracking-wider ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Type
+                  </th>
+                  <th class={`text-left py-3 px-2 md:px-4 font-semibold text-xs uppercase tracking-wider ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Amount
+                  </th>
+                  <th class={`text-left py-3 px-2 md:px-4 font-semibold text-xs uppercase tracking-wider hidden sm:table-cell ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Date
+                  </th>
+                  <th class={`text-left py-3 px-2 md:px-4 font-semibold text-xs uppercase tracking-wider ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Status
+                  </th>
+                  <th class={`text-left py-3 px-2 md:px-4 font-semibold text-xs uppercase tracking-wider hidden md:table-cell ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Hash
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <Show
+                  when={connectionStatus() === 'connected'}
+                  fallback={
+                    <tr>
+                      <td colspan="5" class={`py-12 px-2 md:px-4 text-center ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+                        <div class="flex flex-col items-center gap-3">
+                          <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          </svg>
+                          <p class="text-sm font-medium">Connect your wallet to view transaction history</p>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                >
                   <tr>
-                    <td colspan="5" class={`py-8 px-4 text-center ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Connect your wallet to view transaction history
+                    <td colspan="5" class={`py-12 px-2 md:px-4 text-center ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+                      <div class="flex flex-col items-center gap-3">
+                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <p class="text-sm font-medium">No transactions yet</p>
+                      </div>
                     </td>
                   </tr>
-                }
-              >
-                <tr>
-                  <td colspan="5" class={`py-8 px-4 text-center ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    No transactions yet. Create a SPLITDO token account to get started.
-                  </td>
-                </tr>
-              </Show>
-            </tbody>
-          </table>
+                </Show>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

@@ -210,13 +210,11 @@
 	});
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-teal-50 dark:from-gray-900 dark:to-gray-800 px-4">
+<div class="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 px-4">
 	<div class="max-w-md w-full space-y-8">
 		<!-- Header -->
 		<div class="text-center">
-			<div class="bg-gradient-to-r from-orange-600 to-teal-600 text-transparent bg-clip-text">
-				<h2 class="text-3xl font-bold">Complete Your Profile</h2>
-			</div>
+			<h2 class="text-3xl font-bold text-gray-900 dark:text-white">Complete Your Profile</h2>
 			<p class="mt-4 text-gray-600 dark:text-gray-300">
 				Just a few more details to get started
 			</p>
@@ -238,7 +236,7 @@
 
 						<!-- Step 2 -->
 						<div class="flex items-center">
-							<div class="h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium bg-orange-600 text-white">
+							<div class="h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium bg-[#00d9ff] text-white">
 								2
 							</div>
 							<span class="ml-2 text-sm font-medium text-gray-600 dark:text-gray-300">Set Up Profile</span>
@@ -286,7 +284,7 @@
 							required
 							bind:value={username}
 							disabled={loading}
-							class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+							class="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00d9ff] focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 							placeholder="Choose a unique username"
 						/>
 						{#if usernameError}
@@ -304,7 +302,7 @@
 							name="currency"
 							bind:value={currency}
 							disabled={loading}
-							class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+							class="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#00d9ff] focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{#each currencies as curr}
 								<option value={curr.code}>{curr.symbol} {curr.name} ({curr.code})</option>
@@ -324,7 +322,7 @@
 							bind:value={bio}
 							on:input={(e) => { bio = sanitizeBio(e.target.value); }}
 							disabled={loading}
-							class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed resize-none"
+							class="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00d9ff] focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed resize-none"
 							placeholder="Tell us a bit about yourself (max 100 characters)"
 						></textarea>
 						<div class="mt-1 flex justify-between text-xs">
@@ -344,7 +342,7 @@
 						<button
 							type="submit"
 							disabled={loading || usernameError || bioError}
-							class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 dark:focus:ring-offset-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+							class="w-full flex justify-center items-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium text-white bg-[#00d9ff] hover:bg-[#00b8d4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00d9ff] dark:focus:ring-offset-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{#if loading}
 								<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -365,7 +363,7 @@
 			<div class="text-center pb-4">
 				<p class="text-sm text-gray-600 dark:text-gray-400">
 					Need to start over?
-					<a href="/auth/sign-in" class="font-medium text-orange-600 hover:text-orange-500 dark:text-orange-400 dark:hover:text-orange-300 transition-colors">
+					<a href="/auth/sign-in" class="font-medium text-[#00d9ff] hover:text-[#00b8d4] transition-colors">
 						Sign in instead
 					</a>
 				</p>

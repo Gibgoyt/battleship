@@ -145,17 +145,12 @@
 
 <main>
 	<!-- Background -->
-	<div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16">
+	<div class="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16">
 		<div class="mb-8">
 			<div class="max-w-md w-full space-y-8">
 				<!-- Header -->
 				<div class="text-center">
-					<div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-orange-600">
-						<svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.5-7 1.5 1.5 2.5 4 2.5 7 0 .5 0 1 .5 1.5a3.5 3.5 0 015 0c-.5-.5-.5-1-.5-1.5 0-3 1-5.5 2.5-7 2 2 2.5 5 2.5 7 2-1 2.657-2.343 2.657-2.343A8 8 0 0117.657 18.657z"/>
-						</svg>
-					</div>
-					<h2 class="mt-6 text-3xl font-bold bg-gradient-to-r from-orange-600 to-teal-600 bg-clip-text text-transparent">
+					<h2 class="text-3xl font-bold text-gray-900 dark:text-white">
 						Sign in to SplitDo
 					</h2>
 					<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
@@ -164,17 +159,17 @@
 				</div>
 
 				<!-- Form -->
-				<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 space-y-6">
+				<div class="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 p-8 space-y-6">
 					<!-- Error Message -->
 					{#if errorMessage}
-						<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
+						<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3">
 							{errorMessage}
 						</div>
 					{/if}
 
 					<!-- Success Message -->
 					{#if successMessage}
-						<div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded-lg">
+						<div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3">
 							{successMessage}
 						</div>
 					{/if}
@@ -192,7 +187,7 @@
 								required
 								bind:value={email}
 								disabled={loading}
-								class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+								class="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00d9ff] focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 								placeholder="Enter your email"
 							/>
 						</div>
@@ -209,7 +204,7 @@
 								required
 								bind:value={password}
 								disabled={loading}
-								class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+								class="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00d9ff] focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 								placeholder="Enter your password"
 							/>
 						</div>
@@ -222,7 +217,7 @@
 									type="checkbox"
 									bind:checked={rememberMe}
 									disabled={loading}
-									class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-700"
+									class="h-4 w-4 text-[#00d9ff] focus:ring-[#00d9ff] border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700"
 								/>
 								<label for="remember-me" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
 									Remember me
@@ -230,7 +225,7 @@
 							</div>
 
 							<div class="text-sm">
-								<a href="/auth/forgot-password" class="font-medium text-orange-600 hover:text-orange-500 dark:text-orange-400 dark:hover:text-orange-300 transition-colors">
+								<a href="/auth/forgot-password" class="font-medium text-[#00d9ff] hover:text-[#00b8d4] transition-colors">
 									Forgot your password?
 								</a>
 							</div>
@@ -240,7 +235,7 @@
 							<button
 								type="submit"
 								disabled={loading}
-								class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 dark:focus:ring-offset-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+								class="w-full flex justify-center items-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium text-white bg-[#00d9ff] hover:bg-[#00b8d4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00d9ff] dark:focus:ring-offset-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								{#if loading}
 									<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -249,30 +244,19 @@
 									</svg>
 									Signing in...
 								{:else}
-									Sign in with Firebase
+									Sign In
 								{/if}
 							</button>
 						</div>
 					</form>
-
-					<!-- Alternative Auth Link -->
-					<div class="text-center pt-4 border-t border-gray-200 dark:border-gray-600">
-						<p class="text-sm text-gray-600 dark:text-gray-400">
-							Prefer AWS Cognito?
-							<a href="/auth/sign-in" class="font-medium text-orange-600 hover:text-orange-500 dark:text-orange-400 dark:hover:text-orange-300 transition-colors">
-								Sign in with Cognito
-							</a>
-						</p>
-					</div>
-
 				</div>
 
 				<!-- Sign Up Link -->
 				<div class="text-center">
 					<p class="text-sm text-gray-600 dark:text-gray-400">
 						Don't have an account?
-						<a href="/auth/sign-up" class="font-medium text-orange-600 hover:text-orange-500 dark:text-orange-400 dark:hover:text-orange-300 transition-colors">
-							Sign up here
+						<a href="/auth/sign-up" class="font-medium text-[#00d9ff] hover:text-[#00b8d4] transition-colors">
+							Sign up
 						</a>
 					</p>
 				</div>

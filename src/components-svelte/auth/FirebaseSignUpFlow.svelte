@@ -50,13 +50,11 @@
 
 {#if loading}
 	<!-- Show minimal loading state while detecting URL parameters (very fast) -->
-	<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-teal-50 dark:from-gray-900 dark:to-gray-800 px-4">
+	<div class="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 px-4">
 		<div class="max-w-md w-full text-center">
-			<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
-				<div class="bg-gradient-to-r from-orange-600 to-teal-600 text-transparent bg-clip-text">
-					<h2 class="text-3xl font-bold mb-4">Loading...</h2>
-				</div>
-				<div class="animate-spin h-8 w-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto"></div>
+			<div class="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 p-8">
+				<h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Loading...</h2>
+				<div class="animate-spin h-8 w-8 border-4 border-[#00d9ff] border-t-transparent rounded-full mx-auto"></div>
 			</div>
 		</div>
 	</div>
@@ -68,16 +66,14 @@
 	<FirebaseSignUpForm_Step2 />
 {:else}
 	<!-- Fallback error state -->
-	<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-teal-50 dark:from-gray-900 dark:to-gray-800 px-4">
+	<div class="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 px-4">
 		<div class="max-w-md w-full text-center">
-			<div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
-				<div class="bg-gradient-to-r from-orange-600 to-teal-600 text-transparent bg-clip-text">
-					<h2 class="text-3xl font-bold mb-4">Sign Up Error</h2>
-				</div>
+			<div class="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 p-8">
+				<h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Sign Up Error</h2>
 				<p class="text-gray-600 dark:text-gray-300 mb-4">
 					Something went wrong with the sign-up flow.
 				</p>
-				<a href="/auth/sign-up" class="inline-block px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+				<a href="/auth/sign-up" class="inline-block px-6 py-2 bg-[#00d9ff] text-white hover:bg-[#00b8d4] transition-colors">
 					Start Over
 				</a>
 			</div>
