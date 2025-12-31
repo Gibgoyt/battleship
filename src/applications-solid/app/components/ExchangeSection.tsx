@@ -1,5 +1,5 @@
 import type { Component } from 'solid-js';
-import { Show, createEffect, createMemo } from 'solid-js';
+import { Show, createEffect, createMemo, createSignal } from 'solid-js';
 import { useSplitdoATA, useExchangeModal, useProgramInfo } from 'src/lib/wallet/wallet-reactive-store';
 
 export interface ExchangeSectionProps {
@@ -11,9 +11,13 @@ export const ExchangeSection: Component<ExchangeSectionProps> = (props) => {
   const { openExchangeModal } = useExchangeModal();
   const { programInfo, fetchProgramInfo } = useProgramInfo();
 
+  // Track whether we've already fetched program info for this session
+  const [hasFetchedProgramInfo, setHasFetchedProgramInfo] = createSignal(false);
+
   // Fetch program info when section is mounted and user has SPLITDO account
   createEffect(() => {
-    if (splitdoATA().status === 'exists') {
+    if (splitdoATA().status === 'exists' && !hasFetchedProgramInfo()) {
+      setHasFetchedProgramInfo(true);
       fetchProgramInfo();
     }
   });

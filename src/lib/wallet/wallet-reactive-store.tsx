@@ -52,6 +52,9 @@ const [programInfo, setProgramInfo] = createSignal<{ exchangeRate: number; loadi
   error: null
 });
 
+// Request guard to prevent concurrent fetchProgramInfo calls
+const [isFetchingProgramInfo, setIsFetchingProgramInfo] = createSignal(false);
+
 // Store Firebase token
 let firebaseToken: string | undefined = undefined;
 
@@ -866,6 +869,13 @@ export const useExchangeModal = () => {
 
 // Fetch program info including exchange rate
 const fetchProgramInfo = async () => {
+  // Prevent concurrent fetches
+  if (isFetchingProgramInfo()) {
+    console.log('[ReactiveWalletStore] Already fetching program info, skipping...');
+    return;
+  }
+
+  setIsFetchingProgramInfo(true);
   console.log('[ReactiveWalletStore] Fetching program info...');
   setProgramInfo({ ...programInfo(), loading: true, error: null });
 
@@ -897,6 +907,8 @@ const fetchProgramInfo = async () => {
       loading: false,
       error: error instanceof Error ? error.message : 'Failed to fetch exchange rate'
     });
+  } finally {
+    setIsFetchingProgramInfo(false);
   }
 };
 

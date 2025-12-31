@@ -17,10 +17,17 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
   const [solAmount, setSolAmount] = createSignal('');
   const [isConnecting, setIsConnecting] = createSignal(false);
 
+  // Track whether we've already fetched program info for the current modal session
+  const [hasFetchedForCurrentModal, setHasFetchedForCurrentModal] = createSignal(false);
+
   // Fetch program info when modal opens
   createEffect(() => {
-    if (isExchangeModalOpen()) {
+    if (isExchangeModalOpen() && !hasFetchedForCurrentModal()) {
+      setHasFetchedForCurrentModal(true);
       fetchProgramInfo();
+    } else if (!isExchangeModalOpen()) {
+      // Reset when modal closes so next open triggers fetch
+      setHasFetchedForCurrentModal(false);
     }
   });
 
