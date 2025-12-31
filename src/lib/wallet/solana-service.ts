@@ -34,6 +34,7 @@ import {
 import { SPLITDO_CONFIG, ERROR_MESSAGES, BACKEND_SOLANA_API } from './walletconnect-config';
 import { SolanaBrowserError } from './solana-browser-safe';
 import type { WalletProvider } from './wallet-providers';
+import { type SplitdoRawAmount } from './token-utils';
 
 // Wallet-agnostic transaction creation and signing interface
 export interface WalletTransactionRequest {
@@ -116,7 +117,7 @@ export interface CreateATAApiData {
 }
 
 export interface TokenBalanceApiData {
-  balance_tokens: number;
+  balance_tokens: SplitdoRawAmount; // Raw token amount (requires division by 10^6 for display)
 }
 
 export interface ProgramInfoApiResponse {
@@ -559,7 +560,7 @@ export class EnhancedSolanaService {
    */
   async checkSplitdoBalance(firebaseToken: string): Promise<{
     hasAccount: boolean;
-    balance?: number;
+    balance?: SplitdoRawAmount; // Raw token amount from API
     error?: string;
   }> {
     try {

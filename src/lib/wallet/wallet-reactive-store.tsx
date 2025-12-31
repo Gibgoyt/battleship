@@ -15,6 +15,7 @@ import { CONNECTION_CONFIG, ERROR_MESSAGES } from './walletconnect-config';
 import { solanaService } from './solana-service';
 import { walletConnectService } from './walletconnect-service';
 import { PhantomWalletProvider } from './wallet-providers';
+import { rawToUIAmount, type SplitdoRawAmount } from './token-utils';
 
 export type ATAStatus = 'unknown' | 'checking' | 'exists' | 'not_found' | 'creating' | 'created' | 'error';
 
@@ -571,10 +572,10 @@ const checkSplitdoBalance = async () => {
         status: 'exists',
         address: data.data.token_account_pubkey,
         balance: {
-          uiAmount: data.data.token_balance
+          uiAmount: rawToUIAmount(data.data.token_balance as SplitdoRawAmount)
         }
       });
-      console.log('[ReactiveWalletStore] SPLITDO ATA found:', data.data.token_account_pubkey, 'Balance:', data.data.token_balance);
+      console.log('[ReactiveWalletStore] SPLITDO ATA found:', data.data.token_account_pubkey, 'Raw Balance:', data.data.token_balance, 'UI Balance:', rawToUIAmount(data.data.token_balance));
     } else {
       // API returned but no account
       setSplitdoATA({ status: 'not_found' });
