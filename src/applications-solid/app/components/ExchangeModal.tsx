@@ -1,6 +1,8 @@
 import type { Component } from 'solid-js';
 import { Show, createSignal, createMemo, createEffect } from 'solid-js';
 import { useExchangeModal, useExchange, useWallet, useWalletConnection, useProgramInfo } from 'src/lib/wallet/wallet-reactive-store';
+import { MobileWalletInstallation } from './MobileWalletInstallation';
+import { detectMobilePlatform } from 'src/lib/wallet/mobile-detection';
 
 export interface ExchangeModalProps {
   isDark: boolean;
@@ -16,6 +18,8 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
   const [step, setStep] = createSignal<'wallet' | 'exchange'>('wallet');
   const [solAmount, setSolAmount] = createSignal('');
   const [isConnecting, setIsConnecting] = createSignal(false);
+  const [showMobileInstallation, setShowMobileInstallation] = createSignal(false);
+  const [mobileInstallationPlatform, setMobileInstallationPlatform] = createSignal<'ios' | 'android'>('ios');
 
   // Track whether we've already fetched program info for the current modal session
   const [hasFetchedForCurrentModal, setHasFetchedForCurrentModal] = createSignal(false);
@@ -35,6 +39,7 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
     closeExchangeModal();
     setStep('wallet');
     setSolAmount('');
+    setShowMobileInstallation(false);
   };
 
   const handleBackdropClick = (e: MouseEvent) => {
@@ -96,6 +101,8 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
             isDark={props.isDark}
             connectionStatus={connectionStatus()}
             isConnecting={isConnecting()}
+            showMobileInstallation={showMobileInstallation()}
+            mobileInstallationPlatform={mobileInstallationPlatform()}
             onSelectPhantom={async () => {
               if (connectionStatus() === 'connected') {
                 // Already connected, go to exchange
@@ -108,11 +115,21 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
                   setStep('exchange');
                 } catch (error) {
                   console.error('Failed to connect wallet:', error);
+
+                  // Check if this is a mobile wallet installation error
+                  const mobileDetection = detectMobilePlatform();
+                  if (mobileDetection.isMobile && error instanceof Error &&
+                      error.message.includes('not installed') || error.message.includes('not found')) {
+                    console.log('[ExchangeModal] Showing mobile installation prompt for platform:', mobileDetection.platform);
+                    setMobileInstallationPlatform(mobileDetection.platform as 'ios' | 'android');
+                    setShowMobileInstallation(true);
+                  }
                 } finally {
                   setIsConnecting(false);
                 }
               }
             }}
+            onCloseMobileInstallation={() => setShowMobileInstallation(false)}
           />
         </Show>
       </div>
@@ -126,7 +143,10 @@ interface WalletSelectionProps {
   isDark: boolean;
   connectionStatus: string;
   isConnecting: boolean;
+  showMobileInstallation: boolean;
+  mobileInstallationPlatform: 'ios' | 'android';
   onSelectPhantom: () => void;
+  onCloseMobileInstallation: () => void;
 }
 
 const WalletSelection: Component<WalletSelectionProps> = (props) => {
@@ -209,6 +229,16 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
           Coming Soon
         </span>
       </button>
+
+      {/* Mobile Installation Prompt */}
+      <Show when={props.showMobileInstallation}>
+        <MobileWalletInstallation
+          isDark={props.isDark}
+          platform={props.mobileInstallationPlatform}
+          walletName="Phantom"
+          onClose={props.onCloseMobileInstallation}
+        />
+      </Show>
     </div>
   );
 };
