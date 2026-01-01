@@ -1058,7 +1058,7 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
     }, null, 2));
 
     console.log('[ReactiveWalletStore] 📤 Submitting to backend:', JSON.stringify({
-      endpoint: 'POST /api/splitdo-token/exchange/solana',
+      endpoint: 'POST /api/splitdo-token/async-exchange/solana',
       solAmount: solAmount,
       lamports: lamports,
       serializedTxLength: serializedTransaction.length,
@@ -1066,11 +1066,12 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
       fullRequestPayload: requestPayload
     }, null, 2));
 
-    const exchangeResponse = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/exchange/solana', {
+    const exchangeResponse = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/async-exchange/solana', {
       method: 'POST',
       headers: {
         'Authorization': authHeader,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Origin': 'https://devbackend.splitdo.app:2083'
       },
       body: JSON.stringify(requestPayload)
     });
