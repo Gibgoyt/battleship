@@ -329,42 +329,112 @@ function handlePotentialReturn(): void {
 
   console.log('[MobileTransactionHandler] Potential return detected:', result);
 
-  // Only process if we have transaction data or a clear error
+  // Check if we should handle this as a wallet connection (not transaction)
+  const shouldCheckWalletConnection = result.error === 'No transaction data found in return URL' &&
+                                     transactionListeners.size > 0;
+
+  if (shouldCheckWalletConnection) {
+    console.log('[MobileTransactionHandler] Checking for wallet connection after return from mobile app');
+
+    // Check if wallet is now connected (after user approved in mobile app)
+    const walletConnected = checkWalletConnectionAfterReturn();
+
+    if (walletConnected.success) {
+      console.log('[MobileTransactionHandler] Wallet connection detected after mobile return');
+
+      // Notify listeners of successful connection
+      const connectionResult: MobileTransactionReturn = {
+        success: true,
+        publicKey: walletConnected.publicKey,
+        walletId: walletConnected.walletId
+      };
+
+      notifyListeners(connectionResult);
+      return;
+    } else {
+      console.log('[MobileTransactionHandler] No wallet connection detected after mobile return');
+    }
+  }
+
+  // Process if we have explicit transaction data or error
   if (result.success || result.error !== 'No transaction data found in return URL') {
-    // Notify all relevant listeners
-    const listenersToNotify = Array.from(transactionListeners.values()).filter(listener => {
-      return !listener.walletId || !result.walletId || listener.walletId === result.walletId;
-    });
+    notifyListeners(result);
+  }
+}
 
-    console.log('[MobileTransactionHandler] Notifying listeners:', listenersToNotify.length);
+/**
+ * Check if wallet is connected after returning from mobile app
+ */
+function checkWalletConnectionAfterReturn(): { success: boolean; publicKey?: string; walletId?: string } {
+  try {
+    // Check for Phantom connection
+    const phantom = (window as any).phantom;
+    if (phantom?.solana?.isConnected && phantom.solana.publicKey) {
+      return {
+        success: true,
+        publicKey: phantom.solana.publicKey.toString(),
+        walletId: 'phantom'
+      };
+    }
 
-    listenersToNotify.forEach(listener => {
-      try {
-        listener.callback(result);
-        removeMobileTransactionListener(listener.id); // Auto-remove after successful callback
-      } catch (error) {
-        console.error('[MobileTransactionHandler] Error in listener callback:', error);
+    // Check for other wallets via Wallet Standard
+    const wallets = (window.navigator as any)?.wallets;
+    if (wallets && typeof wallets.get === 'function') {
+      const availableWallets = Array.from(wallets.get());
+      for (const wallet of availableWallets) {
+        if (wallet.accounts && wallet.accounts.length > 0) {
+          return {
+            success: true,
+            publicKey: wallet.accounts[0].address,
+            walletId: wallet.name.toLowerCase()
+          };
+        }
       }
-    });
+    }
 
-    // Clean up URL if we processed transaction data
-    if (result.success && typeof window !== 'undefined') {
-      const url = new URL(window.location.href);
-      const hasTransactionParams = ['signature', 'phantom_signature', 'solflare_signature', 'error'].some(param =>
-        url.searchParams.has(param)
-      );
+    return { success: false };
+  } catch (error) {
+    console.error('[MobileTransactionHandler] Error checking wallet connection:', error);
+    return { success: false };
+  }
+}
 
-      if (hasTransactionParams) {
-        // Remove transaction parameters from URL
-        ['signature', 'publicKey', 'error', 'error_code', 'wallet',
-         'phantom_signature', 'phantom_encryption_public_key', 'phantom_error',
-         'solflare_signature', 'solflare_success', 'solflare_error'].forEach(param => {
-          url.searchParams.delete(param);
-        });
+/**
+ * Notify relevant listeners of transaction/connection result
+ */
+function notifyListeners(result: MobileTransactionReturn): void {
+  const listenersToNotify = Array.from(transactionListeners.values()).filter(listener => {
+    return !listener.walletId || !result.walletId || listener.walletId === result.walletId;
+  });
 
-        window.history.replaceState({}, document.title, url.toString());
-        console.log('[MobileTransactionHandler] Cleaned transaction parameters from URL');
-      }
+  console.log('[MobileTransactionHandler] Notifying listeners:', listenersToNotify.length);
+
+  listenersToNotify.forEach(listener => {
+    try {
+      listener.callback(result);
+      removeMobileTransactionListener(listener.id); // Auto-remove after successful callback
+    } catch (error) {
+      console.error('[MobileTransactionHandler] Error in listener callback:', error);
+    }
+  });
+
+  // Clean up URL if we processed transaction data
+  if (result.success && typeof window !== 'undefined') {
+    const url = new URL(window.location.href);
+    const hasTransactionParams = ['signature', 'phantom_signature', 'solflare_signature', 'error'].some(param =>
+      url.searchParams.has(param)
+    );
+
+    if (hasTransactionParams) {
+      // Remove transaction parameters from URL
+      ['signature', 'publicKey', 'error', 'error_code', 'wallet',
+       'phantom_signature', 'phantom_encryption_public_key', 'phantom_error',
+       'solflare_signature', 'solflare_success', 'solflare_error'].forEach(param => {
+        url.searchParams.delete(param);
+      });
+
+      window.history.replaceState({}, document.title, url.toString());
+      console.log('[MobileTransactionHandler] Cleaned transaction parameters from URL');
     }
   }
 }

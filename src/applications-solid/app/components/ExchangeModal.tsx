@@ -135,14 +135,31 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
                       // Set up transaction listener before navigating to app
                       addMobileTransactionListener(
                         'phantom-exchange',
-                        (result) => {
+                        async (result) => {
                           console.log('[ExchangeModal] Mobile transaction result:', result);
 
                           if (result.success) {
-                            console.log('[ExchangeModal] Mobile wallet connection successful');
-                            setStep('exchange');
+                            console.log('[ExchangeModal] Mobile wallet connection successful - re-attempting wallet connection');
+
+                            try {
+                              // Re-attempt wallet connection now that mobile app has approved
+                              await connectWallet('phantom');
+                              setStep('exchange');
+                              console.log('[ExchangeModal] Desktop wallet connection successful after mobile approval');
+                            } catch (retryError) {
+                              console.error('[ExchangeModal] Wallet connection still failed after mobile approval:', retryError);
+                              // Keep trying - sometimes there's a delay
+                              setTimeout(async () => {
+                                try {
+                                  await connectWallet('phantom');
+                                  setStep('exchange');
+                                } catch (delayedError) {
+                                  console.error('[ExchangeModal] Delayed wallet connection also failed:', delayedError);
+                                }
+                              }, 2000);
+                            }
                           } else {
-                            console.error('[ExchangeModal] Mobile wallet transaction failed:', result.error);
+                            console.error('[ExchangeModal] Mobile wallet connection failed:', result.error);
                           }
                           setIsConnecting(false);
                         },
