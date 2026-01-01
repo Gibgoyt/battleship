@@ -17,6 +17,7 @@ import { walletConnectService } from './walletconnect-service';
 import { PhantomWalletProvider } from './wallet-providers';
 import { rawToUIAmount, type SplitdoRawAmount } from './token-utils';
 import { detectMobilePlatform, getInstallationMessage } from './mobile-detection';
+import { attemptMobileWalletConnection, isMobileWalletConnectionSupported } from './mobile-wallet-connector';
 
 export type ATAStatus = 'unknown' | 'checking' | 'exists' | 'not_found' | 'creating' | 'created' | 'error';
 
@@ -74,6 +75,8 @@ interface PhantomReadinessResult {
   isMobile?: boolean;
   platform?: 'ios' | 'android' | 'desktop';
   installationMessage?: string;
+  useMobileFlow?: boolean;
+  deepLinkUrl?: string;
 }
 
 // Comprehensive Phantom extension verification
@@ -89,6 +92,36 @@ const verifyPhantomReadiness = async (): Promise<PhantomReadinessResult> => {
   const mobileDetection = detectMobilePlatform();
   console.log('[ReactiveWalletStore] Mobile detection result:', mobileDetection);
 
+  // 3. Handle mobile wallet connection differently than desktop extension
+  if (mobileDetection.isMobile && isMobileWalletConnectionSupported()) {
+    console.log('[ReactiveWalletStore] Mobile device detected - using deep link flow');
+
+    const mobileConnectionResult = attemptMobileWalletConnection('phantom');
+    console.log('[ReactiveWalletStore] Mobile connection result:', mobileConnectionResult);
+
+    if (mobileConnectionResult.success) {
+      return {
+        ready: true,
+        isMobile: true,
+        platform: mobileDetection.platform,
+        useMobileFlow: true,
+        deepLinkUrl: mobileConnectionResult.deepLinkUrl
+      };
+    } else {
+      return {
+        ready: false,
+        error: mobileConnectionResult.error || 'Mobile wallet connection failed',
+        isMobile: true,
+        platform: mobileDetection.platform,
+        useMobileFlow: true,
+        installationMessage: mobileConnectionResult.requiresInstallation
+          ? getInstallationMessage('Phantom', mobileDetection.platform)
+          : undefined
+      };
+    }
+  }
+
+  // 4. Desktop: Check for browser extension (original logic)
   const phantom = (window as any).phantom;
   if (!phantom?.solana) {
     const installationMessage = mobileDetection.isMobile
@@ -104,7 +137,7 @@ const verifyPhantomReadiness = async (): Promise<PhantomReadinessResult> => {
     };
   }
 
-  // 3. Check extension properties
+  // 5. Check extension properties
   const provider = phantom.solana;
   if (!provider.isPhantom) {
     return {
@@ -115,7 +148,7 @@ const verifyPhantomReadiness = async (): Promise<PhantomReadinessResult> => {
     };
   }
 
-  // 3. Test basic provider functionality
+  // 6. Test basic provider functionality
   try {
     const requiredMethods = ['connect', 'disconnect', 'signTransaction'];
     for (const method of requiredMethods) {

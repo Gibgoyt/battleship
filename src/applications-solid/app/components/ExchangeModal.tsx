@@ -3,6 +3,8 @@ import { Show, createSignal, createMemo, createEffect } from 'solid-js';
 import { useExchangeModal, useExchange, useWallet, useWalletConnection, useProgramInfo } from 'src/lib/wallet/wallet-reactive-store';
 import { MobileWalletInstallation } from './MobileWalletInstallation';
 import { detectMobilePlatform } from 'src/lib/wallet/mobile-detection';
+import { executeMobileWalletDeepLink, attemptMobileWalletConnection } from 'src/lib/wallet/mobile-wallet-connector';
+import { addMobileTransactionListener, setupMobileReturnListener } from 'src/lib/wallet/mobile-transaction-handler';
 
 export interface ExchangeModalProps {
   isDark: boolean;
@@ -24,11 +26,14 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
   // Track whether we've already fetched program info for the current modal session
   const [hasFetchedForCurrentModal, setHasFetchedForCurrentModal] = createSignal(false);
 
-  // Fetch program info when modal opens
+  // Fetch program info when modal opens and setup mobile listeners
   createEffect(() => {
     if (isExchangeModalOpen() && !hasFetchedForCurrentModal()) {
       setHasFetchedForCurrentModal(true);
       fetchProgramInfo();
+
+      // Setup mobile wallet return listeners for iOS/Android deep links
+      setupMobileReturnListener();
     } else if (!isExchangeModalOpen()) {
       // Reset when modal closes so next open triggers fetch
       setHasFetchedForCurrentModal(false);
@@ -115,16 +120,48 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
                   setStep('exchange');
                 } catch (error) {
                   console.error('Failed to connect wallet:', error);
-
-                  // Check if this is a mobile wallet installation error
-                  const mobileDetection = detectMobilePlatform();
-                  if (mobileDetection.isMobile && error instanceof Error &&
-                      error.message.includes('not installed') || error.message.includes('not found')) {
-                    console.log('[ExchangeModal] Showing mobile installation prompt for platform:', mobileDetection.platform);
-                    setMobileInstallationPlatform(mobileDetection.platform as 'ios' | 'android');
-                    setShowMobileInstallation(true);
-                  }
                 } finally {
+                  // Check if this should trigger mobile deep link flow (when desktop connection fails)
+                  const mobileDetection = detectMobilePlatform();
+                  if (mobileDetection.isMobile && connectionStatus() !== 'connected') {
+                    console.log('[ExchangeModal] Mobile device detected - attempting deep link connection');
+
+                    // Try mobile wallet connection
+                    const mobileConnectionResult = attemptMobileWalletConnection('phantom');
+
+                    if (mobileConnectionResult.success && mobileConnectionResult.deepLinkUrl) {
+                      console.log('[ExchangeModal] Deep link available - opening Phantom app');
+
+                      // Set up transaction listener before navigating to app
+                      addMobileTransactionListener(
+                        'phantom-exchange',
+                        (result) => {
+                          console.log('[ExchangeModal] Mobile transaction result:', result);
+
+                          if (result.success) {
+                            console.log('[ExchangeModal] Mobile wallet connection successful');
+                            setStep('exchange');
+                          } else {
+                            console.error('[ExchangeModal] Mobile wallet transaction failed:', result.error);
+                          }
+                          setIsConnecting(false);
+                        },
+                        { timeout: 300000, walletId: 'phantom' }
+                      );
+
+                      // Navigate to Phantom app - don't reset connecting state yet
+                      window.location.href = mobileConnectionResult.deepLinkUrl;
+                      // setIsConnecting will be handled by the mobile transaction listener
+                      return; // Don't reset connecting state
+                    } else {
+                      // Fallback to installation prompt only if truly needed
+                      console.log('[ExchangeModal] Deep link failed - showing installation prompt');
+                      setMobileInstallationPlatform(mobileDetection.platform as 'ios' | 'android');
+                      setShowMobileInstallation(true);
+                    }
+                  }
+
+                  // Reset connecting state if we didn't navigate to mobile app
                   setIsConnecting(false);
                 }
               }
