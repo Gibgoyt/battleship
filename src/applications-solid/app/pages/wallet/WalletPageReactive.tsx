@@ -24,8 +24,6 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
   // Local state for ATA creation
   const [isCreatingATA, setIsCreatingATA] = createSignal(false);
 
-  // State for creation intent - to create ATA after wallet connection
-  const [createATAAfterConnection, setCreateATAAfterConnection] = createSignal(false);
 
   // Create ATA function using real reactive store implementation
   const createSplitdoATA = async (): Promise<{ success: boolean; signature?: string; error?: string }> => {
@@ -45,18 +43,9 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
     }
   };
 
-  // Smart SPLITDO button handler
-  const handleSplitdoAccountCreation = async () => {
-    if (connectionStatus() === 'connected') {
-      // Wallet connected - directly create ATA
-      console.log('[WalletPageReactive] Creating SPLITDO ATA with connected wallet');
-      await createSplitdoATA();
-    } else {
-      // Need to connect wallet first, then create ATA
-      console.log('[WalletPageReactive] Connecting wallet for SPLITDO ATA creation');
-      setCreateATAAfterConnection(true);
-      openModal();
-    }
+  // Copy exact working pattern from Start Token Exchange button
+  const handleConnectWalletClick = () => {
+    openModal();
   };
 
   // Debug modal state
@@ -74,18 +63,6 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
     checkSplitdoBalance();
   });
 
-  // Auto-create ATA after wallet connection (if intended)
-  createEffect(() => {
-    if (connectionStatus() === 'connected' && createATAAfterConnection()) {
-      console.log('[WalletPageReactive] Wallet connected - proceeding with ATA creation');
-      setCreateATAAfterConnection(false);
-
-      // Small delay to ensure wallet is ready
-      setTimeout(async () => {
-        await createSplitdoATA();
-      }, 500);
-    }
-  });
 
   // Refresh balances when wallet is connected
   createEffect(() => {
@@ -198,7 +175,7 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
                       when={connectionStatus() === 'connected'}
                       fallback={
                         <button
-                          onClick={handleSplitdoAccountCreation}
+                          onClick={handleConnectWalletClick}
                           class={`px-3 py-1.5 text-sm border transition-colors ${
                             props.isDark
                               ? 'border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white'
