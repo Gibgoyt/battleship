@@ -1,6 +1,10 @@
 import type { Component } from 'solid-js';
 import { Show, createSignal, createMemo, createEffect } from 'solid-js';
 import { useExchangeModal, useExchange, useWallet, useWalletConnection, useProgramInfo } from 'src/lib/wallet/wallet-reactive-store';
+import { MobileWalletInstallation } from './MobileWalletInstallation';
+import { detectMobilePlatform } from 'src/lib/wallet/mobile-detection';
+import { executeMobileWalletDeepLink, attemptMobileWalletConnection } from 'src/lib/wallet/mobile-wallet-connector';
+import { addMobileTransactionListener, setupMobileReturnListener } from 'src/lib/wallet/mobile-transaction-handler';
 
 export interface ExchangeModalProps {
   isDark: boolean;
@@ -16,15 +20,20 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
   const [step, setStep] = createSignal<'wallet' | 'exchange'>('wallet');
   const [solAmount, setSolAmount] = createSignal('');
   const [isConnecting, setIsConnecting] = createSignal(false);
+  const [showMobileInstallation, setShowMobileInstallation] = createSignal(false);
+  const [mobileInstallationPlatform, setMobileInstallationPlatform] = createSignal<'ios' | 'android'>('ios');
 
   // Track whether we've already fetched program info for the current modal session
   const [hasFetchedForCurrentModal, setHasFetchedForCurrentModal] = createSignal(false);
 
-  // Fetch program info when modal opens
+  // Fetch program info when modal opens and setup mobile listeners
   createEffect(() => {
     if (isExchangeModalOpen() && !hasFetchedForCurrentModal()) {
       setHasFetchedForCurrentModal(true);
       fetchProgramInfo();
+
+      // Setup mobile wallet return listeners for iOS/Android deep links
+      setupMobileReturnListener();
     } else if (!isExchangeModalOpen()) {
       // Reset when modal closes so next open triggers fetch
       setHasFetchedForCurrentModal(false);
@@ -35,6 +44,7 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
     closeExchangeModal();
     setStep('wallet');
     setSolAmount('');
+    setShowMobileInstallation(false);
   };
 
   const handleBackdropClick = (e: MouseEvent) => {
@@ -96,6 +106,8 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
             isDark={props.isDark}
             connectionStatus={connectionStatus()}
             isConnecting={isConnecting()}
+            showMobileInstallation={showMobileInstallation()}
+            mobileInstallationPlatform={mobileInstallationPlatform()}
             onSelectPhantom={async () => {
               if (connectionStatus() === 'connected') {
                 // Already connected, go to exchange
@@ -109,10 +121,69 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
                 } catch (error) {
                   console.error('Failed to connect wallet:', error);
                 } finally {
+                  // Check if this should trigger mobile deep link flow (when desktop connection fails)
+                  const mobileDetection = detectMobilePlatform();
+                  if (mobileDetection.isMobile && connectionStatus() !== 'connected') {
+                    console.log('[ExchangeModal] Mobile device detected - attempting deep link connection');
+
+                    // Try mobile wallet connection
+                    const mobileConnectionResult = attemptMobileWalletConnection('phantom');
+
+                    if (mobileConnectionResult.success && mobileConnectionResult.deepLinkUrl) {
+                      console.log('[ExchangeModal] Deep link available - opening Phantom app');
+
+                      // Set up transaction listener before navigating to app
+                      addMobileTransactionListener(
+                        'phantom-exchange',
+                        async (result) => {
+                          console.log('[ExchangeModal] Mobile transaction result:', result);
+
+                          if (result.success) {
+                            console.log('[ExchangeModal] Mobile wallet connection successful - re-attempting wallet connection');
+
+                            try {
+                              // Re-attempt wallet connection now that mobile app has approved
+                              await connectWallet('phantom');
+                              setStep('exchange');
+                              console.log('[ExchangeModal] Desktop wallet connection successful after mobile approval');
+                            } catch (retryError) {
+                              console.error('[ExchangeModal] Wallet connection still failed after mobile approval:', retryError);
+                              // Keep trying - sometimes there's a delay
+                              setTimeout(async () => {
+                                try {
+                                  await connectWallet('phantom');
+                                  setStep('exchange');
+                                } catch (delayedError) {
+                                  console.error('[ExchangeModal] Delayed wallet connection also failed:', delayedError);
+                                }
+                              }, 2000);
+                            }
+                          } else {
+                            console.error('[ExchangeModal] Mobile wallet connection failed:', result.error);
+                          }
+                          setIsConnecting(false);
+                        },
+                        { timeout: 300000, walletId: 'phantom' }
+                      );
+
+                      // Navigate to Phantom app - don't reset connecting state yet
+                      window.location.href = mobileConnectionResult.deepLinkUrl;
+                      // setIsConnecting will be handled by the mobile transaction listener
+                      return; // Don't reset connecting state
+                    } else {
+                      // Fallback to installation prompt only if truly needed
+                      console.log('[ExchangeModal] Deep link failed - showing installation prompt');
+                      setMobileInstallationPlatform(mobileDetection.platform as 'ios' | 'android');
+                      setShowMobileInstallation(true);
+                    }
+                  }
+
+                  // Reset connecting state if we didn't navigate to mobile app
                   setIsConnecting(false);
                 }
               }
             }}
+            onCloseMobileInstallation={() => setShowMobileInstallation(false)}
           />
         </Show>
       </div>
@@ -126,7 +197,10 @@ interface WalletSelectionProps {
   isDark: boolean;
   connectionStatus: string;
   isConnecting: boolean;
+  showMobileInstallation: boolean;
+  mobileInstallationPlatform: 'ios' | 'android';
   onSelectPhantom: () => void;
+  onCloseMobileInstallation: () => void;
 }
 
 const WalletSelection: Component<WalletSelectionProps> = (props) => {
@@ -209,6 +283,16 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
           Coming Soon
         </span>
       </button>
+
+      {/* Mobile Installation Prompt */}
+      <Show when={props.showMobileInstallation}>
+        <MobileWalletInstallation
+          isDark={props.isDark}
+          platform={props.mobileInstallationPlatform}
+          walletName="Phantom"
+          onClose={props.onCloseMobileInstallation}
+        />
+      </Show>
     </div>
   );
 };

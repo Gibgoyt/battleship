@@ -16,6 +16,8 @@ import { solanaService } from './solana-service';
 import { walletConnectService } from './walletconnect-service';
 import { PhantomWalletProvider } from './wallet-providers';
 import { rawToUIAmount, type SplitdoRawAmount } from './token-utils';
+import { detectMobilePlatform, getInstallationMessage } from './mobile-detection';
+import { attemptMobileWalletConnection, isMobileWalletConnectionSupported } from './mobile-wallet-connector';
 
 export type ATAStatus = 'unknown' | 'checking' | 'exists' | 'not_found' | 'creating' | 'created' | 'error';
 
@@ -65,11 +67,16 @@ export const initializeWalletStore = (token?: string) => {
   firebaseToken = token;
 };
 
-// Phantom readiness verification interface
+// Phantom readiness verification interface - enhanced with mobile detection
 interface PhantomReadinessResult {
   ready: boolean;
   provider?: any;
   error?: string;
+  isMobile?: boolean;
+  platform?: 'ios' | 'android' | 'desktop';
+  installationMessage?: string;
+  useMobileFlow?: boolean;
+  deepLinkUrl?: string;
 }
 
 // Comprehensive Phantom extension verification
@@ -81,31 +88,76 @@ const verifyPhantomReadiness = async (): Promise<PhantomReadinessResult> => {
     return { ready: false, error: 'Window not available (server-side context)' };
   }
 
+  // 2. Detect mobile platform for enhanced error handling
+  const mobileDetection = detectMobilePlatform();
+  console.log('[ReactiveWalletStore] Mobile detection result:', mobileDetection);
+
+  // 3. Handle mobile wallet connection differently than desktop extension
+  if (mobileDetection.isMobile && isMobileWalletConnectionSupported()) {
+    console.log('[ReactiveWalletStore] Mobile device detected - using deep link flow');
+
+    const mobileConnectionResult = attemptMobileWalletConnection('phantom');
+    console.log('[ReactiveWalletStore] Mobile connection result:', mobileConnectionResult);
+
+    if (mobileConnectionResult.success) {
+      return {
+        ready: true,
+        isMobile: true,
+        platform: mobileDetection.platform,
+        useMobileFlow: true,
+        deepLinkUrl: mobileConnectionResult.deepLinkUrl
+      };
+    } else {
+      return {
+        ready: false,
+        error: mobileConnectionResult.error || 'Mobile wallet connection failed',
+        isMobile: true,
+        platform: mobileDetection.platform,
+        useMobileFlow: true,
+        installationMessage: mobileConnectionResult.requiresInstallation
+          ? getInstallationMessage('Phantom', mobileDetection.platform)
+          : undefined
+      };
+    }
+  }
+
+  // 4. Desktop: Check for browser extension (original logic)
   const phantom = (window as any).phantom;
   if (!phantom?.solana) {
+    const installationMessage = mobileDetection.isMobile
+      ? getInstallationMessage('Phantom', mobileDetection.platform)
+      : 'Phantom wallet not installed. Please install Phantom from https://phantom.app/ and refresh the page.';
+
     return {
       ready: false,
-      error: 'Phantom wallet not installed. Please install Phantom from https://phantom.app/ and refresh the page.'
+      error: installationMessage,
+      isMobile: mobileDetection.isMobile,
+      platform: mobileDetection.platform,
+      installationMessage: mobileDetection.isMobile ? installationMessage : undefined
     };
   }
 
-  // 2. Check extension properties
+  // 5. Check extension properties
   const provider = phantom.solana;
   if (!provider.isPhantom) {
     return {
       ready: false,
-      error: 'Phantom provider not properly initialized. Please refresh the page or restart your browser.'
+      error: 'Phantom provider not properly initialized. Please refresh the page or restart your browser.',
+      isMobile: mobileDetection.isMobile,
+      platform: mobileDetection.platform
     };
   }
 
-  // 3. Test basic provider functionality
+  // 6. Test basic provider functionality
   try {
     const requiredMethods = ['connect', 'disconnect', 'signTransaction'];
     for (const method of requiredMethods) {
       if (typeof provider[method] !== 'function') {
         return {
           ready: false,
-          error: `Phantom provider missing ${method} method. Please update your Phantom extension.`
+          error: `Phantom provider missing ${method} method. Please update your Phantom extension.`,
+          isMobile: mobileDetection.isMobile,
+          platform: mobileDetection.platform
         };
       }
     }
@@ -113,15 +165,23 @@ const verifyPhantomReadiness = async (): Promise<PhantomReadinessResult> => {
     console.log('[ReactiveWalletStore] Phantom verification successful', {
       isPhantom: provider.isPhantom,
       isConnected: provider.isConnected,
-      hasPublicKey: !!provider.publicKey
+      hasPublicKey: !!provider.publicKey,
+      platform: mobileDetection.platform
     });
 
-    return { ready: true, provider };
+    return {
+      ready: true,
+      provider,
+      isMobile: mobileDetection.isMobile,
+      platform: mobileDetection.platform
+    };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return {
       ready: false,
-      error: `Phantom provider verification failed: ${errorMessage}. Please restart Phantom and refresh the page.`
+      error: `Phantom provider verification failed: ${errorMessage}. Please restart Phantom and refresh the page.`,
+      isMobile: mobileDetection.isMobile,
+      platform: mobileDetection.platform
     };
   }
 };
@@ -1070,7 +1130,8 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
       method: 'POST',
       headers: {
         'Authorization': authHeader,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Origin': 'https://devbackend.splitdo.app:2083'
       },
       body: JSON.stringify(requestPayload)
     });
