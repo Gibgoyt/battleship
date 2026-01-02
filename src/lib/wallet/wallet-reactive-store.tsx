@@ -42,7 +42,6 @@ const [connectionStatus, setConnectionStatus] = createSignal<'disconnected' | 'c
 const [wallet, setWallet] = createSignal<WalletInfo | null>(null);
 const [connectionError, setConnectionError] = createSignal<string | null>(null);
 const [isModalOpen, setIsModalOpen] = createSignal(false);
-const [modalOpenTime, setModalOpenTime] = createSignal<number | null>(null);
 const [solBalance, setSolBalance] = createSignal<SolanaBalance | null>(null);
 const [splitdoATA, setSplitdoATA] = createSignal<ATAInfo>({ status: 'unknown' });
 
@@ -810,18 +809,8 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
 };
 
 const openModal = () => {
-  const now = Date.now();
-  const lastOpened = modalOpenTime();
-
-  // Prevent rapid modal openings
-  if (lastOpened && (now - lastOpened) < 2000) {
-    console.log('[ReactiveWalletStore] Modal opening prevented - too recent');
-    return;
-  }
-
   console.log('[ReactiveWalletStore] Opening wallet selection modal');
   setIsModalOpen(true);
-  setModalOpenTime(now);
   console.log('[ReactiveWalletStore] Modal state after opening:', isModalOpen());
 };
 
