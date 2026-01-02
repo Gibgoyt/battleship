@@ -1,5 +1,5 @@
 import type { Component } from 'solid-js';
-import { createSignal, createEffect, Show } from 'solid-js';
+import { createSignal, createEffect, onMount, Show } from 'solid-js';
 import {
   useSplitdoATA,
   useWalletModal,
@@ -68,18 +68,10 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
     console.log('[WalletPageReactive] Connection status changed:', connectionStatus());
   });
 
-  // Protect against multiple balance checks
-  const [isCheckingBalance, setIsCheckingBalance] = createSignal(false);
-
-  // Check SPLITDO account status on page load
-  createEffect(() => {
-    if (!isCheckingBalance()) {
-      console.log('[WalletPageReactive] Checking SPLITDO balance on page load');
-      setIsCheckingBalance(true);
-      checkSplitdoBalance().finally(() => {
-        setIsCheckingBalance(false);
-      });
-    }
+  // Check SPLITDO account status on page load (run once)
+  onMount(() => {
+    console.log('[WalletPageReactive] Checking SPLITDO balance on page load');
+    checkSplitdoBalance();
   });
 
   // Auto-create ATA after wallet connection (if intended)
