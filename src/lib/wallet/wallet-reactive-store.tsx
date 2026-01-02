@@ -42,6 +42,7 @@ const [connectionStatus, setConnectionStatus] = createSignal<'disconnected' | 'c
 const [wallet, setWallet] = createSignal<WalletInfo | null>(null);
 const [connectionError, setConnectionError] = createSignal<string | null>(null);
 const [isModalOpen, setIsModalOpen] = createSignal(false);
+const [modalOpenTime, setModalOpenTime] = createSignal<number | null>(null);
 const [solBalance, setSolBalance] = createSignal<SolanaBalance | null>(null);
 const [splitdoATA, setSplitdoATA] = createSignal<ATAInfo>({ status: 'unknown' });
 
@@ -616,15 +617,22 @@ const checkSplitdoBalance = async () => {
 
     if (!response.ok) {
       if (response.status === 404) {
-        // Account doesn't exist
+        // Handle ACCOUNT_NOT_FOUND elegantly
         setSplitdoATA({ status: 'not_found' });
-        console.log('[ReactiveWalletStore] SPLITDO ATA check complete: not_found');
+        console.log('[ReactiveWalletStore] SPLITDO ATA not found - ready for creation');
         return;
       }
       throw new Error(`API error: ${response.status}`);
     }
 
     const data = await response.json();
+
+    // Check for ACCOUNT_NOT_FOUND in response body
+    if (!data.success && data.error === 'ACCOUNT_NOT_FOUND') {
+      setSplitdoATA({ status: 'not_found' });
+      console.log('[ReactiveWalletStore] SPLITDO ATA not found - ready for creation');
+      return;
+    }
 
     if (data.success && data.data.token_account_pubkey) {
       // Account exists - show balance
@@ -639,7 +647,7 @@ const checkSplitdoBalance = async () => {
     } else {
       // API returned but no account
       setSplitdoATA({ status: 'not_found' });
-      console.log('[ReactiveWalletStore] SPLITDO ATA check complete: not_found');
+      console.log('[ReactiveWalletStore] SPLITDO ATA not found - ready for creation');
     }
   } catch (error) {
     console.error('[ReactiveWalletStore] SPLITDO ATA check failed:', error);
@@ -802,8 +810,18 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
 };
 
 const openModal = () => {
+  const now = Date.now();
+  const lastOpened = modalOpenTime();
+
+  // Prevent rapid modal openings
+  if (lastOpened && (now - lastOpened) < 2000) {
+    console.log('[ReactiveWalletStore] Modal opening prevented - too recent');
+    return;
+  }
+
   console.log('[ReactiveWalletStore] Opening wallet selection modal');
   setIsModalOpen(true);
+  setModalOpenTime(now);
   console.log('[ReactiveWalletStore] Modal state after opening:', isModalOpen());
 };
 
