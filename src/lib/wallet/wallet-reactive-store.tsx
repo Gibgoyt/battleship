@@ -1133,7 +1133,7 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
       fullRequestPayload: requestPayload
     }, null, 2));
 
-    const exchangeResponse = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/exchange/solana', {
+    const exchangeResponse = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/async-exchange/solana', {
       method: 'POST',
       headers: {
         'Authorization': authHeader,
