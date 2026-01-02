@@ -256,7 +256,7 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
 
       {/* Wallet Selection Modal */}
       <WalletModal
-        isOpen={isModalOpen()}
+        isOpen={isModalOpen}
         onClose={() => closeModal()}
         isDark={props.isDark}
       />

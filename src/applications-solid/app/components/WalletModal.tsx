@@ -1,9 +1,9 @@
-import type { Component } from 'solid-js';
+import type { Component, Accessor } from 'solid-js';
 import { createSignal, Show, For } from 'solid-js';
 import { useMultiWallet, useWalletConnection } from 'src/lib/wallet/wallet-reactive-store';
 
 interface WalletModalProps {
-  isOpen: boolean;
+  isOpen: Accessor<boolean>;
   onClose: () => void;
   isDark: boolean;
 }
@@ -142,15 +142,11 @@ const WalletModal: Component<WalletModalProps> = (props) => {
     }
   };
 
-  if (!props.isOpen) {
-    console.log('[WalletModal] Not rendering - modal closed');
-    return null;
-  }
-
-  console.log('[WalletModal] Rendering modal content');
+  console.log('[WalletModal] Rendering with isOpen:', props.isOpen());
 
   return (
-    <div class="fixed inset-0 z-50 flex items-center justify-center">
+    <Show when={props.isOpen()}>
+      <div class="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
         class="absolute inset-0 bg-black bg-opacity-50"
@@ -305,6 +301,7 @@ const WalletModal: Component<WalletModalProps> = (props) => {
         </div>
       </div>
     </div>
+    </Show>
   );
 };
 
