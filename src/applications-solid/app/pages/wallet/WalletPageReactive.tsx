@@ -24,6 +24,9 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
   // Local state for ATA creation
   const [isCreatingATA, setIsCreatingATA] = createSignal(false);
 
+  // State for creation intent - to create ATA after wallet connection
+  const [createATAAfterConnection, setCreateATAAfterConnection] = createSignal(false);
+
   // Create ATA function using real reactive store implementation
   const createSplitdoATA = async (): Promise<{ success: boolean; signature?: string; error?: string }> => {
     setIsCreatingATA(true);
@@ -42,6 +45,20 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
     }
   };
 
+  // Smart SPLITDO button handler
+  const handleSplitdoAccountCreation = async () => {
+    if (connectionStatus() === 'connected') {
+      // Wallet connected - directly create ATA
+      console.log('[WalletPageReactive] Creating SPLITDO ATA with connected wallet');
+      await createSplitdoATA();
+    } else {
+      // Need to connect wallet first, then create ATA
+      console.log('[WalletPageReactive] Connecting wallet for SPLITDO ATA creation');
+      setCreateATAAfterConnection(true);
+      openModal();
+    }
+  };
+
   // Debug modal state
   createEffect(() => {
     console.log('[WalletPageReactive] Modal state changed:', isModalOpen());
@@ -51,10 +68,31 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
     console.log('[WalletPageReactive] Connection status changed:', connectionStatus());
   });
 
+  // Protect against multiple balance checks
+  const [isCheckingBalance, setIsCheckingBalance] = createSignal(false);
+
   // Check SPLITDO account status on page load
   createEffect(() => {
-    console.log('[WalletPageReactive] Checking SPLITDO balance on page load');
-    checkSplitdoBalance();
+    if (!isCheckingBalance()) {
+      console.log('[WalletPageReactive] Checking SPLITDO balance on page load');
+      setIsCheckingBalance(true);
+      checkSplitdoBalance().finally(() => {
+        setIsCheckingBalance(false);
+      });
+    }
+  });
+
+  // Auto-create ATA after wallet connection (if intended)
+  createEffect(() => {
+    if (connectionStatus() === 'connected' && createATAAfterConnection()) {
+      console.log('[WalletPageReactive] Wallet connected - proceeding with ATA creation');
+      setCreateATAAfterConnection(false);
+
+      // Small delay to ensure wallet is ready
+      setTimeout(async () => {
+        await createSplitdoATA();
+      }, 500);
+    }
   });
 
   // Refresh balances when wallet is connected
@@ -168,7 +206,7 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
                       when={connectionStatus() === 'connected'}
                       fallback={
                         <button
-                          onClick={() => openModal()}
+                          onClick={handleSplitdoAccountCreation}
                           class={`px-3 py-1.5 text-sm border transition-colors ${
                             props.isDark
                               ? 'border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white'
