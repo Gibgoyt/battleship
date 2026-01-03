@@ -145,7 +145,7 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
                   SPLITDO
                 </td>
                 <td class={`px-4 md:px-6 py-4 whitespace-nowrap ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  <Show when={splitdoATA().status === 'exists'} fallback={<span class="text-gray-500">--</span>}>
+                  <Show when={splitdoATA().status === 'exists' || splitdoATA().status === 'created'} fallback={<span class="text-gray-500">--</span>}>
                     <span class="font-semibold">{formatCurrency(splitdoATA().balance?.uiAmount || 0)}</span>
                   </Show>
                 </td>
@@ -153,6 +153,12 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
                   <Show when={splitdoATA().status === 'exists'}>
                     <div>
                       <div class="text-green-600 dark:text-green-400 font-medium">Active</div>
+                      <div class="text-xs">{formatAddress(splitdoATA().address || '')}</div>
+                    </div>
+                  </Show>
+                  <Show when={splitdoATA().status === 'created'}>
+                    <div>
+                      <div class="text-green-600 dark:text-green-400 font-medium">✅ Created Successfully!</div>
                       <div class="text-xs">{formatAddress(splitdoATA().address || '')}</div>
                     </div>
                   </Show>
@@ -166,7 +172,10 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
                     <span class="text-blue-500">Creating...</span>
                   </Show>
                   <Show when={splitdoATA().status === 'error'}>
-                    <span class="text-red-500">Error</span>
+                    <div class="text-red-500">
+                      <div class="font-semibold">Error</div>
+                      <div class="text-xs mt-1">{splitdoATA().error || 'Unknown error occurred'}</div>
+                    </div>
                   </Show>
                 </td>
                 <td class={`px-4 md:px-6 py-4`}>

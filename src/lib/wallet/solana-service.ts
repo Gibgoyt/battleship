@@ -474,7 +474,8 @@ export class EnhancedSolanaService {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${firebaseToken}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Origin': 'https://splitdo.app'
         },
         body: JSON.stringify({
           wallet_address: walletAddress,
@@ -491,9 +492,17 @@ export class EnhancedSolanaService {
           transactionSignature: result.data.transaction_signature
         };
       } else {
+        // Provide more specific error messages for common issues
+        let errorMessage = result.message || 'Failed to create token account';
+        if (errorMessage.includes('owner is not allowed')) {
+          errorMessage = 'Transaction ownership error - please try reconnecting your wallet';
+        } else if (errorMessage.includes('simulation failed')) {
+          errorMessage = 'Transaction simulation failed - please check your wallet balance and try again';
+        }
+
         return {
           success: false,
-          error: result.message || 'Failed to create token account'
+          error: errorMessage
         };
       }
     } catch (error) {
