@@ -6,7 +6,11 @@ export const prerender = true
 // Fetch presale price at build time
 let formattedPrice = '$0.001'; // fallback
 try {
-  const response = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/program/info');
+  const response = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/program/info', {
+    headers: {
+      'Origin': 'https://splitdo.app'
+    }
+  });
   if (response.ok) {
     const data = await response.json();
     if (data.success && data.data?.exchange_rate) {
