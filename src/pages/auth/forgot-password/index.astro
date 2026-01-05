@@ -1,0 +1,10 @@
+---
+import AuthLayout from 'src/layouts/AuthLayout.astro';
+import ForgotPasswordForm from 'src/components-svelte/auth/ForgotPasswordForm.svelte';
+
+export const prerender = true;
+---
+
+<AuthLayout title="Reset Password">
+    <ForgotPasswordForm client:only="svelte" />
+</AuthLayout>
