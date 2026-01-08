@@ -1217,8 +1217,7 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
       error: errorMessage,
       errorType: error.constructor.name,
       timestamp: new Date().toISOString(),
-      solAmount: solAmount,
-      walletAddress: phantomProvider.publicKey?.toString()
+      solAmount: solAmount
     });
 
     // Classify error types for better user feedback
