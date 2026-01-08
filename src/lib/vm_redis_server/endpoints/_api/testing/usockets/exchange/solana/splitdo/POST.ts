@@ -1,7 +1,3 @@
-// Import local Rust signing module for SOL transfers (reuse existing)
-import { signSolExchangeRequest } from '../../../solana-mainnet/sol-vault/rust/index.ts'
-import type { SolExchangeSignedBody } from '../../../solana-mainnet/sol-vault/rust/index.ts'
-
 // Exchange-specific response interfaces
 interface ExchangeResponse200 {
     status: 200
@@ -77,112 +73,23 @@ type ExchangePostResponse = ExchangeResponse200 | ExchangeResponse422 | Exchange
  *
  * POST /api/testing/usockets/exchange/solana/splitdo
  *
- * @param userId User's ID (for logging)
- * @param walletPath Path to user's wallet keypair
  * @param accessToken The bearer token for Firebase JWT authentication (required)
- * @param amount Amount of SOL to exchange (e.g. 0.01)
- * @param origin Origin header for CORS validation (e.g. "https://splitdo.app")
+ * @param solAmount Amount of SOL in lamports
+ * @param signedTransaction Base64 signed transaction from Phantom wallet
  */
 export async function POST(
-    userId: string,
-    walletPath: string,
     accessToken: string,
-    amount: number,
-    origin: string
+    solAmount: number,
+    signedTransaction: string
 ): Promise<ExchangePostResponse> {
     try {
-        console.log(`[Exchange POST] Starting SOL to SPLITDO exchange for user ${userId}...`)
-        console.log(`[Exchange POST] Wallet: ${walletPath}`)
-        console.log(`[Exchange POST] Amount: ${amount} SOL`)
-        console.log(`[Exchange POST] Origin: ${origin}`)
+        console.log(`[Exchange POST] Starting SOL to SPLITDO exchange...`)
+        console.log(`[Exchange POST] Amount: ${solAmount} lamports`)
+        console.log(`[Exchange POST] Signed transaction length: ${signedTransaction.length} chars`)
+        console.log(`[Exchange POST] Transaction preview: ${signedTransaction.substring(0, 50)}...`)
 
-        // Fix wallet path - ensure it has correct extension (same logic as sol-vault)
-        let resolvedWalletPath = walletPath
-        if (walletPath.startsWith('/')) {
-            // Already an absolute path, use as-is
-            resolvedWalletPath = walletPath
-        } else if (walletPath.includes('phantom_testuser')) {
-            // For phantom test users, the walletDir already includes .json
-            if (walletPath.endsWith('.json')) {
-                resolvedWalletPath = `../../wallet/mainnet/testing/${walletPath}`
-            } else {
-                resolvedWalletPath = `../../wallet/mainnet/testing/${walletPath}.json`
-            }
-        } else if (!walletPath.includes('/')) {
-            // For regular users, add /keypair.json
-            resolvedWalletPath = `../../wallet/${walletPath}/keypair.json`
-        }
-
-        console.log(`[Exchange POST] Resolved wallet path: ${resolvedWalletPath}`)
-
-        // Check if wallet file exists
-        const path = await import('path')
-        const fs = await import('fs')
-
-        const absoluteWalletPath = path.resolve(resolvedWalletPath)
-        console.log(`[Exchange POST] Absolute wallet path: ${absoluteWalletPath}`)
-
-        if (!fs.existsSync(absoluteWalletPath)) {
-            console.error(`[Exchange POST] ❌ Wallet file not found: ${absoluteWalletPath}`)
-            return {
-                status: 500,
-                data: {
-                    success: false,
-                    error: "Wallet file not found",
-                    message: `No wallet file at: ${absoluteWalletPath}`
-                }
-            }
-        }
-
-        console.log(`[Exchange POST] ✅ Wallet file found: ${absoluteWalletPath}`)
-
-        // 1. Create a legitimate SOL transfer transaction for exchange
-        console.log(`[Exchange POST] Creating SOL exchange transaction...`)
-        console.log(`[Exchange POST] Amount: ${amount} SOL to exchange for SPLITDO`)
-
-        let signedBody: SolExchangeSignedBody
-        try {
-            signedBody = signSolExchangeRequest(
-                absoluteWalletPath,
-                amount,
-                "https://api.mainnet-beta.solana.com"
-            )
-            console.log(`[Exchange POST] ✅ Transaction signed successfully`)
-            console.log(`[Exchange POST] Transaction length: ${signedBody.signedTransaction.length} chars`)
-            console.log(`[Exchange POST] Transaction preview: ${signedBody.signedTransaction.substring(0, 50)}...`)
-        } catch (error) {
-            console.error(`[Exchange POST] ❌ Transaction signing failed:`, error)
-            return {
-                status: 500,
-                data: {
-                    success: false,
-                    error: "Transaction Signing Failed",
-                    message: error instanceof Error ? error.message : "Unknown signing error"
-                }
-            }
-        }
-
-        // 2. Submit to local uSockets exchange endpoint
-        const BASE_URL = process.env.BASE_URL || 'https://localhost:8443'
-        process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"
-
-        const endpoint = BASE_URL + "/api/testing/usockets/exchange/solana/splitdo"
-        console.log(`[Exchange POST] Submitting to exchange endpoint: ${endpoint}`)
-
-        // Create the request body
-        const requestBody = {
-            transaction_signature: signedBody.signedTransaction
-        }
-
-        // Log the complete POST request JSON body
-        console.log(`[Exchange POST] Complete POST request JSON body:`)
-        console.log(`====================================`)
-        console.log(JSON.stringify(requestBody, null, 2))
-        console.log(`====================================`)
-        console.log(`[Exchange POST] Transaction signature length: ${signedBody.signedTransaction.length} characters`)
-
-        // Validate transaction before sending
-        if (!signedBody.signedTransaction || signedBody.signedTransaction.length === 0) {
+        // Validate signed transaction
+        if (!signedTransaction || signedTransaction.length === 0) {
             console.error(`[Exchange POST] 🚨 ABORTING: signed transaction is empty!`)
             return {
                 status: 500,
@@ -194,12 +101,44 @@ export async function POST(
             }
         }
 
+        // Validate access token
+        if (!accessToken || accessToken.length === 0) {
+            console.error(`[Exchange POST] 🚨 ABORTING: access token is missing!`)
+            return {
+                status: 500,
+                data: {
+                    success: false,
+                    error: "Authentication Required",
+                    message: "Firebase JWT access token is required"
+                }
+            }
+        }
+
+        // Submit to local uSockets exchange endpoint
+        const BASE_URL = process.env.BASE_URL || 'https://localhost:8443'
+        process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"
+
+        const endpoint = BASE_URL + "/api/testing/usockets/exchange/solana/splitdo"
+        console.log(`[Exchange POST] Submitting to exchange endpoint: ${endpoint}`)
+
+        // Create the request body (same format as the working test)
+        const requestBody = {
+            sol_amount: solAmount,
+            signed_transaction: signedTransaction
+        }
+
+        // Log the complete POST request JSON body
+        console.log(`[Exchange POST] Complete POST request JSON body:`)
+        console.log(`====================================`)
+        console.log(JSON.stringify(requestBody, null, 2))
+        console.log(`====================================`)
+
         const response = await fetch(endpoint, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${accessToken}`,
-                "Origin": origin
+                "Authorization": `Bearer ${accessToken}`
+                // Note: Origin header removed - browser will auto-add for CORS security
             },
             body: JSON.stringify(requestBody)
         })
@@ -209,7 +148,7 @@ export async function POST(
         const responseData = await response.json()
         console.log(`[Exchange POST] Response data:`, JSON.stringify(responseData, null, 2))
 
-        // 3. Return typed response based on status
+        // Return typed response based on status
         switch (response.status) {
             case 200:
                 console.log(`[Exchange POST] ✅ Exchange request successful!`)
@@ -231,7 +170,14 @@ export async function POST(
                 }
             default:
                 console.error(`[Exchange POST] ❌ Unexpected HTTP status: ${response.status}`)
-                throw new Error(`Unexpected HTTP status: ${response.status}`)
+                return {
+                    status: 500,
+                    data: {
+                        success: false,
+                        error: "Unexpected HTTP Status",
+                        message: `Received HTTP status: ${response.status}`
+                    }
+                }
         }
 
     } catch (error: unknown) {

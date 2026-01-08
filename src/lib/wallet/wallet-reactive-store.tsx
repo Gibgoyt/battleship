@@ -18,6 +18,8 @@ import { PhantomWalletProvider } from './wallet-providers';
 import { rawToUIAmount, type SplitdoRawAmount } from './token-utils';
 import { detectMobilePlatform, getInstallationMessage } from './mobile-detection';
 import { attemptMobileWalletConnection, isMobileWalletConnectionSupported } from './mobile-wallet-connector';
+// Import only the specific endpoint function to avoid Node.js dependencies
+import { POST as splitdoExchangePost } from '../vm_redis_server/endpoints/_api/testing/usockets/exchange/solana/splitdo/POST.ts';
 
 export type ATAStatus = 'unknown' | 'checking' | 'exists' | 'not_found' | 'creating' | 'created' | 'error';
 
@@ -1125,51 +1127,79 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
     }, null, 2));
 
     console.log('[ReactiveWalletStore] 📤 Submitting to backend:', JSON.stringify({
-      endpoint: 'POST /api/testing/splitdo-token/exchange/solana',
+      endpoint: 'splitdoExchangePost (direct import)',
       solAmount: solAmount,
       lamports: lamports,
       serializedTxLength: serializedTransaction.length,
       hasFirebaseToken: !!firebaseToken,
-      fullRequestPayload: requestPayload
+      requestParams: {
+        accessToken: firebaseToken ? 'present' : 'missing',
+        solAmount: lamports,
+        signedTransactionLength: serializedTransaction.length
+      }
     }, null, 2));
 
-    const exchangeResponse = await fetch('https://devbackend.splitdo.app:8443/api/testing/splitdo-token/exchange/solana', {
-      method: 'POST',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        'Origin': 'https://devbackend.splitdo.app:2083'
-      },
-      body: JSON.stringify(requestPayload)
-    });
+    // Call the endpoint function directly (no raw fetch needed)
+    const result = await splitdoExchangePost(
+      firebaseToken,
+      lamports,
+      serializedTransaction
+    );
 
     // Enhanced response logging
     console.log('[ReactiveWalletStore] 📥 Backend response:', JSON.stringify({
-      status: exchangeResponse.status,
-      ok: exchangeResponse.ok,
-      statusText: exchangeResponse.statusText,
-      headers: Object.fromEntries(exchangeResponse.headers.entries())
+      status: result.status,
+      success: result.data.success,
+      hasStage1: !!result.data.stage1_sol_confirmation,
+      hasStage2: !!result.data.stage2_splitdo_exchange
     }, null, 2));
 
-    if (!exchangeResponse.ok) {
-      const errorData = await exchangeResponse.json();
-      console.error('[ReactiveWalletStore] ❌ Backend error:', JSON.stringify({
-        status: exchangeResponse.status,
-        errorData: errorData,
-        requestPayload: { sol_amount: lamports, signed_transaction: `${serializedTransaction.substring(0, 50)}...` }
+    // Handle different response statuses
+    if (result.status === 422) {
+      // Validation error (e.g., missing SPLITDO ATA)
+      const errorData = result.data;
+      console.error('[ReactiveWalletStore] ❌ Validation error (422):', JSON.stringify({
+        error: errorData.error,
+        message: errorData.message,
+        requiredATA: errorData.required_ata_address
       }, null, 2));
-      throw new Error(errorData.message || 'Exchange failed');
+
+      if (errorData.required_ata_address) {
+        throw new Error('SPLITDO account required. Please create your SPLITDO account first.');
+      }
+      throw new Error(errorData.message || 'Exchange validation failed');
     }
 
-    const result = await exchangeResponse.json();
+    if (result.status !== 200 || !result.data.success) {
+      // Server error or exchange failure
+      console.error('[ReactiveWalletStore] ❌ Exchange failed:', JSON.stringify({
+        status: result.status,
+        error: result.data.error,
+        message: result.data.message
+      }, null, 2));
+      throw new Error(result.data.message || result.data.error || 'Exchange failed');
+    }
     console.log('[ReactiveWalletStore] 📥 Full Backend Response Body:', JSON.stringify(result, null, 2));
-    console.log('[ReactiveWalletStore] ✅ Exchange result analysis:', JSON.stringify({
-      transactionSignature: result.data?.transaction_signature,
-      splitdoReceived: result.data?.splitdo_amount,
-      exchangeRate: result.data?.exchange_rate,
-      fullResponse: result.data,
-      rawResult: result
-    }, null, 2));
+
+    // Handle stage1 SOL confirmation
+    if (result.data.stage1_sol_confirmation && result.data.stage1_sol_confirmation.success) {
+      console.log(`[ReactiveWalletStore] ✅ Stage 1 (SOL): Transaction confirmed`);
+      console.log(`   Transaction Signature: ${result.data.stage1_sol_confirmation.tx_signature}`);
+      console.log(`   Duration: ${result.data.stage1_sol_confirmation.duration_ms}ms`);
+    } else if (result.data.stage1_sol_confirmation) {
+      console.log(`[ReactiveWalletStore] ❌ Stage 1 (SOL): ${result.data.stage1_sol_confirmation.error || 'Failed'}`);
+    }
+
+    // Handle stage2 SPLITDO exchange
+    if (result.data.stage2_splitdo_exchange && result.data.stage2_splitdo_exchange.success) {
+      console.log(`[ReactiveWalletStore] ✅ Stage 2 (SPLITDO): Exchange completed`);
+      console.log(`   Transaction Signature: ${result.data.stage2_splitdo_exchange.tx_signature}`);
+      console.log(`   Duration: ${result.data.stage2_splitdo_exchange.duration_ms}ms`);
+    } else if (result.data.stage2_splitdo_exchange) {
+      console.log(`[ReactiveWalletStore] ❌ Stage 2 (SPLITDO): ${result.data.stage2_splitdo_exchange.error || 'Failed'}`);
+    }
+
+    console.log('[ReactiveWalletStore] ✅ Exchange completed successfully');
 
     setExchangeStatus('success');
 

@@ -4,13 +4,19 @@ import { firebaseJwtValidator } from 'src/lib/auth/firebase-jwt-validator'
 import { createLogger } from 'src/lib/logger'
 import AppWithStore from 'src/applications-solid/app/AppWithStore.tsx'
 
-<!-- THIS IS A CATCH ALL ROUTE THAT LOADS A SOLIDJS SINGLE PAGE APP !!NOT REACT!! -->
-<!-- THIS IS A CATCH ALL ROUTE THAT LOADS A SOLIDJS SINGLE PAGE APP !!NOT REACT!! -->
-<!-- THIS IS A CATCH ALL ROUTE THAT LOADS A SOLIDJS SINGLE PAGE APP !!NOT REACT!! -->
-<!-- THIS IS A CATCH ALL ROUTE THAT LOADS A SOLIDJS SINGLE PAGE APP !!NOT REACT!! -->
-<!-- THIS IS A CATCH ALL ROUTE THAT LOADS A SOLIDJS SINGLE PAGE APP !!NOT REACT!! -->
-<!-- THIS IS A CATCH ALL ROUTE THAT LOADS A SOLIDJS SINGLE PAGE APP !!NOT REACT!! -->
-<!-- THIS IS A CATCH ALL ROUTE THAT LOADS A SOLIDJS SINGLE PAGE APP !!NOT REACT!! -->
+/**
+ * IMPORTANT: THIS IS A CATCH-ALL ROUTE FOR A SOLIDJS SINGLE PAGE APPLICATION
+ *
+ * This file implements a catch-all route ([...all].astro) that:
+ * 1. Handles ALL app routes under /app/*
+ * 2. Loads a SolidJS single page application (NOT React!)
+ * 3. Provides Firebase JWT authentication protection
+ * 4. Validates both Firebase and backend user existence
+ * 5. Passes the Firebase token to the SolidJS app for API calls
+ *
+ * The SolidJS app handles its own routing internally using @solidjs/router
+ * All client-side navigation happens within the SPA without page reloads
+ */
 
 export const prerender = false;
 
