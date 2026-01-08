@@ -114,8 +114,8 @@ export async function POST(
             }
         }
 
-        // Submit to local uSockets exchange endpoint
-        const BASE_URL = process.env.BASE_URL || 'https://localhost:8443'
+        // Submit to devbackend uSockets exchange endpoint
+        const BASE_URL = 'https://devbackend.splitdo.app:8443'
         process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"
 
         const endpoint = BASE_URL + "/api/testing/usockets/exchange/solana/splitdo"
