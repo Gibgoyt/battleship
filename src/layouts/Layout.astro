@@ -201,8 +201,8 @@ const { title } = Astro.props;
 </footer>
 
 <script>
-// Support channel navigation functions
-function openTelegram() {
+// Support channel navigation functions - defined globally
+window.openTelegram = function() {
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     const isAndroid = /android/i.test(userAgent);
     const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
@@ -219,9 +219,9 @@ function openTelegram() {
         // Desktop - open web version directly
         window.open('https://web.telegram.org/k/#@splitdo_support_bot', '_blank');
     }
-}
+};
 
-function openDiscord() {
+window.openDiscord = function() {
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     const isAndroid = /android/i.test(userAgent);
     const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
@@ -238,9 +238,9 @@ function openDiscord() {
         // Desktop - open web version directly
         window.open('https://discord.com/channels/1454446948915347550/1454446949699944492', '_blank');
     }
-}
+};
 
-function openWhatsApp() {
+window.openWhatsApp = function() {
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     const isAndroid = /android/i.test(userAgent);
     const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
@@ -257,7 +257,7 @@ function openWhatsApp() {
         // Desktop - open web version directly
         window.open('https://wa.me/971569119332', '_blank');
     }
-}
+};
 
 document.addEventListener('DOMContentLoaded', function () {
     // Theme toggle functionality
