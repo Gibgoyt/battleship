@@ -121,10 +121,10 @@ export async function POST(
         const endpoint = BASE_URL + "/api/testing/usockets/exchange/solana/splitdo"
         console.log(`[Exchange POST] Submitting to exchange endpoint: ${endpoint}`)
 
-        // Create the request body (same format as the working test)
+        // Create the request body (match backend expected format)
         const requestBody = {
             sol_amount: solAmount,
-            signed_transaction: signedTransaction
+            transaction_signature: signedTransaction
         }
 
         // Log the complete POST request JSON body
