@@ -79,19 +79,22 @@ type ExchangePostResponse = ExchangeResponse200 | ExchangeResponse422 | Exchange
  *
  * @param userId User's ID (for logging)
  * @param walletPath Path to user's wallet keypair
- * @param accessToken The bearer token for authentication (optional for testing)
+ * @param accessToken The bearer token for Firebase JWT authentication (required)
  * @param amount Amount of SOL to exchange (e.g. 0.01)
+ * @param origin Origin header for CORS validation (e.g. "https://splitdo.app")
  */
 export async function POST(
     userId: string,
     walletPath: string,
     accessToken: string,
-    amount: number
+    amount: number,
+    origin: string
 ): Promise<ExchangePostResponse> {
     try {
         console.log(`[Exchange POST] Starting SOL to SPLITDO exchange for user ${userId}...`)
         console.log(`[Exchange POST] Wallet: ${walletPath}`)
         console.log(`[Exchange POST] Amount: ${amount} SOL`)
+        console.log(`[Exchange POST] Origin: ${origin}`)
 
         // Fix wallet path - ensure it has correct extension (same logic as sol-vault)
         let resolvedWalletPath = walletPath
@@ -194,8 +197,9 @@ export async function POST(
         const response = await fetch(endpoint, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
-                // Note: No Authorization header needed for testing endpoint
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${accessToken}`,
+                "Origin": origin
             },
             body: JSON.stringify(requestBody)
         })
