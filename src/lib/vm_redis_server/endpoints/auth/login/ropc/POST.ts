@@ -57,7 +57,7 @@ export async function POST(email: string, password: string): Promise<PostRespons
 
 	try {
 		// Get BASE_URL from environment with fallback
-		const BASE_URL = process.env.BASE_URL || 'https://localhost:2053'
+		const BASE_URL = process.env.BASE_URL || 'https://devbackend.splitdo.app:8443'
 
 		// Disable SSL verification for self-signed certificates (like curl -k)
 		process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"

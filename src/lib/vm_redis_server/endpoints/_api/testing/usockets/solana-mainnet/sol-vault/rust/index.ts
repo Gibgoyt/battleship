@@ -1,9 +1,9 @@
-// Load the shared NAPI module
+// Load the shared NAPI module for uSockets Solana vault transfers
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
 
 // Path to shared library
-const sharedLibPath = '../../../../../../../rust_shared/index.node'
+const sharedLibPath = '../../../../../../../../rust_shared/index.node'
 
 const native = require(sharedLibPath)
 

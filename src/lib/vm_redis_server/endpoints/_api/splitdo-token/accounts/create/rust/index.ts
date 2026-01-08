@@ -26,7 +26,7 @@ export function createAccountTransaction(
 ): CreateAccountOutput {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const native = require('../../../../../../../rust_shared/target/release/index.node')
-  return native.signCreateAccountRequest(keypairPath)
+  return native.signCreateAccountRequest(keypairPath, rpcUrl)
 }
 
 // --- High Level Helpers ---
@@ -65,7 +65,7 @@ export function signCreateAccountRequest(walletPath: string): CreateAccountSigne
 
     const config = readJson(configPath)
     const mint = config.splitdo_mint
-    const rpcUrl = "http://localhost:8899"
+    const rpcUrl = "https://api.mainnet-beta.solana.com"
 
     console.log(`[RustBinding] Inputs:`)
     console.log(`  Wallet: ${walletPath}`)

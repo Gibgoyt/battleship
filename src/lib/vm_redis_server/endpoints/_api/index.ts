@@ -8,8 +8,9 @@ import * as SpaLoad from './spa-load/index.ts'
 import * as Solana from './solana/index.ts'
 import * as Debug from './debug/index.ts'
 import * as SplitdoToken from './splitdo-token/index.ts'
+import * as Testing from './testing/index.ts'
 import * as V1 from './v1/index.ts'
 import * as ExchangeRate from './exchange-rate/index.ts'
 import * as Payments from './payments/index.ts'
 import * as Websocket from './websocket/index.ts'
-export { Users, Groups, Invites, Client, Params, Test, SpaLoad, Solana, Debug, SplitdoToken, V1, ExchangeRate, Payments, Websocket }
+export { Users, Groups, Invites, Client, Params, Test, SpaLoad, Solana, Debug, SplitdoToken, Testing, V1, ExchangeRate, Payments, Websocket }

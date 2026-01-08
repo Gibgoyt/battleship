@@ -22,7 +22,7 @@ type GetResponse = Response302
 export async function GET(code?: string, state?: string, error?: string): Promise<GetResponse> {
 	try {
 		// Get BASE_URL from environment with fallback
-		const BASE_URL = process.env.BASE_URL || 'https://localhost:2053'
+		const BASE_URL = process.env.BASE_URL || 'https://localhost:8443'
 
 		// Disable SSL verification for self-signed certificates
 		process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"

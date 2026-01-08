@@ -80,7 +80,7 @@ export async function POST(userId: string, walletPath: string, accessToken: stri
 	        }
 	
 			// 2. Send the request (Server Side)
-			const BASE_URL = process.env.BASE_URL || 'https://localhost:8443'
+			const BASE_URL = process.env.BASE_URL || 'https://devbackend.splitdo.app:8443'
 			process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"
 	
 	        console.log(`[POST] Sending signed request to ${BASE_URL}/api/splitdo-token/accounts/create...`)
