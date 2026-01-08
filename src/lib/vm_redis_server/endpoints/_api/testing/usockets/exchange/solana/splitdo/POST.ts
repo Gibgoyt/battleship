@@ -138,7 +138,7 @@ export async function POST(
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${accessToken}`
-                // Note: Origin header removed - browser will auto-add for CORS security
+                // Origin header automatically added by browser for CORS security
             },
             body: JSON.stringify(requestBody)
         })
