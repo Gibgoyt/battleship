@@ -22,6 +22,19 @@ import CounterPage from './pages/counter/index'
 import ProfilePage from './pages/profile/index'
 import WalletPage from './pages/wallet/index'
 
+/*
+ * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
+ * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
+ * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
+ * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
+ * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
+ * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
+ * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
+ * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
+ * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
+ * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
+*/
+
 const AppContent: Component = () => {
   const [currentPage, setCurrentPage] = createSignal<Page>('dashboard')
   const [isDark, setIsDark] = createSignal(false)
