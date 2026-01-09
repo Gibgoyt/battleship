@@ -74,10 +74,10 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
 
   const quickActions = [
     {
-      title: 'Wallet',
+      title: 'SPLITDO Exchange',
       description: 'Manage your SPLITDO tokens',
-      action: '/app/wallet',
-      label: 'Go to Wallet'
+      action: '/app/splitdo-exchange',
+      label: 'Go to Exchange'
     },
     {
       title: 'Profile',
@@ -192,27 +192,6 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
           </div>
         </div>
 
-        {/* Connect Wallet Button if not connected */}
-        <Show when={connectionStatus() !== 'connected'}>
-          <div class={`mt-4 p-4 border-l-4 border-blue-500 ${props.isDark ? 'bg-zinc-800/30' : 'bg-blue-50'}`}>
-            <div class="flex items-center justify-between">
-              <div>
-                <p class={`text-sm font-medium ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Wallet Not Connected
-                </p>
-                <p class={`text-xs mt-1 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Connect your wallet to view balances and manage tokens
-                </p>
-              </div>
-              <button
-                onClick={() => openModal()}
-                class="px-4 py-2 bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
-              >
-                Connect Wallet
-              </button>
-            </div>
-          </div>
-        </Show>
       </div>
 
       {/* Quick Actions */}

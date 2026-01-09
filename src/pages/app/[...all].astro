@@ -115,11 +115,50 @@ try {
   logger.error('Protected route validation failed', error)
   // Invalid token, clear it and redirect to sign-in
   Astro.cookies.delete('firebase-auth-token', { path: '/' })
-  
+
   logger.info('Redirecting to sign-in due to validation failure')
   return Astro.redirect('/auth/sign-in', 302)
 }
 // ==== END AUTH PROTECTION LOGIC ====
+
+// ==== ROUTE VALIDATION LOGIC ====
+logger.debug('Processing route validation', { pathname: Astro.url.pathname })
+
+// Extract route from URL
+const pathSegments = Astro.url.pathname.split('/').filter(Boolean)
+const appRoute = pathSegments[1] // The part after /app/
+
+// Define valid routes (new structure)
+const validRoutes = ['dashboard', 'splitdo-exchange', 'profile']
+
+// Handle route validation with legacy support
+if (pathSegments[0] === 'app') {
+  // Legacy wallet route - redirect to new splitdo-exchange
+  if (appRoute === 'wallet') {
+    logger.info('Legacy wallet route detected, redirecting to splitdo-exchange', {
+      pathname: Astro.url.pathname
+    })
+    return Astro.redirect('/app/splitdo-exchange', 302)
+  }
+
+  if (!appRoute || appRoute === 'dashboard') {
+    // Valid: /app/ or /app/dashboard
+    logger.debug('Valid dashboard route', { appRoute: appRoute || 'default' })
+  } else if (validRoutes.includes(appRoute)) {
+    // Valid: /app/splitdo-exchange or /app/profile
+    logger.debug('Valid app route', { appRoute })
+  } else {
+    // Invalid: redirect to dashboard
+    logger.info('Invalid app route detected, redirecting to dashboard', {
+      pathname: Astro.url.pathname,
+      appRoute
+    })
+    return Astro.redirect('/app/dashboard', 302)
+  }
+}
+
+logger.debug('Route validation complete')
+// ==== END ROUTE VALIDATION LOGIC ====
 ---
 <!DOCTYPE html>
 <html lang="en" class="h-full bg-zinc-900"> {/* Added bg-zinc-900 here */}
