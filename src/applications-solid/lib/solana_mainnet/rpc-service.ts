@@ -50,33 +50,67 @@ export interface TransactionHistoryResult {
 }
 
 class SolanaRPCService {
-  private readonly RPC_URL = 'https://api.mainnet-beta.solana.com';
+  // Use backend proxy as primary, fallback to CORS-enabled endpoints
+  private readonly RPC_ENDPOINTS = [
+    `${window.location.origin}/api/solana/rpc`, // Our backend proxy (PREFERRED)
+    'https://rpc.ankr.com/solana',              // Ankr - supports CORS
+    'https://solana-api.projectserum.com',     // Project Serum - supports CORS
+    'https://solana-mainnet.rpc.extrnode.com', // Alternative endpoint
+  ];
+
+  private currentEndpointIndex = 0;
   private requestId = 1;
 
   private async makeRPCCall<T>(method: string, params: any[]): Promise<SolanaRPCResponse<T>> {
-    try {
-      const response = await fetch(this.RPC_URL, {
-        method: 'POST',
-        headers: {
+    let lastError: Error | null = null;
+
+    // Try each RPC endpoint until one works
+    for (let i = 0; i < this.RPC_ENDPOINTS.length; i++) {
+      const endpoint = this.RPC_ENDPOINTS[this.currentEndpointIndex];
+
+      try {
+        console.log(`[SolanaRPC] Attempting ${method} with endpoint: ${endpoint}`);
+
+        const isOurProxy = endpoint.includes('/api/solana/rpc');
+        const headers: Record<string, string> = {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: this.requestId++,
-          method,
-          params
-        })
-      });
+        };
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Only add Origin header for external endpoints
+        if (!isOurProxy) {
+          headers['Origin'] = window.location.origin;
+        }
+
+        const requestBody = isOurProxy
+          ? { method, params, id: this.requestId++ } // Simplified for our proxy
+          : { jsonrpc: '2.0', id: this.requestId++, method, params }; // Standard RPC format
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status} from ${endpoint}`);
+        }
+
+        const result = await response.json();
+        console.log(`[SolanaRPC] Success with endpoint: ${endpoint}`);
+        return result;
+
+      } catch (error) {
+        console.warn(`[SolanaRPC] Failed with ${endpoint}:`, error);
+        lastError = error as Error;
+
+        // Try next endpoint
+        this.currentEndpointIndex = (this.currentEndpointIndex + 1) % this.RPC_ENDPOINTS.length;
       }
-
-      return await response.json();
-    } catch (error) {
-      console.error(`RPC call failed for ${method}:`, error);
-      throw error;
     }
+
+    // All endpoints failed
+    console.error(`[SolanaRPC] All RPC endpoints failed for ${method}`);
+    throw lastError || new Error('All RPC endpoints failed');
   }
 
   /**
