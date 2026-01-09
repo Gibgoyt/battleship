@@ -93,9 +93,9 @@ const PortfolioOverview: Component<PortfolioOverviewProps> = (props) => {
       <Show when={connectionStatus() === 'connected'}>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* SOL Allocation */}
-          <div class="flex items-center justify-between p-4 rounded-xl border border-crypto-border bg-crypto-bg-tertiary/50">
+          <div class="asset-allocation-card flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-400 to-purple-600 flex items-center justify-center">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-400 to-purple-600 flex items-center justify-center shadow-lg">
                 <span class="text-white font-bold text-sm">SOL</span>
               </div>
               <div>
@@ -118,9 +118,9 @@ const PortfolioOverview: Component<PortfolioOverviewProps> = (props) => {
           </div>
 
           {/* SPLITDO Allocation */}
-          <div class="flex items-center justify-between p-4 rounded-xl border border-crypto-border bg-crypto-bg-tertiary/50">
+          <div class="asset-allocation-card flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: var(--gradient-button-primary);">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center shadow-lg" style="background: var(--gradient-button-primary);">
                 <span class="text-white font-bold text-sm">SD</span>
               </div>
               <div>

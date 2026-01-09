@@ -126,7 +126,7 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
   };
 
   return (
-    <div class={`min-h-screen ${props.isDark ? 'bg-crypto-bg-primary' : 'bg-crypto-bg-primary'}`}>
+    <div class="crypto-page-background">
       <div class="p-6 md:p-8 max-w-screen-2xl mx-auto space-y-8">
         {/* Header */}
         <div class="text-center mb-8">
