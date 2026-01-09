@@ -1,18 +1,7 @@
 import type { Component } from 'solid-js';
-import { createSignal, createMemo, Show, For } from 'solid-js';
-
-interface Transaction {
-  id: string;
-  type: 'exchange' | 'transfer' | 'account_creation';
-  status: 'success' | 'pending' | 'failed';
-  fromAsset: string;
-  toAsset?: string;
-  amount: number;
-  toAmount?: number;
-  timestamp: Date;
-  signature?: string;
-  fee?: number;
-}
+import { createSignal, createMemo, createEffect, Show, For, onMount } from 'solid-js';
+import { useTransactionHistory } from '../../../../lib/solana_mainnet/transaction-history-store';
+import { useSplitdoATA, useWallet } from 'src/lib/wallet/wallet-reactive-store';
 
 interface TransactionHistoryProps {
   isDark: boolean;
@@ -22,55 +11,32 @@ const TransactionHistory: Component<TransactionHistoryProps> = (props) => {
   const [filter, setFilter] = createSignal<'all' | 'exchange' | 'transfer' | 'account_creation'>('all');
   const [sortBy, setSortBy] = createSignal<'newest' | 'oldest'>('newest');
 
-  // Mock transaction data - in real app this would come from the wallet store
-  const mockTransactions: Transaction[] = [
-    {
-      id: '1',
-      type: 'exchange',
-      status: 'success',
-      fromAsset: 'SOL',
-      toAsset: 'SPLITDO',
-      amount: 2.5,
-      toAmount: 2500,
-      timestamp: new Date('2026-01-09T10:30:00Z'),
-      signature: 'abc123...def789',
-      fee: 0.001
-    },
-    {
-      id: '2',
-      type: 'account_creation',
-      status: 'success',
-      fromAsset: 'SOL',
-      amount: 0.00204,
-      timestamp: new Date('2026-01-09T09:15:00Z'),
-      signature: 'xyz789...abc123',
-      fee: 0.00204
-    },
-    {
-      id: '3',
-      type: 'exchange',
-      status: 'pending',
-      fromAsset: 'SOL',
-      toAsset: 'SPLITDO',
-      amount: 1.0,
-      toAmount: 1000,
-      timestamp: new Date('2026-01-09T11:45:00Z'),
-      fee: 0.001
-    },
-    {
-      id: '4',
-      type: 'transfer',
-      status: 'failed',
-      fromAsset: 'SPLITDO',
-      amount: 500,
-      timestamp: new Date('2026-01-08T14:20:00Z'),
-      signature: 'failed123',
-      fee: 0.0005
+  // Real transaction history from Solana mainnet
+  const { transactions, isLoading, error, fetchHistory, refreshHistory } = useTransactionHistory();
+  const { splitdoATA } = useSplitdoATA();
+  const { wallet, connectionStatus } = useWallet();
+
+  // Fetch transaction history when SPLITDO ATA is available
+  createEffect(() => {
+    const ata = splitdoATA();
+    if (ata.address && ata.status === 'exists') {
+      console.log(`[TransactionHistory] Fetching history for ATA: ${ata.address}`);
+      fetchHistory(ata.address, 20); // Fetch more transactions
     }
-  ];
+  });
+
+  // Also refresh when wallet connects (in case ATA changes)
+  createEffect(() => {
+    if (connectionStatus() === 'connected') {
+      const ata = splitdoATA();
+      if (ata.address) {
+        fetchHistory(ata.address, 20);
+      }
+    }
+  });
 
   const filteredTransactions = createMemo(() => {
-    let filtered = mockTransactions;
+    let filtered = transactions();
 
     if (filter() !== 'all') {
       filtered = filtered.filter(tx => tx.type === filter());
@@ -78,14 +44,21 @@ const TransactionHistory: Component<TransactionHistoryProps> = (props) => {
 
     return filtered.sort((a, b) => {
       if (sortBy() === 'newest') {
-        return b.timestamp.getTime() - a.timestamp.getTime();
+        const aTime = a.blockTime ? new Date(a.blockTime).getTime() : 0;
+        const bTime = b.blockTime ? new Date(b.blockTime).getTime() : 0;
+        return bTime - aTime;
       } else {
-        return a.timestamp.getTime() - b.timestamp.getTime();
+        const aTime = a.blockTime ? new Date(a.blockTime).getTime() : 0;
+        const bTime = b.blockTime ? new Date(b.blockTime).getTime() : 0;
+        return aTime - bTime;
       }
     });
   });
 
-  const formatDate = (date: Date) => {
+  const formatDate = (blockTime: string | null) => {
+    if (!blockTime) return 'Unknown';
+
+    const date = new Date(blockTime);
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
@@ -220,85 +193,126 @@ const TransactionHistory: Component<TransactionHistoryProps> = (props) => {
 
       {/* Transaction List */}
       <div class="space-y-0">
-        <Show when={filteredTransactions().length > 0} fallback={
+        <Show when={isLoading()}>
+          {/* Loading State */}
           <div class="text-center py-12">
             <div class="w-16 h-16 mx-auto mb-4 bg-crypto-border rounded-full flex items-center justify-center">
-              <svg width="32" height="32" viewBox="0 0 32 32" class="fill-current text-crypto-text-muted">
-                <path d="M16 4C9.4 4 4 9.4 4 16s5.4 12 12 12 12-5.4 12-12S22.6 4 16 4zm0 2c5.5 0 10 4.5 10 10s-4.5 10-10 10S6 21.5 6 16 10.5 6 16 6zm-1 4v6h2v-6h-2zm0 8v2h2v-2h-2z"/>
-              </svg>
+              <div class="w-8 h-8 border-2 border-crypto-primary-blue border-t-transparent rounded-full animate-spin"></div>
             </div>
             <h4 class={`crypto-heading-3 mb-2 ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
-              No Transactions Yet
+              Loading Transaction History
             </h4>
             <p class={`crypto-text-large ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
-              Your transaction history will appear here once you start trading.
+              Fetching your transaction data from Solana blockchain...
             </p>
           </div>
-        }>
-          <For each={filteredTransactions()}>
-            {(transaction) => (
-              <div class="transaction-item group">
-                <div class="flex items-center gap-4">
-                  {/* Icon */}
-                  <div class="flex-shrink-0">
-                    {getTransactionIcon(transaction.type)}
-                  </div>
+        </Show>
 
-                  {/* Transaction Info */}
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-start justify-between">
-                      <div>
-                        <h4 class={`font-semibold ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
-                          {getTransactionTitle(transaction)}
-                        </h4>
-                        <p class={`text-sm ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
-                          {getTransactionDescription(transaction)}
-                        </p>
-                        <Show when={transaction.signature}>
-                          <p class={`text-xs mt-1 ${props.isDark ? 'text-crypto-text-muted' : 'text-crypto-text-muted'}`}>
-                            {transaction.signature?.slice(0, 8)}...{transaction.signature?.slice(-8)}
+        <Show when={!isLoading() && error()}>
+          {/* Error State */}
+          <div class="text-center py-12">
+            <div class="error-state">
+              <div class="font-semibold mb-2">Failed to Load Transaction History</div>
+              <div class="mb-4">{error()}</div>
+              <button
+                onClick={() => refreshHistory()}
+                class="btn-crypto-outline"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </Show>
+
+        <Show when={!isLoading() && !error()}>
+          <Show when={filteredTransactions().length > 0} fallback={
+            <div class="text-center py-12">
+              <div class="w-16 h-16 mx-auto mb-4 bg-crypto-border rounded-full flex items-center justify-center">
+                <svg width="32" height="32" viewBox="0 0 32 32" class="fill-current text-crypto-text-muted">
+                  <path d="M16 4C9.4 4 4 9.4 4 16s5.4 12 12 12 12-5.4 12-12S22.6 4 16 4zm0 2c5.5 0 10 4.5 10 10s-4.5 10-10 10S6 21.5 6 16 10.5 6 16 6zm-1 4v6h2v-6h-2zm0 8v2h2v-2h-2z"/>
+                </svg>
+              </div>
+              <h4 class={`crypto-heading-3 mb-2 ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+                No Transactions Yet
+              </h4>
+              <p class={`crypto-text-large ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+                Your transaction history will appear here once you start trading.
+              </p>
+              <Show when={!splitdoATA().address}>
+                <p class={`crypto-text-small mt-2 ${props.isDark ? 'text-crypto-text-muted' : 'text-crypto-text-muted'}`}>
+                  Create a SPLITDO account first to see transaction history.
+                </p>
+              </Show>
+            </div>
+          }>
+            <For each={filteredTransactions()}>
+              {(transaction) => (
+                <div class="transaction-item group">
+                  <div class="flex items-center gap-4">
+                    {/* Icon */}
+                    <div class="flex-shrink-0">
+                      {getTransactionIcon(transaction.type)}
+                    </div>
+
+                    {/* Transaction Info */}
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-start justify-between">
+                        <div>
+                          <h4 class={`font-semibold ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+                            {getTransactionTitle(transaction)}
+                          </h4>
+                          <p class={`text-sm ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+                            {getTransactionDescription(transaction)}
                           </p>
-                        </Show>
-                      </div>
+                          <Show when={transaction.signature}>
+                            <p class={`text-xs mt-1 ${props.isDark ? 'text-crypto-text-muted' : 'text-crypto-text-muted'}`}>
+                              {transaction.signature?.slice(0, 8)}...{transaction.signature?.slice(-8)}
+                            </p>
+                          </Show>
+                        </div>
 
-                      <div class="text-right flex-shrink-0">
-                        <div class={`text-sm font-semibold ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
-                          {formatDate(transaction.timestamp)}
-                        </div>
-                        <div class={`transaction-status ${transaction.status} mt-1`}>
-                          {transaction.status}
-                        </div>
-                        <Show when={transaction.fee}>
-                          <div class={`text-xs mt-1 ${props.isDark ? 'text-crypto-text-muted' : 'text-crypto-text-muted'}`}>
-                            Fee: {formatAmount(transaction.fee!, 'SOL')}
+                        <div class="text-right flex-shrink-0">
+                          <div class={`text-sm font-semibold ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+                            {formatDate(transaction.blockTime)}
                           </div>
-                        </Show>
+                          <div class={`transaction-status ${transaction.success ? 'success' : 'failed'} mt-1`}>
+                            {transaction.success ? 'success' : 'failed'}
+                          </div>
+                          <Show when={transaction.fee}>
+                            <div class={`text-xs mt-1 ${props.isDark ? 'text-crypto-text-muted' : 'text-crypto-text-muted'}`}>
+                              Fee: {formatAmount(transaction.fee / 1000000000, 'SOL')}
+                            </div>
+                          </Show>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Action Button (appears on hover) */}
-                  <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Show when={transaction.signature}>
-                      <button class="p-2 rounded-md hover:bg-crypto-bg-tertiary transition-colors">
-                        <svg width="16" height="16" viewBox="0 0 16 16" class={`fill-current ${props.isDark ? 'text-crypto-text-muted' : 'text-crypto-text-muted'}`}>
-                          <path d="M8 1l7 7-7 7V9H1V7h7V1z"/>
-                        </svg>
-                      </button>
-                    </Show>
+                    {/* Action Button (appears on hover) */}
+                    <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Show when={transaction.signature}>
+                        <button class="p-2 rounded-md hover:bg-crypto-bg-tertiary transition-colors">
+                          <svg width="16" height="16" viewBox="0 0 16 16" class={`fill-current ${props.isDark ? 'text-crypto-text-muted' : 'text-crypto-text-muted'}`}>
+                            <path d="M8 1l7 7-7 7V9H1V7h7V1z"/>
+                          </svg>
+                        </button>
+                      </Show>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </For>
+              )}
+            </For>
+          </Show>
         </Show>
       </div>
 
       {/* Load More Button */}
-      <Show when={filteredTransactions().length > 0}>
+      <Show when={!isLoading() && !error() && filteredTransactions().length > 0}>
         <div class="text-center pt-4 border-t border-crypto-border">
-          <button class="btn-crypto-outline">
-            Load More Transactions
+          <button
+            onClick={() => refreshHistory()}
+            class="btn-crypto-outline"
+          >
+            Refresh Transactions
           </button>
         </div>
       </Show>
