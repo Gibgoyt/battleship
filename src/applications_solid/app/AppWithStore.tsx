@@ -19,7 +19,7 @@ import {
 import { initializeWalletStore } from 'src/lib/wallet/wallet-reactive-store'
 import DashboardPage from './pages/dashboard/index'
 import ProfilePage from './pages/profile/index'
-import WalletPageReactive from './pages/wallet/WalletPageReactive'
+import WalletPageReactive from './pages/splitdo-exchange/WalletPageReactive'
 
 const AppContent: Component = () => {
   const [currentPage, setCurrentPage] = createSignal<Page>('dashboard')

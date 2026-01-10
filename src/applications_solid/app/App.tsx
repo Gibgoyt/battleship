@@ -20,7 +20,7 @@ import { WalletProvider } from 'src/lib/wallet/wallet-context'
 import DashboardPage from './pages/dashboard/index'
 import CounterPage from './pages/counter/index'
 import ProfilePage from './pages/profile/index'
-import WalletPage from './pages/wallet/index'
+import WalletPage from './pages/splitdo-exchange/index'
 
 /*
  * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
