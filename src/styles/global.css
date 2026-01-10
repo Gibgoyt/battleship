@@ -15,19 +15,28 @@
   --gradient-primary: linear-gradient(135deg, #00d9ff 0%, #00f0ff 100%);
   --gradient-hero: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
 
-  /* Professional Crypto Exchange Colors */
+  /* Professional Crypto Exchange Colors - Light Mode */
   --crypto-primary-blue: #0052FF;
   --crypto-primary-cyan: #00D9FF;
   --crypto-accent-green: #00D835;
   --crypto-accent-red: #FF3B30;
-  --crypto-bg-primary: #FFFFFF;
-  --crypto-bg-secondary: #F8FAFC;
-  --crypto-bg-tertiary: #F1F5F9;
-  --crypto-text-primary: #1E293B;
-  --crypto-text-secondary: #64748B;
-  --crypto-text-muted: #94A3B8;
-  --crypto-border: #E2E8F0;
-  --crypto-border-accent: rgba(0, 217, 255, 0.2);
+
+  /* Coinbase-Inspired Light Theme Colors */
+  --crypto-bg-primary: #FFFFFF;         /* Pure white background */
+  --crypto-bg-secondary: #F8FAFC;       /* Card backgrounds */
+  --crypto-bg-tertiary: #F1F5F9;        /* Elevated elements */
+  --crypto-bg-overlay: #E2E8F0;         /* Modal/overlay backgrounds */
+
+  /* Professional Text Hierarchy */
+  --crypto-text-primary: #1E293B;       /* High contrast dark */
+  --crypto-text-secondary: #64748B;     /* Secondary text */
+  --crypto-text-muted: #94A3B8;         /* Muted/disabled text */
+  --crypto-text-accent: #00D9FF;        /* SPLITDO brand accent */
+
+  /* Professional Border System */
+  --crypto-border: #E2E8F0;             /* Subtle borders */
+  --crypto-border-accent: rgba(0,217,255,0.2); /* Accent borders */
+  --crypto-border-focus: rgba(0,82,255,0.4);   /* Focus states */
 
   /* Professional Gradients */
   --gradient-card: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.8) 100%);
@@ -46,19 +55,28 @@
   --gradient-primary: linear-gradient(135deg, #00d9ff 0%, #00f0ff 100%);
   --gradient-hero: linear-gradient(180deg, #0f1419 0%, #12171f 100%);
 
-  /* Professional Crypto Exchange Colors - Dark Mode */
+  /* Professional Crypto Exchange Colors - Dark Mode (Binance/Coinbase Inspired) */
   --crypto-primary-blue: #0052FF;
   --crypto-primary-cyan: #00D9FF;
   --crypto-accent-green: #00D835;
   --crypto-accent-red: #FF3B30;
-  --crypto-bg-primary: #0A0E1A;
-  --crypto-bg-secondary: #1A1D29;
-  --crypto-bg-tertiary: #252933;
-  --crypto-text-primary: #FFFFFF;
-  --crypto-text-secondary: #A8B2C7;
-  --crypto-text-muted: #6B7785;
-  --crypto-border: #2A2F3C;
-  --crypto-border-accent: rgba(0, 217, 255, 0.3);
+
+  /* Binance Midnight Black Theme Colors */
+  --crypto-bg-primary: #0A0E1A;        /* Deep midnight navy */
+  --crypto-bg-secondary: #161922;       /* Card backgrounds */
+  --crypto-bg-tertiary: #1E222D;        /* Elevated elements */
+  --crypto-bg-overlay: #252933;         /* Modal/overlay backgrounds */
+
+  /* Professional Text Hierarchy */
+  --crypto-text-primary: #FFFFFF;       /* High contrast white */
+  --crypto-text-secondary: #B2BBCD;     /* Secondary text */
+  --crypto-text-muted: #7A8299;         /* Muted/disabled text */
+  --crypto-text-accent: #00D9FF;        /* SPLITDO brand accent */
+
+  /* Professional Border System */
+  --crypto-border: #2A2F3C;             /* Subtle borders */
+  --crypto-border-accent: rgba(0,217,255,0.2); /* Accent borders */
+  --crypto-border-focus: rgba(0,82,255,0.4);   /* Focus states */
 
   /* Professional Gradients - Dark Mode */
   --gradient-card: linear-gradient(135deg, rgba(26,29,41,0.9) 0%, rgba(37,41,51,0.8) 100%);
@@ -274,6 +292,18 @@ html {
 /* ====================================== */
 /* PROFESSIONAL CRYPTO EXCHANGE STYLES   */
 /* ====================================== */
+
+/* Professional Dark Mode Transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+/* Smooth Theme Transitions */
+body, html {
+  transition: background-color 300ms ease, color 300ms ease;
+}
 
 /* Professional Card Components */
 .crypto-card {
@@ -743,6 +773,25 @@ html {
   border: 1px solid rgba(255, 59, 48, 0.3);
   border-radius: 0.75rem;
   padding: 1rem;
+}
+
+/* Professional Navigation Styles */
+.crypto-nav-active {
+  background: var(--gradient-button-primary);
+  color: white;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 82, 255, 0.3);
+}
+
+.crypto-nav-inactive {
+  color: var(--crypto-text-secondary);
+  background: transparent;
+}
+
+.crypto-nav-inactive:hover {
+  background: var(--crypto-bg-tertiary);
+  color: var(--crypto-text-primary);
+  transform: translateX(2px);
 }
 
 /* Professional Typography */

@@ -98,7 +98,7 @@ const AssetCard: Component<AssetCardProps> = (props) => {
         <div class="flex items-center gap-3">
           {getAssetIcon()}
           <div>
-            <h3 class={`crypto-heading-3 mb-1 ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+            <h3 class={`crypto-heading-3 mb-1 crypto-text-primary`}>
               {props.asset.name}
             </h3>
             <div class="flex items-center gap-2">
@@ -141,7 +141,7 @@ const AssetCard: Component<AssetCardProps> = (props) => {
           </div>
         }>
           <div>
-            <div class={`text-2xl font-bold mb-1 ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+            <div class={`text-2xl font-bold mb-1 crypto-text-primary`}>
               {props.asset.balanceFormatted}
             </div>
             <div class={`text-lg font-semibold ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>

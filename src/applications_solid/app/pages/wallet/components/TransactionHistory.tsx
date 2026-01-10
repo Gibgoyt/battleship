@@ -141,7 +141,7 @@ const TransactionHistory: Component<TransactionHistoryProps> = (props) => {
       {/* Header */}
       <div class="transaction-history-header">
         <div class="flex items-center justify-between mb-4">
-          <h3 class={`crypto-heading-3 ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+          <h3 class={`crypto-heading-3 crypto-text-primary`}>
             Transaction History
           </h3>
           <button class="btn-crypto-outline text-sm py-2 px-4">
@@ -199,7 +199,7 @@ const TransactionHistory: Component<TransactionHistoryProps> = (props) => {
             <div class="w-16 h-16 mx-auto mb-4 bg-crypto-border rounded-full flex items-center justify-center">
               <div class="w-8 h-8 border-2 border-crypto-primary-blue border-t-transparent rounded-full animate-spin"></div>
             </div>
-            <h4 class={`crypto-heading-3 mb-2 ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+            <h4 class={`crypto-heading-3 mb-2 crypto-text-primary`}>
               Loading Transaction History
             </h4>
             <p class={`crypto-text-large ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
@@ -232,7 +232,7 @@ const TransactionHistory: Component<TransactionHistoryProps> = (props) => {
                   <path d="M16 4C9.4 4 4 9.4 4 16s5.4 12 12 12 12-5.4 12-12S22.6 4 16 4zm0 2c5.5 0 10 4.5 10 10s-4.5 10-10 10S6 21.5 6 16 10.5 6 16 6zm-1 4v6h2v-6h-2zm0 8v2h2v-2h-2z"/>
                 </svg>
               </div>
-              <h4 class={`crypto-heading-3 mb-2 ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+              <h4 class={`crypto-heading-3 mb-2 crypto-text-primary`}>
                 No Transactions Yet
               </h4>
               <p class={`crypto-text-large ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
@@ -258,7 +258,7 @@ const TransactionHistory: Component<TransactionHistoryProps> = (props) => {
                     <div class="flex-1 min-w-0">
                       <div class="flex items-start justify-between">
                         <div>
-                          <h4 class={`font-semibold ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+                          <h4 class={`font-semibold crypto-text-primary`}>
                             {getTransactionTitle(transaction)}
                           </h4>
                           <p class={`text-sm ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
@@ -272,7 +272,7 @@ const TransactionHistory: Component<TransactionHistoryProps> = (props) => {
                         </div>
 
                         <div class="text-right flex-shrink-0">
-                          <div class={`text-sm font-semibold ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+                          <div class={`text-sm font-semibold crypto-text-primary`}>
                             {formatDate(transaction.blockTime)}
                           </div>
                           <div class={`transaction-status ${transaction.success ? 'success' : 'failed'} mt-1`}>

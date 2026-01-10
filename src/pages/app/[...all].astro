@@ -161,17 +161,16 @@ logger.debug('Route validation complete')
 // ==== END ROUTE VALIDATION LOGIC ====
 ---
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-zinc-900"> {/* Added bg-zinc-900 here */}
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SolidJS SPA</title>
+  <title>SPLITDO Bill Splitting</title>
 
-
-  <meta name="theme-color" content="#18181b">
-  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0A0E1A">
+  <meta name="color-scheme" content="light dark">
 </head>
-<body class="h-full bg-zinc-900 text-zinc-100 overflow-x-hidden">
+<body class="h-full overflow-x-hidden" style="background: var(--crypto-bg-primary); color: var(--crypto-text-primary);">
 <!-- Render SolidJS App with Astro's integration -->
 <AppWithStore client:only="solid-js" firebaseToken={firebaseAuthToken?.value} />
 </body>

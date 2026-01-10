@@ -27,15 +27,49 @@ const AppContent: Component = () => {
   const [isSidebarOpen, setIsSidebarOpen] = createSignal(false)
   const middleware = useMiddleware()
 
-  // Detect theme from localStorage and DOM class (shared with Astro app)
+  // Enhanced theme synchronization with Astro layout system
   onMount(() => {
     if (typeof window === 'undefined') return
 
-    const isDarkMode = localStorage.getItem('darkMode') === 'true' ||
-      (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches) ||
-      document.documentElement.classList.contains('dark')
+    // Initial theme detection
+    const detectTheme = () => {
+      return localStorage.getItem('darkMode') === 'true' ||
+        (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches) ||
+        document.documentElement.classList.contains('dark')
+    }
 
-    setIsDark(isDarkMode)
+    setIsDark(detectTheme())
+
+    // Watch for changes to the dark class on document.documentElement (from Layout.astro)
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const newIsDark = document.documentElement.classList.contains('dark')
+          console.log('🔄 Theme changed from Layout.astro:', newIsDark ? 'dark' : 'light')
+          setIsDark(newIsDark)
+        }
+      })
+    })
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    })
+
+    // Also listen for storage changes from other tabs
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'darkMode') {
+        const newIsDark = e.newValue === 'true'
+        setIsDark(newIsDark)
+        if (newIsDark) {
+          document.documentElement.classList.add('dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+        }
+      }
+    }
+
+    window.addEventListener('storage', handleStorageChange)
 
     // Initialize page from URL pathname
     const pathname = window.location.pathname
@@ -47,6 +81,12 @@ const AppContent: Component = () => {
 
     if (['dashboard', 'profile', 'splitdo-exchange'].includes(pageName)) {
       setCurrentPage(pageName as Page)
+    }
+
+    // Cleanup
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('storage', handleStorageChange)
     }
   })
 
@@ -112,32 +152,32 @@ const AppContent: Component = () => {
   })
 
   return (
-    <div class={`h-screen flex overflow-hidden ${isDark() ? 'bg-zinc-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
+    <div class="h-screen flex overflow-hidden" style="background: var(--crypto-bg-primary); color: var(--crypto-text-primary);">
       <Navigation
         currentPage={currentPage()}
         onPageChange={handlePageChange}
         isDark={isDark()}
+        updateTheme={updateTheme}
         isOpen={isSidebarOpen()}
         onClose={() => setIsSidebarOpen(false)}
       />
 
       {/* Main Content */}
-      <main class={`flex-1 overflow-auto lg:ml-64 transition-all duration-300`}>
+      <main class="flex-1 overflow-auto lg:ml-64 transition-all duration-300">
         {/* Mobile Header with Hamburger */}
-        <div class={`lg:hidden sticky top-0 z-30 flex items-center justify-between p-4 border-b ${
-          isDark() ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-gray-200'
-        }`}>
+        <div class="lg:hidden sticky top-0 z-30 flex items-center justify-between p-4 border-b" style="background: var(--crypto-bg-secondary); border-color: var(--crypto-border);">
           <button
             onClick={() => setIsSidebarOpen(true)}
-            class={`p-2 rounded-md ${
-              isDark() ? 'hover:bg-zinc-800 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
-            }`}
+            class="p-2 rounded-md transition-colors"
+            style="color: var(--crypto-text-secondary);"
+            onMouseEnter={(e) => e.target.style.background = 'var(--crypto-bg-tertiary)'}
+            onMouseLeave={(e) => e.target.style.background = 'transparent'}
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <h1 class={`text-lg font-bold ${isDark() ? 'text-white' : 'text-gray-900'}`}>
+          <h1 class="text-lg font-bold" style="color: var(--crypto-text-primary);">
             {currentPage().charAt(0).toUpperCase() + currentPage().slice(1)}
           </h1>
           <div class="w-10" /> {/* Spacer for alignment */}

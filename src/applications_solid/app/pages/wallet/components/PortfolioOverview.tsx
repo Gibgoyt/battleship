@@ -44,7 +44,7 @@ const PortfolioOverview: Component<PortfolioOverviewProps> = (props) => {
         {/* Total Portfolio Value */}
         <div class="lg:col-span-2">
           <div class="mb-2">
-            <h2 class={`text-lg font-semibold ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+            <h2 class={`text-lg font-semibold crypto-text-secondary`}>
               Total Portfolio Value
             </h2>
           </div>
@@ -99,19 +99,19 @@ const PortfolioOverview: Component<PortfolioOverviewProps> = (props) => {
                 <span class="text-white font-bold text-sm">SOL</span>
               </div>
               <div>
-                <div class={`font-semibold ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+                <div class={`font-semibold crypto-text-primary`}>
                   Solana
                 </div>
-                <div class={`text-sm ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+                <div class={`text-sm crypto-text-secondary`}>
                   {formatCurrency(solBalance()?.sol || 0, 4)} SOL
                 </div>
               </div>
             </div>
             <div class="text-right">
-              <div class={`font-semibold ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+              <div class={`font-semibold crypto-text-primary`}>
                 ${formatCurrency((solBalance()?.sol || 0) * 100)}
               </div>
-              <div class={`text-sm ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+              <div class={`text-sm crypto-text-secondary`}>
                 {totalPortfolioValue() > 0 ? (((solBalance()?.sol || 0) * 100 / totalPortfolioValue()) * 100).toFixed(1) : 0}%
               </div>
             </div>
@@ -124,19 +124,19 @@ const PortfolioOverview: Component<PortfolioOverviewProps> = (props) => {
                 <span class="text-white font-bold text-sm">SD</span>
               </div>
               <div>
-                <div class={`font-semibold ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+                <div class={`font-semibold crypto-text-primary`}>
                   SPLITDO
                 </div>
-                <div class={`text-sm ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+                <div class={`text-sm crypto-text-secondary`}>
                   {formatCurrency(splitdoATA().balance?.uiAmount || 0)} SPLITDO
                 </div>
               </div>
             </div>
             <div class="text-right">
-              <div class={`font-semibold ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+              <div class={`font-semibold crypto-text-primary`}>
                 ${formatCurrency(splitdoATA().balance?.uiAmount || 0)}
               </div>
-              <div class={`text-sm ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+              <div class={`text-sm crypto-text-secondary`}>
                 {totalPortfolioValue() > 0 ? (((splitdoATA().balance?.uiAmount || 0) / totalPortfolioValue()) * 100).toFixed(1) : 0}%
               </div>
             </div>
@@ -152,10 +152,10 @@ const PortfolioOverview: Component<PortfolioOverviewProps> = (props) => {
               <path d="M4 8v16h24V8H4zm2 2h20v12H6V10zm2 2v2h2v-2H8zm4 0v2h8v-2h-8z"/>
             </svg>
           </div>
-          <h3 class={`crypto-heading-3 mb-2 ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+          <h3 class={`crypto-heading-3 mb-2 crypto-text-primary`}>
             Connect Your Wallet
           </h3>
-          <p class={`crypto-text-large max-w-md mx-auto ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+          <p class={`crypto-text-large max-w-md mx-auto crypto-text-secondary`}>
             Connect your Solana wallet to view your portfolio and start trading SPLITDO tokens.
           </p>
         </div>

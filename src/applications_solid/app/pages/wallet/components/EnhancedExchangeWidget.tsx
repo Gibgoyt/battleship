@@ -77,16 +77,16 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
       {/* Widget Header */}
       <div class="flex items-center justify-between mb-6">
         <div>
-          <h3 class={`crypto-heading-3 mb-1 ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+          <h3 class="crypto-heading-3 mb-1">
             Exchange
           </h3>
-          <p class={`crypto-text-small ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+          <p class="crypto-text-small">
             Convert SOL to SPLITDO tokens instantly
           </p>
         </div>
         <div class="flex items-center gap-2">
           <div class="w-2 h-2 bg-crypto-accent-green rounded-full"></div>
-          <span class={`text-xs font-medium ${props.isDark ? 'text-crypto-accent-green' : 'text-crypto-accent-green'}`}>
+          <span class="text-xs font-medium" style="color: var(--crypto-accent-green);">
             Live Rate
           </span>
         </div>
@@ -95,14 +95,14 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
       {/* Exchange Rate Display */}
       <div class="exchange-preview mb-6">
         <div class="flex items-center justify-between">
-          <span class={`crypto-text-small ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+          <span class={`crypto-text-small crypto-text-secondary`}>
             Exchange Rate
           </span>
           <div class="text-right">
             <div class="exchange-rate">
               1 SOL = {formatCurrency(programInfo()?.exchange_rate || 0)} SPLITDO
             </div>
-            <div class={`text-xs ${props.isDark ? 'text-crypto-text-muted' : 'text-crypto-text-muted'}`}>
+            <div class={`text-xs crypto-text-muted`}>
               Updated just now
             </div>
           </div>
@@ -111,7 +111,7 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
 
       {/* From Input (SOL) */}
       <div class="exchange-form-group">
-        <label class={`flex items-center justify-between ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+        <label class={`flex items-center justify-between crypto-text-secondary`}>
           <span>From</span>
           <span class="text-xs">
             Balance: {formatCurrency(solBalance()?.sol || 0, 4)} SOL
@@ -127,7 +127,7 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
               <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-purple-600 flex items-center justify-center">
                 <span class="text-white font-bold text-xs">SOL</span>
               </div>
-              <span class={`font-semibold ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+              <span class={`font-semibold crypto-text-primary`}>
                 Solana
               </span>
             </div>
@@ -167,7 +167,7 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
       {/* Exchange Arrow */}
       <div class="flex justify-center my-4">
         <div class="w-10 h-10 rounded-full bg-crypto-bg-tertiary border-2 border-crypto-border flex items-center justify-center">
-          <svg width="20" height="20" viewBox="0 0 20 20" class={`fill-current ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+          <svg width="20" height="20" viewBox="0 0 20 20" class={`fill-current crypto-text-secondary`}>
             <path d="M10 3l-7 7h4v7h6v-7h4l-7-7z"/>
           </svg>
         </div>
@@ -175,7 +175,7 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
 
       {/* To Output (SPLITDO) */}
       <div class="exchange-form-group">
-        <label class={`flex items-center justify-between ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+        <label class={`flex items-center justify-between crypto-text-secondary`}>
           <span>To</span>
           <span class="text-xs">
             Balance: {formatCurrency(splitdoATA().balance?.uiAmount || 0)} SPLITDO
@@ -191,7 +191,7 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
               <div class="w-8 h-8 rounded-full bg-gradient-button-primary flex items-center justify-center">
                 <span class="text-white font-bold text-xs">SD</span>
               </div>
-              <span class={`font-semibold ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+              <span class={`font-semibold crypto-text-primary`}>
                 SPLITDO
               </span>
             </div>
@@ -213,24 +213,24 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
         <div class="exchange-preview">
           <div class="space-y-3">
             <div class="flex justify-between items-center">
-              <span class={`text-sm ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+              <span class={`text-sm crypto-text-secondary`}>
                 Exchange Rate
               </span>
-              <span class={`text-sm font-semibold ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+              <span class={`text-sm font-semibold crypto-text-primary`}>
                 1 SOL = {formatCurrency(exchangePreview().exchangeRate)} SPLITDO
               </span>
             </div>
             <div class="flex justify-between items-center">
-              <span class={`text-sm ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+              <span class={`text-sm crypto-text-secondary`}>
                 Network Fee
               </span>
-              <span class={`text-sm font-semibold ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+              <span class={`text-sm font-semibold crypto-text-primary`}>
                 ~{formatCurrency(exchangePreview().fee, 6)} SOL
               </span>
             </div>
             <div class="border-t border-crypto-border pt-3">
               <div class="flex justify-between items-center">
-                <span class={`text-sm font-semibold ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+                <span class={`text-sm font-semibold crypto-text-primary`}>
                   You'll Receive
                 </span>
                 <span class={`text-sm font-bold text-crypto-primary-blue`}>
@@ -262,7 +262,7 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
           }>
             <div class="space-y-3">
               <div class="text-center">
-                <div class={`text-sm ${props.isDark ? 'text-crypto-text-muted' : 'text-crypto-text-muted'}`}>
+                <div class={`text-sm crypto-text-muted`}>
                   Create a SPLITDO account to start trading
                 </div>
               </div>
@@ -281,7 +281,7 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
       {/* Quick Amount Buttons */}
       <Show when={connectionStatus() === 'connected' && solBalance()?.sol > 0}>
         <div class="mt-4">
-          <div class={`text-xs font-semibold mb-3 ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+          <div class={`text-xs font-semibold mb-3 crypto-text-secondary`}>
             Quick Amounts
           </div>
           <div class="flex gap-2">

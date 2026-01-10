@@ -126,14 +126,14 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
   };
 
   return (
-    <div class="crypto-page-background">
+    <div class="min-h-screen" style="background: var(--crypto-bg-primary); color: var(--crypto-text-primary);">
       <div class="p-6 md:p-8 max-w-screen-2xl mx-auto space-y-8">
         {/* Header */}
         <div class="text-center mb-8">
-          <h1 class={`crypto-heading-1 mb-3 ${props.isDark ? 'text-crypto-text-primary' : 'text-crypto-text-primary'}`}>
+          <h1 class="crypto-heading-1 mb-3">
             SPLITDO Exchange
           </h1>
-          <p class={`crypto-text-large max-w-2xl mx-auto ${props.isDark ? 'text-crypto-text-secondary' : 'text-crypto-text-secondary'}`}>
+          <p class="crypto-text-large max-w-2xl mx-auto">
             Professional crypto exchange for SPLITDO token presale on Solana blockchain
           </p>
         </div>
