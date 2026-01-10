@@ -69,9 +69,8 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
   };
 
   const handleExchange = () => {
-    if (exchangePreview().canExchange) {
-      openExchangeModal();
-    }
+    // Open exchange modal directly like the original ExchangeSection
+    openExchangeModal();
   };
 
   return (
@@ -250,16 +249,9 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
           <Show when={splitdoATA().status !== 'exists'} fallback={
             <button
               onClick={handleExchange}
-              disabled={!exchangePreview().canExchange}
-              class={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all ${
-                exchangePreview().canExchange
-                  ? 'btn-crypto-success hover:shadow-lg hover:shadow-crypto-accent-green/20'
-                  : 'bg-crypto-border text-crypto-text-muted cursor-not-allowed'
-              }`}
+              class="btn-crypto-success w-full py-4 px-6 rounded-xl font-bold text-lg transition-all hover:shadow-lg hover:shadow-crypto-accent-green/20"
             >
-              <Show when={exchangePreview().canExchange} fallback="Enter Amount">
-                Exchange Now
-              </Show>
+              Start Token Exchange
             </button>
           }>
             <div class="space-y-3">
