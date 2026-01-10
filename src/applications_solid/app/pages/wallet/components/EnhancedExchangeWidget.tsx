@@ -5,7 +5,8 @@ import {
   useExchangeModal,
   useWallet,
   useSplitdoATA,
-  useWalletBalances
+  useWalletBalances,
+  useWalletModal
 } from 'src/lib/wallet/wallet-reactive-store';
 
 interface EnhancedExchangeWidgetProps {
@@ -18,6 +19,7 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
   const { wallet, connectionStatus } = useWallet();
   const { splitdoATA } = useSplitdoATA();
   const { solBalance } = useWalletBalances();
+  const { openModal } = useWalletModal();
 
   const [solAmount, setSolAmount] = createSignal('');
   const [focusedInput, setFocusedInput] = createSignal<'from' | 'to' | null>(null);
@@ -272,7 +274,10 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
             </div>
           </Show>
         }>
-          <button class="btn-crypto-primary w-full py-4 text-lg">
+          <button
+            onClick={openModal}
+            class="btn-crypto-primary w-full py-4 text-lg"
+          >
             Connect Wallet to Exchange
           </button>
         </Show>
