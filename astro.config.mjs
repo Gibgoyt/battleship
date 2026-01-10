@@ -28,7 +28,7 @@ export default defineConfig({
       // added to this astro project
       include: [
         '**/components-solid/*',
-        '**/applications-solid/**/*'
+        '**/applications_solid/**/*'
       ]
     }),
     svelte()
