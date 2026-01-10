@@ -184,20 +184,38 @@ export const authMiddleware = () => (from: string, to: string) => {
 
     if (isProtectedRoute && !hasToken) {
       logger.warn('Access denied to protected route', { from, to, hasToken });
-
-      // Instead of blocking here, let Firebase middleware handle redirects
-      // This is a fallback check
       console.warn(`Access denied: ${to} requires authentication`);
 
-      // Return true to let Firebase middleware handle the redirect properly
-      return true;
+      // FORCE BROWSER REDIRECT - Use window.location.href to redirect out of SPA
+      logger.debug('Forcing browser redirect to sign-in page');
+      console.log('Redirecting to /auth/sign-in via browser API');
+
+      // Clear any remaining auth data
+      localStorage.removeItem('firebase-idToken');
+      localStorage.removeItem('firebase-refreshToken');
+      sessionStorage.removeItem('firebase-idToken');
+      sessionStorage.removeItem('firebase-refreshToken');
+
+      // Force browser redirect (NOT SolidJS router)
+      window.location.href = '/auth/sign-in';
+
+      // Block this navigation since we're redirecting
+      return false;
     }
 
     return true; // Allow navigation
   } catch (error) {
     logger.error('Error in auth middleware:', error);
     console.error('Auth middleware error:', error);
-    return true; // Allow navigation on error to prevent lockouts
+
+    // On error, also redirect to sign-in for safety
+    if (to.startsWith('/app')) {
+      console.log('Auth middleware error - redirecting to sign-in for safety');
+      window.location.href = '/auth/sign-in';
+      return false;
+    }
+
+    return true; // Allow navigation on error for non-protected routes
   }
 };
 
