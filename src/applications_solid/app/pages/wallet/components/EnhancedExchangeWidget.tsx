@@ -15,7 +15,7 @@ interface EnhancedExchangeWidgetProps {
 
 const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) => {
   const { programInfo } = useProgramInfo();
-  const { openModal: openExchangeModal } = useExchangeModal();
+  const { openExchangeModal } = useExchangeModal();
   const { wallet, connectionStatus } = useWallet();
   const { splitdoATA } = useSplitdoATA();
   const { solBalance } = useWalletBalances();
