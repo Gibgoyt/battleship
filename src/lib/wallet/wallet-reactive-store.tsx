@@ -57,8 +57,16 @@ const [programInfo, setProgramInfo] = createSignal<{ exchangeRate: number; loadi
   error: null
 });
 
-// Request guard to prevent concurrent fetchProgramInfo calls
+// SOL price from CoinGecko
+const [solPrice, setSolPrice] = createSignal<{ usd: number; loading: boolean; error: string | null }>({
+  usd: 0,
+  loading: false,
+  error: null
+});
+
+// Request guards to prevent concurrent fetches
 const [isFetchingProgramInfo, setIsFetchingProgramInfo] = createSignal(false);
+const [isFetchingSolPrice, setIsFetchingSolPrice] = createSignal(false);
 
 // Store Firebase token
 let firebaseToken: string | undefined = undefined;
@@ -982,11 +990,64 @@ const fetchProgramInfo = async () => {
   }
 };
 
+// Fetch SOL price from CoinGecko
+const fetchSolPrice = async () => {
+  // Prevent concurrent fetches
+  if (isFetchingSolPrice()) {
+    console.log('[ReactiveWalletStore] Already fetching SOL price, skipping...');
+    return;
+  }
+
+  setIsFetchingSolPrice(true);
+  console.log('[ReactiveWalletStore] Fetching SOL price from CoinGecko...');
+  setSolPrice({ ...solPrice(), loading: true, error: null });
+
+  try {
+    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+
+    if (!response.ok) {
+      throw new Error(`CoinGecko API error: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (!result.solana || typeof result.solana.usd !== 'number') {
+      throw new Error('Invalid response from CoinGecko API');
+    }
+
+    const usdPrice = result.solana.usd;
+    console.log('[ReactiveWalletStore] Fetched SOL price:', `$${usdPrice}`);
+
+    setSolPrice({
+      usd: usdPrice,
+      loading: false,
+      error: null
+    });
+  } catch (error) {
+    console.error('[ReactiveWalletStore] Failed to fetch SOL price:', error);
+    setSolPrice({
+      ...solPrice(),
+      loading: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch SOL price'
+    });
+  } finally {
+    setIsFetchingSolPrice(false);
+  }
+};
+
 // Program Info Hook
 export const useProgramInfo = () => {
   return {
     programInfo,
     fetchProgramInfo
+  };
+};
+
+// SOL Price Hook
+export const useSolPrice = () => {
+  return {
+    solPrice,
+    fetchSolPrice
   };
 };
 

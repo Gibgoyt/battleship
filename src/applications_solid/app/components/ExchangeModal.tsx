@@ -64,51 +64,55 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
 
       {/* Modal Content */}
       <div
-        class={`relative w-full max-w-md mx-4 p-6 rounded-lg shadow-xl z-10 ${
-          props.isDark ? 'bg-zinc-800 border border-zinc-700' : 'bg-white border border-gray-200'
+        class={`relative w-full max-w-2xl mx-4 p-0 rounded-xl shadow-2xl z-10 overflow-hidden ${
+          props.isDark ? 'bg-crypto-bg-primary border border-crypto-border' : 'bg-crypto-bg-primary border border-crypto-border'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div class="flex items-center justify-between mb-6">
-          <h2 class={`text-xl font-bold ${
-            props.isDark ? 'text-white' : 'text-gray-900'
-          }`}>
-            Exchange SOL for SPLITDO
-          </h2>
-          <button
-            onClick={handleClose}
-            class={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 ${
-              props.isDark ? 'hover:bg-zinc-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'
-            }`}
-          >
-            ×
-          </button>
+        {/* Professional Header */}
+        <div class="bg-gradient-to-r from-crypto-primary-blue to-crypto-primary-cyan px-8 py-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-2xl font-bold text-white mb-1">
+                Exchange SOL for SPLITDO
+              </h2>
+              <p class="text-blue-100 opacity-90">
+                Secure token exchange powered by Solana
+              </p>
+            </div>
+            <button
+              onClick={handleClose}
+              class="w-10 h-10 rounded-full flex items-center justify-center text-white hover:bg-white hover:bg-opacity-20 transition-colors text-xl font-light"
+            >
+              ×
+            </button>
+          </div>
         </div>
 
         {/* Content */}
-        <Show
-          when={step() === 'wallet'}
-          fallback={
-            <ExchangeForm
+        <div class="p-8">
+          <Show
+            when={step() === 'wallet'}
+            fallback={
+              <ExchangeForm
+                isDark={props.isDark}
+                solAmount={solAmount()}
+                setSolAmount={setSolAmount}
+                exchangeStatus={exchangeStatus()}
+                exchangeError={exchangeError()}
+                executeExchange={executeExchange}
+                onBack={() => setStep('wallet')}
+                exchangeRate={programInfo().exchangeRate}
+              />
+            }
+          >
+            <WalletSelection
               isDark={props.isDark}
-              solAmount={solAmount()}
-              setSolAmount={setSolAmount}
-              exchangeStatus={exchangeStatus()}
-              exchangeError={exchangeError()}
-              executeExchange={executeExchange}
-              onBack={() => setStep('wallet')}
-              exchangeRate={programInfo().exchangeRate}
-            />
-          }
-        >
-          <WalletSelection
-            isDark={props.isDark}
-            connectionStatus={connectionStatus()}
-            isConnecting={isConnecting()}
-            showMobileInstallation={showMobileInstallation()}
-            mobileInstallationPlatform={mobileInstallationPlatform()}
-            onSelectPhantom={async () => {
+              connectionStatus={connectionStatus()}
+              isConnecting={isConnecting()}
+              showMobileInstallation={showMobileInstallation()}
+              mobileInstallationPlatform={mobileInstallationPlatform()}
+              onSelectPhantom={async () => {
               if (connectionStatus() === 'connected') {
                 // Already connected, go to exchange
                 setStep('exchange');
@@ -185,7 +189,8 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
             }}
             onCloseMobileInstallation={() => setShowMobileInstallation(false)}
           />
-        </Show>
+          </Show>
+        </div>
       </div>
     </div>
     </Show>
@@ -205,24 +210,23 @@ interface WalletSelectionProps {
 
 const WalletSelection: Component<WalletSelectionProps> = (props) => {
   return (
-    <div class="space-y-4">
-      <p class={`text-center text-sm ${
-        props.isDark ? 'text-gray-400' : 'text-gray-600'
-      }`}>
-        Choose your wallet to continue with the exchange:
-      </p>
+    <div class="space-y-6">
+      <div class="text-center">
+        <h3 class="crypto-heading-3 mb-2">Connect Your Wallet</h3>
+        <p class="crypto-text-secondary">
+          Choose your preferred wallet to continue with the exchange
+        </p>
+      </div>
 
       {/* Phantom Wallet Option */}
       <button
         onClick={props.onSelectPhantom}
         disabled={props.isConnecting}
-        class={`w-full p-4 border-2 transition-all duration-200 flex items-center gap-4 ${
+        class={`w-full p-6 border-2 transition-all duration-200 flex items-center gap-4 rounded-xl ${
           props.isConnecting
-            ? 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-200'
-            : `hover:border-blue-500 cursor-pointer ${
-                props.isDark
-                  ? 'bg-zinc-700 border-zinc-600 hover:bg-zinc-600'
-                  : 'bg-gray-50 border-gray-300 hover:bg-gray-100'
+            ? 'opacity-50 cursor-not-allowed bg-crypto-bg-tertiary border-crypto-border'
+            : `hover:border-crypto-primary-blue hover:shadow-lg cursor-pointer bg-crypto-bg-secondary border-crypto-border hover:bg-crypto-bg-tertiary ${
+                props.connectionStatus === 'connected' ? 'border-crypto-accent-green bg-crypto-accent-green bg-opacity-10' : ''
               }`
         }`}
       >
@@ -237,49 +241,43 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
           />
         </div>
         <div class="flex-1 text-left">
-          <div class={`font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+          <div class="crypto-text-large font-semibold crypto-text-primary">
             Phantom Wallet
           </div>
-          <div class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+          <div class="crypto-text-small crypto-text-secondary">
             {props.isConnecting
               ? 'Connecting...'
               : props.connectionStatus === 'connected'
               ? 'Connected - Ready to exchange'
-              : 'Click to connect'
+              : 'Most popular Solana wallet'
             }
           </div>
         </div>
         <Show when={props.isConnecting}>
-          <div class="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <div class="w-5 h-5 border-2 border-crypto-primary-blue border-t-transparent rounded-full animate-spin"></div>
         </Show>
         <Show when={!props.isConnecting && props.connectionStatus === 'connected'}>
-          <div class="text-green-500 font-bold">✓</div>
+          <div class="text-crypto-accent-green font-bold text-xl">✓</div>
         </Show>
       </button>
 
       {/* MetaMask Option (Coming Soon) */}
       <button
         disabled
-        class={`w-full p-4 border-2 opacity-50 cursor-not-allowed flex items-center gap-4 ${
-          props.isDark
-            ? 'bg-zinc-700 border-zinc-600'
-            : 'bg-gray-50 border-gray-300'
-        }`}
+        class="w-full p-6 border-2 opacity-50 cursor-not-allowed flex items-center gap-4 rounded-xl bg-crypto-bg-secondary border-crypto-border"
       >
-        <div class={`w-10 h-10 flex items-center justify-center font-bold ${props.isDark ? 'text-orange-400' : 'text-orange-600'}`}>
+        <div class="w-10 h-10 flex items-center justify-center font-bold text-orange-400 bg-orange-100 rounded-full">
           MM
         </div>
         <div class="flex-1 text-left">
-          <div class={`font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+          <div class="crypto-text-large font-semibold crypto-text-primary">
             MetaMask
           </div>
-          <div class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+          <div class="crypto-text-small crypto-text-muted">
             Solana support coming soon
           </div>
         </div>
-        <span class={`text-xs px-2 py-1 ${
-          props.isDark ? 'bg-zinc-600 text-gray-300' : 'bg-gray-200 text-gray-600'
-        }`}>
+        <span class="text-xs px-3 py-1 bg-crypto-bg-tertiary text-crypto-text-muted rounded-full font-medium">
           Coming Soon
         </span>
       </button>
@@ -343,80 +341,88 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
   };
 
   return (
-    <div class="space-y-6">
+    <div class="space-y-8">
       {/* Back Button */}
       <button
         onClick={props.onBack}
-        class={`text-sm flex items-center gap-2 ${
-          props.isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
-        }`}
+        class="crypto-text-secondary hover:crypto-text-primary text-sm flex items-center gap-2 transition-colors"
       >
         ← Back to wallet selection
       </button>
 
       {/* Input Section */}
-      <div>
-        <label class={`block text-sm font-medium mb-2 ${
-          props.isDark ? 'text-white' : 'text-gray-900'
-        }`}>
-          SOL Amount
-        </label>
-        <input
-          type="number"
-          value={props.solAmount}
-          onInput={(e) => props.setSolAmount(e.currentTarget.value)}
-          placeholder={`Enter SOL amount (min ${MIN_SOL_AMOUNT})`}
-          min={MIN_SOL_AMOUNT}
-          step="0.01"
-          class={`w-full px-4 py-3 rounded-lg border transition-colors duration-200 ${
-            props.isDark
-              ? 'bg-zinc-700 border-zinc-600 text-white placeholder-gray-400 focus:border-blue-500'
-              : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'
-          } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
-        />
-        <Show when={props.solAmount && !isValidAmount()}>
-          <p class="text-red-500 text-sm mt-1">
-            Minimum amount is {MIN_SOL_AMOUNT} SOL
-          </p>
-        </Show>
+      <div class="space-y-4">
+        <div>
+          <h3 class="crypto-heading-3 mb-4">Enter Exchange Amount</h3>
+          <div class="relative">
+            <label class="block crypto-text-small crypto-text-secondary mb-3">
+              SOL Amount (minimum {MIN_SOL_AMOUNT})
+            </label>
+            <div class="relative">
+              <input
+                type="number"
+                value={props.solAmount}
+                onInput={(e) => props.setSolAmount(e.currentTarget.value)}
+                placeholder="0.00"
+                min={MIN_SOL_AMOUNT}
+                step="0.01"
+                class="w-full px-6 py-4 text-xl font-semibold rounded-xl border-2 border-crypto-border bg-crypto-bg-secondary crypto-text-primary placeholder-crypto-text-muted focus:outline-none focus:border-crypto-primary-blue focus:ring-4 focus:ring-crypto-primary-blue focus:ring-opacity-20 transition-all"
+              />
+              <div class="absolute right-4 top-1/2 -translate-y-1/2 crypto-text-secondary">
+                SOL
+              </div>
+            </div>
+            <Show when={props.solAmount && !isValidAmount()}>
+              <div class="flex items-center gap-2 mt-3 text-crypto-accent-red text-sm">
+                <span>⚠️</span>
+                Minimum amount is {MIN_SOL_AMOUNT} SOL
+              </div>
+            </Show>
+          </div>
+        </div>
       </div>
 
       {/* Exchange Preview */}
       <Show when={isValidAmount()}>
-        <div class={`p-4 rounded-lg ${
-          props.isDark ? 'bg-zinc-700' : 'bg-gray-50'
-        }`}>
-          <h4 class={`text-sm font-medium mb-3 ${
-            props.isDark ? 'text-white' : 'text-gray-900'
-          }`}>
+        <div class="bg-crypto-bg-tertiary border border-crypto-border rounded-xl p-6">
+          <h4 class="crypto-heading-3 mb-4 flex items-center gap-2">
+            <span>📊</span>
             Exchange Preview
           </h4>
-          <div class="space-y-2">
-            <div class="flex justify-between">
-              <span class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                You pay:
-              </span>
-              <span class={`text-sm font-medium ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                {props.solAmount || '0'} SOL
-              </span>
+          <div class="space-y-4">
+            <div class="flex justify-between items-center py-3">
+              <span class="crypto-text-small crypto-text-secondary">You pay:</span>
+              <div class="text-right">
+                <div class="crypto-text-large font-semibold crypto-text-primary">
+                  {props.solAmount || '0'} SOL
+                </div>
+              </div>
             </div>
-            <div class="flex justify-between">
-              <span class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                You receive:
-              </span>
-              <span class="text-sm font-medium text-green-500">
-                ~{splitdoAmount().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SPLITDO
-              </span>
+
+            <div class="flex justify-center">
+              <div class="w-8 h-8 rounded-full bg-crypto-primary-blue flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 16 16" class="fill-white rotate-90">
+                  <path d="M8 1l-4 4h3v6h2V5h3L8 1z"/>
+                </svg>
+              </div>
             </div>
-            <div class={`flex justify-between pt-2 border-t ${
-              props.isDark ? 'border-zinc-600' : 'border-gray-200'
-            }`}>
-              <span class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                Exchange rate:
-              </span>
-              <span class={`text-xs ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                1 SOL ≈ {splitdoPerSol()} SPLITDO (${solPerSplitdo()} per token)
-              </span>
+
+            <div class="flex justify-between items-center py-3">
+              <span class="crypto-text-small crypto-text-secondary">You receive:</span>
+              <div class="text-right">
+                <div class="crypto-text-large font-semibold text-crypto-accent-green">
+                  ~{splitdoAmount().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SPLITDO
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-crypto-border pt-4">
+              <div class="flex justify-between items-center">
+                <span class="crypto-text-small crypto-text-muted">Exchange rate:</span>
+                <span class="crypto-text-small crypto-text-secondary">
+                  1 SOL = {splitdoPerSol()} SPLITDO ($0.11 per token)
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -426,39 +432,49 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
       <button
         onClick={handleExchange}
         disabled={!isValidAmount() || props.exchangeStatus === 'loading'}
-        class={`w-full px-4 py-3 font-medium rounded-lg transition-colors duration-200 ${
+        class={`w-full py-4 px-6 font-bold text-lg rounded-xl transition-all duration-200 ${
           !isValidAmount() || props.exchangeStatus === 'loading'
-            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            : 'bg-blue-500 hover:bg-blue-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+            ? 'bg-crypto-bg-tertiary text-crypto-text-muted cursor-not-allowed border-2 border-crypto-border'
+            : 'btn-crypto-success hover:shadow-lg hover:shadow-crypto-accent-green/20 focus:outline-none focus:ring-4 focus:ring-crypto-accent-green focus:ring-opacity-30'
         }`}
       >
         <Show
           when={props.exchangeStatus !== 'loading'}
           fallback={
-            <span class="flex items-center justify-center gap-2">
-              <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span class="flex items-center justify-center gap-3">
+              <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               Processing Exchange...
             </span>
           }
         >
-          Exchange Tokens
+          <span class="flex items-center justify-center gap-3">
+            🔄 Exchange Tokens
+          </span>
         </Show>
       </button>
 
       {/* Status Messages */}
       <Show when={props.exchangeStatus === 'error' && props.exchangeError}>
-        <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p class="text-red-700 text-sm">
-            {props.exchangeError}
-          </p>
+        <div class="p-4 bg-red-50 border-2 border-crypto-accent-red rounded-xl">
+          <div class="flex items-center gap-3">
+            <span class="text-crypto-accent-red text-xl">⚠️</span>
+            <div>
+              <div class="font-semibold text-crypto-accent-red mb-1">Exchange Failed</div>
+              <p class="text-sm text-red-700">{props.exchangeError}</p>
+            </div>
+          </div>
         </div>
       </Show>
 
       <Show when={props.exchangeStatus === 'success'}>
-        <div class="p-3 bg-green-50 border border-green-200">
-          <p class="text-green-700 text-sm font-medium">
-            Exchange completed successfully! Your SPLITDO tokens will appear in your wallet shortly.
-          </p>
+        <div class="p-4 bg-green-50 border-2 border-crypto-accent-green rounded-xl">
+          <div class="flex items-center gap-3">
+            <span class="text-crypto-accent-green text-xl">✅</span>
+            <div>
+              <div class="font-semibold text-crypto-accent-green mb-1">Exchange Successful!</div>
+              <p class="text-sm text-green-700">Your SPLITDO tokens have been deposited to your wallet.</p>
+            </div>
+          </div>
         </div>
       </Show>
     </div>
