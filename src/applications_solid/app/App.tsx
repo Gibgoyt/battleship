@@ -1,7 +1,8 @@
 import {
   createSignal,
   createEffect,
-  onMount
+  onMount,
+  onCleanup
 } from 'solid-js'
 import type {
   Component
@@ -17,6 +18,8 @@ import {
   authMiddleware
 } from './middleware'
 import { WalletProvider } from 'src/lib/wallet/wallet-context'
+import { AuthStoreProvider } from './middleware/firebase/auth-store'
+import { createLogger } from 'src/lib/logger'
 import DashboardPage from './pages/dashboard/index'
 import CounterPage from './pages/counter/index'
 import ProfilePage from './pages/profile/index'
@@ -34,6 +37,8 @@ import WalletPage from './pages/splitdo-exchange/index'
  * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
  * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
 */
+
+const logger = createLogger('[SolidJS App]');
 
 const AppContent: Component = () => {
   const [currentPage, setCurrentPage] = createSignal<Page>('dashboard')
@@ -118,24 +123,89 @@ const AppContent: Component = () => {
     }
   }
 
-  // Setup middleware
-  onMount(() => {
-    // Check authentication immediately on app load
-    const authCheck = authMiddleware()
-    const currentRoute = middleware.currentRoute()
-    // authCheck('', currentRoute) // Check current route on load
-    
-    // Add authentication middleware - this will redirect if not authenticated
-    middleware.beforeNavigate(authMiddleware())
-    
-    // Add logging middleware
-    middleware.afterNavigate(loggingMiddleware())
-    
-    // Example: Add custom middleware
-    middleware.beforeNavigate((from, to) => {
-      console.log(`Navigating from ${from} to ${to}`)
-      return true // Allow navigation
-    })
+  // Setup Firebase auth services and middleware
+  onMount(async () => {
+    try {
+      logger.debug('Initializing Firebase auth services');
+
+      // Import Firebase auth components
+      const { getGlobalAuthStore } = await import('./middleware/firebase/auth-store');
+      const { setupAuthMiddleware } = await import('./middleware/firebase/auth-middleware');
+
+      // Get auth store and initialize if not already done
+      const authStore = getGlobalAuthStore();
+
+      // Setup Firebase auth middleware
+      const authSetup = setupAuthMiddleware({
+        protectedRoutes: ['/app'],
+        publicOnlyRoutes: ['/auth/sign-in', '/auth/sign-up'],
+        loginRoute: '/auth/sign-in',
+        dashboardRoute: '/app/dashboard',
+      });
+
+      // Initialize auth middleware
+      await authSetup.initialize();
+
+      // Setup manual navigation handling for browser back/forward
+      authSetup.setupManualNavigation();
+
+      // Integrate with existing middleware system
+      middleware.beforeNavigate(async (from, to) => {
+        logger.debug('Before navigate middleware', { from, to });
+
+        // Use Firebase auth middleware for auth checks
+        const allowed = await authSetup.middleware.beforeNavigate(from, to);
+
+        if (allowed) {
+          logger.debug('Navigation allowed by Firebase auth middleware');
+        } else {
+          logger.debug('Navigation blocked by Firebase auth middleware');
+        }
+
+        return allowed;
+      });
+
+      middleware.afterNavigate(async (to) => {
+        logger.debug('After navigate middleware', { to });
+
+        // Run Firebase auth middleware after navigation
+        await authSetup.middleware.afterNavigate('', to);
+
+        // Keep existing logging middleware
+        loggingMiddleware()(to);
+      });
+
+      // Setup auth state change listeners
+      createEffect(() => {
+        const isAuthenticated = authStore.isAuthenticated();
+        const tokenStatus = authStore.tokenStatus();
+
+        logger.debug('Auth state changed', {
+          isAuthenticated,
+          tokenStatus,
+          currentRoute: middleware.currentRoute(),
+        });
+
+        // Handle auth state changes
+        authSetup.middleware.onAuthStateChange(isAuthenticated);
+        authSetup.middleware.onTokenStatusChange(tokenStatus);
+      });
+
+      // Cleanup on unmount
+      onCleanup(() => {
+        logger.debug('Cleaning up Firebase auth services');
+        authSetup.middleware.cleanup();
+        authStore.cleanup();
+      });
+
+      logger.debug('Firebase auth services initialized successfully');
+    } catch (error) {
+      logger.error('Failed to initialize Firebase auth services:', error);
+
+      // Fallback to basic auth middleware
+      middleware.beforeNavigate(authMiddleware());
+      middleware.afterNavigate(loggingMiddleware());
+    }
   })
 
   return (
@@ -157,9 +227,11 @@ const AppContent: Component = () => {
 const App: Component<{ firebaseToken?: string }> = (props) => {
   return (
     <MiddlewareProvider>
-      <WalletProvider firebaseToken={props.firebaseToken}>
-        <AppContent />
-      </WalletProvider>
+      <AuthStoreProvider initialToken={props.firebaseToken}>
+        <WalletProvider firebaseToken={props.firebaseToken}>
+          <AppContent />
+        </WalletProvider>
+      </AuthStoreProvider>
     </MiddlewareProvider>
   )
 }
