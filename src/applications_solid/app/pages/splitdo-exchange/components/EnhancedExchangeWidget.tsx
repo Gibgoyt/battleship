@@ -1,5 +1,5 @@
 import type { Component } from 'solid-js';
-import { createSignal, createEffect, createMemo, Show } from 'solid-js';
+import { createSignal, createEffect, createMemo, Show, onMount } from 'solid-js';
 import {
   useProgramInfo,
   useExchangeModal,
@@ -23,8 +23,8 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
   const { solBalance } = useWalletBalances();
   const { openModal } = useWalletModal();
 
-  // Fetch prices on component mount
-  createEffect(() => {
+  // Fetch prices on component mount (only once)
+  onMount(() => {
     fetchProgramInfo();
     fetchSolPrice();
   });
