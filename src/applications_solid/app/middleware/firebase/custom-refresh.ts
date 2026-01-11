@@ -242,3 +242,127 @@ export function isTokenNearExpiration(idToken: string, bufferMinutes: number = 3
 }
 
 // RefreshTokenError is already exported above as part of the class declaration
+
+/**
+ * Direct refresh utility for fallback scenarios
+ * Used when service initialization hasn't completed yet
+ *
+ * @param refreshToken - The refresh token from storage
+ * @returns Promise<DirectRefreshResult> - Result of direct refresh attempt
+ */
+export async function performDirectTokenRefresh(refreshToken: string): Promise<import('../types').DirectRefreshResult> {
+  const correlationId = Math.random().toString(36).substr(2, 9)
+  const startTime = Date.now()
+
+  logger.debug('Starting direct token refresh (fallback mode)', {
+    correlationId,
+    refreshTokenLength: refreshToken.length
+  })
+
+  try {
+    // Validate refresh token format first
+    if (!validateRefreshTokenFormat(refreshToken)) {
+      throw new RefreshTokenError(
+        'Invalid refresh token format for direct refresh',
+        'INVALID_TOKEN'
+      )
+    }
+
+    // Use existing refresh API
+    const refreshResult = await refreshTokenViaAPI(refreshToken)
+
+    // Store new tokens directly in localStorage
+    const { firebaseTokenStorage } = await import('src/lib/auth/firebase-token-storage')
+
+    firebaseTokenStorage.storeTokens({
+      idToken: refreshResult.idToken,
+      refreshToken: refreshResult.refreshToken,
+      rememberMe: Boolean(localStorage.getItem('firebase-rememberMe'))
+    })
+
+    // Update localStorage with expiration info
+    const tokenExpiresAt = extractTokenExpiration(refreshResult.idToken)
+    if (tokenExpiresAt) {
+      localStorage.setItem('firebase-tokenExpiresAt', tokenExpiresAt.toString())
+    }
+    localStorage.setItem('firebase-lastRefresh', Date.now().toString())
+
+    const responseTime = Date.now() - startTime
+
+    logger.info('Direct token refresh successful', {
+      correlationId,
+      userId: refreshResult.userId,
+      responseTime,
+      tokenExpiresAt: new Date(tokenExpiresAt).toISOString()
+    })
+
+    return {
+      success: true,
+      newToken: refreshResult.idToken,
+      refreshToken: refreshResult.refreshToken,
+      timestamp: Date.now()
+    }
+
+  } catch (error) {
+    const responseTime = Date.now() - startTime
+
+    logger.error('Direct token refresh failed', {
+      correlationId,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+      responseTime
+    })
+
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred during direct refresh',
+      timestamp: Date.now()
+    }
+  }
+}
+
+/**
+ * Check if services are available for token refresh
+ * Used to determine if fallback refresh is needed
+ */
+export function checkServiceAvailability(): {
+  isServiceAvailable: boolean;
+  hasRefreshService: boolean;
+  hasAuthManager: boolean;
+  issues: string[];
+} {
+  const issues: string[] = []
+
+  try {
+    // Check if token refresh service exists
+    const { FirebaseTokenRefreshService } = require('./token-refresh-service')
+    const tokenService = FirebaseTokenRefreshService.getInstance()
+
+    if (!tokenService) {
+      issues.push('Token refresh service not initialized')
+    } else if (!tokenService.isServiceRunning()) {
+      issues.push('Token refresh service not running')
+    }
+  } catch (error) {
+    issues.push('Token refresh service module not available')
+  }
+
+  try {
+    // Check if auth manager exists
+    const { FirebaseAuthManager } = require('./auth-manager')
+    const authManager = FirebaseAuthManager.getInstance()
+
+    if (!authManager) {
+      issues.push('Auth manager not initialized')
+    }
+  } catch (error) {
+    issues.push('Auth manager module not available')
+  }
+
+  return {
+    isServiceAvailable: issues.length === 0,
+    hasRefreshService: !issues.some(issue => issue.includes('refresh service')),
+    hasAuthManager: !issues.some(issue => issue.includes('auth manager')),
+    issues
+  }
+}

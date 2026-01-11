@@ -120,6 +120,32 @@ export interface TimerManager {
   cleanupTimer: number | null;
 }
 
+// Service Health Interface
+export interface ServiceHealth {
+  isHealthy: boolean;
+  lastCheck: number;
+  consecutiveFailures: number;
+  issues: string[];
+}
+
+// Direct Token Refresh Result Interface
+export interface DirectRefreshResult {
+  success: boolean;
+  newToken?: string;
+  refreshToken?: string;
+  error?: string;
+  timestamp: number;
+}
+
+// Session Expiry Notification Interface
+export interface SessionExpiryNotification {
+  isVisible: boolean;
+  countdown: number;
+  message: string;
+  onRedirect: () => void;
+  onDismiss: () => void;
+}
+
 // Default Configuration Constants
 export const DEFAULT_AUTH_CONFIG: AuthManagerConfig = {
   proactiveRefreshInterval: 30 * 60 * 1000, // 30 minutes

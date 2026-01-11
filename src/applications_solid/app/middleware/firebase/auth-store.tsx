@@ -13,6 +13,9 @@ import type {
   AuthStore,
   TokenRefreshResult,
   AuthPollingResult,
+  ServiceHealth,
+  DirectRefreshResult,
+  SessionExpiryNotification,
 } from '../types';
 
 const logger = createLogger('[Firebase Auth Store]');
@@ -54,6 +57,27 @@ const [lastError, setLastError] = createSignal<{
 const [rateLimitActive, setRateLimitActive] = createSignal(false);
 const [rateLimitEndTime, setRateLimitEndTime] = createSignal(0);
 const [rateLimitReason, setRateLimitReason] = createSignal<string | null>(null);
+
+// Service health monitoring signal
+const [serviceHealth, setServiceHealth] = createSignal<ServiceHealth>({
+  isHealthy: true,
+  lastCheck: Date.now(),
+  consecutiveFailures: 0,
+  issues: []
+});
+
+// Session expiry notification signal
+const [sessionExpiryNotification, setSessionExpiryNotification] = createSignal<SessionExpiryNotification>({
+  isVisible: false,
+  countdown: 5,
+  message: 'Session expired, please relog in',
+  onRedirect: () => {
+    window.location.href = '/auth/sign-in';
+  },
+  onDismiss: () => {
+    setSessionExpiryNotification(prev => ({ ...prev, isVisible: false }));
+  }
+});
 
 /**
  * Create Firebase Auth Store
@@ -160,23 +184,57 @@ export function createFirebaseAuthStore(): AuthStore {
     }
   };
 
-  // Manual token refresh
+  // Enhanced token refresh with fallback mechanism
   const refreshToken = async (): Promise<void> => {
-    if (!tokenRefreshService) {
-      throw new Error('Token refresh service not initialized');
-    }
+    const correlationId = Math.random().toString(36).substr(2, 9);
+
+    logger.debug('Manual token refresh triggered', { correlationId });
+    setRefreshStatus('refreshing');
+    setAuthError(null);
 
     try {
-      logger.debug('Manual token refresh triggered');
-      setRefreshStatus('refreshing');
-      setAuthError(null);
+      // First, try the service-based approach if available
+      if (tokenRefreshService && await isServiceRunning()) {
+        try {
+          logger.debug('Attempting service-based token refresh', { correlationId });
 
-      const result: TokenRefreshResult = await tokenRefreshService.triggerManualRefresh();
+          const result: TokenRefreshResult = await tokenRefreshService.triggerManualRefresh();
 
-      if (result.success) {
+          if (result.success) {
+            setRefreshStatus('success');
+            await updateAuthState();
+            logger.info('Service-based token refresh successful', { correlationId });
+
+            // Clear success status after 2 seconds
+            setTimeout(() => {
+              if (refreshStatus() === 'success') {
+                setRefreshStatus('idle');
+              }
+            }, 2000);
+            return;
+          } else {
+            logger.warn('Service-based refresh failed, falling back to direct refresh', {
+              correlationId,
+              error: result.error
+            });
+          }
+        } catch (serviceError) {
+          logger.warn('Service-based refresh threw error, falling back to direct refresh', {
+            correlationId,
+            error: serviceError instanceof Error ? serviceError.message : 'Unknown error'
+          });
+        }
+      }
+
+      // Fallback: Direct token refresh without service dependency
+      logger.debug('Using fallback direct token refresh', { correlationId });
+
+      const directResult = await performDirectRefresh();
+
+      if (directResult.success) {
         setRefreshStatus('success');
         await updateAuthState();
-        logger.debug('Manual token refresh successful');
+        logger.info('Fallback token refresh successful', { correlationId });
 
         // Clear success status after 2 seconds
         setTimeout(() => {
@@ -185,16 +243,9 @@ export function createFirebaseAuthStore(): AuthStore {
           }
         }, 2000);
       } else {
-        setRefreshStatus('error');
-        const errorMessage = result.error || 'Token refresh failed';
-        setAuthError(errorMessage);
-        setLastError({
-          type: 'refresh',
-          message: errorMessage,
-          timestamp: Date.now(),
-        });
-        logger.error('Manual token refresh failed:', result.error);
+        throw new Error(directResult.error || 'Direct refresh failed');
       }
+
     } catch (error) {
       setRefreshStatus('error');
       const errorMessage = (error as Error).message;
@@ -204,7 +255,7 @@ export function createFirebaseAuthStore(): AuthStore {
         message: errorMessage,
         timestamp: Date.now(),
       });
-      logger.error('Manual token refresh error:', error);
+      logger.error('All refresh mechanisms failed', { correlationId, error: errorMessage });
       throw error;
     }
   };
@@ -385,6 +436,150 @@ export function createFirebaseAuthStore(): AuthStore {
     remainingMs: Math.max(0, rateLimitEndTime() - Date.now())
   });
 
+  // Service health and fallback utilities
+  const isServiceRunning = async (): Promise<boolean> => {
+    try {
+      return tokenRefreshService &&
+             typeof tokenRefreshService.isServiceRunning === 'function' &&
+             tokenRefreshService.isServiceRunning();
+    } catch (error) {
+      logger.warn('Error checking service running status:', error);
+      return false;
+    }
+  };
+
+  const performDirectRefresh = async (): Promise<DirectRefreshResult> => {
+    try {
+      // Import the direct refresh function
+      const { performDirectTokenRefresh } = await import('./custom-refresh');
+      const { firebaseTokenStorage } = await import('src/lib/auth/firebase-token-storage');
+
+      // Get refresh token from storage
+      const tokens = firebaseTokenStorage.getTokens();
+      if (!tokens.refreshToken) {
+        throw new Error('No refresh token available for direct refresh');
+      }
+
+      // Perform direct refresh
+      const result = await performDirectTokenRefresh(tokens.refreshToken);
+
+      return result;
+    } catch (error) {
+      logger.error('Direct refresh failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred during direct refresh',
+        timestamp: Date.now()
+      };
+    }
+  };
+
+  // Service health monitoring
+  const checkServiceHealth = async (): Promise<void> => {
+    try {
+      const issues: string[] = [];
+
+      // Check if token refresh service exists and is running
+      if (!tokenRefreshService) {
+        issues.push('Token refresh service not initialized');
+      } else if (!await isServiceRunning()) {
+        issues.push('Token refresh service not running');
+      }
+
+      // Check if auth manager exists
+      if (!authManager) {
+        issues.push('Auth manager not initialized');
+      }
+
+      // Check token validity
+      const { firebaseTokenStorage } = await import('src/lib/auth/firebase-token-storage');
+      const tokens = firebaseTokenStorage.getTokens();
+      if (tokens.idToken) {
+        const { extractTokenExpiration } = await import('./custom-refresh');
+        const expirationTime = extractTokenExpiration(tokens.idToken);
+        if (expirationTime && Date.now() > expirationTime) {
+          issues.push('Current token is expired');
+        }
+      } else if (authState().isAuthenticated) {
+        issues.push('Authenticated user has no stored token');
+      }
+
+      const isHealthy = issues.length === 0;
+      const currentHealth = serviceHealth();
+
+      setServiceHealth({
+        isHealthy,
+        lastCheck: Date.now(),
+        consecutiveFailures: isHealthy ? 0 : currentHealth.consecutiveFailures + 1,
+        issues
+      });
+
+      // Log health status
+      if (!isHealthy) {
+        logger.warn('Service health check failed', { issues });
+      } else {
+        logger.debug('Service health check passed');
+      }
+
+    } catch (error) {
+      logger.error('Service health check error:', error);
+    }
+  };
+
+  // Session expiry notification management
+  const triggerSessionExpiryNotification = (): void => {
+    logger.warn('Triggering session expiry notification');
+
+    setSessionExpiryNotification(prev => ({
+      ...prev,
+      isVisible: true,
+      countdown: 5
+    }));
+
+    // Start countdown
+    const startCountdown = () => {
+      const intervalId = setInterval(() => {
+        setSessionExpiryNotification(prev => {
+          if (prev.countdown <= 1) {
+            clearInterval(intervalId);
+            // Auto-redirect after countdown
+            prev.onRedirect();
+            return { ...prev, isVisible: false, countdown: 0 };
+          }
+          return { ...prev, countdown: prev.countdown - 1 };
+        });
+      }, 1000);
+    };
+
+    // Slight delay before starting countdown to allow UI to render
+    setTimeout(startCountdown, 100);
+  };
+
+  const dismissSessionExpiryNotification = (): void => {
+    setSessionExpiryNotification(prev => ({ ...prev, isVisible: false, countdown: 5 }));
+  };
+
+  // Refresh error management for service notifications
+  const setRefreshError = (errorMessage: string): void => {
+    setAuthError(errorMessage);
+    setLastError({
+      type: 'refresh',
+      message: errorMessage,
+      timestamp: Date.now(),
+    });
+    logger.warn('Refresh error set from service notification:', errorMessage);
+  };
+
+  const clearRefreshError = (): void => {
+    // Only clear if the current error is a refresh error
+    const currentError = lastError();
+    if (currentError && currentError.type === 'refresh') {
+      setAuthError(null);
+      setLastError(null);
+      logger.debug('Refresh error cleared from service notification');
+    }
+  };
+
   // Setup cleanup on unmount
   onCleanup(() => {
     cleanup();
@@ -419,6 +614,21 @@ export function createFirebaseAuthStore(): AuthStore {
     rateLimitActive: () => rateLimitActive(),
     rateLimitReason: () => rateLimitReason(),
     rateLimitEndTime: () => rateLimitEndTime(),
+
+    // Service health and notification methods
+    checkServiceHealth,
+    getServiceHealth: () => serviceHealth(),
+    triggerSessionExpiryNotification,
+    dismissSessionExpiryNotification,
+    getSessionExpiryNotification: () => sessionExpiryNotification(),
+
+    // Fallback refresh utilities
+    isServiceRunning,
+    performDirectRefresh,
+
+    // Service notification handlers
+    setRefreshError,
+    clearRefreshError,
   };
 }
 
@@ -511,4 +721,6 @@ export {
   rateLimitActive,
   rateLimitEndTime,
   rateLimitReason,
+  serviceHealth,
+  sessionExpiryNotification,
 };

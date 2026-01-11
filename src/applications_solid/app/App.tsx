@@ -24,6 +24,7 @@ import DashboardPage from './pages/dashboard/index'
 import CounterPage from './pages/counter/index'
 import ProfilePage from './pages/profile/index'
 import WalletPage from './pages/splitdo-exchange/index'
+import { SessionExpiryNotification } from './components/SessionExpiryNotification'
 
 /*
  * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
@@ -43,6 +44,7 @@ const logger = createLogger('[SolidJS App]');
 const AppContent: Component = () => {
   const [currentPage, setCurrentPage] = createSignal<Page>('dashboard')
   const [isDark, setIsDark] = createSignal(false)
+  const [authStore, setAuthStore] = createSignal<ReturnType<typeof import('./middleware/firebase/auth-store').getGlobalAuthStore> | null>(null)
   const middleware = useMiddleware()
 
   // Detect theme from localStorage and DOM class (shared with Astro app)
@@ -133,7 +135,8 @@ const AppContent: Component = () => {
       const { setupAuthMiddleware } = await import('./middleware/firebase/auth-middleware');
 
       // Get auth store and initialize if not already done
-      const authStore = getGlobalAuthStore();
+      const authStoreInstance = getGlobalAuthStore();
+      setAuthStore(authStoreInstance);
 
       // Setup Firebase auth middleware
       const authSetup = setupAuthMiddleware({
@@ -177,8 +180,8 @@ const AppContent: Component = () => {
 
       // Setup auth state change listeners
       createEffect(() => {
-        const isAuthenticated = authStore.isAuthenticated();
-        const tokenStatus = authStore.tokenStatus();
+        const isAuthenticated = authStoreInstance.isAuthenticated();
+        const tokenStatus = authStoreInstance.tokenStatus();
 
         logger.debug('Auth state changed', {
           isAuthenticated,
@@ -195,7 +198,7 @@ const AppContent: Component = () => {
       onCleanup(() => {
         logger.debug('Cleaning up Firebase auth services');
         authSetup.middleware.cleanup();
-        authStore.cleanup();
+        authStoreInstance.cleanup();
       });
 
       logger.debug('Firebase auth services initialized successfully');
@@ -210,16 +213,31 @@ const AppContent: Component = () => {
 
   return (
     <div class={`h-screen flex overflow-hidden ${isDark() ? 'bg-zinc-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
-      <Navigation 
-        currentPage={currentPage()} 
-        onPageChange={handlePageChange} 
-        isDark={isDark()} 
+      <Navigation
+        currentPage={currentPage()}
+        onPageChange={handlePageChange}
+        isDark={isDark()}
       />
-      
+
       {/* Main Content */}
       <main class={`flex-1 overflow-auto ml-64 transition-all duration-300`}>
         {renderPage()}
       </main>
+
+      {/* Session Expiry Notification */}
+      {authStore() && (() => {
+        const sessionNotification = authStore()!.getSessionExpiryNotification();
+        return (
+          <SessionExpiryNotification
+            isVisible={sessionNotification.isVisible}
+            countdown={sessionNotification.countdown}
+            message={sessionNotification.message}
+            onRedirect={sessionNotification.onRedirect}
+            onDismiss={sessionNotification.onDismiss}
+            isDark={isDark()}
+          />
+        );
+      })()}
     </div>
   )
 }

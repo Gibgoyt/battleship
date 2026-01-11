@@ -152,10 +152,14 @@ export class FirebaseTokenRefreshService {
 
   /**
    * Perform proactive token refresh (called every 30 minutes)
+   * Enhanced with auth store error notification
    */
   private async performProactiveRefresh(): Promise<void> {
     const startTime = Date.now();
+    const correlationId = Math.random().toString(36).substr(2, 9);
+
     logger.debug('Performing proactive token refresh', {
+      correlationId,
       attempt: this.refreshAttempts + 1,
       lastAttempt: this.lastRefreshAttempt ? new Date(this.lastRefreshAttempt).toISOString() : 'never',
     });
@@ -163,37 +167,50 @@ export class FirebaseTokenRefreshService {
     try {
       // Check if user is authenticated using custom implementation
       if (!isUserAuthenticated()) {
-        logger.debug('No authenticated user - skipping proactive refresh');
+        logger.debug('No authenticated user - skipping proactive refresh', { correlationId });
         return;
       }
 
       // Check current token status
       const tokens = firebaseTokenStorage.getTokens();
       if (!tokens.idToken) {
-        logger.debug('No current token - requesting fresh token');
+        logger.debug('No current token - requesting fresh token', { correlationId });
       }
 
       // Perform refresh
       const result = await this.refreshFirebaseToken();
 
       if (result.success) {
-        logger.debug('Proactive refresh successful', {
+        logger.info('Proactive refresh successful', {
+          correlationId,
           duration: Date.now() - startTime,
           newToken: Boolean(result.newToken),
         });
         this.refreshAttempts = 0; // Reset attempts on success
+
+        // Notify auth store of successful refresh
+        this.notifyAuthStoreSuccess();
       } else {
-        logger.warn('Proactive refresh failed', {
+        logger.error('Proactive refresh failed', {
+          correlationId,
           error: result.error,
           attempts: this.refreshAttempts,
         });
-        this.handleRefreshFailure(result);
+
+        // Critical: Notify auth store of failure for user feedback
+        this.notifyAuthStoreError(result.error || 'Proactive refresh failed');
+
+        this.handleProactiveRefreshFailure(result);
       }
 
       this.lastRefreshAttempt = Date.now();
     } catch (error) {
-      logger.error('Proactive refresh error:', error);
-      this.handleRefreshError(error as Error);
+      logger.error('Proactive refresh error:', { correlationId, error: (error as Error).message });
+
+      // Critical: Always notify auth store of errors
+      this.notifyAuthStoreError((error as Error).message);
+
+      this.handleProactiveRefreshError(error as Error);
     }
   }
 
@@ -424,10 +441,10 @@ export class FirebaseTokenRefreshService {
   }
 
   /**
-   * Handle refresh failure
+   * Enhanced proactive refresh failure handler
    */
-  private handleRefreshFailure(result: TokenRefreshResult): void {
-    logger.warn('Handling refresh failure', {
+  private handleProactiveRefreshFailure(result: TokenRefreshResult): void {
+    logger.warn('Handling proactive refresh failure', {
       error: result.error,
       attempts: this.refreshAttempts,
       retryAfter: result.retryAfter,
@@ -436,23 +453,88 @@ export class FirebaseTokenRefreshService {
     if (result.retryAfter && result.retryAfter > 0) {
       // Schedule retry
       this.timers.cleanupTimer = setTimeout(async () => {
-        logger.debug('Executing scheduled refresh retry');
-        await this.refreshFirebaseToken();
+        logger.debug('Executing scheduled proactive refresh retry');
+        await this.performProactiveRefresh();
       }, result.retryAfter);
+    }
+
+    // If we're approaching the max refresh attempts, notify auth store
+    if (this.refreshAttempts >= this.config.maxRefreshAttempts - 1) {
+      this.notifyAuthStoreError('Proactive refresh nearing failure limit - user may be logged out soon');
     }
   }
 
   /**
-   * Handle refresh error
+   * Enhanced proactive refresh error handler
    */
-  private async handleRefreshError(error: Error): Promise<void> {
-    logger.error('Handling refresh error:', error);
+  private async handleProactiveRefreshError(error: Error): Promise<void> {
+    logger.error('Handling proactive refresh error:', error);
 
     this.refreshAttempts++;
 
     if (this.refreshAttempts >= this.config.maxRefreshAttempts) {
-      logger.error('Max refresh attempts exceeded due to errors');
-      await this.forceSignOut('Refresh errors exceeded maximum attempts');
+      logger.error('Max proactive refresh attempts exceeded due to errors');
+      this.notifyAuthStoreError('Proactive token refresh has failed - session will expire soon');
+      await this.forceSignOut('Proactive refresh errors exceeded maximum attempts');
+    } else {
+      // Notify about the error but don't force logout yet
+      this.notifyAuthStoreError(`Proactive refresh error (${this.refreshAttempts}/${this.config.maxRefreshAttempts}): ${error.message}`);
+    }
+  }
+
+  /**
+   * Handle refresh failure (legacy method for backward compatibility)
+   */
+  private handleRefreshFailure(result: TokenRefreshResult): void {
+    // Use the enhanced handler
+    this.handleProactiveRefreshFailure(result);
+  }
+
+  /**
+   * Handle refresh error (legacy method for backward compatibility)
+   */
+  private async handleRefreshError(error: Error): Promise<void> {
+    // Use the enhanced handler
+    await this.handleProactiveRefreshError(error);
+  }
+
+  /**
+   * Notify auth store of successful refresh
+   */
+  private notifyAuthStoreSuccess(): void {
+    try {
+      // Import auth store dynamically to avoid circular dependencies
+      import('./auth-store').then(({ getGlobalAuthStore }) => {
+        const authStore = getGlobalAuthStore();
+        if (authStore && typeof authStore.clearRefreshError === 'function') {
+          // Clear any existing refresh error in the auth store
+          authStore.clearRefreshError();
+        }
+      }).catch(error => {
+        logger.warn('Could not notify auth store of refresh success:', error);
+      });
+    } catch (error) {
+      logger.warn('Error notifying auth store of refresh success:', error);
+    }
+  }
+
+  /**
+   * Notify auth store of refresh error
+   */
+  private notifyAuthStoreError(errorMessage: string): void {
+    try {
+      // Import auth store dynamically to avoid circular dependencies
+      import('./auth-store').then(({ getGlobalAuthStore }) => {
+        const authStore = getGlobalAuthStore();
+        if (authStore && typeof authStore.setRefreshError === 'function') {
+          // Set error state in auth store for user feedback
+          authStore.setRefreshError(errorMessage);
+        }
+      }).catch(error => {
+        logger.warn('Could not notify auth store of refresh error:', error);
+      });
+    } catch (error) {
+      logger.warn('Error notifying auth store of refresh error:', error);
     }
   }
 

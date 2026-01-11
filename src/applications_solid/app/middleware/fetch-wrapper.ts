@@ -32,18 +32,6 @@ function activateRateLimit(): void {
  * @returns Promise<Response>
  */
 export async function fetchMiddleware(url: string, options: RequestInit = {}): Promise<Response> {
-  // Check global rate limit first
-  if (isRateLimited()) {
-    const authStore = getGlobalAuthStore()
-    const rateLimitInfo = authStore.getRateLimitInfo()
-    const remainingTime = Math.ceil(rateLimitInfo.remainingMs / 1000)
-    logger.warn(`Request blocked due to global rate limit. ${remainingTime}s remaining`, {
-      reason: rateLimitInfo.reason,
-      correlationId
-    })
-    throw new Error(`Global rate limit active (${rateLimitInfo.reason}). Please wait ${remainingTime} seconds.`)
-  }
-
   const startTime = Date.now()
   const correlationId = Math.random().toString(36).substr(2, 9)
 
@@ -55,12 +43,46 @@ export async function fetchMiddleware(url: string, options: RequestInit = {}): P
 
   // Get auth store and current tokens
   const authStore = getGlobalAuthStore()
+
+  // Check global rate limit first
+  if (isRateLimited()) {
+    const rateLimitInfo = authStore.getRateLimitInfo()
+    const remainingTime = Math.ceil(rateLimitInfo.remainingMs / 1000)
+    logger.warn(`Request blocked due to global rate limit. ${remainingTime}s remaining`, {
+      reason: rateLimitInfo.reason,
+      correlationId
+    })
+    throw new Error(`Global rate limit active (${rateLimitInfo.reason}). Please wait ${remainingTime} seconds.`)
+  }
+
+  // Enhanced: Service health validation before making requests
+  try {
+    const serviceHealth = authStore.getServiceHealth();
+    if (!serviceHealth.isHealthy && serviceHealth.consecutiveFailures > 2) {
+      logger.warn('Service health issues detected, attempting recovery', {
+        correlationId,
+        issues: serviceHealth.issues,
+        consecutiveFailures: serviceHealth.consecutiveFailures
+      });
+
+      // Attempt service recovery
+      try {
+        await authStore.checkServiceHealth();
+      } catch (recoveryError) {
+        logger.error('Service recovery failed:', { correlationId, recoveryError });
+      }
+    }
+  } catch (healthError) {
+    logger.warn('Could not check service health:', { correlationId, healthError });
+  }
+
   let tokens = firebaseTokenStorage.getTokens()
 
   // Check if we have a valid token
   if (!tokens.idToken) {
-    logger.warn('No authentication token available, redirecting to sign-in', { correlationId })
-    window.location.href = '/auth/sign-in'
+    logger.warn('No authentication token available, triggering session expiry notification', { correlationId })
+    // Use graceful session expiry notification instead of abrupt redirect
+    authStore.triggerSessionExpiryNotification()
     throw new Error('No authentication token available')
   }
 
@@ -115,25 +137,26 @@ export async function fetchMiddleware(url: string, options: RequestInit = {}): P
         }
       }
 
-      // Handle authentication errors (401 and 403)
+      // Enhanced authentication error handling (401 and 403)
       if ((response.status === 401 || response.status === 403) && retryCount < MAX_RETRIES) {
-        logger.warn(`Authentication error ${response.status}, attempting token refresh`, {
+        logger.warn(`Authentication error ${response.status}, attempting enhanced token refresh with fallback`, {
           correlationId,
           attempt: retryCount + 1,
           status: response.status
         })
 
         try {
-          // Attempt token refresh
-          await authStore.refreshToken()
+          // Enhanced token refresh with fallback mechanism
+          await authStore.refreshToken() // Now has built-in fallback support
 
           // Get updated tokens
           tokens = firebaseTokenStorage.getTokens()
 
           if (!tokens.idToken) {
-            logger.error('Token refresh failed, no new token available', { correlationId })
-            window.location.href = '/auth/sign-in'
-            throw new Error('Token refresh failed')
+            logger.error('Enhanced token refresh failed, no new token available', { correlationId })
+            // Use graceful session expiry notification instead of abrupt redirect
+            authStore.triggerSessionExpiryNotification()
+            throw new Error('Token refresh failed - session expiry notification triggered')
           }
 
           // Update Authorization header with new token
@@ -141,7 +164,7 @@ export async function fetchMiddleware(url: string, options: RequestInit = {}): P
           newHeaders.set('Authorization', `Bearer ${tokens.idToken}`)
           fetchOptions.headers = newHeaders
 
-          logger.info('Token refreshed successfully, retrying request', {
+          logger.info('Enhanced token refresh successful, retrying request', {
             correlationId,
             newTokenLength: tokens.idToken.length
           })
@@ -150,26 +173,29 @@ export async function fetchMiddleware(url: string, options: RequestInit = {}): P
           continue // Retry the request
 
         } catch (refreshError) {
-          logger.error('Token refresh failed', {
+          logger.error('All token refresh mechanisms failed', {
             correlationId,
-            error: refreshError instanceof Error ? refreshError.message : 'Unknown error'
+            error: refreshError instanceof Error ? refreshError.message : 'Unknown error',
+            responseTime: Date.now() - startTime
           })
 
-          window.location.href = '/auth/sign-in'
-          throw new Error('Authentication failed after refresh attempt')
+          // Use graceful session expiry notification instead of abrupt redirect
+          authStore.triggerSessionExpiryNotification()
+          throw new Error('Authentication failed after all refresh attempts')
         }
       }
 
       // Handle final authentication failure after retry
       if ((response.status === 401 || response.status === 403) && retryCount >= MAX_RETRIES) {
-        logger.error('Authentication failed after maximum retries, redirecting to sign-in', {
+        logger.error('Authentication failed after maximum retries, triggering session expiry notification', {
           correlationId,
           status: response.status,
           attempts: retryCount + 1
         })
 
-        window.location.href = '/auth/sign-in'
-        throw new Error('Authentication failed after retry')
+        // Use graceful session expiry notification instead of abrupt redirect
+        authStore.triggerSessionExpiryNotification()
+        throw new Error('Authentication failed after maximum retry attempts')
       }
 
       // Success case - return the response
@@ -196,12 +222,18 @@ export async function fetchMiddleware(url: string, options: RequestInit = {}): P
       }
 
       if (fetchError instanceof Error && fetchError.message.includes('Authentication failed')) {
-        // Auth error - don't retry
+        // Auth error - don't retry, but ensure session expiry notification is shown
         logger.error('Request failed due to authentication', {
           correlationId,
           error: fetchError.message,
           responseTime
         })
+
+        // Ensure session expiry notification is triggered if not already
+        if (!fetchError.message.includes('session expiry notification triggered')) {
+          authStore.triggerSessionExpiryNotification()
+        }
+
         throw fetchError
       }
 

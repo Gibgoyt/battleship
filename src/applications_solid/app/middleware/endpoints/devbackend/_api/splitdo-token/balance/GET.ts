@@ -73,14 +73,57 @@ export async function GET(): Promise<GetResponse> {
 	try {
 		logger.info('Starting balance retrieval request')
 
-		const response = await fetchMiddleware('https://devbackend.splitdo.app:8443/api/splitdo-token/balance', {
+		let response = await fetchMiddleware('https://devbackend.splitdo.app:8443/api/splitdo-token/balance', {
 			method: "GET"
 			// fetchMiddleware automatically handles:
 			// - Authorization header injection
 			// - 401/403 retry logic with token refresh
 			// - Global rate limiting (Cloudflare 1015)
-			// - Browser redirect on final auth failure
+			// - Session expiry notification on final auth failure
 		})
+
+		// Enhanced: If 401 and fetchMiddleware didn't handle it, try direct refresh once
+		if (response.status === 401) {
+			logger.warn('Balance endpoint received 401, attempting direct token refresh')
+
+			try {
+				// Import auth store dynamically to avoid circular dependencies
+				const { getGlobalAuthStore } = await import('../../../../../firebase/auth-store')
+				const authStore = getGlobalAuthStore()
+				await authStore.refreshToken() // Uses fallback mechanism
+
+				// Retry the request exactly once
+				response = await fetchMiddleware('https://devbackend.splitdo.app:8443/api/splitdo-token/balance', {
+					method: "GET"
+				})
+
+				// If still 401, don't retry again
+				if (response.status === 401) {
+					logger.error('Balance endpoint still receiving 401 after token refresh - auth failure')
+					return {
+						status: 401,
+						data: {
+							success: false,
+							error: 'authentication_failed',
+							message: 'Session expired, please log in again'
+						}
+					}
+				}
+
+			} catch (refreshError) {
+				logger.error('Direct token refresh failed in balance endpoint', {
+					error: refreshError instanceof Error ? refreshError.message : 'Unknown error'
+				})
+				return {
+					status: 401,
+					data: {
+						success: false,
+						error: 'token_refresh_failed',
+						message: 'Unable to refresh authentication token'
+					}
+				}
+			}
+		}
 
 		const responseData = await response.json()
 
