@@ -31,12 +31,15 @@ if (args[0] === 'test_refreshMechanism401') {
     process.exit(1)
   }
   await test_middlewareFetch(username)
+} else if (args[0] === 'test_staleTokenToExpectedRefresh') {
+  await test_staleTokenToExpectedRefresh()
 } else {
   console.log("Available commands:")
   console.log("  ./main.ts test_refreshMechanism401 <username>    - Test 401 refresh mechanism")
   console.log("  ./main.ts test_staleTokenFailure                - Test stale token failure")
   console.log("  ./main.ts test_freshTokenSuccess <username>      - Test fresh token success")
   console.log("  ./main.ts test_middlewareFetch <username>        - Test new middleware system")
+  console.log("  ./main.ts test_staleTokenToExpectedRefresh       - Test stale token with refresh mechanism")
   console.log("")
   console.log("Available users: TestUser1, TestUser2, TestUser3, TestUser4, TestUser5, TestUser6, TestUser7")
   process.exit(1)
@@ -325,5 +328,98 @@ async function makeRequestWithRetry(url: string, token: string): Promise<{
       status: 0,
       error: error instanceof Error ? error.message : 'Network error'
     }
+  }
+}
+
+/**
+ * Test stale token with expected refresh mechanism
+ * Simulates our fetchMiddleware behavior: try with stale token, get 401, refresh, retry
+ */
+async function test_staleTokenToExpectedRefresh() {
+  console.log(`🧪 Testing stale token with refresh mechanism`)
+  console.log("=".repeat(50))
+
+  console.log("📋 Step 1: Testing with pre-stored stale TestUser7 token...")
+  console.log(`   Token (first 20 chars): ${staleTestUser7Token.substring(0, 20)}...`)
+
+  try {
+    // Step 1: Try with stale token first
+    let response = await fetch('https://devbackend.splitdo.app:8443/api/hello/firebase', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${staleTestUser7Token}`,
+        'Content-Type': 'application/json',
+        'Origin': 'https://splitdo.app'
+      }
+    })
+
+    let responseData = await response.json()
+
+    console.log(`📊 First attempt result: ${response.status} ${response.statusText}`)
+    console.log(`   Authenticated: ${responseData.authenticated}`)
+
+    if (responseData.error) {
+      console.log(`   Error: ${responseData.error}`)
+      console.log(`   Message: ${responseData.message}`)
+    }
+
+    // Step 2: Check if we got 401 or authentication failed
+    const shouldRefresh = response.status === 401 ||
+                         response.status === 403 ||
+                         (response.ok && !responseData.authenticated)
+
+    if (shouldRefresh) {
+      console.log("\n🔄 Step 2: 401/403 or authentication failed detected - triggering refresh...")
+
+      // Get fresh token for TestUser7 (simulates refresh mechanism)
+      console.log("   🔐 Refreshing token via Firebase authentication...")
+      const authResponse = await getJwt('TestUser7')
+
+      console.log(`   ✅ Token refreshed successfully!`)
+      console.log(`   📝 New token (first 20 chars): ${authResponse.idToken.substring(0, 20)}...`)
+      console.log(`   ⏰ New token expires in: ${authResponse.expiresIn} seconds`)
+
+      // Step 3: Retry with fresh token
+      console.log("\n🔄 Step 3: Retrying request with fresh token...")
+
+      response = await fetch('https://devbackend.splitdo.app:8443/api/hello/firebase', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authResponse.idToken}`,
+          'Content-Type': 'application/json',
+          'Origin': 'https://splitdo.app'
+        }
+      })
+
+      responseData = await response.json()
+
+      console.log(`📊 Retry result: ${response.status} ${response.statusText}`)
+      console.log(`   Authenticated: ${responseData.authenticated}`)
+
+      if (response.ok && responseData.authenticated) {
+        console.log(`   ✅ SUCCESS! Refresh mechanism worked!`)
+        console.log(`   👤 User: ${responseData.user?.email}`)
+        console.log(`   🔑 User ID: ${responseData.user?.id}`)
+        console.log(`   🕒 Token expires at: ${new Date(responseData.token_info?.expires_at * 1000).toISOString()}`)
+      } else {
+        console.log(`   ❌ Retry still failed after refresh`)
+        if (responseData.error) {
+          console.log(`   Error: ${responseData.error}`)
+          console.log(`   Message: ${responseData.message}`)
+        }
+      }
+
+      // Step 4: Test balance endpoint with fresh token
+      console.log("\n📋 Step 4: Testing balance endpoint with fresh token...")
+      await testBalanceEndpoint(authResponse.idToken)
+
+    } else {
+      console.log("\n⚠️  Unexpected: stale token didn't fail as expected")
+      console.log("   No refresh was triggered - token may not be stale")
+    }
+
+  } catch (error) {
+    console.error("❌ Refresh mechanism test failed:", error)
+    process.exit(1)
   }
 }
