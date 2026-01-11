@@ -72,7 +72,7 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
             </span>
             <div class="text-right">
               <div class="exchange-rate">
-                1 SOL = {formatCurrency(1 / (programInfo()?.exchangeRate || 0.11), 2)} SPLITDO
+                1 SOL = {formatCurrency((solPrice().usd || 135.98) / 0.11, 2)} SPLITDO
               </div>
               <Show when={solPrice().usd > 0}>
                 <div class={`text-xs crypto-text-muted`}>

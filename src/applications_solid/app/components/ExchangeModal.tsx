@@ -251,7 +251,11 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
             : `hover:border-blue-500 hover:shadow-lg cursor-pointer ${
                 props.isDark ? 'bg-gray-800 border-gray-700 hover:bg-gray-700' : 'bg-white border-gray-200 hover:bg-gray-50'
               } ${
-                props.connectionStatus === 'connected' ? 'border-green-500 bg-green-50' : ''
+                props.connectionStatus === 'connected'
+                  ? props.isDark
+                    ? 'border-green-500 bg-green-900 bg-opacity-30'
+                    : 'border-green-500 bg-green-50'
+                  : ''
               }`
         }`}
       >
