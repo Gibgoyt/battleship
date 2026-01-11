@@ -617,15 +617,15 @@ const checkSplitdoBalance = async () => {
     switch (response.status) {
       case 200:
         // Success - account exists with balance
-        if (response.data.success && response.data.data.token_account_pubkey) {
+        if (response.data.success && response.data.token_account_pubkey) {
           setSplitdoATA({
             status: 'exists',
-            address: response.data.data.token_account_pubkey,
+            address: response.data.token_account_pubkey,
             balance: {
-              uiAmount: rawToUIAmount(response.data.data.token_balance as SplitdoRawAmount)
+              uiAmount: rawToUIAmount(response.data.mainnet_response.balance as SplitdoRawAmount)
             }
           });
-          console.log('[ReactiveWalletStore] SPLITDO ATA found:', response.data.data.token_account_pubkey, 'Raw Balance:', response.data.data.token_balance, 'UI Balance:', rawToUIAmount(response.data.data.token_balance));
+          console.log('[ReactiveWalletStore] SPLITDO ATA found:', response.data.token_account_pubkey, 'Raw Balance:', response.data.mainnet_response.balance, 'UI Balance:', response.data.mainnet_response.ui_amount_string);
         } else {
           // Unexpected success response format
           setSplitdoATA({ status: 'not_found' });
@@ -648,6 +648,16 @@ const checkSplitdoBalance = async () => {
           error: `Authentication error: ${response.data.message || response.data.error}`
         });
         console.error('[ReactiveWalletStore] Authentication failed:', response.data);
+        break;
+
+      case 429:
+        // CloudFlare rate limit (error 1015)
+        const retryAfter = response.data.retry_after || 7;
+        setSplitdoATA({
+          status: 'error',
+          error: `Rate limit exceeded. Please try again in ${retryAfter} seconds.`
+        });
+        console.warn('[ReactiveWalletStore] Rate limit exceeded:', response.data);
         break;
 
       default:

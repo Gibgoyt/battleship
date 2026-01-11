@@ -1,21 +1,25 @@
 import { getGlobalAuthStore } from '../../../../../firebase/auth-store'
 import { firebaseTokenStorage } from '../../../../../../../../lib/auth/firebase-token-storage'
 
-interface BalanceInfo {
-	user_id: string
-	token_account_pubkey: string
-	token_balance: number
-	equivalent_usdc: number
-	exchange_rate: number
+interface MainnetResponse {
+	balance: number
+	decimals: number
 	last_updated: string
+	ui_amount_string: string
+}
+
+interface BalanceInfo {
+	last_updated: string
+	mainnet_response: MainnetResponse
+	splitdo_token_mint: string
+	success: true
+	token_account_pubkey: string
+	user_id: string
 }
 
 interface Response200 {
 	status: 200
-	data: {
-		success: true
-		data: BalanceInfo
-	}
+	data: BalanceInfo
 }
 
 interface Response401 {
@@ -45,7 +49,16 @@ interface Response404 {
 	}
 }
 
-export type GetResponse = Response200 | Response401 | Response403 | Response404
+interface Response429 {
+	status: 429
+	data: {
+		error: string
+		message: string
+		retry_after?: number
+	}
+}
+
+export type GetResponse = Response200 | Response401 | Response403 | Response404 | Response429
 
 /*
  * Get user's token balance with automatic Firebase JWT auth handling
@@ -123,6 +136,18 @@ export async function GET(): Promise<GetResponse> {
 						return {
 							status: 404,
 							data: responseData
+						}
+					case 429:
+						console.log('[GET Balance] Rate limit exceeded (CloudFlare error 1015)')
+						// Extract retry-after header if available
+						const retryAfter = response.headers.get('Retry-After')
+						return {
+							status: 429,
+							data: {
+								error: 'rate_limit_exceeded',
+								message: responseData || 'Rate limit exceeded. Please try again later.',
+								retry_after: retryAfter ? parseInt(retryAfter) : undefined
+							}
 						}
 					default:
 						throw new Error(`Unexpected HTTP status: ${response.status}`)
