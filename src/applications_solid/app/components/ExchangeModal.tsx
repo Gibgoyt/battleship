@@ -22,15 +22,37 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
   const [isConnecting, setIsConnecting] = createSignal(false);
   const [showMobileInstallation, setShowMobileInstallation] = createSignal(false);
   const [mobileInstallationPlatform, setMobileInstallationPlatform] = createSignal<'ios' | 'android'>('ios');
+  const [solPriceUSD, setSolPriceUSD] = createSignal(135.98); // Default fallback price
 
   // Track whether we've already fetched program info for the current modal session
   const [hasFetchedForCurrentModal, setHasFetchedForCurrentModal] = createSignal(false);
 
-  // Fetch program info when modal opens and setup mobile listeners
+  // Function to fetch SOL price from CoinGecko
+  const fetchSolPrice = async () => {
+    try {
+      const { middlewareFetch } = await import('src/applications_solid/app/middleware/endpoints');
+      const response = await middlewareFetch.Endpoints.CoinGecko._Api.V3.Simple.Price.GET({
+        ids: 'solana',
+        vs_currencies: 'usd'
+      });
+
+      if (response.status === 200 && response.data.solana?.usd) {
+        setSolPriceUSD(response.data.solana.usd);
+        console.log('[ExchangeModal] SOL price updated:', response.data.solana.usd);
+      } else {
+        console.warn('[ExchangeModal] Failed to fetch SOL price, using fallback');
+      }
+    } catch (error) {
+      console.error('[ExchangeModal] Error fetching SOL price:', error);
+    }
+  };
+
+  // Fetch program info and SOL price when modal opens and setup mobile listeners
   createEffect(() => {
     if (isExchangeModalOpen() && !hasFetchedForCurrentModal()) {
       setHasFetchedForCurrentModal(true);
       fetchProgramInfo();
+      fetchSolPrice();
 
       // Setup mobile wallet return listeners for iOS/Android deep links
       setupMobileReturnListener();
@@ -65,7 +87,7 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
       {/* Modal Content */}
       <div
         class={`relative w-full max-w-2xl mx-4 p-0 rounded-xl shadow-2xl z-10 overflow-hidden ${
-          props.isDark ? 'bg-crypto-bg-primary border border-crypto-border' : 'bg-crypto-bg-primary border border-crypto-border'
+          props.isDark ? 'bg-crypto-bg-primary border border-crypto-border' : 'bg-white border border-gray-200'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -103,6 +125,7 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
                 executeExchange={executeExchange}
                 onBack={() => setStep('wallet')}
                 exchangeRate={programInfo().exchangeRate}
+                solPriceUSD={solPriceUSD()}
               />
             }
           >
@@ -212,8 +235,8 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
   return (
     <div class="space-y-6">
       <div class="text-center">
-        <h3 class="crypto-heading-3 mb-2">Connect Your Wallet</h3>
-        <p class="crypto-text-secondary">
+        <h3 class={`text-2xl font-bold mb-2 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>Connect Your Wallet</h3>
+        <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
           Choose your preferred wallet to continue with the exchange
         </p>
       </div>
@@ -224,9 +247,11 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
         disabled={props.isConnecting}
         class={`w-full p-6 border-2 transition-all duration-200 flex items-center gap-4 rounded-xl ${
           props.isConnecting
-            ? 'opacity-50 cursor-not-allowed bg-crypto-bg-tertiary border-crypto-border'
-            : `hover:border-crypto-primary-blue hover:shadow-lg cursor-pointer bg-crypto-bg-secondary border-crypto-border hover:bg-crypto-bg-tertiary ${
-                props.connectionStatus === 'connected' ? 'border-crypto-accent-green bg-crypto-accent-green bg-opacity-10' : ''
+            ? `opacity-50 cursor-not-allowed ${props.isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'}`
+            : `hover:border-blue-500 hover:shadow-lg cursor-pointer ${
+                props.isDark ? 'bg-gray-800 border-gray-700 hover:bg-gray-700' : 'bg-white border-gray-200 hover:bg-gray-50'
+              } ${
+                props.connectionStatus === 'connected' ? 'border-green-500 bg-green-50' : ''
               }`
         }`}
       >
@@ -241,10 +266,10 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
           />
         </div>
         <div class="flex-1 text-left">
-          <div class="crypto-text-large font-semibold crypto-text-primary">
+          <div class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
             Phantom Wallet
           </div>
-          <div class="crypto-text-small crypto-text-secondary">
+          <div class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
             {props.isConnecting
               ? 'Connecting...'
               : props.connectionStatus === 'connected'
@@ -264,20 +289,24 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
       {/* MetaMask Option (Coming Soon) */}
       <button
         disabled
-        class="w-full p-6 border-2 opacity-50 cursor-not-allowed flex items-center gap-4 rounded-xl bg-crypto-bg-secondary border-crypto-border"
+        class={`w-full p-6 border-2 opacity-50 cursor-not-allowed flex items-center gap-4 rounded-xl ${
+          props.isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'
+        }`}
       >
         <div class="w-10 h-10 flex items-center justify-center font-bold text-orange-400 bg-orange-100 rounded-full">
           MM
         </div>
         <div class="flex-1 text-left">
-          <div class="crypto-text-large font-semibold crypto-text-primary">
+          <div class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
             MetaMask
           </div>
-          <div class="crypto-text-small crypto-text-muted">
+          <div class={`text-sm ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>
             Solana support coming soon
           </div>
         </div>
-        <span class="text-xs px-3 py-1 bg-crypto-bg-tertiary text-crypto-text-muted rounded-full font-medium">
+        <span class={`text-xs px-3 py-1 rounded-full font-medium ${
+          props.isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'
+        }`}>
           Coming Soon
         </span>
       </button>
@@ -305,10 +334,12 @@ interface ExchangeFormProps {
   executeExchange: (amount: number) => Promise<any>;
   onBack: () => void;
   exchangeRate: number;
+  solPriceUSD: number;
 }
 
 const ExchangeForm: Component<ExchangeFormProps> = (props) => {
   const MIN_SOL_AMOUNT = 0.01;
+  const SPLITDO_PRICE_USD = 0.11; // Fixed presale price: $0.11 per SPLITDO
 
   const solAmountNum = createMemo(() => {
     const num = parseFloat(props.solAmount);
@@ -319,20 +350,25 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
     return solAmountNum() >= MIN_SOL_AMOUNT;
   });
 
+  // Calculate how much SOL is worth in USD
+  const solValueUSD = createMemo(() => {
+    return solAmountNum() * props.solPriceUSD;
+  });
+
+  // Calculate SPLITDO amount: SOL_USD_VALUE / SPLITDO_PRICE_USD
+  // Example: 1 SOL @ $135.98 = $135.98 / $0.11 = ~1,236 SPLITDO
   const splitdoAmount = createMemo(() => {
-    // Calculate SPLITDO amount: SOL / exchange_rate
-    // If exchange_rate is 0.11, then 1 SOL = 1/0.11 = ~9.09 SPLITDO
-    if (props.exchangeRate <= 0) return 0;
-    return Math.floor((solAmountNum() / props.exchangeRate) * 100) / 100; // Round to 2 decimals
+    return Math.floor((solValueUSD() / SPLITDO_PRICE_USD) * 100) / 100; // Round to 2 decimals
   });
 
-  const solPerSplitdo = createMemo(() => {
-    return props.exchangeRate;
-  });
-
+  // Calculate how many SPLITDO per 1 SOL (dynamic based on SOL price)
   const splitdoPerSol = createMemo(() => {
-    if (props.exchangeRate <= 0) return 0;
-    return Math.floor((1 / props.exchangeRate) * 100) / 100;
+    return Math.floor((props.solPriceUSD / SPLITDO_PRICE_USD) * 100) / 100;
+  });
+
+  // USD equivalent calculations
+  const splitdoPerUSD = createMemo(() => {
+    return Math.floor((1 / SPLITDO_PRICE_USD) * 100) / 100; // 1 USD = ~9.09 SPLITDO
   });
 
   const handleExchange = async () => {
@@ -345,7 +381,11 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
       {/* Back Button */}
       <button
         onClick={props.onBack}
-        class="crypto-text-secondary hover:crypto-text-primary text-sm flex items-center gap-2 transition-colors"
+        class={`text-sm flex items-center gap-2 transition-colors ${
+          props.isDark
+            ? 'text-gray-400 hover:text-white'
+            : 'text-gray-600 hover:text-gray-900'
+        }`}
       >
         ← Back to wallet selection
       </button>
@@ -353,9 +393,9 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
       {/* Input Section */}
       <div class="space-y-4">
         <div>
-          <h3 class="crypto-heading-3 mb-4">Enter Exchange Amount</h3>
+          <h3 class={`text-2xl font-bold mb-4 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>Enter Exchange Amount</h3>
           <div class="relative">
-            <label class="block crypto-text-small crypto-text-secondary mb-3">
+            <label class={`block text-sm mb-3 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               SOL Amount (minimum {MIN_SOL_AMOUNT})
             </label>
             <div class="relative">
@@ -366,9 +406,13 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
                 placeholder="0.00"
                 min={MIN_SOL_AMOUNT}
                 step="0.01"
-                class="w-full px-6 py-4 text-xl font-semibold rounded-xl border-2 border-crypto-border bg-crypto-bg-secondary crypto-text-primary placeholder-crypto-text-muted focus:outline-none focus:border-crypto-primary-blue focus:ring-4 focus:ring-crypto-primary-blue focus:ring-opacity-20 transition-all"
+                class={`w-full px-6 py-4 text-xl font-semibold rounded-xl border-2 transition-all focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-20 ${
+                  props.isDark
+                    ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-500 focus:border-blue-500'
+                    : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:border-blue-500'
+                }`}
               />
-              <div class="absolute right-4 top-1/2 -translate-y-1/2 crypto-text-secondary">
+              <div class={`absolute right-4 top-1/2 -translate-y-1/2 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 SOL
               </div>
             </div>
@@ -384,23 +428,29 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
 
       {/* Exchange Preview */}
       <Show when={isValidAmount()}>
-        <div class="bg-crypto-bg-tertiary border border-crypto-border rounded-xl p-6">
-          <h4 class="crypto-heading-3 mb-4 flex items-center gap-2">
+        <div class={`rounded-xl p-6 border ${
+          props.isDark
+            ? 'bg-gray-800 border-gray-600'
+            : 'bg-gray-50 border-gray-200'
+        }`}>
+          <h4 class={`text-xl font-bold mb-4 flex items-center gap-2 ${
+            props.isDark ? 'text-white' : 'text-gray-900'
+          }`}>
             <span>📊</span>
             Exchange Preview
           </h4>
           <div class="space-y-4">
             <div class="flex justify-between items-center py-3">
-              <span class="crypto-text-small crypto-text-secondary">You pay:</span>
+              <span class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>You pay:</span>
               <div class="text-right">
-                <div class="crypto-text-large font-semibold crypto-text-primary">
+                <div class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
                   {props.solAmount || '0'} SOL
                 </div>
               </div>
             </div>
 
             <div class="flex justify-center">
-              <div class="w-8 h-8 rounded-full bg-crypto-primary-blue flex items-center justify-center">
+              <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 16 16" class="fill-white rotate-90">
                   <path d="M8 1l-4 4h3v6h2V5h3L8 1z"/>
                 </svg>
@@ -408,20 +458,34 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
             </div>
 
             <div class="flex justify-between items-center py-3">
-              <span class="crypto-text-small crypto-text-secondary">You receive:</span>
+              <span class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>You receive:</span>
               <div class="text-right">
-                <div class="crypto-text-large font-semibold text-crypto-accent-green">
+                <div class="text-lg font-semibold text-green-500">
                   ~{splitdoAmount().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SPLITDO
                 </div>
               </div>
             </div>
 
-            <div class="border-t border-crypto-border pt-4">
-              <div class="flex justify-between items-center">
-                <span class="crypto-text-small crypto-text-muted">Exchange rate:</span>
-                <span class="crypto-text-small crypto-text-secondary">
-                  1 SOL = {splitdoPerSol()} SPLITDO ($0.11 per token)
-                </span>
+            <div class={`border-t pt-4 ${props.isDark ? 'border-gray-600' : 'border-gray-200'}`}>
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class={`text-sm ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>Current SOL Price:</span>
+                  <span class={`text-sm font-semibold ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    ${props.solPriceUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+                  </span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class={`text-sm ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>Exchange Rate:</span>
+                  <span class={`text-sm font-semibold ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    1 SOL = {splitdoPerSol().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SPLITDO
+                  </span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class={`text-sm ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>SPLITDO Price:</span>
+                  <span class={`text-sm font-semibold ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    $0.11 USD = 1 SPLITDO (${splitdoPerUSD()} SPLITDO per $1)
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -434,8 +498,12 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
         disabled={!isValidAmount() || props.exchangeStatus === 'loading'}
         class={`w-full py-4 px-6 font-bold text-lg rounded-xl transition-all duration-200 ${
           !isValidAmount() || props.exchangeStatus === 'loading'
-            ? 'bg-crypto-bg-tertiary text-crypto-text-muted cursor-not-allowed border-2 border-crypto-border'
-            : 'btn-crypto-success hover:shadow-lg hover:shadow-crypto-accent-green/20 focus:outline-none focus:ring-4 focus:ring-crypto-accent-green focus:ring-opacity-30'
+            ? `cursor-not-allowed border-2 ${
+                props.isDark
+                  ? 'bg-gray-800 text-gray-500 border-gray-700'
+                  : 'bg-gray-100 text-gray-400 border-gray-300'
+              }`
+            : 'bg-green-500 hover:bg-green-600 text-white hover:shadow-lg hover:shadow-green-500/20 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-30'
         }`}
       >
         <Show
