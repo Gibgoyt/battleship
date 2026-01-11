@@ -82,12 +82,16 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
       onClick={handleBackdropClick}
     >
       {/* Backdrop */}
-      <div class="absolute inset-0 bg-black bg-opacity-50" />
+      <div class={`absolute inset-0 transition-all duration-300 ${
+        props.isDark ? 'modal-backdrop-dark' : 'modal-backdrop-light'
+      }`} />
 
       {/* Modal Content */}
       <div
-        class={`relative w-full max-w-2xl mx-4 p-0 rounded-xl shadow-2xl z-10 overflow-hidden ${
-          props.isDark ? 'bg-crypto-bg-primary border border-crypto-border' : 'bg-white border border-gray-200'
+        class={`relative w-full max-w-2xl mx-4 p-0 rounded-xl shadow-2xl z-10 overflow-hidden transition-all duration-300 ${
+          props.isDark
+            ? 'bg-crypto-bg-primary border border-crypto-border'
+            : 'bg-white/95 border border-gray-200/50 shadow-xl backdrop-blur-sm'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -527,24 +531,36 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
 
       {/* Status Messages */}
       <Show when={props.exchangeStatus === 'error' && props.exchangeError}>
-        <div class="p-4 bg-red-50 border-2 border-crypto-accent-red rounded-xl">
+        <div class={`p-4 border-2 border-crypto-accent-red rounded-xl ${
+          props.isDark
+            ? 'bg-red-900/20 text-red-100'
+            : 'bg-red-50 text-red-900'
+        }`}>
           <div class="flex items-center gap-3">
             <span class="text-crypto-accent-red text-xl">⚠️</span>
             <div>
               <div class="font-semibold text-crypto-accent-red mb-1">Exchange Failed</div>
-              <p class="text-sm text-red-700">{props.exchangeError}</p>
+              <p class={`text-sm ${props.isDark ? 'text-red-200' : 'text-red-700'}`}>
+                {props.exchangeError}
+              </p>
             </div>
           </div>
         </div>
       </Show>
 
       <Show when={props.exchangeStatus === 'success'}>
-        <div class="p-4 bg-green-50 border-2 border-crypto-accent-green rounded-xl">
+        <div class={`p-4 border-2 border-crypto-accent-green rounded-xl ${
+          props.isDark
+            ? 'bg-green-900/20 text-green-100'
+            : 'bg-green-50 text-green-900'
+        }`}>
           <div class="flex items-center gap-3">
             <span class="text-crypto-accent-green text-xl">✅</span>
             <div>
               <div class="font-semibold text-crypto-accent-green mb-1">Exchange Successful!</div>
-              <p class="text-sm text-green-700">Your SPLITDO tokens have been deposited to your wallet.</p>
+              <p class={`text-sm ${props.isDark ? 'text-green-200' : 'text-green-700'}`}>
+                Your SPLITDO tokens have been deposited to your wallet.
+              </p>
             </div>
           </div>
         </div>

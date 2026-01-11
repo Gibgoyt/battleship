@@ -84,6 +84,25 @@
   --gradient-button-success: linear-gradient(135deg, #00D835 0%, #00F04A 100%);
 }
 
+/* Apple-style Glass Morphism Effects */
+.modal-backdrop-light {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  backdrop-filter: blur(20px) saturate(1.8);
+}
+
+.modal-backdrop-dark {
+  background: linear-gradient(
+    135deg,
+    rgba(10, 14, 26, 0.7) 0%,
+    rgba(10, 14, 26, 0.5) 100%
+  );
+  backdrop-filter: blur(20px) saturate(1.2);
+}
+
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
