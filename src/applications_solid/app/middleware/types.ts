@@ -125,7 +125,7 @@ export const DEFAULT_AUTH_CONFIG: AuthManagerConfig = {
   proactiveRefreshInterval: 30 * 60 * 1000, // 30 minutes
   authPollingInterval: 5 * 60 * 1000, // 5 minutes
   maxRefreshAttempts: 3,
-  refreshBufferTime: 5 * 60 * 1000, // 5 minutes before expiration
+  refreshBufferTime: 30 * 60 * 1000, // 30 minutes before expiration
 };
 
 // Storage Keys Constants

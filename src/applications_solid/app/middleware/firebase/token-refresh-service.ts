@@ -1,6 +1,7 @@
 /**
  * Firebase Token Refresh Service
  * Implements 30-minute proactive refresh and 5-minute auth state polling
+ * Refresh buffer time set to 30 minutes (refresh tokens when 30min remaining)
  */
 
 import { auth } from 'src/lib/firebase/firebase';
@@ -394,7 +395,7 @@ export class FirebaseTokenRefreshService {
       }
 
       // Step 4: Check if refresh needed soon
-      const refreshBufferTime = 5 * 60 * 1000; // 5 minutes
+      const refreshBufferTime = 30 * 60 * 1000; // 30 minutes
       const shouldRefresh = timeUntilExpiry < refreshBufferTime;
 
       logger.debug('Auth state validation complete', {

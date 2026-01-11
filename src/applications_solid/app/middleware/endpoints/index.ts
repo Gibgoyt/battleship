@@ -1,5 +1,6 @@
 import * as Devbackend from './devbackend'
 import * as CoinGecko from './coingecko'
+import { fetchMiddleware, rateLimitUtils } from '../fetch-wrapper'
 
 export const middlewareFetch = {
 	Endpoints: {
@@ -7,3 +8,6 @@ export const middlewareFetch = {
 		CoinGecko
 	}
 }
+
+// Export centralized fetch wrapper for direct usage
+export { fetchMiddleware, rateLimitUtils }

@@ -50,6 +50,11 @@ const [lastError, setLastError] = createSignal<{
   timestamp: number;
 } | null>(null);
 
+// Global rate limiting signals
+const [rateLimitActive, setRateLimitActive] = createSignal(false);
+const [rateLimitEndTime, setRateLimitEndTime] = createSignal(0);
+const [rateLimitReason, setRateLimitReason] = createSignal<string | null>(null);
+
 /**
  * Create Firebase Auth Store
  * Returns reactive auth store with signals and methods
@@ -115,7 +120,7 @@ export function createFirebaseAuthStore(): AuthStore {
 
         if (timeUntilExpiry < 0) {
           setTokenStatus('expired');
-        } else if (timeUntilExpiry < 5 * 60 * 1000) { // Less than 5 minutes
+        } else if (timeUntilExpiry < 30 * 60 * 1000) { // Less than 30 minutes
           setTokenStatus('refreshing');
         } else {
           setTokenStatus('valid');
@@ -335,6 +340,51 @@ export function createFirebaseAuthStore(): AuthStore {
     logger.debug('Firebase Auth Store cleanup complete');
   };
 
+  // Rate limiting functions
+  const activateRateLimit = (reason: string = 'Cloudflare error 1015', durationMs: number = 10000) => {
+    setRateLimitActive(true);
+    setRateLimitEndTime(Date.now() + durationMs);
+    setRateLimitReason(reason);
+
+    logger.warn('Global rate limit activated', {
+      reason,
+      durationMs,
+      endTime: new Date(Date.now() + durationMs).toISOString()
+    });
+
+    // Auto-deactivate after duration
+    setTimeout(() => {
+      if (rateLimitActive() && Date.now() >= rateLimitEndTime()) {
+        setRateLimitActive(false);
+        setRateLimitEndTime(0);
+        setRateLimitReason(null);
+        logger.info('Global rate limit automatically deactivated');
+      }
+    }, durationMs);
+  };
+
+  const isRateLimited = (): boolean => {
+    const now = Date.now();
+    if (rateLimitActive() && now < rateLimitEndTime()) {
+      return true;
+    }
+    if (rateLimitActive() && now >= rateLimitEndTime()) {
+      // Auto-deactivate if expired
+      setRateLimitActive(false);
+      setRateLimitEndTime(0);
+      setRateLimitReason(null);
+      logger.info('Global rate limit expired and deactivated');
+    }
+    return false;
+  };
+
+  const getRateLimitInfo = () => ({
+    isActive: rateLimitActive(),
+    endTime: rateLimitEndTime(),
+    reason: rateLimitReason(),
+    remainingMs: Math.max(0, rateLimitEndTime() - Date.now())
+  });
+
   // Setup cleanup on unmount
   onCleanup(() => {
     cleanup();
@@ -359,6 +409,16 @@ export function createFirebaseAuthStore(): AuthStore {
     validateAuth,
     cleanup,
     updateAuthState,
+
+    // Rate limiting methods
+    activateRateLimit,
+    isRateLimited,
+    getRateLimitInfo,
+
+    // Rate limiting state accessors
+    rateLimitActive: () => rateLimitActive(),
+    rateLimitReason: () => rateLimitReason(),
+    rateLimitEndTime: () => rateLimitEndTime(),
   };
 }
 
@@ -448,4 +508,7 @@ export {
   isLoading,
   serviceStatus,
   lastError,
+  rateLimitActive,
+  rateLimitEndTime,
+  rateLimitReason,
 };

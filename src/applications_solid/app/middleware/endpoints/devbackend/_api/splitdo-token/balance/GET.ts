@@ -1,5 +1,7 @@
-import { getGlobalAuthStore } from '../../../../../firebase/auth-store'
-import { firebaseTokenStorage } from '../../../../../../../../lib/auth/firebase-token-storage'
+import { fetchMiddleware } from '../../../../../fetch-wrapper'
+import { createLogger } from '../../../../../../../../lib/logger'
+
+const logger = createLogger('[Balance GET Endpoint]')
 
 interface MainnetResponse {
 	balance: number
@@ -69,106 +71,82 @@ export type GetResponse = Response200 | Response401 | Response403 | Response404 
  */
 export async function GET(): Promise<GetResponse> {
 	try {
-		// Get auth store and current token
-		const authStore = getGlobalAuthStore()
-		const tokens = firebaseTokenStorage.getTokens()
+		logger.info('Starting balance retrieval request')
 
-		if (!tokens.idToken) {
-			// No token available, redirect to login
-			window.location.href = '/auth/sign-in'
-			throw new Error('No authentication token available')
-		}
+		const response = await fetchMiddleware('https://devbackend.splitdo.app:8443/api/splitdo-token/balance', {
+			method: "GET"
+			// fetchMiddleware automatically handles:
+			// - Authorization header injection
+			// - 401/403 retry logic with token refresh
+			// - Global rate limiting (Cloudflare 1015)
+			// - Browser redirect on final auth failure
+		})
 
-		let retryCount = 0
-		const MAX_RETRIES = 1
+		const responseData = await response.json()
 
-		while (retryCount <= MAX_RETRIES) {
-			try {
-				const response = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/balance', {
-					method: "GET",
-					headers: {
-						"Content-Type": "application/json",
-						"Authorization": `Bearer ${tokens.idToken}`
-					}
+		// Return structured response based on status
+		switch (response.status) {
+			case 200:
+				logger.info('Successfully retrieved balance data', {
+					userId: responseData.user_id,
+					tokenAccount: responseData.token_account_pubkey,
+					balance: responseData.mainnet_response?.balance
 				})
-
-				const responseData = await response.json()
-
-				// Handle 403 with retry logic
-				if (response.status === 403 && retryCount < MAX_RETRIES) {
-					console.log(`[GET Balance] Received 403, attempting token refresh (attempt ${retryCount + 1}/${MAX_RETRIES + 1})`)
-					await authStore.refreshToken()
-					const newTokens = firebaseTokenStorage.getTokens()
-					tokens.idToken = newTokens.idToken // Update token for retry
-					retryCount++
-					continue
+				return {
+					status: 200,
+					data: responseData
 				}
-
-				// Second 403 or refresh failed - redirect to sign-in
-				if (response.status === 403 && retryCount === MAX_RETRIES) {
-					console.log('[GET Balance] Authentication failed after retry, redirecting to sign-in')
-					window.location.href = '/auth/sign-in'
-					throw new Error('Authentication failed - redirecting to sign-in')
+			case 401:
+				logger.warn('Unauthorized access - this should not happen with fetchMiddleware')
+				return {
+					status: 401,
+					data: responseData
 				}
-
-				// Return structured response based on status
-				switch (response.status) {
-					case 200:
-						console.log('[GET Balance] Successfully retrieved balance data')
-						return {
-							status: 200,
-							data: responseData
-						}
-					case 401:
-						console.log('[GET Balance] Unauthorized access')
-						return {
-							status: 401,
-							data: responseData
-						}
-					case 403:
-						console.log('[GET Balance] Forbidden access')
-						return {
-							status: 403,
-							data: responseData
-						}
-					case 404:
-						console.log('[GET Balance] Balance data not found')
-						return {
-							status: 404,
-							data: responseData
-						}
-					case 429:
-						console.log('[GET Balance] Rate limit exceeded (CloudFlare error 1015)')
-						// Extract retry-after header if available
-						const retryAfter = response.headers.get('Retry-After')
-						return {
-							status: 429,
-							data: {
-								error: 'rate_limit_exceeded',
-								message: responseData || 'Rate limit exceeded. Please try again later.',
-								retry_after: retryAfter ? parseInt(retryAfter) : undefined
-							}
-						}
-					default:
-						throw new Error(`Unexpected HTTP status: ${response.status}`)
+			case 403:
+				logger.warn('Forbidden access - this should not happen with fetchMiddleware')
+				return {
+					status: 403,
+					data: responseData
 				}
-			} catch (fetchError: unknown) {
-				if (fetchError instanceof Error) {
-					console.log("Failed to fetch balance data: " + fetchError.message)
-				} else {
-					console.log("An unknown error occurred during balance fetch")
+			case 404:
+				logger.info('Balance data not found (user may not have token account)', {
+					response: responseData
+				})
+				return {
+					status: 404,
+					data: responseData
 				}
-				throw fetchError
-			}
+			case 429:
+				// This is handled by fetchMiddleware for Cloudflare 1015, but might be other rate limiting
+				logger.warn('Rate limit exceeded', {
+					retryAfter: response.headers.get('Retry-After'),
+					response: responseData
+				})
+				const retryAfter = response.headers.get('Retry-After')
+				return {
+					status: 429,
+					data: {
+						error: 'rate_limit_exceeded',
+						message: responseData || 'Rate limit exceeded. Please try again later.',
+						retry_after: retryAfter ? parseInt(retryAfter) : undefined
+					}
+				}
+			default:
+				logger.error('Unexpected HTTP status received', {
+					status: response.status,
+					statusText: response.statusText,
+					response: responseData
+				})
+				throw new Error(`Unexpected HTTP status: ${response.status}`)
 		}
-
-		// This should never be reached due to the loop structure, but TypeScript needs it
-		throw new Error('Unexpected end of retry loop')
 	} catch (error: unknown) {
 		if (error instanceof Error) {
-			console.log("GET Balance endpoint failed: " + error.message)
+			logger.error("Balance endpoint failed", {
+				error: error.message,
+				stack: error.stack
+			})
 		} else {
-			console.log("An unknown error occurred in GET Balance endpoint")
+			logger.error("Unknown error in balance endpoint", { error })
 		}
 		throw error
 	}
