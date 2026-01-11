@@ -2,11 +2,13 @@
  * Firebase Token Refresh Service
  * Implements 30-minute proactive refresh and 5-minute auth state polling
  * Refresh buffer time set to 30 minutes (refresh tokens when 30min remaining)
+ * Uses custom REST API instead of Firebase SDK
  */
 
-import { auth } from 'src/lib/firebase/firebase';
 import { firebaseTokenStorage } from 'src/lib/auth/firebase-token-storage';
 import { createLogger } from 'src/lib/logger';
+import { createCustomUserFromStorage, isUserAuthenticated } from './custom-user';
+import { refreshTokenViaAPI, RefreshTokenError } from './custom-refresh';
 import type {
   TokenRefreshResult,
   AuthPollingResult,
@@ -159,9 +161,8 @@ export class FirebaseTokenRefreshService {
     });
 
     try {
-      // Check if user is authenticated
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
+      // Check if user is authenticated using custom implementation
+      if (!isUserAuthenticated()) {
         logger.debug('No authenticated user - skipping proactive refresh');
         return;
       }
@@ -245,7 +246,8 @@ export class FirebaseTokenRefreshService {
     logger.debug('Starting Firebase token refresh');
 
     try {
-      const currentUser = auth.currentUser;
+      // Get current user from storage instead of Firebase SDK
+      const currentUser = createCustomUserFromStorage();
 
       if (!currentUser) {
         throw new Error('No authenticated user available for token refresh');
@@ -253,12 +255,12 @@ export class FirebaseTokenRefreshService {
 
       this.refreshAttempts++;
 
-      // Force token refresh with Firebase SDK
-      logger.debug('Calling Firebase getIdToken(true) for force refresh');
+      // Force token refresh with custom REST API
+      logger.debug('Calling custom refresh API for force refresh');
       const newToken = await currentUser.getIdToken(true);
 
       if (!newToken) {
-        throw new Error('Firebase returned empty token');
+        throw new Error('Custom refresh API returned empty token');
       }
 
       // Extract token expiration
@@ -330,15 +332,15 @@ export class FirebaseTokenRefreshService {
     logger.debug('Validating current auth state');
 
     try {
-      // Step 1: Check if Firebase user exists
-      const currentUser = auth.currentUser;
+      // Step 1: Check if custom user exists
+      const currentUser = createCustomUserFromStorage();
       if (!currentUser) {
-        logger.debug('No Firebase user found');
+        logger.debug('No custom user found');
 
         // Check if we have stale tokens
         const tokens = firebaseTokenStorage.getTokens();
         if (tokens.idToken) {
-          logger.warn('Firebase user missing but tokens exist - stale state');
+          logger.warn('Custom user missing but tokens exist - stale state');
           return {
             isValid: false,
             shouldRefresh: false,

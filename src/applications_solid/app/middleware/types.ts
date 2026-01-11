@@ -3,12 +3,12 @@
  * Defines core types for authentication state management and token refresh
  */
 
-import type { User } from 'firebase/auth';
+import type { CustomFirebaseUser } from './firebase/custom-user';
 
 // Auth State Interface
 export interface AuthState {
   isAuthenticated: boolean;
-  user: User | null;
+  user: CustomFirebaseUser | null;
   tokenExpiresAt: number | null;
   lastRefreshAt: number | null;
   nextRefreshAt: number | null;

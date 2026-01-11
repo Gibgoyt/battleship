@@ -1,12 +1,18 @@
 /**
  * Firebase Auth Manager
- * Core authentication state management with Firebase SDK integration
+ * Core authentication state management with custom Firebase implementation
+ * Replaced Firebase SDK with custom REST API calls
  */
 
-import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
-import { auth } from 'src/lib/firebase/firebase';
 import { firebaseTokenStorage, type FirebaseTokenData } from 'src/lib/auth/firebase-token-storage';
 import { createLogger } from 'src/lib/logger';
+import {
+  createCustomUserFromStorage,
+  createCustomUserFromTokens,
+  isUserAuthenticated,
+  type CustomFirebaseUser
+} from './custom-user';
+import { refreshTokenViaAPI, RefreshTokenError } from './custom-refresh';
 import type {
   AuthState,
   AuthService,
@@ -91,23 +97,45 @@ export class FirebaseAuthManager implements AuthService {
   }
 
   /**
-   * Setup Firebase auth state change listener
+   * Setup custom auth state monitoring (replaces Firebase onAuthStateChanged)
+   * Uses polling instead of Firebase listener since we use custom implementation
    */
   private setupAuthStateListener(): void {
-    logger.debug('Setting up Firebase auth state listener');
+    logger.debug('Setting up custom auth state monitoring');
 
-    this.unsubscribeAuth = onAuthStateChanged(auth, async (user: User | null) => {
-      logger.debug('Firebase auth state changed', {
-        hasUser: Boolean(user),
-        userId: user?.uid,
-      });
+    // Note: Firebase onAuthStateChanged removed - we rely on polling instead
+    // The token refresh service already has 5-minute auth polling that handles state changes
+    // This approach is more reliable for custom token management
+
+    // Check initial auth state immediately
+    this.checkInitialAuthState();
+
+    logger.debug('Custom auth state monitoring setup complete (using polling)');
+  }
+
+  /**
+   * Check initial authentication state from stored tokens
+   */
+  private checkInitialAuthState(): void {
+    try {
+      const user = createCustomUserFromStorage();
 
       if (user) {
-        await this.handleUserAuthenticated(user);
+        logger.debug('Found authenticated user in storage', {
+          userId: user.uid,
+          email: user.email
+        });
+        this.handleUserAuthenticated(user);
       } else {
+        logger.debug('No authenticated user found in storage');
         this.handleUserUnauthenticated();
       }
-    });
+    } catch (error) {
+      logger.error('Error checking initial auth state', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      this.handleUserUnauthenticated();
+    }
   }
 
   /**
@@ -199,15 +227,15 @@ export class FirebaseAuthManager implements AuthService {
   /**
    * Handle user authenticated event from Firebase
    */
-  private async handleUserAuthenticated(user: User): Promise<void> {
+  private async handleUserAuthenticated(user: CustomFirebaseUser): Promise<void> {
     logger.debug('Handling user authenticated', { userId: user.uid });
 
     try {
-      // Get fresh ID token
-      const idToken = await user.getIdToken();
+      // Get current ID token (no forced refresh here)
+      const idToken = await user.getIdToken(false);
       const tokenExpiresAt = this.extractTokenExpiration(idToken);
 
-      // Update storage
+      // Update storage with current tokens
       firebaseTokenStorage.storeTokens({
         idToken,
         refreshToken: user.refreshToken,
@@ -336,7 +364,8 @@ export class FirebaseAuthManager implements AuthService {
     });
 
     try {
-      const currentUser = auth.currentUser;
+      // Get current user from storage instead of Firebase SDK
+      const currentUser = createCustomUserFromStorage();
 
       if (!currentUser) {
         throw new Error('No authenticated user found');
@@ -347,11 +376,11 @@ export class FirebaseAuthManager implements AuthService {
         refreshAttempts: this.authState.refreshAttempts + 1,
       });
 
-      // Force token refresh
+      // Force token refresh using custom REST API
       const newToken = await currentUser.getIdToken(true);
       const tokenExpiresAt = this.extractTokenExpiration(newToken);
 
-      // Update storage
+      // Update storage (note: refresh token may have rotated)
       firebaseTokenStorage.storeTokens({
         idToken: newToken,
         refreshToken: currentUser.refreshToken,
@@ -412,13 +441,15 @@ export class FirebaseAuthManager implements AuthService {
     logger.debug('Validating auth state');
 
     try {
-      const currentUser = auth.currentUser;
       const tokens = firebaseTokenStorage.getTokens();
 
-      // Check if Firebase user exists
+      // Check if user is authenticated with custom implementation
+      const currentUser = createCustomUserFromStorage();
+
+      // Check if custom user exists
       if (!currentUser) {
         if (tokens.idToken) {
-          logger.debug('Firebase user lost but tokens exist - clearing stale data');
+          logger.debug('Custom user lost but tokens exist - clearing stale data');
           await this.handleAuthFailure('TOKEN_EXPIRED');
         }
         return {
@@ -488,10 +519,8 @@ export class FirebaseAuthManager implements AuthService {
     logger.debug('Starting logout process');
 
     try {
-      // Sign out from Firebase
-      await signOut(auth);
-
-      // Clear all tokens
+      // Custom logout - clear all tokens (no Firebase SDK needed)
+      // Note: Could call custom logout REST API here if backend requires it
       firebaseTokenStorage.clearTokens();
 
       // Stop all services
@@ -520,11 +549,9 @@ export class FirebaseAuthManager implements AuthService {
   cleanup(): void {
     logger.debug('Cleaning up Firebase Auth Manager');
 
-    // Unsubscribe from Firebase auth state changes
-    if (this.unsubscribeAuth) {
-      this.unsubscribeAuth();
-      this.unsubscribeAuth = null;
-    }
+    // Note: No Firebase auth state listener to unsubscribe from
+    // We use polling-based auth state monitoring instead
+    this.unsubscribeAuth = null;
 
     // Remove storage event listener
     if (this.storageEventListener) {

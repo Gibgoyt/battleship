@@ -4,7 +4,7 @@
  */
 
 import { createSignal, createEffect, onCleanup, type Accessor, type Setter } from 'solid-js';
-import type { User } from 'firebase/auth';
+import type { CustomFirebaseUser } from './custom-user';
 import { FirebaseAuthManager } from './auth-manager';
 import { FirebaseTokenRefreshService } from './token-refresh-service';
 import { createLogger } from 'src/lib/logger';
