@@ -955,7 +955,7 @@ export const useExchangeModal = () => {
   };
 };
 
-// Fetch program info including exchange rate
+// Fetch program info including exchange rate (now cached)
 const fetchProgramInfo = async () => {
   // Prevent concurrent fetches
   if (isFetchingProgramInfo()) {
@@ -968,26 +968,24 @@ const fetchProgramInfo = async () => {
   setProgramInfo({ ...programInfo(), loading: true, error: null });
 
   try {
-    const response = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/program/info');
+    // Use the cached version from PersistentDataProvider
+    const { usePersistentData } = await import('../../applications_solid/app/data/PersistentDataProvider');
+    const { fetchExchangeRates } = usePersistentData();
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch program info');
+    const result = await fetchExchangeRates();
+
+    if (result.data) {
+      const exchangeRate = result.data.exchangeRate;
+      console.log('[ReactiveWalletStore] Fetched exchange rate:', exchangeRate);
+
+      setProgramInfo({
+        exchangeRate,
+        loading: false,
+        error: null
+      });
+    } else {
+      throw new Error('No exchange rate data available from cache');
     }
-
-    const result = await response.json();
-
-    if (!result.success || !result.data) {
-      throw new Error('Invalid response from program info API');
-    }
-
-    const exchangeRate = result.data.exchange_rate || 0.11;
-    console.log('[ReactiveWalletStore] Fetched exchange rate:', exchangeRate);
-
-    setProgramInfo({
-      exchangeRate,
-      loading: false,
-      error: null
-    });
   } catch (error) {
     console.error('[ReactiveWalletStore] Failed to fetch program info:', error);
     setProgramInfo({
@@ -1000,7 +998,7 @@ const fetchProgramInfo = async () => {
   }
 };
 
-// Fetch SOL price from CoinGecko
+// Fetch SOL price from CoinGecko (now cached)
 const fetchSolPrice = async () => {
   // Prevent concurrent fetches
   if (isFetchingSolPrice()) {
@@ -1013,26 +1011,24 @@ const fetchSolPrice = async () => {
   setSolPrice({ ...solPrice(), loading: true, error: null });
 
   try {
-    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+    // Use the cached version from PersistentDataProvider
+    const { usePersistentData } = await import('../../applications_solid/app/data/PersistentDataProvider');
+    const { fetchSolPrice: fetchCachedSolPrice } = usePersistentData();
 
-    if (!response.ok) {
-      throw new Error(`CoinGecko API error: ${response.status}`);
+    const result = await fetchCachedSolPrice();
+
+    if (result.data) {
+      const usdPrice = result.data.price;
+      console.log('[ReactiveWalletStore] Fetched SOL price:', `$${usdPrice}`);
+
+      setSolPrice({
+        usd: usdPrice,
+        loading: false,
+        error: null
+      });
+    } else {
+      throw new Error('No SOL price data available from cache');
     }
-
-    const result = await response.json();
-
-    if (!result.solana || typeof result.solana.usd !== 'number') {
-      throw new Error('Invalid response from CoinGecko API');
-    }
-
-    const usdPrice = result.solana.usd;
-    console.log('[ReactiveWalletStore] Fetched SOL price:', `$${usdPrice}`);
-
-    setSolPrice({
-      usd: usdPrice,
-      loading: false,
-      error: null
-    });
   } catch (error) {
     console.error('[ReactiveWalletStore] Failed to fetch SOL price:', error);
     setSolPrice({

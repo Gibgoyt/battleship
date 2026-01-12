@@ -16,14 +16,34 @@ const TransactionHistory: Component<TransactionHistoryProps> = (props) => {
   const { splitdoATA } = useSplitdoATA();
   const { wallet, connectionStatus } = useWallet();
 
-  // Smart fetch: only fetches if cache is stale or missing
-  createEffect(() => {
+  // Memoize ATA address to prevent unnecessary re-execution
+  const memoizedATA = createMemo(() => {
     const ata = splitdoATA();
+    return {
+      address: ata.address,
+      status: ata.status
+    };
+  });
+
+  // Track the last fetched address to prevent duplicate fetches
+  const [lastFetchedAddress, setLastFetchedAddress] = createSignal<string | null>(null);
+
+  // Smart fetch: only fetches if cache is stale or missing AND address has changed
+  createEffect(() => {
+    const ata = memoizedATA();
     if (ata.address && ata.status === 'exists') {
-      console.log(`[TransactionHistory] Smart fetching history for ATA: ${ata.address}`);
-      fetchIfStale(ata.address, 20).catch(error => {
-        console.error('[TransactionHistory] Smart fetch failed:', error);
-      });
+      // Only fetch if this is a new address or we haven't fetched for this address yet
+      if (lastFetchedAddress() !== ata.address) {
+        console.log(`[TransactionHistory] Smart fetching history for ATA: ${ata.address}`);
+        setLastFetchedAddress(ata.address);
+        fetchIfStale(ata.address, 20).catch(error => {
+          console.error('[TransactionHistory] Smart fetch failed:', error);
+          // Reset last fetched address on error so it can be retried
+          setLastFetchedAddress(null);
+        });
+      } else {
+        console.log(`[TransactionHistory] ATA ${ata.address} already fetched, skipping`);
+      }
     }
   });
 

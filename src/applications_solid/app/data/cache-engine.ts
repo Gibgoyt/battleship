@@ -29,8 +29,13 @@ export const CACHE_POLICIES = {
   },
   EXCHANGE_RATES: {
     ttl: 5 * 60 * 1000,        // 5 minutes
-    staleWhileRevalidate: false,
+    staleWhileRevalidate: true,
     maxAge: 30 * 60 * 1000     // 30 minutes max
+  },
+  SOL_PRICE: {
+    ttl: 2 * 60 * 1000,        // 2 minutes
+    staleWhileRevalidate: true,
+    maxAge: 10 * 60 * 1000     // 10 minutes max
   },
   PROGRAM_INFO: {
     ttl: 10 * 60 * 1000,       // 10 minutes

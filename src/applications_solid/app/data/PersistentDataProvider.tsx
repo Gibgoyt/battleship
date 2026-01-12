@@ -22,8 +22,13 @@ export interface BalanceData {
 
 export interface ExchangeRateData {
   exchangeRate: number;
-  solPrice: number;
   splitdoTokenMint: string;
+  lastUpdated: string;
+}
+
+export interface SolPriceData {
+  price: number;
+  currency: string;
   lastUpdated: string;
 }
 
@@ -32,15 +37,19 @@ export interface PersistentDataContextValue {
   transactionHistory: () => ProcessedTransaction[];
   balanceData: () => BalanceData | null;
   exchangeRates: () => ExchangeRateData | null;
+  solPrice: () => SolPriceData | null;
 
   // Smart fetch functions
   fetchTransactions: (address: string, limit?: number, options?: { force?: boolean }) => Promise<SmartFetchResult<ProcessedTransaction[]>>;
   fetchBalances: (options?: { force?: boolean }) => Promise<SmartFetchResult<BalanceData>>;
   fetchExchangeRates: (options?: { force?: boolean }) => Promise<SmartFetchResult<ExchangeRateData>>;
+  fetchSolPrice: (options?: { force?: boolean }) => Promise<SmartFetchResult<SolPriceData>>;
 
   // Cache management
   invalidateTransactions: () => void;
   invalidateBalances: () => void;
+  invalidateExchangeRates: () => void;
+  invalidateSolPrice: () => void;
   invalidateAll: () => void;
   clearUserData: (userId: string) => void;
 
@@ -56,6 +65,7 @@ export const PersistentDataProvider: Component<{ children: any }> = (props) => {
   const [transactionHistory, setTransactionHistory] = createSignal<ProcessedTransaction[]>([]);
   const [balanceData, setBalanceData] = createSignal<BalanceData | null>(null);
   const [exchangeRates, setExchangeRates] = createSignal<ExchangeRateData | null>(null);
+  const [solPrice, setSolPrice] = createSignal<SolPriceData | null>(null);
   const [isLoading, setIsLoading] = createSignal(false);
   const [currentUserId, setCurrentUserId] = createSignal<string | null>(null);
 
@@ -194,7 +204,7 @@ export const PersistentDataProvider: Component<{ children: any }> = (props) => {
     }
   };
 
-  // Smart fetch function for exchange rates (placeholder)
+  // Smart fetch function for exchange rates
   const fetchExchangeRates = async (options: { force?: boolean } = {}): Promise<SmartFetchResult<ExchangeRateData>> => {
     const userId = currentUserId();
     const cacheKey = 'exchange-rates';
@@ -204,24 +214,81 @@ export const PersistentDataProvider: Component<{ children: any }> = (props) => {
     try {
       const result = await smartFetch(
         async () => {
-          // This would integrate with existing exchange rate fetching
-          return {
-            exchangeRate: 0.11,
-            solPrice: 139.65,
-            splitdoTokenMint: '6vdfHTgLiEXvoGVp8Ga2HaKQsPKj6DrUTee7526SCXoM',
-            lastUpdated: new Date().toISOString()
-          } as ExchangeRateData;
+          // Call the actual backend API for exchange rates
+          const { middlewareFetch } = await import('../middleware/endpoints');
+          const response = await middlewareFetch.Endpoints.Devbackend._Api.SplitdoToken.Program.Info.GET();
+
+          if (response.status === 200) {
+            const data = response.data;
+            return {
+              exchangeRate: data.exchangeRate || 0.11,
+              splitdoTokenMint: data.splitdoTokenMint || '6vdfHTgLiEXvoGVp8Ga2HaKQsPKj6DrUTee7526SCXoM',
+              lastUpdated: new Date().toISOString()
+            } as ExchangeRateData;
+          } else {
+            throw new Error(`Exchange rate API error: ${response.status}`);
+          }
         },
         {
           cacheKey,
           policy: CACHE_POLICIES.EXCHANGE_RATES,
           userId: userId || undefined,
-          bypassCache: options.force
+          bypassCache: options.force,
+          backgroundRefresh: true
         }
       );
 
       if (result.data) {
         setExchangeRates(result.data);
+      }
+
+      return result;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Smart fetch function for SOL price
+  const fetchSolPrice = async (options: { force?: boolean } = {}): Promise<SmartFetchResult<SolPriceData>> => {
+    const userId = currentUserId();
+    const cacheKey = 'sol-price';
+
+    setIsLoading(true);
+
+    try {
+      const result = await smartFetch(
+        async () => {
+          // Call CoinGecko API for SOL price
+          const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+
+          if (!response.ok) {
+            throw new Error(`SOL price API error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          const solanaPrice = data.solana?.usd;
+
+          if (typeof solanaPrice !== 'number') {
+            throw new Error('Invalid SOL price response format');
+          }
+
+          return {
+            price: solanaPrice,
+            currency: 'usd',
+            lastUpdated: new Date().toISOString()
+          } as SolPriceData;
+        },
+        {
+          cacheKey,
+          policy: CACHE_POLICIES.SOL_PRICE,
+          userId: userId || undefined,
+          bypassCache: options.force,
+          backgroundRefresh: true
+        }
+      );
+
+      if (result.data) {
+        setSolPrice(result.data);
       }
 
       return result;
@@ -245,6 +312,20 @@ export const PersistentDataProvider: Component<{ children: any }> = (props) => {
     console.log('[PersistentDataProvider] Invalidated balance cache');
   };
 
+  const invalidateExchangeRates = () => {
+    const userId = currentUserId();
+    invalidateCache('exchange-rates', userId || undefined);
+    setExchangeRates(null);
+    console.log('[PersistentDataProvider] Invalidated exchange rates cache');
+  };
+
+  const invalidateSolPrice = () => {
+    const userId = currentUserId();
+    invalidateCache('sol-price', userId || undefined);
+    setSolPrice(null);
+    console.log('[PersistentDataProvider] Invalidated SOL price cache');
+  };
+
   const invalidateAll = () => {
     const userId = currentUserId();
     if (userId) {
@@ -253,6 +334,7 @@ export const PersistentDataProvider: Component<{ children: any }> = (props) => {
     setTransactionHistory([]);
     setBalanceData(null);
     setExchangeRates(null);
+    setSolPrice(null);
     console.log('[PersistentDataProvider] Invalidated all cache data');
   };
 
@@ -262,6 +344,7 @@ export const PersistentDataProvider: Component<{ children: any }> = (props) => {
       setTransactionHistory([]);
       setBalanceData(null);
       setExchangeRates(null);
+      setSolPrice(null);
     }
     console.log('[PersistentDataProvider] Cleared user data for:', userId);
   };
@@ -272,15 +355,19 @@ export const PersistentDataProvider: Component<{ children: any }> = (props) => {
     transactionHistory,
     balanceData,
     exchangeRates,
+    solPrice,
 
     // Smart fetch functions
     fetchTransactions,
     fetchBalances,
     fetchExchangeRates,
+    fetchSolPrice,
 
     // Cache management
     invalidateTransactions,
     invalidateBalances,
+    invalidateExchangeRates,
+    invalidateSolPrice,
     invalidateAll,
     clearUserData,
 
