@@ -51,3 +51,4 @@ debug_txts/
 .astro
 .wrangler
 .gemini*
+.wrangler/
