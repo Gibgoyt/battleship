@@ -11,10 +11,10 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
   // Extract user info from JWT
   const getFirebaseUserInfo = () => {
     try {
-      // Try multiple possible cookie names
-      const cookieNames = ['firebase-auth-token', 'firebase-idToken', 'auth-token'];
       let token = null;
 
+      // First, try to get token from cookies
+      const cookieNames = ['firebase-auth-token', 'firebase-idToken', 'auth-token'];
       for (const cookieName of cookieNames) {
         const cookieValue = document.cookie
           .split('; ')
@@ -23,12 +23,30 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
 
         if (cookieValue) {
           token = cookieValue;
+          console.log(`[ProfilePage] Found token in cookie: ${cookieName}`);
           break;
         }
       }
 
+      // If no token in cookies, try browser storage (sessionStorage first, then localStorage)
       if (!token) {
-        console.log('No auth token found in cookies');
+        console.log('[ProfilePage] No auth token found in cookies, checking browser storage...');
+
+        // Try sessionStorage first (where firebase-idToken is typically stored)
+        token = sessionStorage.getItem('firebase-idToken');
+        if (token) {
+          console.log('[ProfilePage] Found token in sessionStorage');
+        } else {
+          // Try localStorage as fallback
+          token = localStorage.getItem('firebase-idToken');
+          if (token) {
+            console.log('[ProfilePage] Found token in localStorage');
+          }
+        }
+      }
+
+      if (!token) {
+        console.log('[ProfilePage] No auth token found in cookies or browser storage');
         return null;
       }
 

@@ -125,38 +125,93 @@ export class FirebaseTokenStorage {
     try {
       // Try localStorage first, then sessionStorage
       const storages = [localStorage, sessionStorage];
+      const storageNames = ['localStorage', 'sessionStorage'];
       const tokens: FirebaseTokenData = {};
 
-      for (const storage of storages) {
-        if (!tokens.idToken) tokens.idToken = storage.getItem('firebase-idToken') || undefined;
-        if (!tokens.refreshToken) tokens.refreshToken = storage.getItem('firebase-refreshToken') || undefined;
+      logger.debug('Starting token retrieval from browser storage');
+
+      for (let i = 0; i < storages.length; i++) {
+        const storage = storages[i];
+        const storageName = storageNames[i];
+
+        const storageContents = {
+          idToken: storage.getItem('firebase-idToken'),
+          refreshToken: storage.getItem('firebase-refreshToken'),
+          rememberMe: storage.getItem('firebase-rememberMe'),
+          lastRefresh: storage.getItem('firebase-lastRefresh'),
+          tokenExpiresAt: storage.getItem('firebase-tokenExpiresAt'),
+        };
+
+        logger.debug(`Checking ${storageName} contents`, {
+          storageName,
+          hasIdToken: Boolean(storageContents.idToken),
+          hasRefreshToken: Boolean(storageContents.refreshToken),
+          idTokenLength: storageContents.idToken?.length || 0,
+          refreshTokenLength: storageContents.refreshToken?.length || 0,
+          rememberMe: storageContents.rememberMe,
+          lastRefresh: storageContents.lastRefresh,
+          tokenExpiresAt: storageContents.tokenExpiresAt,
+        });
+
+        if (!tokens.idToken) {
+          tokens.idToken = storageContents.idToken || undefined;
+          if (tokens.idToken) {
+            logger.debug(`Found idToken in ${storageName}`, { length: tokens.idToken.length });
+          }
+        }
+
+        if (!tokens.refreshToken) {
+          tokens.refreshToken = storageContents.refreshToken || undefined;
+          if (tokens.refreshToken) {
+            logger.debug(`Found refreshToken in ${storageName}`, { length: tokens.refreshToken.length });
+          }
+        }
 
         if (tokens.rememberMe === undefined) {
-          const rememberMeStr = storage.getItem('firebase-rememberMe');
+          const rememberMeStr = storageContents.rememberMe;
           tokens.rememberMe = rememberMeStr ? rememberMeStr === 'true' : undefined;
+          if (tokens.rememberMe !== undefined) {
+            logger.debug(`Found rememberMe in ${storageName}`, { value: tokens.rememberMe });
+          }
         }
 
         if (tokens.lastRefresh === undefined) {
-          const lastRefreshStr = storage.getItem('firebase-lastRefresh');
+          const lastRefreshStr = storageContents.lastRefresh;
           tokens.lastRefresh = lastRefreshStr ? parseInt(lastRefreshStr, 10) : undefined;
+          if (tokens.lastRefresh !== undefined) {
+            logger.debug(`Found lastRefresh in ${storageName}`, { timestamp: tokens.lastRefresh });
+          }
         }
 
         if (tokens.tokenExpiresAt === undefined) {
           const tokenExpiresAtStr = storage.getItem('firebase-tokenExpiresAt');
           tokens.tokenExpiresAt = tokenExpiresAtStr ? parseInt(tokenExpiresAtStr, 10) : undefined;
+          if (tokens.tokenExpiresAt !== undefined) {
+            logger.debug(`Found tokenExpiresAt in ${storageName}`, { timestamp: tokens.tokenExpiresAt });
+          }
         }
 
         if (tokens.refreshAttempts === undefined) {
           const refreshAttemptsStr = storage.getItem('firebase-refreshAttempts');
           tokens.refreshAttempts = refreshAttemptsStr ? parseInt(refreshAttemptsStr, 10) : 0;
+          if (tokens.refreshAttempts !== undefined) {
+            logger.debug(`Found refreshAttempts in ${storageName}`, { attempts: tokens.refreshAttempts });
+          }
         }
       }
 
-      logger.debug('Retrieved tokens', {
+      const finalTokens = {
         hasIdToken: Boolean(tokens.idToken),
         hasRefreshToken: Boolean(tokens.refreshToken),
-        rememberMe: tokens.rememberMe
-      });
+        idTokenLength: tokens.idToken?.length || 0,
+        refreshTokenLength: tokens.refreshToken?.length || 0,
+        rememberMe: tokens.rememberMe,
+        lastRefresh: tokens.lastRefresh,
+        tokenExpiresAt: tokens.tokenExpiresAt,
+        refreshAttempts: tokens.refreshAttempts,
+      };
+
+      logger.debug('Final token retrieval result', finalTokens);
 
       return tokens;
     } catch (error) {

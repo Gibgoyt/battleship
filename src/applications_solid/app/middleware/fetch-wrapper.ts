@@ -78,12 +78,39 @@ export async function fetchMiddleware(url: string, options: RequestInit = {}): P
 
   let tokens = firebaseTokenStorage.getTokens()
 
+  // Enhanced token debugging
+  logger.debug('Token retrieval details', {
+    correlationId,
+    hasIdToken: Boolean(tokens.idToken),
+    hasRefreshToken: Boolean(tokens.refreshToken),
+    idTokenLength: tokens.idToken?.length || 0,
+    // Debug storage contents
+    sessionStorageIdToken: sessionStorage.getItem('firebase-idToken') ? 'PRESENT' : 'MISSING',
+    localStorageIdToken: localStorage.getItem('firebase-idToken') ? 'PRESENT' : 'MISSING',
+    sessionStorageRefreshToken: sessionStorage.getItem('firebase-refreshToken') ? 'PRESENT' : 'MISSING',
+    localStorageRefreshToken: localStorage.getItem('firebase-refreshToken') ? 'PRESENT' : 'MISSING',
+  });
+
   // Check if we have a valid token
   if (!tokens.idToken) {
-    logger.warn('No authentication token available, triggering session expiry notification', { correlationId })
-    // Use graceful session expiry notification instead of abrupt redirect
-    authStore.triggerSessionExpiryNotification()
-    throw new Error('No authentication token available')
+    // Enhanced fallback: directly check storage when firebaseTokenStorage fails
+    const directStorageToken = sessionStorage.getItem('firebase-idToken') || localStorage.getItem('firebase-idToken');
+
+    if (directStorageToken) {
+      logger.warn('Token not found via firebaseTokenStorage but found in direct storage access - using fallback', {
+        correlationId,
+        tokenLength: directStorageToken.length,
+        source: sessionStorage.getItem('firebase-idToken') ? 'sessionStorage' : 'localStorage'
+      });
+
+      // Use the directly retrieved token as fallback
+      tokens = { ...tokens, idToken: directStorageToken };
+    } else {
+      logger.warn('No authentication token available in firebaseTokenStorage or direct storage, triggering session expiry notification', { correlationId })
+      // Use graceful session expiry notification instead of abrupt redirect
+      authStore.triggerSessionExpiryNotification()
+      throw new Error('No authentication token available')
+    }
   }
 
   // Prepare headers with auth

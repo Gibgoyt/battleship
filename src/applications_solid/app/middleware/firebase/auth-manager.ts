@@ -149,23 +149,48 @@ export class FirebaseAuthManager implements AuthService {
           key: event.key,
           newValue: Boolean(event.newValue),
           oldValue: Boolean(event.oldValue),
+          newValueLength: event.newValue?.length || 0,
+          storageType: event.storageArea === localStorage ? 'localStorage' : 'sessionStorage',
         });
 
         // Handle token changes from other tabs
-        if (event.key === STORAGE_KEYS.ID_TOKEN) {
+        if (event.key === STORAGE_KEYS.ID_TOKEN || event.key === 'firebase-idToken') {
           if (event.newValue) {
-            logger.debug('Token updated in another tab');
+            logger.debug('Token updated in another tab - syncing auth state');
             this.syncAuthStateFromStorage();
           } else {
-            logger.debug('Token cleared in another tab');
+            logger.debug('Token cleared in another tab - triggering logout');
             this.handleTokenClearedInOtherTab();
           }
+        }
+
+        // Handle refresh token changes
+        if (event.key === STORAGE_KEYS.REFRESH_TOKEN || event.key === 'firebase-refreshToken') {
+          if (event.newValue) {
+            logger.debug('Refresh token updated in another tab');
+          } else {
+            logger.debug('Refresh token cleared in another tab - may need to logout');
+            // Check if we still have an ID token, if not, logout
+            setTimeout(() => {
+              const tokens = firebaseTokenStorage.getTokens();
+              if (!tokens.idToken) {
+                logger.debug('No ID token after refresh token cleared - logging out');
+                this.handleTokenClearedInOtherTab();
+              }
+            }, 100); // Small delay to ensure storage has settled
+          }
+        }
+
+        // Handle token expiration updates
+        if (event.key === 'firebase-tokenExpiresAt' && event.newValue) {
+          logger.debug('Token expiration updated in another tab - revalidating');
+          this.syncAuthStateFromStorage();
         }
       }
     };
 
     window.addEventListener('storage', this.storageEventListener);
-    logger.debug('Storage event listener setup complete');
+    logger.debug('Enhanced storage event listener setup complete');
   }
 
   /**
@@ -200,27 +225,73 @@ export class FirebaseAuthManager implements AuthService {
    * Validate initial authentication state
    */
   private async validateInitialAuthState(): Promise<void> {
-    logger.debug('Validating initial auth state');
+    logger.debug('Validating initial auth state with enhanced storage validation');
 
-    // Check if we have stored tokens
+    // Enhanced storage validation - check both firebaseTokenStorage and direct storage access
     const tokens = firebaseTokenStorage.getTokens();
 
-    if (tokens.idToken) {
-      const tokenExpiresAt = this.extractTokenExpiration(tokens.idToken);
+    // Direct storage validation as fallback
+    const directStorageValidation = {
+      sessionStorageIdToken: sessionStorage.getItem('firebase-idToken'),
+      localStorageIdToken: localStorage.getItem('firebase-idToken'),
+      sessionStorageRefreshToken: sessionStorage.getItem('firebase-refreshToken'),
+      localStorageRefreshToken: localStorage.getItem('firebase-refreshToken'),
+    };
+
+    logger.debug('Storage validation results', {
+      firebaseTokenStorageHasIdToken: Boolean(tokens.idToken),
+      firebaseTokenStorageHasRefreshToken: Boolean(tokens.refreshToken),
+      directStorageHasSessionIdToken: Boolean(directStorageValidation.sessionStorageIdToken),
+      directStorageHasLocalIdToken: Boolean(directStorageValidation.localStorageIdToken),
+      directStorageHasSessionRefreshToken: Boolean(directStorageValidation.sessionStorageRefreshToken),
+      directStorageHasLocalRefreshToken: Boolean(directStorageValidation.localStorageRefreshToken),
+    });
+
+    // Use fallback token if firebaseTokenStorage fails but direct storage succeeds
+    let effectiveToken = tokens.idToken;
+    if (!effectiveToken && (directStorageValidation.sessionStorageIdToken || directStorageValidation.localStorageIdToken)) {
+      effectiveToken = directStorageValidation.sessionStorageIdToken || directStorageValidation.localStorageIdToken;
+      logger.warn('firebaseTokenStorage.getTokens() failed but direct storage has token - using fallback', {
+        tokenLength: effectiveToken?.length,
+        source: directStorageValidation.sessionStorageIdToken ? 'sessionStorage' : 'localStorage'
+      });
+
+      // Store the token back in firebaseTokenStorage to sync the systems
+      if (effectiveToken) {
+        const refreshToken = directStorageValidation.sessionStorageRefreshToken || directStorageValidation.localStorageRefreshToken;
+        firebaseTokenStorage.storeTokens({
+          idToken: effectiveToken,
+          refreshToken: refreshToken || undefined,
+          rememberMe: Boolean(directStorageValidation.localStorageIdToken), // Prefer localStorage if found there
+        });
+        logger.debug('Synchronized tokens back to firebaseTokenStorage');
+      }
+    }
+
+    if (effectiveToken) {
+      const tokenExpiresAt = this.extractTokenExpiration(effectiveToken);
       const isExpired = tokenExpiresAt ? Date.now() > tokenExpiresAt : true;
+
+      logger.debug('Token validation result', {
+        hasToken: Boolean(effectiveToken),
+        tokenLength: effectiveToken.length,
+        tokenExpiresAt: tokenExpiresAt ? new Date(tokenExpiresAt).toISOString() : 'unknown',
+        isExpired,
+        timeUntilExpiryMinutes: tokenExpiresAt ? Math.round((tokenExpiresAt - Date.now()) / 1000 / 60) : 'unknown',
+      });
 
       if (isExpired) {
         logger.debug('Initial token is expired, attempting refresh');
         await this.refreshToken();
       } else {
-        logger.debug('Initial token is valid');
+        logger.debug('Initial token is valid, updating auth state');
         this.updateAuthState({
           isAuthenticated: true,
           tokenExpiresAt,
         });
       }
     } else {
-      logger.debug('No initial tokens found');
+      logger.debug('No initial tokens found in firebaseTokenStorage or direct storage');
     }
   }
 
@@ -644,17 +715,58 @@ export class FirebaseAuthManager implements AuthService {
   }
 
   private async syncAuthStateFromStorage(): Promise<void> {
-    logger.debug('Syncing auth state from storage');
+    logger.debug('Syncing auth state from storage with enhanced validation');
 
+    // Get tokens with fallback validation
     const tokens = firebaseTokenStorage.getTokens();
 
-    if (tokens.idToken) {
-      const tokenExpiresAt = this.extractTokenExpiration(tokens.idToken);
-      this.updateAuthState({
-        isAuthenticated: true,
-        tokenExpiresAt,
-        lastRefreshAt: Date.now(),
+    // Additional direct storage check as fallback
+    const directStorageToken = sessionStorage.getItem('firebase-idToken') || localStorage.getItem('firebase-idToken');
+
+    logger.debug('Cross-tab sync validation', {
+      firebaseTokenStorageHasToken: Boolean(tokens.idToken),
+      directStorageHasToken: Boolean(directStorageToken),
+      tokenLengthMatch: tokens.idToken?.length === directStorageToken?.length,
+    });
+
+    // Use fallback if storage systems are out of sync
+    const effectiveToken = tokens.idToken || directStorageToken;
+
+    if (effectiveToken) {
+      const tokenExpiresAt = this.extractTokenExpiration(effectiveToken);
+      const isExpired = tokenExpiresAt ? Date.now() > tokenExpiresAt : true;
+
+      logger.debug('Cross-tab sync token validation', {
+        hasToken: Boolean(effectiveToken),
+        tokenLength: effectiveToken.length,
+        isExpired,
+        tokenExpiresAt: tokenExpiresAt ? new Date(tokenExpiresAt).toISOString() : 'unknown',
       });
+
+      if (!isExpired) {
+        this.updateAuthState({
+          isAuthenticated: true,
+          tokenExpiresAt,
+          lastRefreshAt: Date.now(),
+        });
+
+        // If we had to use fallback token, sync back to firebaseTokenStorage
+        if (!tokens.idToken && directStorageToken) {
+          logger.debug('Syncing fallback token back to firebaseTokenStorage for consistency');
+          const refreshToken = sessionStorage.getItem('firebase-refreshToken') || localStorage.getItem('firebase-refreshToken');
+          firebaseTokenStorage.storeTokens({
+            idToken: directStorageToken,
+            refreshToken: refreshToken || undefined,
+            rememberMe: Boolean(localStorage.getItem('firebase-idToken')),
+          });
+        }
+      } else {
+        logger.debug('Token in cross-tab sync is expired - handling as unauthenticated');
+        this.handleUserUnauthenticated();
+      }
+    } else {
+      logger.debug('No token found in cross-tab sync - handling as unauthenticated');
+      this.handleUserUnauthenticated();
     }
   }
 
