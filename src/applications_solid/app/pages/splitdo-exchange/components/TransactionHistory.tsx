@@ -1,6 +1,6 @@
 import type { Component } from 'solid-js';
 import { createSignal, createMemo, createEffect, Show, For, onMount } from 'solid-js';
-import { useTransactionHistory } from '../../../../lib/solana_mainnet/transaction-history-store';
+import { usePersistedTransactions } from '../../../data';
 import { useSplitdoATA, useWallet } from 'src/lib/wallet/wallet-reactive-store';
 
 interface TransactionHistoryProps {
@@ -11,27 +11,19 @@ const TransactionHistory: Component<TransactionHistoryProps> = (props) => {
   const [filter, setFilter] = createSignal<'all' | 'exchange' | 'transfer' | 'account_creation'>('all');
   const [sortBy, setSortBy] = createSignal<'newest' | 'oldest'>('newest');
 
-  // Real transaction history from Solana mainnet
-  const { transactions, isLoading, error, fetchHistory, refreshHistory } = useTransactionHistory();
+  // Persistent transaction history with smart caching
+  const { transactions, isLoading, error, fetchIfStale, refreshTransactions } = usePersistedTransactions();
   const { splitdoATA } = useSplitdoATA();
   const { wallet, connectionStatus } = useWallet();
 
-  // Fetch transaction history when SPLITDO ATA is available
+  // Smart fetch: only fetches if cache is stale or missing
   createEffect(() => {
     const ata = splitdoATA();
     if (ata.address && ata.status === 'exists') {
-      console.log(`[TransactionHistory] Fetching history for ATA: ${ata.address}`);
-      fetchHistory(ata.address, 20); // Fetch more transactions
-    }
-  });
-
-  // Also refresh when wallet connects (in case ATA changes)
-  createEffect(() => {
-    if (connectionStatus() === 'connected') {
-      const ata = splitdoATA();
-      if (ata.address) {
-        fetchHistory(ata.address, 20);
-      }
+      console.log(`[TransactionHistory] Smart fetching history for ATA: ${ata.address}`);
+      fetchIfStale(ata.address, 20).catch(error => {
+        console.error('[TransactionHistory] Smart fetch failed:', error);
+      });
     }
   });
 
@@ -215,7 +207,12 @@ const TransactionHistory: Component<TransactionHistoryProps> = (props) => {
               <div class="font-semibold mb-2">Failed to Load Transaction History</div>
               <div class="mb-4">{error()}</div>
               <button
-                onClick={() => refreshHistory()}
+                onClick={() => {
+                  const ata = splitdoATA();
+                  if (ata.address) {
+                    refreshTransactions(ata.address, 20);
+                  }
+                }}
                 class="btn-crypto-outline"
               >
                 Try Again
@@ -309,7 +306,12 @@ const TransactionHistory: Component<TransactionHistoryProps> = (props) => {
       <Show when={!isLoading() && !error() && filteredTransactions().length > 0}>
         <div class="text-center pt-4 border-t border-crypto-border">
           <button
-            onClick={() => refreshHistory()}
+            onClick={() => {
+              const ata = splitdoATA();
+              if (ata.address) {
+                refreshTransactions(ata.address, 20);
+              }
+            }}
             class="btn-crypto-outline"
           >
             Refresh Transactions

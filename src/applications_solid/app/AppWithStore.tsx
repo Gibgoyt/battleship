@@ -16,6 +16,7 @@ import {
   loggingMiddleware,
   authMiddleware
 } from './middleware'
+import { PersistentDataProvider } from './data'
 import { initializeWalletStore } from 'src/lib/wallet/wallet-reactive-store'
 import DashboardPage from './pages/dashboard/index'
 import ProfilePage from './pages/profile/index'
@@ -198,7 +199,9 @@ const AppWithStore: Component<{ firebaseToken?: string }> = (props) => {
 
   return (
     <MiddlewareProvider>
-      <AppContent />
+      <PersistentDataProvider>
+        <AppContent />
+      </PersistentDataProvider>
     </MiddlewareProvider>
   )
 }
