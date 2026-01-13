@@ -4,7 +4,7 @@ import {
   useWallet,
   useWalletBalances,
   useSplitdoATA
-} from 'src/lib/wallet/wallet-reactive-store';
+} from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
 
 interface PortfolioOverviewProps {
   isDark: boolean;

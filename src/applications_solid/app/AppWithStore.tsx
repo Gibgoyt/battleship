@@ -17,7 +17,7 @@ import {
   authMiddleware
 } from './middleware'
 import { PersistentDataProvider } from './data'
-import { initializeWalletStore } from 'src/lib/wallet/wallet-reactive-store'
+import { initializeWalletStore } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store'
 import DashboardPage from './pages/dashboard/index'
 import ProfilePage from './pages/profile/index'
 import WalletPageReactive from './pages/splitdo-exchange/WalletPageReactive'

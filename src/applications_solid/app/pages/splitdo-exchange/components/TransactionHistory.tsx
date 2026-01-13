@@ -1,7 +1,7 @@
 import type { Component } from 'solid-js';
 import { createSignal, createMemo, createEffect, Show, For, onMount } from 'solid-js';
 import { usePersistedTransactions } from '../../../data';
-import { useSplitdoATA, useWallet } from 'src/lib/wallet/wallet-reactive-store';
+import { useSplitdoATA, useWallet } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
 
 interface TransactionHistoryProps {
   isDark: boolean;

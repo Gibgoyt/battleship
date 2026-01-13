@@ -19,7 +19,7 @@ import { rawToUIAmount, type SplitdoRawAmount } from './token-utils';
 import { detectMobilePlatform, getInstallationMessage } from './mobile-detection';
 import { attemptMobileWalletConnection, isMobileWalletConnectionSupported } from './mobile-wallet-connector';
 // Import only the specific endpoint function to avoid Node.js dependencies
-import { POST as splitdoExchangePost } from '../vm_redis_server/endpoints/_api/testing/usockets/exchange/solana/splitdo/POST.ts';
+import { POST as splitdoExchangePost } from '../../../../lib/vm_redis_server/endpoints/_api/testing/usockets/exchange/solana/splitdo/POST.ts';
 
 export type ATAStatus = 'unknown' | 'checking' | 'exists' | 'not_found' | 'creating' | 'created' | 'error';
 
@@ -969,7 +969,7 @@ const fetchProgramInfo = async () => {
 
   try {
     // Use the cached version from PersistentDataProvider
-    const { usePersistentData } = await import('../../applications_solid/app/data/PersistentDataProvider');
+    const { usePersistentData } = await import('../../data/PersistentDataProvider');
     const { fetchExchangeRates } = usePersistentData();
 
     const result = await fetchExchangeRates();
@@ -1012,7 +1012,7 @@ const fetchSolPrice = async () => {
 
   try {
     // Use the cached version from PersistentDataProvider
-    const { usePersistentData } = await import('../../applications_solid/app/data/PersistentDataProvider');
+    const { usePersistentData } = await import('../../data/PersistentDataProvider');
     const { fetchSolPrice: fetchCachedSolPrice } = usePersistentData();
 
     const result = await fetchCachedSolPrice();

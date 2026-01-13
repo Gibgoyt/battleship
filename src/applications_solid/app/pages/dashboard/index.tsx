@@ -5,7 +5,7 @@ import {
   useWallet,
   useWalletBalances,
   useWalletModal
-} from 'src/lib/wallet/wallet-reactive-store';
+} from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
 
 const DashboardPage: Component<{ isDark: boolean }> = (props) => {
   const [userEmail, setUserEmail] = createSignal<string>('');

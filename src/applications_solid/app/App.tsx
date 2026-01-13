@@ -17,7 +17,7 @@ import {
   loggingMiddleware,
   authMiddleware
 } from './middleware'
-import { WalletProvider } from 'src/lib/wallet/wallet-context'
+import { WalletProvider } from 'src/applications_solid/app/lib/wallet/wallet-context'
 import { AuthStoreProvider } from './middleware/firebase/auth-store'
 import { createLogger } from 'src/lib/logger'
 import DashboardPage from './pages/dashboard/index'

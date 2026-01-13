@@ -5,8 +5,8 @@
 
 import type { Component } from 'solid-js';
 import { Show } from 'solid-js';
-import { getWalletStoreUrl, getDirectStoreLink } from 'src/lib/wallet/app-store-urls';
-import { getInstallationMessage } from 'src/lib/wallet/mobile-detection';
+import { getWalletStoreUrl, getDirectStoreLink } from 'src/applications_solid/app/lib/wallet/app-store-urls';
+import { getInstallationMessage } from 'src/applications_solid/app/lib/wallet/mobile-detection';
 
 export interface MobileWalletInstallationProps {
   isDark: boolean;

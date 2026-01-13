@@ -8,7 +8,7 @@ import {
   useWalletBalances,
   useExchangeModal,
   useExchange
-} from 'src/lib/wallet/wallet-reactive-store';
+} from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
 import WalletModal from '../../components/WalletModal';
 import { ExchangeSection } from '../../components/ExchangeSection';
 import { ExchangeModal } from '../../components/ExchangeModal';

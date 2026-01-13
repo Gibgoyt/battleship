@@ -1,10 +1,10 @@
 import type { Component } from 'solid-js';
 import { Show, createSignal, createMemo, createEffect } from 'solid-js';
-import { useExchangeModal, useExchange, useWallet, useWalletConnection, useProgramInfo } from 'src/lib/wallet/wallet-reactive-store';
+import { useExchangeModal, useExchange, useWallet, useWalletConnection, useProgramInfo } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
 import { MobileWalletInstallation } from './MobileWalletInstallation';
-import { detectMobilePlatform } from 'src/lib/wallet/mobile-detection';
-import { executeMobileWalletDeepLink, attemptMobileWalletConnection } from 'src/lib/wallet/mobile-wallet-connector';
-import { addMobileTransactionListener, setupMobileReturnListener } from 'src/lib/wallet/mobile-transaction-handler';
+import { detectMobilePlatform } from 'src/applications_solid/app/lib/wallet/mobile-detection';
+import { executeMobileWalletDeepLink, attemptMobileWalletConnection } from 'src/applications_solid/app/lib/wallet/mobile-wallet-connector';
+import { addMobileTransactionListener, setupMobileReturnListener } from 'src/applications_solid/app/lib/wallet/mobile-transaction-handler';
 
 export interface ExchangeModalProps {
   isDark: boolean;

@@ -1,6 +1,6 @@
 import type { Component, Accessor } from 'solid-js';
 import { createSignal, Show, For } from 'solid-js';
-import { useMultiWallet, useWalletConnection } from 'src/lib/wallet/wallet-reactive-store';
+import { useMultiWallet, useWalletConnection } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
 
 interface WalletModalProps {
   isOpen: Accessor<boolean>;

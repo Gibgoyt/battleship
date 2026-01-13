@@ -6,7 +6,7 @@ import {
   useWallet,
   useWalletConnection,
   useWalletBalances
-} from 'src/lib/wallet/wallet-context';
+} from 'src/applications_solid/app/lib/wallet/wallet-context';
 import WalletSelectionModal from '../../components/WalletSelectionModal';
 
 const WalletPage: Component<{ isDark: boolean }> = (props) => {

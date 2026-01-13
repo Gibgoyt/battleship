@@ -1,6 +1,6 @@
 import type { Component } from 'solid-js';
 import { Show, createEffect, createMemo, createSignal } from 'solid-js';
-import { useSplitdoATA, useExchangeModal, useProgramInfo } from 'src/lib/wallet/wallet-reactive-store';
+import { useSplitdoATA, useExchangeModal, useProgramInfo } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
 
 export interface ExchangeSectionProps {
   isDark: boolean;

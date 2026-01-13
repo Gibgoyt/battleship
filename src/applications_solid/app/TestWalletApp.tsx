@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js'
 import type { Component } from 'solid-js'
-import { SimpleWalletProvider, useSimpleWallet } from 'src/lib/wallet/wallet-context-simple'
+import { SimpleWalletProvider, useSimpleWallet } from 'src/applications_solid/app/lib/wallet/wallet-context-simple'
 
 const WalletTest: Component = () => {
   const { connectionStatus, connectWallet, disconnectWallet } = useSimpleWallet();

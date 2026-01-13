@@ -6,7 +6,7 @@ import {
   useWallet,
   useWalletConnection,
   useWalletBalances
-} from 'src/lib/wallet/wallet-global-store';
+} from 'src/applications_solid/app/lib/wallet/wallet-global-store';
 import WalletSelectionModalWithStore from '../../components/WalletSelectionModalWithStore';
 import TestModal from '../../components/TestModal';
 
