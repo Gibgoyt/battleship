@@ -81,6 +81,11 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
     })} ${currency}`;
   };
 
+  const formatAddress = (address: string) => {
+    if (address.length <= 8) return address;
+    return `${address.slice(0, 4)}...${address.slice(-4)}`;
+  };
+
 
   return (
     <div class="min-h-screen" style="background: var(--crypto-bg-primary); color: var(--crypto-text-primary);">
