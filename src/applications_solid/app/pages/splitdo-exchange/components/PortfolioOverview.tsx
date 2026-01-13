@@ -89,60 +89,6 @@ const PortfolioOverview: Component<PortfolioOverviewProps> = (props) => {
         </div>
       </div>
 
-      {/* Asset Allocation Overview */}
-      <Show when={connectionStatus() === 'connected'}>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* SOL Allocation */}
-          <div class="asset-allocation-card flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-400 to-purple-600 flex items-center justify-center shadow-lg">
-                <span class="text-white font-bold text-sm">SOL</span>
-              </div>
-              <div>
-                <div class={`font-semibold crypto-text-primary`}>
-                  Solana
-                </div>
-                <div class={`text-sm crypto-text-secondary`}>
-                  {formatCurrency(solBalance()?.sol || 0, 4)} SOL
-                </div>
-              </div>
-            </div>
-            <div class="text-right">
-              <div class={`font-semibold crypto-text-primary`}>
-                ${formatCurrency((solBalance()?.sol || 0) * 100)}
-              </div>
-              <div class={`text-sm crypto-text-secondary`}>
-                {totalPortfolioValue() > 0 ? (((solBalance()?.sol || 0) * 100 / totalPortfolioValue()) * 100).toFixed(1) : 0}%
-              </div>
-            </div>
-          </div>
-
-          {/* SPLITDO Allocation */}
-          <div class="asset-allocation-card flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full flex items-center justify-center shadow-lg" style="background: var(--gradient-button-primary);">
-                <span class="text-white font-bold text-sm">SD</span>
-              </div>
-              <div>
-                <div class={`font-semibold crypto-text-primary`}>
-                  SPLITDO
-                </div>
-                <div class={`text-sm crypto-text-secondary`}>
-                  {formatCurrency(splitdoATA().balance?.uiAmount || 0)} SPLITDO
-                </div>
-              </div>
-            </div>
-            <div class="text-right">
-              <div class={`font-semibold crypto-text-primary`}>
-                ${formatCurrency((splitdoATA().balance?.uiAmount || 0) * 0.11)}
-              </div>
-              <div class={`text-sm crypto-text-secondary`}>
-                {totalPortfolioValue() > 0 ? ((((splitdoATA().balance?.uiAmount || 0) * 0.11) / totalPortfolioValue()) * 100).toFixed(1) : 0}%
-              </div>
-            </div>
-          </div>
-        </div>
-      </Show>
 
       {/* Wallet Status for Disconnected State */}
       <Show when={connectionStatus() !== 'connected'}>

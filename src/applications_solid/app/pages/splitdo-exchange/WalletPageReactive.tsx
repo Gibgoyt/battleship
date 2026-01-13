@@ -12,7 +12,6 @@ import {
 import WalletModal from '../../components/WalletModal';
 import { ExchangeModal } from '../../components/ExchangeModal';
 import PortfolioOverview from './components/PortfolioOverview';
-import AssetCard from './components/AssetCard';
 import EnhancedExchangeWidget from './components/EnhancedExchangeWidget';
 import TransactionHistory from './components/TransactionHistory';
 
@@ -82,48 +81,6 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
     })} ${currency}`;
   };
 
-  const formatAddress = (address: string) => {
-    if (address.length <= 8) return address;
-    return `${address.slice(0, 4)}...${address.slice(-4)}`;
-  };
-
-  // Prepare asset data for the AssetCard components
-  const solAssetData = () => ({
-    symbol: 'SOL',
-    name: 'Solana',
-    balance: solBalance()?.sol || 0,
-    balanceFormatted: `${formatCurrency(solBalance()?.sol || 0, 4)} SOL`,
-    usdValue: (solBalance()?.sol || 0) * 100, // Mock $100 per SOL
-    change24h: 2.45, // Mock 24h change
-    status: connectionStatus() === 'connected' ? 'connected' as const : 'not_connected' as const,
-    address: wallet()?.address,
-    error: connectionError() || undefined
-  });
-
-  const splitdoAssetData = () => {
-    const ata = splitdoATA();
-    let status: 'connected' | 'not_connected' | 'not_found' | 'error' | 'creating' | 'checking';
-
-    if (ata.status === 'exists' || ata.status === 'created') {
-      status = 'connected';
-    } else if (connectionStatus() !== 'connected') {
-      status = 'not_connected';
-    } else {
-      status = ata.status as any;
-    }
-
-    return {
-      symbol: 'SPLITDO',
-      name: 'SPLITDO Token',
-      balance: ata.balance?.uiAmount || 0,
-      balanceFormatted: `${formatCurrency(ata.balance?.uiAmount || 0)} SPLITDO`,
-      usdValue: ata.balance?.uiAmount || 0, // Mock $1 per SPLITDO
-      change24h: 5.82, // Mock 24h change
-      status,
-      address: ata.address,
-      error: ata.error || undefined
-    };
-  };
 
   return (
     <div class="min-h-screen" style="background: var(--crypto-bg-primary); color: var(--crypto-text-primary);">
@@ -170,26 +127,8 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
 
         {/* Main Dashboard Grid */}
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Left Column: Asset Cards */}
+          {/* Left Column: Transaction History */}
           <div class="xl:col-span-2 space-y-6">
-            {/* Asset Cards Grid */}
-            <div class="asset-grid">
-              <AssetCard
-                isDark={props.isDark}
-                asset={solAssetData()}
-                onConnect={handleConnectWalletClick}
-                onRetry={() => refreshBalances()}
-              />
-              <AssetCard
-                isDark={props.isDark}
-                asset={splitdoAssetData()}
-                onConnect={handleConnectWalletClick}
-                onCreate={createSplitdoATA}
-                onRetry={() => checkSplitdoBalance()}
-                isCreating={isCreatingATA()}
-              />
-            </div>
-
             {/* Transaction History */}
             <TransactionHistory isDark={props.isDark} />
           </div>
