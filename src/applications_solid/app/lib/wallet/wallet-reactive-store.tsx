@@ -20,6 +20,7 @@ import { detectMobilePlatform, getInstallationMessage } from './mobile-detection
 import { attemptMobileWalletConnection, isMobileWalletConnectionSupported } from './mobile-wallet-connector';
 // Import endpoint function from middleware using the new structure
 import { POST as splitdoExchangePost } from '../../middleware/endpoints/devbackend/_api/testing/usockets/exchange/solana/splitdo/POST';
+import { middlewareFetch } from '../../middleware/endpoints';
 
 export type ATAStatus = 'unknown' | 'checking' | 'exists' | 'not_found' | 'creating' | 'created' | 'error';
 
@@ -1087,13 +1088,12 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
 
     // 3. Get SOL vault address from backend
     console.log('[ReactiveWalletStore] Fetching vault address...');
-    const vaultResponse = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/exchange/solana/vault');
-    if (!vaultResponse.ok) {
+    const vaultResponse = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.SplitdoToken.Exchange.Solana.Vault.GET();
+    if (vaultResponse.status !== 200) {
       throw new Error('Failed to fetch vault address');
     }
 
-    const vaultData = await vaultResponse.json();
-    const solVaultAddress = vaultData.data.sol_vault_address;
+    const solVaultAddress = vaultResponse.data.data.sol_vault_address;
     console.log('[ReactiveWalletStore] Got vault address:', solVaultAddress);
 
     // 4. Get current wallet provider using direct Phantom access (working pattern from createSplitdoATA)
@@ -1139,17 +1139,16 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
 
     // 5.5. Get recent blockhash from backend (same as createSplitdoATA pattern)
     console.log('[ReactiveWalletStore] Fetching recent blockhash...');
-    const blockhashResponse = await fetch('https://devbackend.splitdo.app:8443/api/solana/network/recent-blockhash');
-    if (!blockhashResponse.ok) {
+    const blockhashResponse = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Network.RecentBlockhash.GET();
+    if (blockhashResponse.status !== 200) {
       throw new Error('Failed to fetch recent blockhash');
     }
 
-    const blockhashData = await blockhashResponse.json();
-    if (!blockhashData.success || !blockhashData.blockhash) {
+    if (!blockhashResponse.data.success || !blockhashResponse.data.blockhash) {
       throw new Error('Invalid response from backend blockhash API');
     }
 
-    transaction.recentBlockhash = blockhashData.blockhash;
+    transaction.recentBlockhash = blockhashResponse.data.blockhash;
     transaction.feePayer = phantomProvider.publicKey;
     console.log('[ReactiveWalletStore] Set blockhash and fee payer on transaction');
 
