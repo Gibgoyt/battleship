@@ -12,7 +12,11 @@ export default defineConfig({
   output: 'server',
   server: {
     port: 2084,
-    host: true
+    host: true,
+    headers: {
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+      'X-Content-Type-Options': 'nosniff'
+    }
   },
   integrations: [
     // mdx(),
