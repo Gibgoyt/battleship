@@ -18,8 +18,8 @@ import { PhantomWalletProvider } from './wallet-providers';
 import { rawToUIAmount, type SplitdoRawAmount } from './token-utils';
 import { detectMobilePlatform, getInstallationMessage } from './mobile-detection';
 import { attemptMobileWalletConnection, isMobileWalletConnectionSupported } from './mobile-wallet-connector';
-// Import only the specific endpoint function to avoid Node.js dependencies
-import { POST as splitdoExchangePost } from '../../../../lib/vm_redis_server/endpoints/_api/testing/usockets/exchange/solana/splitdo/POST.ts';
+// Import endpoint function from middleware using the new structure
+import { POST as splitdoExchangePost } from '../../middleware/endpoints/devbackend/_api/testing/usockets/exchange/solana/splitdo/POST';
 
 export type ATAStatus = 'unknown' | 'checking' | 'exists' | 'not_found' | 'creating' | 'created' | 'error';
 
@@ -1207,8 +1207,8 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
     }, null, 2));
 
     // Call the endpoint function directly (no raw fetch needed)
+    // fetchMiddleware handles authentication automatically
     const result = await splitdoExchangePost(
-      firebaseToken,
       lamports,
       serializedTransaction
     );

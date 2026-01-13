@@ -1,5 +1,7 @@
 import * as SplitdoToken from './splitdo-token'
+import * as Testing from './testing'
 
 export {
-	SplitdoToken
+	SplitdoToken,
+	Testing
 }
