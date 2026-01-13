@@ -74,18 +74,12 @@ const PortfolioOverview: Component<PortfolioOverviewProps> = (props) => {
 
         {/* Quick Actions */}
         <div class="flex flex-col gap-3">
-          <Show when={connectionStatus() === 'connected'} fallback={
-            <button class="btn-crypto-primary w-full">
-              Connect Wallet to Get Started
-            </button>
-          }>
-            <button class="btn-crypto-primary w-full">
-              Exchange SOL → SPLITDO
-            </button>
-            <button class="btn-crypto-outline w-full">
-              View Transaction History
-            </button>
-          </Show>
+          <button class="btn-crypto-primary w-full">
+            Exchange SOL → SPLITDO
+          </button>
+          <button class="btn-crypto-outline w-full">
+            View Transaction History
+          </button>
         </div>
       </div>
 
