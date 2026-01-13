@@ -15,10 +15,10 @@ const PortfolioOverview: Component<PortfolioOverviewProps> = (props) => {
   const { solBalance } = useWalletBalances();
   const { splitdoATA } = useSplitdoATA();
 
-  // Calculate total portfolio value in USD (simplified for now)
+  // Calculate total portfolio value in USD
   const totalPortfolioValue = createMemo(() => {
     const solValue = (solBalance()?.sol || 0) * 100; // Assume $100 per SOL for demo
-    const splitdoValue = (splitdoATA().balance?.uiAmount || 0) * 1; // Assume $1 per SPLITDO for demo
+    const splitdoValue = (splitdoATA().balance?.uiAmount || 0) * 0.11; // $0.11 per SPLITDO (presale price)
     return solValue + splitdoValue;
   });
 
@@ -134,10 +134,10 @@ const PortfolioOverview: Component<PortfolioOverviewProps> = (props) => {
             </div>
             <div class="text-right">
               <div class={`font-semibold crypto-text-primary`}>
-                ${formatCurrency(splitdoATA().balance?.uiAmount || 0)}
+                ${formatCurrency((splitdoATA().balance?.uiAmount || 0) * 0.11)}
               </div>
               <div class={`text-sm crypto-text-secondary`}>
-                {totalPortfolioValue() > 0 ? (((splitdoATA().balance?.uiAmount || 0) / totalPortfolioValue()) * 100).toFixed(1) : 0}%
+                {totalPortfolioValue() > 0 ? ((((splitdoATA().balance?.uiAmount || 0) * 0.11) / totalPortfolioValue()) * 100).toFixed(1) : 0}%
               </div>
             </div>
           </div>
