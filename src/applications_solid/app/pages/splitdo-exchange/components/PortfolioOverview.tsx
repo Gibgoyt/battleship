@@ -72,15 +72,6 @@ const PortfolioOverview: Component<PortfolioOverviewProps> = (props) => {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div class="flex flex-col gap-3">
-          <button class="btn-crypto-primary w-full">
-            Exchange SOL → SPLITDO
-          </button>
-          <button class="btn-crypto-outline w-full">
-            View Transaction History
-          </button>
-        </div>
       </div>
 
 
