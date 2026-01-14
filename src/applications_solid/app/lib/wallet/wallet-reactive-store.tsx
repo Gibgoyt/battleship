@@ -1191,10 +1191,10 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
     console.log('[ReactiveWalletStore] 📥 Backend response:', JSON.stringify({
       status: result.status,
       exchangeStatus: result.data.status,
-      solTxSignature: result.data.sol_tx_signature,
-      splitdoTxSignature: result.data.splitdo_tx_signature,
-      solAmount: result.data.sol_amount,
-      splitdoAmount: result.data.splitdo_amount
+      txSignature: result.data.tx_signature,
+      userWallet: result.data.user_wallet,
+      tokenAccount: result.data.token_account_pubkey,
+      message: result.data.message
     }, null, 2));
 
     // Handle different response statuses for new endpoint
@@ -1204,9 +1204,30 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
       console.error('[ReactiveWalletStore] ❌ Bad request error (400):', JSON.stringify({
         error: errorData.error,
         message: errorData.message,
-        field: errorData.field
+        providedSignature: errorData.provided_signature
       }, null, 2));
       throw new Error(errorData.message || 'Invalid request format');
+    }
+
+    if (result.status === 401) {
+      // Authentication error
+      const errorData = result.data;
+      console.error('[ReactiveWalletStore] ❌ Authentication error (401):', JSON.stringify({
+        error: errorData.error,
+        message: errorData.message
+      }, null, 2));
+      throw new Error(errorData.message || 'Authentication failed. Please log in again.');
+    }
+
+    if (result.status === 408) {
+      // Request timeout
+      const errorData = result.data;
+      console.error('[ReactiveWalletStore] ❌ Request timeout (408):', JSON.stringify({
+        error: errorData.error,
+        message: errorData.message,
+        completedStages: errorData.completed_stages
+      }, null, 2));
+      throw new Error(errorData.message || 'Request processing timeout');
     }
 
     if (result.status === 409) {
@@ -1226,9 +1247,20 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
       console.error('[ReactiveWalletStore] ❌ Transaction verification error (422):', JSON.stringify({
         error: errorData.error,
         message: errorData.message,
-        details: errorData.details
+        expectedSender: errorData.expected_sender,
+        expectedReceiver: errorData.expected_receiver
       }, null, 2));
       throw new Error(errorData.message || 'Transaction verification failed');
+    }
+
+    if (result.status === 429) {
+      // Rate limit exceeded
+      const errorData = result.data;
+      console.error('[ReactiveWalletStore] ❌ Rate limit exceeded (429):', JSON.stringify({
+        error: errorData.error,
+        message: errorData.message
+      }, null, 2));
+      throw new Error(errorData.message || 'Rate limit exceeded. Please wait and try again.');
     }
 
     if (result.status !== 200) {
@@ -1244,15 +1276,12 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
     console.log('[ReactiveWalletStore] 📥 Full Backend Response Body:', JSON.stringify(result, null, 2));
 
     // Handle successful response from new endpoint
-    if (result.data.status === "completed") {
-      console.log(`[ReactiveWalletStore] ✅ Exchange completed successfully`);
-      console.log(`   SOL Transaction: ${result.data.sol_tx_signature || transactionResult.signature}`);
-      console.log(`   SPLITDO Transaction: ${result.data.splitdo_tx_signature || 'Processing'}`);
-      console.log(`   SOL Amount: ${result.data.sol_amount} lamports`);
-      console.log(`   SPLITDO Amount: ${result.data.splitdo_amount} tokens`);
-    } else if (result.data.status === "processing") {
-      console.log(`[ReactiveWalletStore] 🔄 Exchange processing...`);
-      console.log(`   SOL Transaction: ${result.data.sol_tx_signature || transactionResult.signature}`);
+    if (result.data.status === "processing") {
+      console.log(`[ReactiveWalletStore] ✅ Exchange request accepted and processing`);
+      console.log(`   Message: ${result.data.message}`);
+      console.log(`   SOL Transaction: ${result.data.tx_signature}`);
+      console.log(`   User Wallet: ${result.data.user_wallet}`);
+      console.log(`   Token Account: ${result.data.token_account_pubkey}`);
     }
 
     console.log('[ReactiveWalletStore] ✅ Exchange completed successfully');

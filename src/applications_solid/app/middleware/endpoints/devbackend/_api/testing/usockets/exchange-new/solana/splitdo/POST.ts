@@ -1,37 +1,24 @@
 // Phantom signAndSendTransaction flow - no Rust signing needed
+import { fetchMiddleware } from '../../../../../fetch-wrapper'
 
-// Exchange-new specific response interfaces for Phantom-compatible endpoint
+// Exchange-new specific response interfaces matching the API specification
 interface ExchangeNewResponse200 {
     status: 200
     data: {
-        status: "completed" | "processing"
-        sol_tx_signature: string
-        sol_amount: number
-        sol_usd_rate: number
-        splitdo_amount: number
-        splitdo_tx_signature?: string
+        status: "processing"
         message: string
-        view_sol_tx?: string
-        view_splitdo_tx?: string
+        tx_signature: string
+        user_wallet: string
+        token_account_pubkey: string
     }
 }
 
 interface ExchangeNewResponse400 {
     status: 400
     data: {
-        error: "invalid_request" | "invalid_signature_format" | "missing_fields" | "empty_fields"
+        error: "invalid_signature_format" | "missing_fields" | "empty_fields"
         message: string
-        field?: string
         provided_signature?: string
-    }
-}
-
-interface ExchangeNewResponse409 {
-    status: 409
-    data: {
-        error: "duplicate_transaction" | "duplicate_processing"
-        message: string
-        tx_signature: string
     }
 }
 
@@ -44,45 +31,58 @@ interface ExchangeNewResponse408 {
     }
 }
 
-interface ExchangeNewResponse422 {
-    status: 422
+interface ExchangeNewResponse409 {
+    status: 409
     data: {
-        error: "transaction_verification_failed" | "invalid_token_account"
+        error: "duplicate_transaction"
         message: string
-        details?: any
-        expected?: string
-        actual?: string
+        tx_signature: string
     }
 }
 
-interface ExchangeNewResponse202 {
-    status: 202
+interface ExchangeNewResponse422 {
+    status: 422
     data: {
-        status: "processing"
+        error: "transaction_verification_failed"
         message: string
-        tx_signature?: string
-        user_wallet?: string
-        token_account_pubkey?: string
+        expected_sender?: string
+        expected_receiver?: string
+    }
+}
+
+interface ExchangeNewResponse401 {
+    status: 401
+    data: {
+        error: "missing_authorization" | "authentication_failed" | "token_refresh_failed"
+        message: string
+    }
+}
+
+interface ExchangeNewResponse429 {
+    status: 429
+    data: {
+        error: "rate_limit_exceeded"
+        message: string
     }
 }
 
 interface ExchangeNewResponse500 {
     status: 500
     data: {
-        error: "redis_error" | "splitdo_transfer_failed" | "internal_error"
+        error: "internal_error"
         message: string
         stage?: string
-        rpc_error?: any
     }
 }
 
 type ExchangeNewPostResponse =
     | ExchangeNewResponse200
-    | ExchangeNewResponse202
     | ExchangeNewResponse400
-    | ExchangeNewResponse409
+    | ExchangeNewResponse401
     | ExchangeNewResponse408
+    | ExchangeNewResponse409
     | ExchangeNewResponse422
+    | ExchangeNewResponse429
     | ExchangeNewResponse500
 
 /*
@@ -120,24 +120,21 @@ export async function POST(
             }
         }
 
-        // 2. Validate transaction signature format (base58)
-        if (txSignature.length < 80 || txSignature.length > 90) {
+        // 2. Validate transaction signature format (base58, 87-88 characters)
+        if (txSignature.length < 87 || txSignature.length > 88) {
             console.error(`🟢 [Exchange NEW POST] ❌ Invalid transaction signature format`)
             return {
                 status: 400,
                 data: {
                     error: "invalid_signature_format",
-                    message: "Transaction signature must be a valid base58 string",
+                    message: "Transaction signature format is invalid (must be base58, 87-88 characters)",
                     provided_signature: txSignature
                 }
             }
         }
 
-        // 3. Submit to backend exchange endpoint
-        const BASE_URL = process.env.BASE_URL || 'https://devbackend.splitdo.app:8443'
-        process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"
-
-        const endpoint = BASE_URL + "/api/testing/usockets/exchange-new/solana/splitdo"
+        // 3. Submit to backend exchange endpoint using fetchMiddleware for automatic auth
+        const endpoint = "https://devbackend.splitdo.app:8443/api/testing/usockets/exchange-new/solana/splitdo"
         console.log(`🟢 [Exchange NEW POST] Submitting to backend exchange endpoint: ${endpoint}`)
 
         // Create the request body format expected by backend
@@ -153,17 +150,90 @@ export async function POST(
         console.log(JSON.stringify(requestBody, null, 2))
         console.log(`====================================`)
 
-        const response = await fetch(endpoint, {
+        let response = await fetchMiddleware(endpoint, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(requestBody)
+            // fetchMiddleware automatically handles:
+            // - Authorization header injection
+            // - 401/403 retry logic with token refresh
+            // - Global rate limiting (Cloudflare 1015)
+            // - Session expiry notification on final auth failure
         })
+
+        // Enhanced: If 401 and fetchMiddleware didn't handle it, try direct refresh once
+        if (response.status === 401) {
+            console.log(`🟢 [Exchange NEW POST] Received 401, attempting direct token refresh`)
+
+            try {
+                // Import auth store dynamically to avoid circular dependencies
+                const { getGlobalAuthStore } = await import('../../../../../firebase/auth-store')
+                const authStore = getGlobalAuthStore()
+                await authStore.refreshToken() // Uses fallback mechanism
+
+                // Retry the request exactly once
+                response = await fetchMiddleware(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(requestBody)
+                })
+
+                // If still 401, don't retry again
+                if (response.status === 401) {
+                    console.error(`🟢 [Exchange NEW POST] Still receiving 401 after token refresh - auth failure`)
+                    return {
+                        status: 401,
+                        data: {
+                            error: 'authentication_failed',
+                            message: 'Session expired, please log in again'
+                        }
+                    }
+                }
+
+            } catch (refreshError) {
+                console.error(`🟢 [Exchange NEW POST] Direct token refresh failed:`, refreshError)
+                return {
+                    status: 401,
+                    data: {
+                        error: 'token_refresh_failed',
+                        message: 'Unable to refresh authentication token'
+                    }
+                }
+            }
+        }
 
         console.log(`🟢 [Exchange NEW POST] NEW exchange endpoint responded with status: ${response.status}`)
 
-        const responseData = await response.json()
+        let responseData: any
+
+        // Handle CloudFlare rate limiting (429 with "error code: 1015" in body)
+        if (response.status === 429) {
+            const responseText = await response.text()
+            if (responseText.includes("error code: 1015")) {
+                console.log(`🟢 [Exchange NEW POST] 🚨 CloudFlare rate limiting detected (error code: 1015)`)
+                return {
+                    status: 429,
+                    data: {
+                        error: "rate_limit_exceeded",
+                        message: "CloudFlare rate limit exceeded. Please wait and try again."
+                    }
+                }
+            } else {
+                // Try to parse as JSON for API rate limiting
+                try {
+                    responseData = JSON.parse(responseText)
+                } catch {
+                    responseData = { error: "rate_limit_exceeded", message: responseText }
+                }
+            }
+        } else {
+            responseData = await response.json()
+        }
+
         console.log(`🟢 [Exchange NEW POST] Response data:`, JSON.stringify(responseData, null, 2))
 
         // 5. Return typed response based on status
@@ -174,16 +244,16 @@ export async function POST(
                     status: 200,
                     data: responseData
                 }
-            case 202:
-                console.log(`🟢 [Exchange NEW POST] 🔄 Exchange request accepted and processing`)
-                return {
-                    status: 202,
-                    data: responseData
-                }
             case 400:
                 console.log(`🟢 [Exchange NEW POST] ⚠️ Bad request error (400)`)
                 return {
                     status: 400,
+                    data: responseData
+                }
+            case 401:
+                console.log(`🟢 [Exchange NEW POST] ⚠️ Unauthorized error (401) - this should not happen with fetchMiddleware`)
+                return {
+                    status: 401,
                     data: responseData
                 }
             case 408:
@@ -202,6 +272,12 @@ export async function POST(
                 console.log(`🟢 [Exchange NEW POST] ⚠️ Transaction verification error (422)`)
                 return {
                     status: 422,
+                    data: responseData
+                }
+            case 429:
+                console.log(`🟢 [Exchange NEW POST] 🚨 Rate limit exceeded (429)`)
+                return {
+                    status: 429,
                     data: responseData
                 }
             case 500:
