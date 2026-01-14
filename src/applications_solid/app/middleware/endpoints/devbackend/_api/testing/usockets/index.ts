@@ -1,2 +1,6 @@
 import * as Exchange from './exchange'
-export { Exchange }
+import * as ExchangeNew from './exchange-new'
+export {
+	Exchange,
+	ExchangeNew
+}

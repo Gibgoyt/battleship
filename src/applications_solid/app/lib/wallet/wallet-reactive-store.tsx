@@ -19,7 +19,7 @@ import { rawToUIAmount, type SplitdoRawAmount } from './token-utils';
 import { detectMobilePlatform, getInstallationMessage } from './mobile-detection';
 import { attemptMobileWalletConnection, isMobileWalletConnectionSupported } from './mobile-wallet-connector';
 // Import endpoint function from middleware using the new structure
-import { POST as splitdoExchangePost } from '../../middleware/endpoints/devbackend/_api/testing/usockets/exchange/solana/splitdo/POST';
+import { POST as splitdoExchangePost } from '../../middleware/endpoints/devbackend/_api/testing/usockets/exchange-new/solana/splitdo/POST';
 import { middlewareFetch } from '../../middleware/endpoints';
 
 export type ATAStatus = 'unknown' | 'checking' | 'exists' | 'not_found' | 'creating' | 'created' | 'error';
@@ -1114,14 +1114,8 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
       throw new Error('No public key available from connected wallet');
     }
 
-    // Create adapter using working pattern from createSplitdoATA
-    const currentProvider = {
-      publicKey: phantomProvider.publicKey,
-      signTransaction: async (transaction: any) => {
-        console.log('[ReactiveWalletStore] 🚀 CALLING PHANTOM signTransaction for exchange');
-        return await phantomProvider.signTransaction(transaction);
-      }
-    };
+    // Use Phantom provider directly for signAndSendTransaction
+    console.log('[ReactiveWalletStore] Using Phantom provider directly for signAndSendTransaction');
 
     // 5. Create SOL transfer transaction
     const lamports = Math.floor(solAmount * 1000000000); // Convert SOL to lamports
@@ -1137,107 +1131,93 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
 
     console.log('[ReactiveWalletStore] Created transaction for', lamports, 'lamports');
 
-    // 5.5. Get recent blockhash from backend (same as createSplitdoATA pattern)
-    console.log('[ReactiveWalletStore] Fetching recent blockhash...');
-    const blockhashResponse = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Network.RecentBlockhash.GET();
-    if (blockhashResponse.status !== 200) {
-      throw new Error('Failed to fetch recent blockhash');
-    }
+    // 6. Sign and send transaction with Phantom (eliminates need for backend submission)
+    console.log('[ReactiveWalletStore] 🚀 Signing and sending transaction with timeout protection...');
 
-    if (!blockhashResponse.data.success || !blockhashResponse.data.blockhash) {
-      throw new Error('Invalid response from backend blockhash API');
-    }
-
-    transaction.recentBlockhash = blockhashResponse.data.blockhash;
-    transaction.feePayer = phantomProvider.publicKey;
-    console.log('[ReactiveWalletStore] Set blockhash and fee payer on transaction');
-
-    // 6. Sign transaction with wallet (with timeout protection)
-    console.log('[ReactiveWalletStore] 🚀 Signing transaction with timeout protection...');
-
-    // Add timeout protection (matching createSplitdoATA pattern)
+    // Add timeout protection for signAndSendTransaction
     let timeoutId: NodeJS.Timeout;
     const timeoutPromise = new Promise<never>((_, reject) => {
       timeoutId = setTimeout(() => {
-        console.log('[ReactiveWalletStore] ⏰ Exchange signing timeout - Phantom not responding');
-        reject(new Error('Transaction signing timed out. Check for Phantom popup window.'));
-      }, 10000);
+        console.log('[ReactiveWalletStore] ⏰ Exchange signing and sending timeout - Phantom not responding');
+        reject(new Error('Transaction signing and sending timed out. Check for Phantom popup window.'));
+      }, 30000); // Longer timeout since this includes blockchain submission
     });
 
-    const signedTransaction = await Promise.race([
-      currentProvider.signTransaction(transaction),
+    const transactionResult = await Promise.race([
+      phantomProvider.signAndSendTransaction(transaction),
       timeoutPromise
     ]);
 
-    // Clear the timeout since signing succeeded
+    // Clear the timeout since signing and sending succeeded
     clearTimeout(timeoutId);
 
-    console.log('[ReactiveWalletStore] ✅ Transaction signed successfully');
+    console.log('[ReactiveWalletStore] ✅ Transaction signed and sent successfully');
+    console.log('[ReactiveWalletStore] Transaction signature (base58):', transactionResult.signature);
 
-    // 7. Submit to backend exchange endpoint
-    const serializedTransaction = Buffer.from(signedTransaction.serialize()).toString('base64');
+    // 7. Send transaction signature to backend for verification and SPLITDO exchange
+    const ataAddress = currentATA.address;
 
-    // Enhanced request logging
-    const requestPayload = {
-      sol_amount: lamports,
-      signed_transaction: serializedTransaction
-    };
-
-    const authHeader = `Bearer ${firebaseToken}`;
-
-    console.log('[ReactiveWalletStore] 🔍 Token Debug Info:', JSON.stringify({
-      firebaseToken: firebaseToken,
-      tokenType: typeof firebaseToken,
-      tokenLength: firebaseToken?.length,
-      authorizationHeader: authHeader
+    console.log('[ReactiveWalletStore] 📤 Submitting signature to backend for verification:', JSON.stringify({
+      endpoint: 'exchange-new (signAndSendTransaction flow)',
+      transactionSignature: transactionResult.signature,
+      userWallet: phantomProvider.publicKey.toString(),
+      tokenAccountPubkey: ataAddress,
+      hasFirebaseToken: !!firebaseToken
     }, null, 2));
 
-    console.log('[ReactiveWalletStore] 📤 Submitting to backend:', JSON.stringify({
-      endpoint: 'splitdoExchangePost (direct import)',
-      solAmount: solAmount,
-      lamports: lamports,
-      serializedTxLength: serializedTransaction.length,
-      hasFirebaseToken: !!firebaseToken,
-      requestParams: {
-        accessToken: firebaseToken ? 'present' : 'missing',
-        solAmount: lamports,
-        signedTransactionLength: serializedTransaction.length
-      }
-    }, null, 2));
-
-    // Call the endpoint function directly (no raw fetch needed)
-    // fetchMiddleware handles authentication automatically
+    // Call the new endpoint with transaction signature
     const result = await splitdoExchangePost(
-      lamports,
-      serializedTransaction
+      transactionResult.signature,
+      phantomProvider.publicKey.toString(),
+      ataAddress
     );
 
-    // Enhanced response logging
+    // Enhanced response logging for new endpoint format
     console.log('[ReactiveWalletStore] 📥 Backend response:', JSON.stringify({
       status: result.status,
-      success: result.data.success,
-      hasStage1: !!result.data.stage1_sol_confirmation,
-      hasStage2: !!result.data.stage2_splitdo_exchange
+      exchangeStatus: result.data.status,
+      solTxSignature: result.data.sol_tx_signature,
+      splitdoTxSignature: result.data.splitdo_tx_signature,
+      solAmount: result.data.sol_amount,
+      splitdoAmount: result.data.splitdo_amount
     }, null, 2));
 
-    // Handle different response statuses
-    if (result.status === 422) {
-      // Validation error (e.g., missing SPLITDO ATA)
+    // Handle different response statuses for new endpoint
+    if (result.status === 400) {
+      // Bad request error
       const errorData = result.data;
-      console.error('[ReactiveWalletStore] ❌ Validation error (422):', JSON.stringify({
+      console.error('[ReactiveWalletStore] ❌ Bad request error (400):', JSON.stringify({
         error: errorData.error,
         message: errorData.message,
-        requiredATA: errorData.required_ata_address
+        field: errorData.field
       }, null, 2));
-
-      if (errorData.required_ata_address) {
-        throw new Error('SPLITDO account required. Please create your SPLITDO account first.');
-      }
-      throw new Error(errorData.message || 'Exchange validation failed');
+      throw new Error(errorData.message || 'Invalid request format');
     }
 
-    if (result.status !== 200 || !result.data.success) {
-      // Server error or exchange failure
+    if (result.status === 409) {
+      // Duplicate transaction error
+      const errorData = result.data;
+      console.error('[ReactiveWalletStore] ❌ Duplicate transaction error (409):', JSON.stringify({
+        error: errorData.error,
+        message: errorData.message,
+        txSignature: errorData.tx_signature
+      }, null, 2));
+      throw new Error(errorData.message || 'Duplicate transaction detected');
+    }
+
+    if (result.status === 422) {
+      // Transaction verification failed
+      const errorData = result.data;
+      console.error('[ReactiveWalletStore] ❌ Transaction verification error (422):', JSON.stringify({
+        error: errorData.error,
+        message: errorData.message,
+        details: errorData.details
+      }, null, 2));
+      throw new Error(errorData.message || 'Transaction verification failed');
+    }
+
+    if (result.status !== 200) {
+      // Server error or other failure
       console.error('[ReactiveWalletStore] ❌ Exchange failed:', JSON.stringify({
         status: result.status,
         error: result.data.error,
@@ -1245,24 +1225,19 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
       }, null, 2));
       throw new Error(result.data.message || result.data.error || 'Exchange failed');
     }
+
     console.log('[ReactiveWalletStore] 📥 Full Backend Response Body:', JSON.stringify(result, null, 2));
 
-    // Handle stage1 SOL confirmation
-    if (result.data.stage1_sol_confirmation && result.data.stage1_sol_confirmation.success) {
-      console.log(`[ReactiveWalletStore] ✅ Stage 1 (SOL): Transaction confirmed`);
-      console.log(`   Transaction Signature: ${result.data.stage1_sol_confirmation.tx_signature}`);
-      console.log(`   Duration: ${result.data.stage1_sol_confirmation.duration_ms}ms`);
-    } else if (result.data.stage1_sol_confirmation) {
-      console.log(`[ReactiveWalletStore] ❌ Stage 1 (SOL): ${result.data.stage1_sol_confirmation.error || 'Failed'}`);
-    }
-
-    // Handle stage2 SPLITDO exchange
-    if (result.data.stage2_splitdo_exchange && result.data.stage2_splitdo_exchange.success) {
-      console.log(`[ReactiveWalletStore] ✅ Stage 2 (SPLITDO): Exchange completed`);
-      console.log(`   Transaction Signature: ${result.data.stage2_splitdo_exchange.tx_signature}`);
-      console.log(`   Duration: ${result.data.stage2_splitdo_exchange.duration_ms}ms`);
-    } else if (result.data.stage2_splitdo_exchange) {
-      console.log(`[ReactiveWalletStore] ❌ Stage 2 (SPLITDO): ${result.data.stage2_splitdo_exchange.error || 'Failed'}`);
+    // Handle successful response from new endpoint
+    if (result.data.status === "completed") {
+      console.log(`[ReactiveWalletStore] ✅ Exchange completed successfully`);
+      console.log(`   SOL Transaction: ${result.data.sol_tx_signature || transactionResult.signature}`);
+      console.log(`   SPLITDO Transaction: ${result.data.splitdo_tx_signature || 'Processing'}`);
+      console.log(`   SOL Amount: ${result.data.sol_amount} lamports`);
+      console.log(`   SPLITDO Amount: ${result.data.splitdo_amount} tokens`);
+    } else if (result.data.status === "processing") {
+      console.log(`[ReactiveWalletStore] 🔄 Exchange processing...`);
+      console.log(`   SOL Transaction: ${result.data.sol_tx_signature || transactionResult.signature}`);
     }
 
     console.log('[ReactiveWalletStore] ✅ Exchange completed successfully');
