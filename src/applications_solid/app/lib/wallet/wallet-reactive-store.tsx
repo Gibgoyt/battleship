@@ -1288,12 +1288,6 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
 
     setExchangeStatus('success');
 
-    // Refresh wallet data after successful exchange
-    setTimeout(() => {
-      refreshBalances();
-      checkSplitdoBalance();
-    }, 1000);
-
     return { success: true, data: result.data };
 
   } catch (error: any) {
