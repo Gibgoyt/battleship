@@ -1131,7 +1131,22 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
 
     console.log('[ReactiveWalletStore] Created transaction for', lamports, 'lamports');
 
-    // 6. Sign and send transaction with Phantom (eliminates need for backend submission)
+    // 5.5. Get recent blockhash from backend (still needed for signAndSendTransaction)
+    console.log('[ReactiveWalletStore] Fetching recent blockhash...');
+    const blockhashResponse = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Network.RecentBlockhash.GET();
+    if (blockhashResponse.status !== 200) {
+      throw new Error('Failed to fetch recent blockhash');
+    }
+
+    if (!blockhashResponse.data.success || !blockhashResponse.data.blockhash) {
+      throw new Error('Invalid response from backend blockhash API');
+    }
+
+    transaction.recentBlockhash = blockhashResponse.data.blockhash;
+    transaction.feePayer = phantomProvider.publicKey;
+    console.log('[ReactiveWalletStore] Set blockhash and fee payer on transaction');
+
+    // 6. Sign and send transaction with Phantom
     console.log('[ReactiveWalletStore] 🚀 Signing and sending transaction with timeout protection...');
 
     // Add timeout protection for signAndSendTransaction
