@@ -1,5 +1,5 @@
 // Phantom signAndSendTransaction flow - no Rust signing needed
-import { fetchMiddleware } from '../../../../../fetch-wrapper'
+import { fetchMiddleware } from '../../../../../../../../fetch-wrapper'
 
 // Exchange-new specific response interfaces matching the API specification
 interface ExchangeNewResponse200 {
@@ -169,7 +169,7 @@ export async function POST(
 
             try {
                 // Import auth store dynamically to avoid circular dependencies
-                const { getGlobalAuthStore } = await import('../../../../../firebase/auth-store')
+                const { getGlobalAuthStore } = await import('../../../../../../../../firebase/auth-store')
                 const authStore = getGlobalAuthStore()
                 await authStore.refreshToken() // Uses fallback mechanism
 
