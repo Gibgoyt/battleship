@@ -15,18 +15,21 @@ npm run dev
 ```
 
 ### 2. Backend API Verification
-```bash
-# Test program info endpoint
-curl -X GET https://devbackend.splitdo.app:8443/api/splitdo-token/program/info
+```typescript
+// Test program info endpoint
+import { middlewareFetch } from '../middleware/endpoints'
 
-# Expected response:
-# {
-#   "data": {
-#     "utility_token_mint": "6vdfHTgLiEXvoGVp8Ga2HaKQsPKj6DrUTee7526SCXoM",
-#     ...
-#   },
-#   "success": true
-# }
+const programInfoResult = await middlewareFetch.Endpoints._Api.SplitdoToken.Program.Info.GET()
+
+if (programInfoResult.status === 200) {
+  console.log('Token Mint:', programInfoResult.data.data.utility_token_mint)
+  // Expected: "6vdfHTgLiEXvoGVp8Ga2HaKQsPKj6DrUTee7526SCXoM"
+} else {
+  console.error('Failed to get program info:', programInfoResult.data.message)
+}
+
+// Old curl command (replaced):
+// curl -X GET https://devbackend.splitdo.app:8443/api/splitdo-token/program/info
 ```
 
 ### 3. MetaMask Setup Requirements
@@ -120,16 +123,29 @@ console.log('ATA creation result:', result);
 - MetaMask-signed transaction
 
 **API Test**:
-```bash
-# Test with actual signed transaction (replace values)
-curl -X POST https://devbackend.splitdo.app:8443/api/splitdo-token/accounts/create \
-  -H "Authorization: Bearer YOUR_FIREBASE_JWT" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "wallet_address": "YOUR_WALLET_ADDRESS",
-    "token_account_address": "YOUR_ATA_ADDRESS",
-    "signed_transaction": "YOUR_BASE64_SIGNED_TX"
-  }'
+```typescript
+// Test with actual signed transaction (replace values)
+import { middlewareFetch } from '../middleware/endpoints'
+
+const createAccountResult = await middlewareFetch.Endpoints._Api.SplitdoToken.Accounts.Create.POST({
+  wallet_address: "YOUR_WALLET_ADDRESS",
+  token_account_address: "YOUR_ATA_ADDRESS",
+  signed_transaction: "YOUR_BASE64_SIGNED_TX"
+})
+
+if (createAccountResult.status === 200) {
+  console.log('Account created successfully:', createAccountResult.data.data.transaction_signature)
+} else if (createAccountResult.status === 409) {
+  console.log('Account already exists for this wallet')
+} else {
+  console.error('Failed to create account:', createAccountResult.data.message)
+}
+
+// Old curl command (replaced):
+// curl -X POST https://devbackend.splitdo.app:8443/api/splitdo-token/accounts/create \
+//   -H "Authorization: Bearer YOUR_FIREBASE_JWT" \
+//   -H "Content-Type: application/json" \
+//   -d '{ ... }'
 ```
 
 **Expected Response**:
