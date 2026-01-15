@@ -91,13 +91,19 @@ export const CONNECTION_CONFIG = {
   keepAlive: true
 };
 
-// Backend Solana API configuration (no rate limits)
+// Backend Solana API configuration using endpoints system
+export const getBackendBaseUrl = () => {
+  // Use endpoints system for production, fallback to localhost for development
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return `http://localhost:8444`;
+  }
+  return `https://devbackend.splitdo.app:8443`;
+};
+
 export const BACKEND_SOLANA_API = {
-  baseUrl: typeof window !== 'undefined'
-    ? (window.location.hostname === 'localhost'
-        ? `http://localhost:8444`
-        : `https://devbackend.splitdo.app:8443`)
-    : `https://devbackend.splitdo.app:8443`,
+  get baseUrl() {
+    return getBackendBaseUrl();
+  },
 
   endpoints: {
     // Solana network endpoints

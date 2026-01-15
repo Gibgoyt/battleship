@@ -35,6 +35,7 @@ import { SPLITDO_CONFIG, ERROR_MESSAGES, BACKEND_SOLANA_API } from './walletconn
 import { SolanaBrowserError } from './solana-browser-safe';
 import type { WalletProvider } from './wallet-providers';
 import { type SplitdoRawAmount } from './token-utils';
+import { middlewareFetch } from '../../middleware/endpoints';
 
 // Wallet-agnostic transaction creation and signing interface
 export interface WalletTransactionRequest {
@@ -148,13 +149,13 @@ export class EnhancedSolanaService {
     }
 
     try {
-      const response = await fetch(`${BACKEND_SOLANA_API.baseUrl}${BACKEND_SOLANA_API.endpoints.recentBlockhash}`);
+      const result = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Network.RecentBlockhash.GET();
 
-      if (!response.ok) {
-        throw new Error(`Backend API error: ${response.status}`);
+      if (result.status !== 200) {
+        throw new Error(`Backend API error: ${result.status}`);
       }
 
-      const data = await response.json();
+      const data = result.data;
       if (!data.success || !data.blockhash) {
         throw new Error('Invalid response from backend blockhash API');
       }
@@ -177,14 +178,14 @@ export class EnhancedSolanaService {
    */
   private async checkNetworkHealth(): Promise<boolean> {
     try {
-      const response = await fetch(`${BACKEND_SOLANA_API.baseUrl}${BACKEND_SOLANA_API.endpoints.networkHealth}`);
+      const result = await middlewareFetch.Endpoints.Devbackend.GET();
 
-      if (!response.ok) {
+      if (result.status !== 200) {
         return false;
       }
 
-      const data = await response.json();
-      return data.success && data.health?.status === 'ok';
+      const data = result.data;
+      return data.status === 'ok' || data.status === 'healthy';
     } catch (error) {
       console.error('[SolanaService] Network health check failed:', error);
       return false;
