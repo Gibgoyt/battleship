@@ -16,7 +16,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
   // SolidJS Wallet Reactive Store Hooks
   const { splitdoATA, checkSplitdoBalance } = useSplitdoATA();
   const { openModal, closeModal, isModalOpen } = useWalletModal();
-  const { isCreateAccountModalOpen, closeCreateAccountModal } = useCreateAccountModal();
+  const { isCreateAccountModalOpen, closeCreateAccountModal, openCreateAccountModal } = useCreateAccountModal();
   const { wallet, connectionStatus, connectionError } = useWallet();
   const { connectWallet, disconnectWallet } = useWalletConnection();
   const { solBalance, refreshBalances } = useWalletBalances();
@@ -32,6 +32,14 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
     if (connectionStatus() === 'connected' && wallet()) {
       console.log('[WalletPage] Wallet connected, refreshing balances');
       refreshBalances();
+    }
+  });
+
+  // Auto-open modal when no SPLITDO account exists and wallet is connected
+  createEffect(() => {
+    if (splitdoATA().status === 'not_found' && connectionStatus() === 'connected') {
+      console.log('[WalletPage] No SPLITDO account found, opening creation modal');
+      openCreateAccountModal();
     }
   });
 

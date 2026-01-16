@@ -1,5 +1,5 @@
 import type { Component } from 'solid-js';
-import { Show, createSignal } from 'solid-js';
+import { Show, createSignal, createEffect } from 'solid-js';
 import { useCreateAccountModal, useWallet, useWalletConnection, useSplitdoATA } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
 import { MobileWalletInstallation } from './MobileWalletInstallation';
 import { detectMobilePlatform } from 'src/applications_solid/app/lib/wallet/mobile-detection';
@@ -30,6 +30,14 @@ export const CreateAccountModal: Component<CreateAccountModalProps> = (props) =>
       setStep('create');
     }
   };
+
+  // Auto-advance to create step when modal opens and wallet is connected
+  createEffect(() => {
+    if (isCreateAccountModalOpen() && connectionStatus() === 'connected' && wallet()) {
+      console.log('[CreateAccountModal] Wallet connected, advancing to create step');
+      setStep('create');
+    }
+  });
 
   // Handle backdrop click
   const handleBackdropClick = (e: MouseEvent) => {
