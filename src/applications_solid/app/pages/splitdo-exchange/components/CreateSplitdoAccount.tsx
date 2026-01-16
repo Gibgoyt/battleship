@@ -1,5 +1,5 @@
 import { Component, Show, createSignal } from 'solid-js';
-import { useSplitdoATA, useWallet, useWalletModal } from '../../../lib/wallet/wallet-context';
+import { useSplitdoATA, useWallet, useWalletModal } from '../../../lib/wallet/wallet-reactive-store';
 
 const CreateSplitdoAccount: Component = () => {
   const { splitdoATA, createSplitdoATA } = useSplitdoATA();

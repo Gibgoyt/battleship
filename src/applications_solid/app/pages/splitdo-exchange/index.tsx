@@ -6,12 +6,12 @@ import {
   useWallet,
   useWalletConnection,
   useWalletBalances
-} from 'src/applications_solid/app/lib/wallet/wallet-context';
-import WalletSelectionModal from '../../components/WalletSelectionModal';
+} from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
+import WalletModal from '../../components/WalletModal';
 import CreateSplitdoAccount from './components/CreateSplitdoAccount';
 
 const WalletPage: Component<{ isDark: boolean }> = (props) => {
-  // SolidJS Wallet Context Hooks
+  // SolidJS Wallet Reactive Store Hooks
   const { splitdoATA, checkSplitdoBalance } = useSplitdoATA();
   const { openModal, closeModal, isModalOpen } = useWalletModal();
   const { wallet, connectionStatus, connectionError } = useWallet();
@@ -350,8 +350,8 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
       </Show>
 
       {/* Wallet Selection Modal for ATA Creation */}
-      <WalletSelectionModal
-        isOpen={isModalOpen()}
+      <WalletModal
+        isOpen={isModalOpen}
         onClose={() => closeModal()}
         isDark={props.isDark}
       />
