@@ -16,6 +16,15 @@ export const CreateAccountModal: Component<CreateAccountModalProps> = (props) =>
   const { connectWallet } = useWalletConnection();
   const { createSplitdoATA, splitdoATA } = useSplitdoATA();
 
+  // DEBUG: Log modal state changes
+  createEffect(() => {
+    console.log('[CreateAccountModal] Modal state changed:', {
+      isOpen: isCreateAccountModalOpen(),
+      componentRendered: true,
+      props: props
+    });
+  });
+
   const [step, setStep] = createSignal<'wallet' | 'create'>('wallet');
   const [isConnecting, setIsConnecting] = createSignal(false);
   const [showMobileInstallation, setShowMobileInstallation] = createSignal(false);
@@ -57,11 +66,32 @@ export const CreateAccountModal: Component<CreateAccountModalProps> = (props) =>
     setCreationSuccess(false);
   };
 
+  // DEBUG: Log every render
+  console.log('[CreateAccountModal] Component render:', {
+    isOpen: isCreateAccountModalOpen(),
+    step: step(),
+    connectionStatus: connectionStatus(),
+    wallet: wallet(),
+    timestamp: new Date().toISOString()
+  });
+
   return (
-    <Show when={isCreateAccountModalOpen()}>
+    <Show when={isCreateAccountModalOpen()} fallback={
+      <div style="display: none;">
+        {(() => {
+          console.log('[CreateAccountModal] Modal NOT showing - isOpen:', isCreateAccountModalOpen());
+          return null;
+        })()}
+      </div>
+    }>
+      {(() => {
+        console.log('[CreateAccountModal] Modal IS showing - rendering UI');
+        return null;
+      })()}
     <div
       class="fixed inset-0 z-50 flex items-center justify-center"
       onClick={handleBackdropClick}
+      style="background: rgba(255, 0, 0, 0.1); border: 2px solid red;" // DEBUG: Make modal visible with red background
     >
       {/* Backdrop */}
       <div class={`absolute inset-0 transition-all duration-300 ${

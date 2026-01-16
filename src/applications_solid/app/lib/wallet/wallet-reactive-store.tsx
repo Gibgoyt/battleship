@@ -965,11 +965,20 @@ export const useCreateAccountModal = () => {
     isCreateAccountModalOpen,
     openCreateAccountModal: () => {
       console.log('[ReactiveWalletStore] Opening create account modal');
+      console.log('[ReactiveWalletStore] BEFORE SET: isCreateAccountModalOpen =', isCreateAccountModalOpen());
       setIsCreateAccountModalOpen(true);
+      console.log('[ReactiveWalletStore] AFTER SET: isCreateAccountModalOpen =', isCreateAccountModalOpen());
+
+      // DEBUG: Force check in next tick
+      setTimeout(() => {
+        console.log('[ReactiveWalletStore] NEXT TICK CHECK: isCreateAccountModalOpen =', isCreateAccountModalOpen());
+      }, 0);
     },
     closeCreateAccountModal: () => {
       console.log('[ReactiveWalletStore] Closing create account modal');
+      console.log('[ReactiveWalletStore] BEFORE CLOSE: isCreateAccountModalOpen =', isCreateAccountModalOpen());
       setIsCreateAccountModalOpen(false);
+      console.log('[ReactiveWalletStore] AFTER CLOSE: isCreateAccountModalOpen =', isCreateAccountModalOpen());
     }
   };
 };
