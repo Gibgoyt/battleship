@@ -52,6 +52,9 @@ const [splitdoATA, setSplitdoATA] = createSignal<ATAInfo>({ status: 'unknown' })
 const [isExchangeModalOpen, setIsExchangeModalOpen] = createSignal(false);
 const [exchangeStatus, setExchangeStatus] = createSignal<'idle' | 'loading' | 'success' | 'error'>('idle');
 const [exchangeError, setExchangeError] = createSignal<string | null>(null);
+
+// Create Account Modal signals
+const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = createSignal(false);
 const [programInfo, setProgramInfo] = createSignal<{ exchangeRate: number; loading: boolean; error: string | null }>({
   exchangeRate: 0.11, // Default fallback value
   loading: false,
@@ -952,6 +955,21 @@ export const useExchangeModal = () => {
       // Reset exchange state when modal closes
       setExchangeStatus('idle');
       setExchangeError(null);
+    }
+  };
+};
+
+// Create Account Modal Hook
+export const useCreateAccountModal = () => {
+  return {
+    isCreateAccountModalOpen,
+    openCreateAccountModal: () => {
+      console.log('[ReactiveWalletStore] Opening create account modal');
+      setIsCreateAccountModalOpen(true);
+    },
+    closeCreateAccountModal: () => {
+      console.log('[ReactiveWalletStore] Closing create account modal');
+      setIsCreateAccountModalOpen(false);
     }
   };
 };

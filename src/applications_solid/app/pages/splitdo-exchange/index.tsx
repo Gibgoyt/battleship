@@ -3,17 +3,20 @@ import { createSignal, createEffect, Show } from 'solid-js';
 import {
   useSplitdoATA,
   useWalletModal,
+  useCreateAccountModal,
   useWallet,
   useWalletConnection,
   useWalletBalances
 } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
 import WalletModal from '../../components/WalletModal';
+import { CreateAccountModal } from '../../components/CreateAccountModal';
 import CreateSplitdoAccount from './components/CreateSplitdoAccount';
 
 const WalletPage: Component<{ isDark: boolean }> = (props) => {
   // SolidJS Wallet Reactive Store Hooks
   const { splitdoATA, checkSplitdoBalance } = useSplitdoATA();
   const { openModal, closeModal, isModalOpen } = useWalletModal();
+  const { isCreateAccountModalOpen, closeCreateAccountModal } = useCreateAccountModal();
   const { wallet, connectionStatus, connectionError } = useWallet();
   const { connectWallet, disconnectWallet } = useWalletConnection();
   const { solBalance, refreshBalances } = useWalletBalances();
@@ -353,6 +356,11 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
       <WalletModal
         isOpen={isModalOpen}
         onClose={() => closeModal()}
+        isDark={props.isDark}
+      />
+
+      {/* Create Account Modal */}
+      <CreateAccountModal
         isDark={props.isDark}
       />
     </div>

@@ -3,6 +3,7 @@ import { createSignal, createEffect, createMemo, Show, onMount } from 'solid-js'
 import {
   useProgramInfo,
   useExchangeModal,
+  useCreateAccountModal,
   useWallet,
   useSplitdoATA,
   useWalletBalances,
@@ -18,6 +19,7 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
   const { programInfo, fetchProgramInfo } = useProgramInfo();
   const { solPrice, fetchSolPrice } = useSolPrice();
   const { openExchangeModal } = useExchangeModal();
+  const { openCreateAccountModal } = useCreateAccountModal();
   const { wallet, connectionStatus } = useWallet();
   const { splitdoATA, createSplitdoATA } = useSplitdoATA();
   const { solBalance } = useWalletBalances();
@@ -66,21 +68,9 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
     openExchangeModal();
   };
 
-  const handleCreateAccount = async () => {
-    console.log('[EnhancedExchangeWidget] Starting SPLITDO account creation...');
-
-    try {
-      // Call createSplitdoATA which will trigger Phantom to sign the transaction
-      const result = await createSplitdoATA();
-
-      if (result.success) {
-        console.log('[EnhancedExchangeWidget] Account created successfully:', result.signature);
-      } else {
-        console.error('[EnhancedExchangeWidget] Account creation failed:', result.error);
-      }
-    } catch (error) {
-      console.error('[EnhancedExchangeWidget] Account creation error:', error);
-    }
+  const handleCreateAccount = () => {
+    console.log('[EnhancedExchangeWidget] Opening create account modal...');
+    openCreateAccountModal();
   };
 
   return (
