@@ -11,7 +11,7 @@ import {
 } from 'solid-js';
 import { PublicKey } from '@solana/web3.js';
 
-import { CONNECTION_CONFIG, ERROR_MESSAGES } from './walletconnect-config';
+import { CONNECTION_CONFIG, ERROR_MESSAGES, SPLITDO_CONFIG } from './walletconnect-config';
 import { solanaService } from './solana-service';
 import { walletConnectService } from './walletconnect-service';
 import { PhantomWalletProvider } from './wallet-providers';
@@ -696,138 +696,134 @@ const refreshBalances = async () => {
 // Real SPLITDO ATA creation function
 const createSplitdoATA = async (): Promise<{ success: boolean; signature?: string; error?: string }> => {
   const currentWallet = wallet();
-  const token = firebaseToken;
 
   if (!currentWallet) {
     return { success: false, error: 'No wallet connected' };
   }
 
-  if (!token) {
-    return { success: false, error: 'No authentication token available' };
-  }
-
-  // Use the ALREADY CONNECTED Phantom wallet from window
+  // Use Phantom provider directly like exchange
   if (typeof window === 'undefined') {
     return { success: false, error: 'Not in browser environment' };
   }
 
   const phantomProvider = (window as any).phantom?.solana;
-  if (!phantomProvider || !phantomProvider.isPhantom) {
-    return { success: false, error: 'Phantom wallet not found' };
-  }
-
-  if (!phantomProvider.isConnected) {
-    return { success: false, error: 'Phantom wallet not connected' };
-  }
-
-  if (!phantomProvider.publicKey) {
-    return { success: false, error: 'No public key available from connected wallet' };
+  if (!phantomProvider?.isPhantom || !phantomProvider.isConnected) {
+    return { success: false, error: 'Phantom wallet not found or not connected' };
   }
 
   setSplitdoATA(prev => ({ ...prev, status: 'creating' }));
 
-  // Create adapter that uses the already connected Phantom provider
-  const phantomAdapter = {
-    id: 'phantom',
-    name: 'Phantom',
-    icon: '🟣',
-    isAvailable: () => true, // Already checked above
-    isConnected: () => phantomProvider.isConnected,
-    getPublicKey: () => {
-      try {
-        return phantomProvider.publicKey ? new PublicKey(phantomProvider.publicKey.toString()) : null;
-      } catch (error) {
-        console.error('[ReactiveWalletStore] Error getting public key:', error);
-        return null;
-      }
-    },
-    signTransaction: async (transaction: any) => {
-      console.log('[ReactiveWalletStore] 🚀 CALLING PHANTOM signTransaction - popup should appear!');
-      return await phantomProvider.signTransaction(transaction);
-    },
-    connect: async () => {
-      const result = await phantomProvider.connect();
-      return { publicKey: new PublicKey(result.publicKey.toString()) };
-    },
-    disconnect: async () => {
-      await phantomProvider.disconnect();
-    }
-  };
-
   try {
-    console.log('[ReactiveWalletStore] Creating SPLITDO ATA with connected Phantom wallet...');
+    console.log('[ReactiveWalletStore] Creating SPLITDO ATA with signAndSendTransaction (like exchange)...');
     console.log('[ReactiveWalletStore] Phantom connected?', phantomProvider.isConnected);
     console.log('[ReactiveWalletStore] Phantom public key:', phantomProvider.publicKey?.toString());
 
-    // Use the enhanced solana service with the adapter
-    const ataResult = await solanaService.createSplitdoATA(phantomAdapter);
+    // 1. Create ATA transaction using solana service
+    const ataTransactionResult = await solanaService.createATATransaction({
+      walletAddress: currentWallet.address,
+      tokenMint: SPLITDO_CONFIG.tokenMint
+    });
 
-    if (!ataResult.success) {
-      setSplitdoATA(prev => ({
-        ...prev,
-        status: 'error',
-        error: ataResult.error
-      }));
-      return {
-        success: false,
-        error: ataResult.error
-      };
-    }
-
-    if (!ataResult.signature) {
+    if (!ataTransactionResult.needsCreation) {
       // ATA already exists
       setSplitdoATA({
         status: 'exists',
-        address: ataResult.ataAddress
+        address: ataTransactionResult.associatedTokenAddress
       });
       return { success: true, signature: 'already_exists' };
     }
 
-    // Submit signed transaction to backend
-    const submitResult = await solanaService.submitSignedATATransaction(
-      token,
-      currentWallet.address,
-      ataResult.ataAddress!,
-      ataResult.signature
-    );
+    // 2. Set blockhash and fee payer (same as exchange)
+    const { middlewareFetch } = await import('../../middleware/endpoints');
+    const blockhashResponse = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Network.RecentBlockhash.GET();
+    ataTransactionResult.transaction.recentBlockhash = blockhashResponse.data.blockhash;
+    ataTransactionResult.transaction.feePayer = phantomProvider.publicKey;
 
-    if (submitResult.success) {
+    // 3. PHANTOM POPUP - Use signTransaction (backend needs signed transaction)
+    console.log('[ReactiveWalletStore] 🚀 Signing ATA transaction for backend submission...');
+
+    let timeoutId: NodeJS.Timeout;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        console.log('[ReactiveWalletStore] ⏰ ATA transaction timeout - Phantom not responding');
+        reject(new Error('Transaction signing timed out. Please try again.'));
+      }, 30000);
+    });
+
+    const signedTransaction = await Promise.race([
+      phantomProvider.signTransaction(ataTransactionResult.transaction),  // KEY: Sign only (backend submits)
+      timeoutPromise
+    ]);
+
+    clearTimeout(timeoutId);
+
+    console.log('[ReactiveWalletStore] ✅ ATA transaction signed successfully');
+
+    // 4. Convert signed transaction to base64 for backend
+    const serializedTransaction = signedTransaction.serialize({
+      requireAllSignatures: false
+    });
+    const base64Transaction = serializedTransaction.toString('base64');
+
+    console.log('[ReactiveWalletStore] Serialized transaction for backend submission');
+
+    // 5. Send signed transaction to backend
+    const { POST: createAccountEndpoint } = await import('../../middleware/endpoints/devbackend/_api/splitdo-token/accounts/create');
+
+    const backendResult = await createAccountEndpoint({
+      wallet_address: currentWallet.address,
+      token_account_address: ataTransactionResult.associatedTokenAddress,
+      signed_transaction: base64Transaction  // Send signed transaction, not signature
+    });
+
+    if (backendResult.status === 200) {
       setSplitdoATA({
         status: 'created',
-        address: ataResult.ataAddress,
+        address: ataTransactionResult.associatedTokenAddress,
         balance: {
           uiAmount: 0
         }
       });
 
       // Refresh balances after creation
-      setTimeout(() => refreshBalances(), 2000);
+      setTimeout(() => refreshSplitdoATA(), 2000);
 
       return {
         success: true,
-        signature: submitResult.transactionSignature
+        signature: base64Transaction
       };
     } else {
       setSplitdoATA(prev => ({
         ...prev,
         status: 'error',
-        error: submitResult.error
+        error: backendResult.data.message || 'Backend submission failed'
       }));
       return {
         success: false,
-        error: submitResult.error
+        error: backendResult.data.message || 'Backend submission failed'
       };
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Transaction failed';
+
+    // User-friendly error messages (same as exchange)
+    let userFriendlyMessage = errorMessage;
+    if (errorMessage.includes('timeout')) {
+      userFriendlyMessage = 'Transaction signing timed out. Please try again.';
+    } else if (errorMessage.includes('User rejected')) {
+      userFriendlyMessage = 'Transaction was cancelled. Please try again when ready.';
+    } else if (errorMessage.includes('Insufficient SOL')) {
+      userFriendlyMessage = 'Insufficient SOL balance for transaction fees. Please add SOL to your wallet.';
+    }
+
     setSplitdoATA(prev => ({
       ...prev,
       status: 'error',
-      error: errorMessage
+      error: userFriendlyMessage
     }));
     return {
       success: false,
-      error: errorMessage
+      error: userFriendlyMessage
     };
   }
 };
