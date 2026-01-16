@@ -86,12 +86,8 @@
 
 /* Apple-style Glass Morphism Effects */
 .modal-backdrop-light {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
-  backdrop-filter: blur(20px) saturate(1.8);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
 }
 
 .modal-backdrop-dark {

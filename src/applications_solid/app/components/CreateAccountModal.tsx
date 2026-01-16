@@ -83,7 +83,7 @@ export const CreateAccountModal: Component<CreateAccountModalProps> = (props) =>
         class={`relative w-full max-w-2xl mx-4 p-0 rounded-xl shadow-2xl z-10 overflow-hidden transition-all duration-300 ${
           props.isDark
             ? 'bg-crypto-bg-primary border border-crypto-border'
-            : 'bg-white/95 border border-gray-200/50 shadow-xl backdrop-blur-sm'
+            : 'bg-gray-100 border border-gray-300 shadow-2xl'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -210,12 +210,12 @@ const WalletSelection: Component<{
       >
         <div class="text-center mb-8">
           <h3 class={`text-xl font-semibold mb-2 ${
-            props.isDark ? 'text-crypto-text-primary' : 'text-gray-800'
+            props.isDark ? 'text-crypto-text-primary' : 'text-gray-900'
           }`}>
             Connect Your Wallet
           </h3>
           <p class={`text-sm ${
-            props.isDark ? 'text-crypto-text-secondary' : 'text-gray-600'
+            props.isDark ? 'text-crypto-text-secondary' : 'text-gray-700'
           }`}>
             Choose your preferred wallet to create your SPLITDO account
           </p>
@@ -229,7 +229,7 @@ const WalletSelection: Component<{
             class={`w-full p-4 rounded-xl border-2 transition-all duration-200 flex items-center space-x-4 ${
               props.isDark
                 ? 'border-crypto-border bg-crypto-bg-secondary hover:bg-crypto-bg-tertiary text-crypto-text-primary'
-                : 'border-gray-200 bg-white hover:bg-gray-50 text-gray-800'
+                : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-900'
             } ${props.isConnecting() ? 'opacity-50 cursor-not-allowed' : 'hover:border-crypto-accent-purple cursor-pointer'}`}
           >
             <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center">
@@ -250,7 +250,7 @@ const WalletSelection: Component<{
             class={`w-full p-4 rounded-xl border-2 border-dashed opacity-50 cursor-not-allowed flex items-center space-x-4 ${
               props.isDark
                 ? 'border-crypto-border bg-crypto-bg-secondary text-crypto-text-secondary'
-                : 'border-gray-200 bg-gray-50 text-gray-500'
+                : 'border-gray-300 bg-gray-50 text-gray-500'
             }`}
           >
             <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-600 rounded-xl flex items-center justify-center">
@@ -338,7 +338,7 @@ const CreateAccountForm: Component<{
               Account Created Successfully!
             </h3>
             <p class={`text-sm ${
-              props.isDark ? 'text-crypto-text-secondary' : 'text-gray-600'
+              props.isDark ? 'text-crypto-text-secondary' : 'text-gray-700'
             }`}>
               Your SPLITDO account is ready. You can now start trading!
             </p>
@@ -353,12 +353,12 @@ const CreateAccountForm: Component<{
               <span class="text-white font-bold text-xl">S</span>
             </div>
             <h3 class={`text-xl font-semibold mb-2 ${
-              props.isDark ? 'text-crypto-text-primary' : 'text-gray-800'
+              props.isDark ? 'text-crypto-text-primary' : 'text-gray-900'
             }`}>
               Create Your SPLITDO Account
             </h3>
             <p class={`text-sm ${
-              props.isDark ? 'text-crypto-text-secondary' : 'text-gray-600'
+              props.isDark ? 'text-crypto-text-secondary' : 'text-gray-700'
             }`}>
               This will create an Associated Token Account (ATA) for SPLITDO tokens on your wallet.
             </p>
