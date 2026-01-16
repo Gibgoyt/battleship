@@ -750,42 +750,38 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
     });
     transaction.add(createATAInstruction);
 
-    // 4. PHANTOM POPUP - Use signTransaction (backend needs signed transaction)
-    console.log('[ReactiveWalletStore] 🚀 Signing ATA transaction for backend submission...');
+    // 4. PHANTOM POPUP - Use signAndSendTransaction (frontend submits to Solana)
+    console.log('[ReactiveWalletStore] 🚀 Signing and sending ATA transaction to Solana...');
 
     let timeoutId: NodeJS.Timeout;
     const timeoutPromise = new Promise<never>((_, reject) => {
       timeoutId = setTimeout(() => {
         console.log('[ReactiveWalletStore] ⏰ ATA transaction timeout - Phantom not responding');
-        reject(new Error('Transaction signing timed out. Please try again.'));
+        reject(new Error('Transaction signing and sending timed out. Check for Phantom popup window.'));
       }, 30000);
     });
 
-    const signedTransaction = await Promise.race([
-      phantomProvider.signTransaction(transaction),  // KEY: Sign only (backend submits)
+    const transactionResult = await Promise.race([
+      phantomProvider.signAndSendTransaction(transaction),  // KEY: Sign AND send (Phantom submits to blockchain)
       timeoutPromise
     ]);
 
     clearTimeout(timeoutId);
 
-    console.log('[ReactiveWalletStore] ✅ ATA transaction signed successfully');
+    console.log('[ReactiveWalletStore] ✅ ATA transaction signed and submitted to blockchain by Phantom');
+    console.log('[ReactiveWalletStore] Transaction signature (base58):', transactionResult.signature);
 
-    // 4. Convert signed transaction to base64 for backend
-    const serializedTransaction = signedTransaction.serialize({
-      requireAllSignatures: false
-    });
-    const base64Transaction = serializedTransaction.toString('base64');
+    // 4. Extract transaction signature for backend verification
+    const txSignature = transactionResult.signature;
 
-    console.log('[ReactiveWalletStore] Serialized transaction for backend submission');
+    console.log('[ReactiveWalletStore] Transaction submitted to blockchain, sending signature to backend for verification');
 
-    // 5. Send signed transaction to backend using middlewareFetch (automatic JWT)
-    const { POST: createAccountEndpoint } = await import('../../middleware/endpoints/devbackend/_api/splitdo-token/accounts/create');
-
-    const backendResult = await createAccountEndpoint({
-      wallet_address: currentWallet.address,
-      token_account_address: associatedTokenAddress.toString(),
-      signed_transaction: base64Transaction  // Send signed transaction, not signature
-    });
+    // 5. Send transaction signature to backend for verification using middlewareFetch (automatic JWT)
+    const backendResult = await middlewareFetch.Endpoints.Devbackend._Api.Testing.Usockets.TokenAccount.Create.POST(
+      txSignature,
+      phantomProvider.publicKey.toString(),
+      associatedTokenAddress.toString()
+    );
 
     if (backendResult.status === 200) {
       setSplitdoATA({
@@ -801,7 +797,7 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
 
       return {
         success: true,
-        signature: base64Transaction
+        signature: txSignature
       };
     } else {
       setSplitdoATA(prev => ({
@@ -820,7 +816,7 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
     // User-friendly error messages (same as exchange)
     let userFriendlyMessage = errorMessage;
     if (errorMessage.includes('timeout')) {
-      userFriendlyMessage = 'Transaction signing timed out. Please try again.';
+      userFriendlyMessage = 'Transaction signing and sending timed out. Check for Phantom popup window.';
     } else if (errorMessage.includes('User rejected')) {
       userFriendlyMessage = 'Transaction was cancelled. Please try again when ready.';
     } else if (errorMessage.includes('Insufficient SOL')) {
