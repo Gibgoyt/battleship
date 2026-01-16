@@ -215,7 +215,7 @@ const WalletSelection: Component<{
             Connect Your Wallet
           </h3>
           <p class={`text-sm ${
-            props.isDark ? 'text-crypto-text-secondary' : 'text-gray-700'
+            props.isDark ? 'text-crypto-text-secondary' : 'text-black'
           }`}>
             Choose your preferred wallet to create your SPLITDO account
           </p>
@@ -338,7 +338,7 @@ const CreateAccountForm: Component<{
               Account Created Successfully!
             </h3>
             <p class={`text-sm ${
-              props.isDark ? 'text-crypto-text-secondary' : 'text-gray-700'
+              props.isDark ? 'text-crypto-text-secondary' : 'text-black'
             }`}>
               Your SPLITDO account is ready. You can now start trading!
             </p>
@@ -358,7 +358,7 @@ const CreateAccountForm: Component<{
               Create Your SPLITDO Account
             </h3>
             <p class={`text-sm ${
-              props.isDark ? 'text-crypto-text-secondary' : 'text-gray-700'
+              props.isDark ? 'text-crypto-text-secondary' : 'text-black'
             }`}>
               This will create an Associated Token Account (ATA) for SPLITDO tokens on your wallet.
             </p>
@@ -392,7 +392,7 @@ const CreateAccountForm: Component<{
           </button>
 
           <p class={`text-xs ${
-            props.isDark ? 'text-crypto-text-secondary' : 'text-gray-500'
+            props.isDark ? 'text-crypto-text-secondary' : 'text-gray-600'
           }`}>
             This transaction requires a small SOL fee for account creation (~0.001 SOL)
           </p>
