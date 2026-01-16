@@ -6,17 +6,20 @@ import {
   useCreateAccountModal,
   useWallet,
   useWalletConnection,
-  useWalletBalances
+  useWalletBalances,
+  useExchangeModal
 } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
 import WalletModal from '../../components/WalletModal';
 import { CreateAccountModal } from '../../components/CreateAccountModal';
-import CreateSplitdoAccount from './components/CreateSplitdoAccount';
+import { ExchangeModal } from '../../components/ExchangeModal';
+import EnhancedExchangeWidget from './components/EnhancedExchangeWidget';
 
 const WalletPage: Component<{ isDark: boolean }> = (props) => {
   // SolidJS Wallet Reactive Store Hooks
   const { splitdoATA, checkSplitdoBalance } = useSplitdoATA();
   const { openModal, closeModal, isModalOpen } = useWalletModal();
   const { isCreateAccountModalOpen, closeCreateAccountModal, openCreateAccountModal } = useCreateAccountModal();
+  const { isExchangeModalOpen } = useExchangeModal();
   const { wallet, connectionStatus, connectionError } = useWallet();
   const { connectWallet, disconnectWallet } = useWalletConnection();
   const { solBalance, refreshBalances } = useWalletBalances();
@@ -124,10 +127,8 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
         </div>
       </Show>
 
-      {/* Show CreateSplitdoAccount component when no account exists */}
-      <Show when={splitdoATA().status === 'not_found'}>
-        <CreateSplitdoAccount />
-      </Show>
+      {/* Enhanced Exchange Widget with both working buttons */}
+      <EnhancedExchangeWidget isDark={props.isDark} />
 
       {/* Balance Overview - Only show when account exists or is being checked */}
       <Show when={splitdoATA().status !== 'not_found'}>
@@ -366,6 +367,9 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
         onClose={() => closeModal()}
         isDark={props.isDark}
       />
+
+      {/* Exchange Modal */}
+      <ExchangeModal isDark={props.isDark} />
 
       {/* Create Account Modal */}
       <CreateAccountModal
