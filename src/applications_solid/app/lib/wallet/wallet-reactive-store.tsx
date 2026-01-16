@@ -724,17 +724,18 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
 
     // 1. Create transaction locally (no backend health checks)
     const SPLITDO_TOKEN_MINT = new PublicKey("6vdfHTgLiEXvoGVp8Ga2HaKQsPKj6DrUTee7526SCXoM"); // utility_token_mint
+    const walletPublicKey = phantomProvider.publicKey; // Use Phantom's PublicKey object
     const associatedTokenAddress = await getAssociatedTokenAddress(
       SPLITDO_TOKEN_MINT,
-      currentWallet.publicKey
+      walletPublicKey
     );
 
     console.log('[ReactiveWalletStore] Creating ATA instruction for:', associatedTokenAddress.toString());
 
     const createATAInstruction = createAssociatedTokenAccountInstruction(
-      currentWallet.publicKey, // payer
+      walletPublicKey, // payer
       associatedTokenAddress,   // ata
-      currentWallet.publicKey,  // owner
+      walletPublicKey,  // owner
       SPLITDO_TOKEN_MINT        // mint
     );
 
@@ -745,7 +746,7 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
     // 3. Create and set up transaction
     const transaction = new Transaction({
       recentBlockhash: blockhashResponse.data.blockhash,
-      feePayer: phantomProvider.publicKey
+      feePayer: walletPublicKey
     });
     transaction.add(createATAInstruction);
 
