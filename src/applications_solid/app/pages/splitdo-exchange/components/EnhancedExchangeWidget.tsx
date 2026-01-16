@@ -187,7 +187,10 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
                   Create a SPLITDO account to start trading
                 </div>
               </div>
-              <button class="btn-crypto-primary w-full py-4 text-lg">
+              <button
+                onClick={openModal}
+                class="btn-crypto-primary w-full py-4 text-lg"
+              >
                 Create SPLITDO Account
               </button>
             </div>

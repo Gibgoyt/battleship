@@ -1,10 +1,10 @@
 import { Component, Show, createSignal } from 'solid-js';
-import { useSplitdoATA, useWallet, useWalletConnection } from '../../../lib/wallet/wallet-reactive-store';
+import { useSplitdoATA, useWallet, useWalletModal } from '../../../lib/wallet/wallet-context';
 
 const CreateSplitdoAccount: Component = () => {
   const { splitdoATA, createSplitdoATA } = useSplitdoATA();
   const { wallet, connectionStatus } = useWallet();
-  const { connectWallet } = useWalletConnection();
+  const { openModal } = useWalletModal();
 
   const [isCreating, setIsCreating] = createSignal(false);
   const [creationError, setCreationError] = createSignal<string | null>(null);
@@ -45,7 +45,7 @@ const CreateSplitdoAccount: Component = () => {
   };
 
   const handleConnectWallet = () => {
-    connectWallet('phantom'); // Default to Phantom for now
+    openModal(); // Open wallet selection modal
   };
 
   return (

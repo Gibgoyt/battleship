@@ -73,7 +73,7 @@ const AppContent: Component = () => {
       ? pathSegments[1] 
       : 'dashboard'
     
-    if (['dashboard', 'counter', 'profile', 'wallet'].includes(pageName)) {
+    if (['dashboard', 'counter', 'profile', 'splitdo-exchange'].includes(pageName)) {
       setCurrentPage(pageName as Page)
     }
   })
@@ -94,7 +94,7 @@ const AppContent: Component = () => {
       ? pathSegments[1] 
       : 'dashboard'
     
-    if (['dashboard', 'counter', 'profile', 'wallet'].includes(pageName)) {
+    if (['dashboard', 'counter', 'profile', 'splitdo-exchange'].includes(pageName)) {
       setCurrentPage(pageName as Page)
     }
   })
@@ -118,7 +118,7 @@ const AppContent: Component = () => {
         return <CounterPage isDark={isDark()} />
       case 'profile':
         return <ProfilePage isDark={isDark()} />
-      case 'wallet':
+      case 'splitdo-exchange':
         return <WalletPage isDark={isDark()} />
       default:
         return <DashboardPage isDark={isDark()} />
