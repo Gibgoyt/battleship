@@ -9,7 +9,11 @@ import {
   createEffect,
   type Accessor
 } from 'solid-js';
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey, Transaction } from '@solana/web3.js';
+import {
+  getAssociatedTokenAddress,
+  createAssociatedTokenAccountInstruction
+} from '@solana/spl-token';
 
 import { CONNECTION_CONFIG, ERROR_MESSAGES, SPLITDO_CONFIG } from './walletconnect-config';
 import { solanaService } from './solana-service';
@@ -718,28 +722,34 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
     console.log('[ReactiveWalletStore] Phantom connected?', phantomProvider.isConnected);
     console.log('[ReactiveWalletStore] Phantom public key:', phantomProvider.publicKey?.toString());
 
-    // 1. Create ATA transaction using solana service
-    const ataTransactionResult = await solanaService.createATATransaction({
-      walletAddress: currentWallet.address,
-      tokenMint: SPLITDO_CONFIG.tokenMint
-    });
+    // 1. Create transaction locally (no backend health checks)
+    const SPLITDO_TOKEN_MINT = new PublicKey("6vdfHTgLiEXvoGVp8Ga2HaKQsPKj6DrUTee7526SCXoM"); // utility_token_mint
+    const associatedTokenAddress = await getAssociatedTokenAddress(
+      SPLITDO_TOKEN_MINT,
+      currentWallet.publicKey
+    );
 
-    if (!ataTransactionResult.needsCreation) {
-      // ATA already exists
-      setSplitdoATA({
-        status: 'exists',
-        address: ataTransactionResult.associatedTokenAddress
-      });
-      return { success: true, signature: 'already_exists' };
-    }
+    console.log('[ReactiveWalletStore] Creating ATA instruction for:', associatedTokenAddress.toString());
 
-    // 2. Set blockhash and fee payer (same as exchange)
+    const createATAInstruction = createAssociatedTokenAccountInstruction(
+      currentWallet.publicKey, // payer
+      associatedTokenAddress,   // ata
+      currentWallet.publicKey,  // owner
+      SPLITDO_TOKEN_MINT        // mint
+    );
+
+    // 2. Get recent blockhash using existing middleware
     const { middlewareFetch } = await import('../../middleware/endpoints');
     const blockhashResponse = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Network.RecentBlockhash.GET();
-    ataTransactionResult.transaction.recentBlockhash = blockhashResponse.data.blockhash;
-    ataTransactionResult.transaction.feePayer = phantomProvider.publicKey;
 
-    // 3. PHANTOM POPUP - Use signTransaction (backend needs signed transaction)
+    // 3. Create and set up transaction
+    const transaction = new Transaction({
+      recentBlockhash: blockhashResponse.data.blockhash,
+      feePayer: phantomProvider.publicKey
+    });
+    transaction.add(createATAInstruction);
+
+    // 4. PHANTOM POPUP - Use signTransaction (backend needs signed transaction)
     console.log('[ReactiveWalletStore] 🚀 Signing ATA transaction for backend submission...');
 
     let timeoutId: NodeJS.Timeout;
@@ -751,7 +761,7 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
     });
 
     const signedTransaction = await Promise.race([
-      phantomProvider.signTransaction(ataTransactionResult.transaction),  // KEY: Sign only (backend submits)
+      phantomProvider.signTransaction(transaction),  // KEY: Sign only (backend submits)
       timeoutPromise
     ]);
 
@@ -767,19 +777,19 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
 
     console.log('[ReactiveWalletStore] Serialized transaction for backend submission');
 
-    // 5. Send signed transaction to backend
+    // 5. Send signed transaction to backend using middlewareFetch (automatic JWT)
     const { POST: createAccountEndpoint } = await import('../../middleware/endpoints/devbackend/_api/splitdo-token/accounts/create');
 
     const backendResult = await createAccountEndpoint({
       wallet_address: currentWallet.address,
-      token_account_address: ataTransactionResult.associatedTokenAddress,
+      token_account_address: associatedTokenAddress.toString(),
       signed_transaction: base64Transaction  // Send signed transaction, not signature
     });
 
     if (backendResult.status === 200) {
       setSplitdoATA({
         status: 'created',
-        address: ataTransactionResult.associatedTokenAddress,
+        address: associatedTokenAddress.toString(),
         balance: {
           uiAmount: 0
         }
