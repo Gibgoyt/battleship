@@ -472,7 +472,7 @@ export class EnhancedSolanaService {
   }> {
     try {
       // Import middleware endpoint dynamically to avoid circular dependencies
-      const { POST: createAccountEndpoint } = await import('../../middleware/endpoints/_api/splitdo-token/accounts/create');
+      const { POST: createAccountEndpoint } = await import('../../middleware/endpoints/devbackend/_api/splitdo-token/accounts/create');
 
       const result = await createAccountEndpoint({
         wallet_address: walletAddress,
@@ -485,7 +485,7 @@ export class EnhancedSolanaService {
         case 200:
           return {
             success: true,
-            transactionSignature: result.data.data?.transaction_signature
+            transactionSignature: result.data.data?.token_account_pubkey // Use token account as success indicator since no transaction signature is returned
           };
         case 400:
           return {
@@ -501,28 +501,6 @@ export class EnhancedSolanaService {
           return {
             success: false,
             error: 'Access forbidden'
-          };
-        case 409:
-          return {
-            success: false,
-            error: 'Token account already exists'
-          };
-        case 422:
-          // Provide more specific error messages for common issues
-          let errorMessage = result.data.message || 'Invalid signed transaction';
-          if (errorMessage.includes('owner is not allowed')) {
-            errorMessage = 'Transaction ownership error - please try reconnecting your wallet';
-          } else if (errorMessage.includes('simulation failed')) {
-            errorMessage = 'Transaction simulation failed - please check your wallet balance and try again';
-          }
-          return {
-            success: false,
-            error: errorMessage
-          };
-        case 429:
-          return {
-            success: false,
-            error: `Rate limit exceeded. ${result.data.retry_after ? `Retry after ${result.data.retry_after} seconds` : ''}`
           };
         case 500:
           return {
