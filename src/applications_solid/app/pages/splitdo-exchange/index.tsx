@@ -368,14 +368,6 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
       />
 
       {/* Create Account Modal */}
-      {(() => {
-        console.log('[WalletPage] Rendering CreateAccountModal with props:', {
-          isDark: props.isDark,
-          isCreateAccountModalOpen: isCreateAccountModalOpen(),
-          timestamp: new Date().toISOString()
-        });
-        return null;
-      })()}
       <CreateAccountModal
         isDark={props.isDark}
       />

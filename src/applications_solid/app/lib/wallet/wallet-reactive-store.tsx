@@ -786,7 +786,7 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
       });
 
       // Refresh balances after creation
-      setTimeout(() => refreshSplitdoATA(), 2000);
+      setTimeout(() => checkSplitdoBalance(), 2000);
 
       return {
         success: true,
