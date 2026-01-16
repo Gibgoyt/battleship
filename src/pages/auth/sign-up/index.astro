@@ -6,5 +6,39 @@ export const prerender = true; // KEEP STATIC - client-side detection handles UR
 ---
 
 <AuthLayout title="Sign Up">
-	<FirebaseSignUpFlow client:only="svelte" />
+	<div id="signup-container">
+		<FirebaseSignUpFlow client:only="svelte" />
+		<noscript>
+			<div class="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 px-4">
+				<div class="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 p-8 text-center">
+					<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">JavaScript Required</h2>
+					<p class="text-gray-600 dark:text-gray-400">Please enable JavaScript to use the sign-up form.</p>
+				</div>
+			</div>
+		</noscript>
+	</div>
+
+	<script>
+		window.addEventListener('error', (event) => {
+			if (event.filename?.includes('FirebaseSignUp') ||
+				event.message?.toLowerCase().includes('hydration')) {
+				console.error('Component hydration failed:', event);
+				const container = document.getElementById('signup-container');
+				if (container) {
+					container.innerHTML = `
+						<div class="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 px-4">
+							<div class="bg-white dark:bg-zinc-800 border border-red-200 p-8 text-center">
+								<h2 class="text-xl font-bold text-red-900 dark:text-red-100 mb-4">Loading Error</h2>
+								<p class="text-red-600 dark:text-red-400 mb-4">Sign-up form failed to load.</p>
+								<button onclick="window.location.reload()"
+										class="px-6 py-2 bg-red-600 text-white hover:bg-red-700">
+									Reload Page
+								</button>
+							</div>
+						</div>
+					`;
+				}
+			}
+		});
+	</script>
 </AuthLayout>

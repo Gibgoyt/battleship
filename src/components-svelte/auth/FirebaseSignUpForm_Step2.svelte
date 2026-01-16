@@ -46,44 +46,44 @@
 			.substring(0, 100); // Max 100 chars
 	}
 
-	// Real-time bio validation
+	// Bio validation with explicit reactive dependencies
+	$: bioValid = bio.length <= 100 && /^[a-zA-Z0-9.,?!#@\s]*$/.test(bio);
+	$: bioError = (() => {
+		if (bio.length > 100) return 'Bio must be 100 characters or less';
+		if (!/^[a-zA-Z0-9.,?!#@\s]*$/.test(bio)) return 'Bio contains invalid characters';
+		return '';
+	})();
+
+	// Username validation with explicit reactive dependencies
+	$: usernameValid = username ?
+		(username.trim().length >= 3 &&
+		 username.trim().length <= 50 &&
+		 /^[a-zA-Z0-9_-]+$/.test(username.trim())) : true;
+
+	$: usernameError = (() => {
+		if (!username) return '';
+		const trimmed = username.trim();
+		if (trimmed.length < 3) return 'Username must be at least 3 characters';
+		if (trimmed.length > 50) return 'Username must be less than 50 characters';
+		if (!/^[a-zA-Z0-9_-]+$/.test(trimmed))
+			return 'Username can only contain letters, numbers, underscores, and dashes';
+		return '';
+	})();
+
+	// Form validity with explicit reactive dependencies
+	$: formValid = username.trim() && usernameValid && bioValid;
+
+	// Debug validation state changes
 	$: {
-		if (bio.length > 100) {
-			bioError = 'Bio must be 100 characters or less';
-		} else if (!/^[a-zA-Z0-9.,?!#@\s]*$/.test(bio)) {
-			bioError = 'Bio contains invalid characters';
-		} else {
-			bioError = '';
-		}
-	}
-
-	// Username validation
-	function validateUsername() {
-		const trimmedUsername = username.trim();
-
-		if (trimmedUsername.length < 3) {
-			usernameError = 'Username must be at least 3 characters';
-			return false;
-		}
-		if (trimmedUsername.length > 50) {
-			usernameError = 'Username must be less than 50 characters';
-			return false;
-		}
-		if (!/^[a-zA-Z0-9_-]+$/.test(trimmedUsername)) {
-			usernameError = 'Username can only contain letters, numbers, underscores, and dashes';
-			return false;
-		}
-		usernameError = '';
-		return true;
-	}
-
-	// Real-time username validation - only validate if user has started typing
-	$: {
-		if (username.length > 0) {
-			validateUsername();
-		} else {
-			usernameError = '';
-		}
+		logger.debug('Step 2 validation state:', {
+			username: !!username,
+			bio: !!bio,
+			usernameValid,
+			bioValid,
+			usernameError,
+			bioError,
+			formValid
+		});
 	}
 
 	function handleSubmit(e) {
@@ -95,7 +95,8 @@
 			return;
 		}
 
-		if (!validateUsername() || bioError) {
+		if (!formValid) {
+			showError('Please fix validation errors before submitting.');
 			return;
 		}
 
@@ -341,7 +342,7 @@
 					<div>
 						<button
 							type="submit"
-							disabled={loading || usernameError || bioError}
+							disabled={loading || !formValid}
 							class="w-full flex justify-center items-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium text-white bg-[#00d9ff] hover:bg-[#00b8d4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00d9ff] dark:focus:ring-offset-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{#if loading}

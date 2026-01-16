@@ -46,8 +46,8 @@ function createLogger(context: string): Logger {
   }
 
   const shouldLog = (level: LogLevel): boolean => {
-    if (isDevelopment) return true
-    return level === 'error' || level === 'warn'
+    // Always enable all logging levels
+    return true;
   }
 
   // Return plain functions that don't create circular references

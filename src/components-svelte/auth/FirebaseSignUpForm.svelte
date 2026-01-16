@@ -35,35 +35,39 @@
 		successMessage = '';
 	}
 
-	// Email validation
-	function validateEmails() {
-		if (email && confirmEmail && email !== confirmEmail) {
-			emailError = 'Email addresses do not match';
-			return false;
-		}
-		emailError = '';
-		return true;
-	}
+	// Email validation with explicit reactive dependencies
+	$: emailsMatch = email && confirmEmail ? email === confirmEmail : true;
+	$: emailError = email && confirmEmail && !emailsMatch ? 'Email addresses do not match' : '';
 
-	// Password validation
-	function validatePasswords() {
-		if (password && confirmPassword) {
-			if (password !== confirmPassword) {
-				passwordError = 'Passwords do not match';
-				return false;
-			}
-			if (password.length < 6) {
-				passwordError = 'Password must be at least 6 characters';
-				return false;
-			}
-		}
-		passwordError = '';
-		return true;
-	}
+	// Password validation with explicit reactive dependencies
+	$: passwordsMatch = password && confirmPassword ? password === confirmPassword : true;
+	$: passwordMinLength = password ? password.length >= 6 : true;
+	$: passwordError = (() => {
+		if (!password || !confirmPassword) return '';
+		if (!passwordsMatch) return 'Passwords do not match';
+		if (!passwordMinLength) return 'Password must be at least 6 characters';
+		return '';
+	})();
 
-	// Real-time validation
-	$: validateEmails();
-	$: validatePasswords();
+	// Form validity with explicit reactive dependencies
+	$: formValid = email && confirmEmail && password && confirmPassword &&
+	              emailsMatch && passwordsMatch && passwordMinLength;
+
+	// Debug validation state changes
+	$: {
+		logger.debug('Validation state:', {
+			email: !!email,
+			confirmEmail: !!confirmEmail,
+			emailsMatch,
+			emailError,
+			password: !!password,
+			confirmPassword: !!confirmPassword,
+			passwordsMatch,
+			passwordMinLength,
+			passwordError,
+			formValid
+		});
+	}
 
 	function handleSubmit(e) {
 		e.preventDefault();
@@ -74,7 +78,8 @@
 			return;
 		}
 
-		if (!validateEmails() || !validatePasswords()) {
+		if (!formValid) {
+			showError('Please fix validation errors before submitting.');
 			return;
 		}
 
@@ -307,7 +312,7 @@
 					<div>
 						<button
 							type="submit"
-							disabled={loading || emailError || passwordError}
+							disabled={loading || !formValid}
 							class="w-full flex justify-center items-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium text-white bg-[#00d9ff] hover:bg-[#00b8d4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00d9ff] dark:focus:ring-offset-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{#if loading}
