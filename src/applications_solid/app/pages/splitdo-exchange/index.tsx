@@ -8,6 +8,7 @@ import {
   useWalletBalances
 } from 'src/applications_solid/app/lib/wallet/wallet-context';
 import WalletSelectionModal from '../../components/WalletSelectionModal';
+import CreateSplitdoAccount from './components/CreateSplitdoAccount';
 
 const WalletPage: Component<{ isDark: boolean }> = (props) => {
   // SolidJS Wallet Context Hooks
@@ -112,11 +113,17 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
         </div>
       </Show>
 
-      {/* Balance Overview */}
-      <div class="space-y-6">
-        <h3 class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-          Balances
-        </h3>
+      {/* Show CreateSplitdoAccount component when no account exists */}
+      <Show when={splitdoATA().status === 'not_found'}>
+        <CreateSplitdoAccount />
+      </Show>
+
+      {/* Balance Overview - Only show when account exists or is being checked */}
+      <Show when={splitdoATA().status !== 'not_found'}>
+        <div class="space-y-6">
+          <h3 class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+            Balances
+          </h3>
 
         <div class="space-y-4">
           {/* SPLITDO Balance */}
@@ -145,18 +152,12 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
             </Show>
 
             <Show when={splitdoATA().status === 'not_found'}>
-              <div class="space-y-3 mt-4">
-                <p class={`text-lg ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  No Account Found
+              <div class="text-center py-4">
+                <p class={`text-lg mb-2 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  No SPLITDO Account Found
                 </p>
-                <button
-                  onClick={() => openModal()}
-                  class="px-6 py-2 bg-[#00d9ff] text-white hover:bg-[#00b8d4] transition-colors font-semibold"
-                >
-                  Create Account
-                </button>
-                <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                  Connect wallet to create your SPLITDO token account
+                <p class={`text-sm ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  You need to create a SPLITDO token account to start trading
                 </p>
               </div>
             </Show>
@@ -234,9 +235,11 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
             </Show>
           </div>
         </div>
-      </div>
+        </div>
+      </Show>
 
-      {/* Quick Actions */}
+      {/* Quick Actions - Only show when account exists */}
+      <Show when={splitdoATA().status !== 'not_found'}>
       <div class="pt-6 border-t border-gray-200 dark:border-zinc-800">
         <h3 class={`text-lg font-semibold mb-4 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
           Quick Actions
@@ -344,6 +347,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
           </div>
         </div>
       </div>
+      </Show>
 
       {/* Wallet Selection Modal for ATA Creation */}
       <WalletSelectionModal
