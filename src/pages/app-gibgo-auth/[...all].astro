@@ -1,0 +1,27 @@
+---
+import 'src/styles/global.css'
+import App from 'src/applications_solid/app-gibgo-auth/App.tsx'
+
+/**
+ * CATCH-ALL ROUTE FOR GIBGO AUTH SOLIDJS SINGLE PAGE APPLICATION
+ *
+ * This file implements a catch-all route ([...all].astro) that:
+ * 1. Handles ALL routes under /app-gibgo-auth/*
+ * 2. Loads a SolidJS single page application
+ * 3. NO authentication - just a simple test app
+ */
+
+export const prerender = false;
+---
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gibgo Auth Test App</title>
+  <meta name="theme-color" content="#4F46E5">
+</head>
+<body class="h-full">
+<App client:only="solid-js" />
+</body>
+</html>
