@@ -458,10 +458,10 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Submit signed ATA transaction to backend (requires Firebase token)
+   * Submit signed ATA transaction to backend (uses middleware with automatic auth handling)
    */
   async submitSignedATATransaction(
-    firebaseToken: string,
+    firebaseToken: string, // Keep for backward compatibility but unused
     walletAddress: string,
     ataAddress: string,
     signedTransaction: string
@@ -471,46 +471,75 @@ export class EnhancedSolanaService {
     error?: string;
   }> {
     try {
-      const response = await fetch(`${SPLITDO_CONFIG.apiBaseUrl}/splitdo-token/accounts/create`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${firebaseToken}`,
-          'Content-Type': 'application/json',
-          'Origin': 'https://splitdo.app'
-        },
-        body: JSON.stringify({
-          wallet_address: walletAddress,
-          token_account_address: ataAddress,
-          signed_transaction: signedTransaction
-        })
+      // Import middleware endpoint dynamically to avoid circular dependencies
+      const { POST: createAccountEndpoint } = await import('../../middleware/endpoints/_api/splitdo-token/accounts/create');
+
+      const result = await createAccountEndpoint({
+        wallet_address: walletAddress,
+        token_account_address: ataAddress,
+        signed_transaction: signedTransaction
       });
 
-      const result = await response.json() as APIResponse<CreateATAApiData>;
-
-      if (response.ok && result.success) {
-        return {
-          success: true,
-          transactionSignature: result.data.transaction_signature
-        };
-      } else {
-        // Provide more specific error messages for common issues
-        let errorMessage = result.message || 'Failed to create token account';
-        if (errorMessage.includes('owner is not allowed')) {
-          errorMessage = 'Transaction ownership error - please try reconnecting your wallet';
-        } else if (errorMessage.includes('simulation failed')) {
-          errorMessage = 'Transaction simulation failed - please check your wallet balance and try again';
-        }
-
-        return {
-          success: false,
-          error: errorMessage
-        };
+      // Handle discriminated union responses from middleware
+      switch (result.status) {
+        case 200:
+          return {
+            success: true,
+            transactionSignature: result.data.data?.transaction_signature
+          };
+        case 400:
+          return {
+            success: false,
+            error: result.data.message || 'Invalid request parameters'
+          };
+        case 401:
+          return {
+            success: false,
+            error: 'Authentication failed - please login again'
+          };
+        case 403:
+          return {
+            success: false,
+            error: 'Access forbidden'
+          };
+        case 409:
+          return {
+            success: false,
+            error: 'Token account already exists'
+          };
+        case 422:
+          // Provide more specific error messages for common issues
+          let errorMessage = result.data.message || 'Invalid signed transaction';
+          if (errorMessage.includes('owner is not allowed')) {
+            errorMessage = 'Transaction ownership error - please try reconnecting your wallet';
+          } else if (errorMessage.includes('simulation failed')) {
+            errorMessage = 'Transaction simulation failed - please check your wallet balance and try again';
+          }
+          return {
+            success: false,
+            error: errorMessage
+          };
+        case 429:
+          return {
+            success: false,
+            error: `Rate limit exceeded. ${result.data.retry_after ? `Retry after ${result.data.retry_after} seconds` : ''}`
+          };
+        case 500:
+          return {
+            success: false,
+            error: result.data.message || 'Internal server error'
+          };
+        default:
+          return {
+            success: false,
+            error: 'Unexpected server response'
+          };
       }
     } catch (error) {
-      console.error('Error submitting signed ATA transaction:', error);
+      console.error('Middleware endpoint call failed:', error);
       return {
         success: false,
-        error: ERROR_MESSAGES.NETWORK_ERROR
+        error: error instanceof Error ? error.message : ERROR_MESSAGES.NETWORK_ERROR
       };
     }
   }
