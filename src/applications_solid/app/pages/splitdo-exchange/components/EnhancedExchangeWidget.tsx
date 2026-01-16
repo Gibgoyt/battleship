@@ -19,7 +19,7 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
   const { solPrice, fetchSolPrice } = useSolPrice();
   const { openExchangeModal } = useExchangeModal();
   const { wallet, connectionStatus } = useWallet();
-  const { splitdoATA } = useSplitdoATA();
+  const { splitdoATA, createSplitdoATA } = useSplitdoATA();
   const { solBalance } = useWalletBalances();
   const { openModal } = useWalletModal();
 
@@ -64,6 +64,23 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
   const handleExchange = () => {
     // Open exchange modal directly like the original ExchangeSection
     openExchangeModal();
+  };
+
+  const handleCreateAccount = async () => {
+    console.log('[EnhancedExchangeWidget] Starting SPLITDO account creation...');
+
+    try {
+      // Call createSplitdoATA which will trigger Phantom to sign the transaction
+      const result = await createSplitdoATA();
+
+      if (result.success) {
+        console.log('[EnhancedExchangeWidget] Account created successfully:', result.signature);
+      } else {
+        console.error('[EnhancedExchangeWidget] Account creation failed:', result.error);
+      }
+    } catch (error) {
+      console.error('[EnhancedExchangeWidget] Account creation error:', error);
+    }
   };
 
   return (
@@ -188,7 +205,7 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
                 </div>
               </div>
               <button
-                onClick={openModal}
+                onClick={handleCreateAccount}
                 class="btn-crypto-primary w-full py-4 text-lg"
               >
                 Create SPLITDO Account
