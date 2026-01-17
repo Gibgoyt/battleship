@@ -1,44 +1,138 @@
-# TODOS
+# TODOS - FIX UP SEO
 
-Pattern up the damned fucking sign up onboarding
+run this:
 
-## Sign Up Session Fuckup
+```bash
+find . -type f -name '*.astro'
+```
 
-If user goes to /auth/sign-up to create account
-First create account with Firebase
-Then store JWT token on browser
-Then POST /api/users to create user on our backend
+these files very closely resemble HTML, example:
 
-But user gotta:
+@ LAnding Pages SEO
+```astro
+---
+import Layout from 'src/layouts/Layout.astro';
 
-1. Sign Up Firebase at /auth/sign-in
-2. manually go to /auth/sign-in
-3. Then finish sign up with auth/sign-up/?firebaseUserExists=true&backendUserExists=false
+export const prerender = true
 
-This needs to be fixed,
-and no fixing does not mean a redirect to /auth/sign-in
-It should be a single fluid process
+// Fetch presale price at build time
+let formattedPrice = '$0.001'; // fallback
+try {
+  const response = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/program/info', {
+    headers: {
+      'Origin': 'https://splitdo.app'
+    }
+  });
+  if (response.ok) {
+    const data = await response.json();
+    if (data.success && data.data?.exchange_rate) {
+      const price = data.data.exchange_rate;
+      formattedPrice = price >= 1 ? `$${price.toFixed(2)}` : `$${price.toFixed(3)}`;
+      console.info(`✅ Presale price fetched: ${formattedPrice}`);
+    }
+  }
+} catch (error) {
+  console.warn('Failed to fetch presale price, using fallback:', error);
+}
+---
 
-## /auth/sign-in and /auth/sign-up look fucked up 
+<Layout title="SPLITDO Token Presale - Join Early Access">
+	Hello World
+</Layout
+```
 
-Please fix 
+With Layout, this is most likely where the SEO sits, inside ./src/layouts/Layout.astro
 
-Looks fucked, Firebase SVG logo fucked up
-Why the fuck is it even Firebase and not SplitDo logo??
-Color scheme like hella fucked so yea
+```astro
+---
+import DarkModeToggle from 'src/components-qwik/DarkModeToggle';
+import 'src/styles/global.css';
 
-## Buttons On landing page not linked to app
+export const prerender = true
 
-Join presale buttons must take user to app
-currently ./src/pages/app/[...all].astro checks for JWT on browser if none then redirect to /auth/sign-in
-if yea he got a JWT but no account on backend the redirect to auth/sign-up/?firebaseUserExists=true&backendUserExists=false
+export interface Props {
+    title: string;
+}
 
-the buttons need to take user to /app/wallet or what the fuck not
-and catch-all take care of logging in and what the fuck not ye
+const { title } = Astro.props;
+---
 
-## /auth/sign-in and /auth/sign-up
+<!doctype html>
+<html lang="en">
+<head>
 
-Must have already have an account sign in 
-or dont have an account sign up
+  <!-- THIS IS WHERE SEO METADATA GOES!!! -->
+  <!-- THIS IS WHERE SEO METADATA GOES!!! -->
+  <!-- THIS IS WHERE SEO METADATA GOES!!! -->
+  <!-- THIS IS WHERE SEO METADATA GOES!!! -->
+  <!-- THIS IS WHERE SEO METADATA GOES!!! -->
 
-buttons on each page
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+
+    <script is:inline>
+        // Prevent flash of light mode
+        const isDarkMode = localStorage.getItem('darkMode') === 'true' ||
+            (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</head>
+<body>
+</body>
+```
+
+# App SEO
+
+Run find ./src/pages -type f -name '\[...all\].astro'
+Specifically ./src/pages/app/[...all].astro
+
+Ask Claude what the heck this is, but here is a brief summary:
+
+```text
+An Astro catch-all does whatever a catch all route does, for an HTTP request:
+
+  GET /app/ HTTP/1.1\r\n....
+  GET /app/dashboard HTTP/1.1\r\n...
+
+It will respond  with the exact same response for both
+
+So /app/* load a SolidJS single page dashboard in this case,
+Where the app is entirely client-side routed, like React Router
+```
+
+[...all].astro
+```astro
+---
+// all JS catch-all server side logic here
+
+/* server must execute logic on every request, not just at build time
+* 'true' would generate static HTML at build
+* static HTML does fuck all
+*/
+export const prerender = false
+---
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <!-- THIS IS WHERE SEO METADATA GOES!!! -->
+  <!-- THIS IS WHERE SEO METADATA GOES!!! -->
+  <!-- THIS IS WHERE SEO METADATA GOES!!! -->
+  <!-- THIS IS WHERE SEO METADATA GOES!!! -->
+  <!-- THIS IS WHERE SEO METADATA GOES!!! -->
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPLITDO Bill Splitting</title>
+
+  <meta name="theme-color" content="#0A0E1A">
+  <meta name="color-scheme" content="light dark">
+</head>
+<body>
+</body>
+```
