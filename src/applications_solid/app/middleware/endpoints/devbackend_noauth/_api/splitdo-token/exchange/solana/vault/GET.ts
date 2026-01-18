@@ -65,11 +65,13 @@ export async function GET(): Promise<GetResponse> {
 		const url = 'https://devbackend.splitdo.app:8443/api/splitdo-token/exchange/solana/vault'
 
 		// NEW: Log exact fetch configuration
+		// FIXED: Removed custom User-Agent header that caused CORS rejection on mobile
 		const fetchConfig = {
 			method: 'GET',
 			headers: {
-				'Accept': 'application/json',
-				'User-Agent': 'SPLITDO-App/1.0'
+				'Accept': 'application/json'
+				// User-Agent header removed - browsers send this automatically
+				// Custom User-Agent headers cause CORS issues on mobile browsers
 			}
 		};
 
