@@ -785,11 +785,17 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
         console.log('[ReactiveWalletStore] Step 2: Serializing signed ATA transaction...');
         const rawTransaction = signedTransaction.serialize({ requireAllSignatures: false });
 
-        // Step 3: Send to network using our Solana connection
-        console.log('[ReactiveWalletStore] Step 3: Sending raw ATA transaction to Solana network...');
-        const result = await solanaService.sendRawTransaction(rawTransaction);
+        // Step 3: Send to network via backend (fixes 403 errors on mobile)
+        console.log('[ReactiveWalletStore] Step 3: Sending raw ATA transaction via backend...');
+        const result = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Transaction.Submit.POST({
+          serializedTransaction: Buffer.from(rawTransaction).toString('base64')
+        });
 
-        return { signature: result.signature };
+        if (result.status !== 200) {
+          throw new Error(`ATA transaction submission failed: ${result.data.message || 'Unknown error'}`);
+        }
+
+        return { signature: result.data.signature };
       };
 
       transactionResult = await Promise.race([
@@ -1277,11 +1283,17 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
         console.log('[ReactiveWalletStore] Step 2: Serializing signed transaction...');
         const rawTransaction = signedTransaction.serialize({ requireAllSignatures: false });
 
-        // Step 3: Send to network using our Solana connection
-        console.log('[ReactiveWalletStore] Step 3: Sending raw transaction to Solana network...');
-        const result = await solanaService.sendRawTransaction(rawTransaction);
+        // Step 3: Send to network via backend (fixes 403 errors on mobile)
+        console.log('[ReactiveWalletStore] Step 3: Sending raw transaction via backend...');
+        const result = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Transaction.Submit.POST({
+          serializedTransaction: Buffer.from(rawTransaction).toString('base64')
+        });
 
-        return { signature: result.signature };
+        if (result.status !== 200) {
+          throw new Error(`Transaction submission failed: ${result.data.message || 'Unknown error'}`);
+        }
+
+        return { signature: result.data.signature };
       };
 
       transactionResult = await Promise.race([
