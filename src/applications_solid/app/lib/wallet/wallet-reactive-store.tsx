@@ -785,17 +785,19 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
         console.log('[ReactiveWalletStore] Step 2: Serializing signed ATA transaction...');
         const rawTransaction = signedTransaction.serialize({ requireAllSignatures: false });
 
-        // Step 3: Send to network via backend (fixes 403 errors on mobile)
-        console.log('[ReactiveWalletStore] Step 3: Sending raw ATA transaction via backend...');
-        const result = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Transaction.Submit.POST({
-          serializedTransaction: Buffer.from(rawTransaction).toString('base64')
+        // Step 3: Send ATA creation via backend (fixes 403 errors on mobile)
+        console.log('[ReactiveWalletStore] Step 3: Sending ATA creation transaction via backend...');
+        const result = await middlewareFetch.Endpoints.Devbackend._Api.SplitdoToken.Accounts.Create.POST({
+          wallet_address: phantomProvider.publicKey.toString(),
+          token_account_address: associatedTokenAddress.toString(),
+          signed_transaction: Buffer.from(rawTransaction).toString('base64')
         });
 
         if (result.status !== 200) {
-          throw new Error(`ATA transaction submission failed: ${result.data.message || 'Unknown error'}`);
+          throw new Error(`ATA creation failed: ${result.data.message || 'Unknown error'}`);
         }
 
-        return { signature: result.data.signature };
+        return { signature: result.data.data?.token_account_pubkey || 'ata_created' };
       };
 
       transactionResult = await Promise.race([
@@ -1283,17 +1285,23 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
         console.log('[ReactiveWalletStore] Step 2: Serializing signed transaction...');
         const rawTransaction = signedTransaction.serialize({ requireAllSignatures: false });
 
-        // Step 3: Send to network via backend (fixes 403 errors on mobile)
-        console.log('[ReactiveWalletStore] Step 3: Sending raw transaction via backend...');
-        const result = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Transaction.Submit.POST({
-          serializedTransaction: Buffer.from(rawTransaction).toString('base64')
-        });
+        // Step 3: Send to exchange endpoint via backend (fixes 403 errors on mobile)
+        console.log('[ReactiveWalletStore] Step 3: Sending signed transaction to exchange endpoint...');
+        const result = await middlewareFetch.Endpoints.Devbackend._Api.Testing.Usockets.Exchange.Solana.Splitdo.POST(
+          solAmount * 1_000_000_000, // Convert SOL to lamports for backend
+          Buffer.from(rawTransaction).toString('base64')
+        );
 
         if (result.status !== 200) {
-          throw new Error(`Transaction submission failed: ${result.data.message || 'Unknown error'}`);
+          throw new Error(`Exchange submission failed: ${result.data.message || 'Unknown error'}`);
         }
 
-        return { signature: result.data.signature };
+        // Extract transaction signature from exchange response
+        const exchangeSignature = result.data.stage1_sol_confirmation?.result?.value ? 'exchange_success' :
+                                 result.data.stage2_splitdo_exchange?.result?.value ? 'exchange_success' :
+                                 'exchange_completed';
+
+        return { signature: exchangeSignature };
       };
 
       transactionResult = await Promise.race([
