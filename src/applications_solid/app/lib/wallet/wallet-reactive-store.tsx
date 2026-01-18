@@ -1158,6 +1158,31 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
 
     // 3. Get SOL vault address from backend
     console.log('[ReactiveWalletStore] Fetching vault address...');
+
+    // NEW: Log environment before vault call for CORS debugging
+    const mobileDetectionForDebug = detectMobilePlatform();
+    console.log('[EXCHANGE DEBUG] Pre-vault call environment:', {
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
+      origin: typeof window !== 'undefined' ? window.location.origin : 'N/A',
+      href: typeof window !== 'undefined' ? window.location.href : 'N/A',
+      timestamp: new Date().toISOString(),
+      mobileDetection: mobileDetectionForDebug,
+      windowSize: typeof window !== 'undefined' ? {
+        innerWidth: window.innerWidth,
+        innerHeight: window.innerHeight
+      } : 'N/A',
+      phantomInfo: {
+        available: typeof window !== 'undefined' ? !!(window as any).phantom?.solana : false,
+        connected: typeof window !== 'undefined' ? !!(window as any).phantom?.solana?.isConnected : false,
+        version: typeof window !== 'undefined' ? (window as any).phantom?.solana?.version : 'N/A'
+      },
+      browserFeatures: {
+        supportsServiceWorker: typeof navigator !== 'undefined' ? 'serviceWorker' in navigator : false,
+        supportsFetch: typeof fetch !== 'undefined',
+        supportsWebGL: typeof window !== 'undefined' ? !!(window as any).WebGLRenderingContext : false
+      }
+    });
+
     const vaultResponse = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.SplitdoToken.Exchange.Solana.Vault.GET();
     if (vaultResponse.status !== 200) {
       throw new Error('Failed to fetch vault address');
