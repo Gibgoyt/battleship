@@ -1,7 +1,8 @@
 import type { Component } from 'solid-js';
 import { Show, createSignal, createMemo, createEffect } from 'solid-js';
-import { useExchangeModal, useExchange, useWallet, useWalletConnection, useProgramInfo } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
+import { useExchangeModal, useExchange, useWallet, useWalletConnection, useProgramInfo, useWalletConnectQRModal } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
 import { MobileWalletInstallation } from './MobileWalletInstallation';
+import { WalletConnectQRModal } from './WalletConnectQRModal';
 import { detectMobilePlatform } from 'src/applications_solid/app/lib/wallet/mobile-detection';
 import { executeMobileWalletDeepLink, attemptMobileWalletConnection } from 'src/applications_solid/app/lib/wallet/mobile-wallet-connector';
 import { addMobileTransactionListener, setupMobileReturnListener } from 'src/applications_solid/app/lib/wallet/mobile-transaction-handler';
@@ -16,6 +17,15 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
   const { connectionStatus } = useWallet();
   const { connectWallet } = useWalletConnection();
   const { programInfo, fetchProgramInfo } = useProgramInfo();
+  const {
+    isWalletConnectQRModalOpen,
+    closeWalletConnectQRModal,
+    walletConnectQRData,
+    walletConnectStatus,
+    walletConnectError,
+    refreshWalletConnectQR,
+    handleMobileWalletClick
+  } = useWalletConnectQRModal();
 
   const [step, setStep] = createSignal<'wallet' | 'exchange'>('wallet');
   const [solAmount, setSolAmount] = createSignal('');
@@ -214,11 +224,40 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
                 }
               }
             }}
+            onSelectWalletConnect={async () => {
+              if (connectionStatus() === 'connected') {
+                // Already connected, go to exchange
+                setStep('exchange');
+              } else {
+                // Need to connect WalletConnect
+                setIsConnecting(true);
+                try {
+                  await connectWallet('walletconnect');  // This opens QR modal
+                  setStep('exchange');
+                } catch (error) {
+                  console.error('Failed to connect WalletConnect:', error);
+                } finally {
+                  setIsConnecting(false);
+                }
+              }
+            }}
             onCloseMobileInstallation={() => setShowMobileInstallation(false)}
           />
           </Show>
         </div>
       </div>
+
+      {/* WalletConnect QR Modal */}
+      <WalletConnectQRModal
+        isDark={props.isDark}
+        isOpen={isWalletConnectQRModalOpen()}
+        onClose={closeWalletConnectQRModal}
+        qrData={walletConnectQRData()}
+        connectionStatus={walletConnectStatus()}
+        error={walletConnectError()}
+        onRefreshQR={refreshWalletConnectQR}
+        onMobileWalletClick={handleMobileWalletClick}
+      />
     </div>
     </Show>
   );
@@ -232,6 +271,7 @@ interface WalletSelectionProps {
   showMobileInstallation: boolean;
   mobileInstallationPlatform: 'ios' | 'android';
   onSelectPhantom: () => void;
+  onSelectWalletConnect: () => void;
   onCloseMobileInstallation: () => void;
 }
 
@@ -317,6 +357,39 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
         }`}>
           Coming Soon
         </span>
+      </button>
+
+      {/* WalletConnect Option */}
+      <button
+        onClick={props.onSelectWalletConnect}
+        disabled={props.isConnecting}
+        class={`w-full p-6 border-2 transition-all duration-200 flex items-center gap-4 rounded-xl ${
+          props.isConnecting
+            ? `opacity-50 cursor-not-allowed ${props.isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'}`
+            : `hover:border-blue-500 hover:shadow-lg cursor-pointer ${
+                props.isDark
+                  ? 'bg-gray-800 border-gray-700 hover:bg-gray-700'
+                  : 'bg-white border-gray-300 hover:bg-gray-50'
+              }`
+        }`}
+      >
+        <div class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg text-white text-xl font-bold">
+          🔗
+        </div>
+        <div class="flex-1 text-left">
+          <div class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+            WalletConnect
+          </div>
+          <div class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            {props.isConnecting
+              ? 'Connecting...'
+              : 'Scan QR code with mobile wallet'
+            }
+          </div>
+        </div>
+        <Show when={props.isConnecting}>
+          <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+        </Show>
       </button>
 
       {/* Mobile Installation Prompt */}
