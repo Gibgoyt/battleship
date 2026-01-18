@@ -1,8 +1,7 @@
 import type { Component } from 'solid-js';
 import { Show, createSignal, createMemo, createEffect } from 'solid-js';
-import { useExchangeModal, useExchange, useWallet, useWalletConnection, useProgramInfo, useWalletConnectQRModal } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
+import { useExchangeModal, useExchange, useWallet, useWalletConnection, useProgramInfo } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
 import { MobileWalletInstallation } from './MobileWalletInstallation';
-import { WalletConnectQRModal } from './WalletConnectQRModal';
 import { detectMobilePlatform } from 'src/applications_solid/app/lib/wallet/mobile-detection';
 import { executeMobileWalletDeepLink, attemptMobileWalletConnection } from 'src/applications_solid/app/lib/wallet/mobile-wallet-connector';
 import { addMobileTransactionListener, setupMobileReturnListener } from 'src/applications_solid/app/lib/wallet/mobile-transaction-handler';
@@ -17,15 +16,6 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
   const { connectionStatus } = useWallet();
   const { connectWallet } = useWalletConnection();
   const { programInfo, fetchProgramInfo } = useProgramInfo();
-  const {
-    isWalletConnectQRModalOpen,
-    closeWalletConnectQRModal,
-    walletConnectQRData,
-    walletConnectStatus,
-    walletConnectError,
-    refreshWalletConnectQR,
-    handleMobileWalletClick
-  } = useWalletConnectQRModal();
 
   const [step, setStep] = createSignal<'wallet' | 'exchange'>('wallet');
   const [solAmount, setSolAmount] = createSignal('');
@@ -246,18 +236,6 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
           </Show>
         </div>
       </div>
-
-      {/* WalletConnect QR Modal */}
-      <WalletConnectQRModal
-        isDark={props.isDark}
-        isOpen={isWalletConnectQRModalOpen}
-        onClose={closeWalletConnectQRModal}
-        qrData={walletConnectQRData}
-        connectionStatus={walletConnectStatus}
-        error={walletConnectError}
-        onRefreshQR={refreshWalletConnectQR}
-        onMobileWalletClick={handleMobileWalletClick}
-      />
     </div>
     </Show>
   );
