@@ -15,7 +15,7 @@ import {
   createAssociatedTokenAccountInstruction
 } from '@solana/spl-token';
 
-import { CONNECTION_CONFIG, ERROR_MESSAGES, SPLITDO_CONFIG } from './walletconnect-config';
+import { CONNECTION_CONFIG, ERROR_MESSAGES, SPLITDO_CONFIG, SUPPORTED_WALLETS } from './walletconnect-config';
 import { solanaService } from './solana-service';
 import { walletConnectService } from './walletconnect-service';
 import { PhantomWalletProvider } from './wallet-providers';
@@ -59,6 +59,13 @@ const [exchangeError, setExchangeError] = createSignal<string | null>(null);
 
 // Create Account Modal signals
 const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = createSignal(false);
+
+// WalletConnect QR Modal signals
+const [isWalletConnectQRModalOpen, setIsWalletConnectQRModalOpen] = createSignal(false);
+const [walletConnectQRData, setWalletConnectQRData] = createSignal<{ uri: string; qrCodeDataURL: string; expired: boolean } | null>(null);
+const [walletConnectStatus, setWalletConnectStatus] = createSignal<'idle' | 'connecting' | 'connected' | 'error'>('idle');
+const [walletConnectError, setWalletConnectError] = createSignal<string | null>(null);
+
 const [programInfo, setProgramInfo] = createSignal<{ exchangeRate: number; loading: boolean; error: string | null }>({
   exchangeRate: 0.11, // Default fallback value
   loading: false,
@@ -79,10 +86,63 @@ const [isFetchingSolPrice, setIsFetchingSolPrice] = createSignal(false);
 // Store Firebase token
 let firebaseToken: string | undefined = undefined;
 
+// Store WalletConnect provider instance for transaction signing
+let walletConnectProviderInstance: any = null;
+
 // Initialize store with Firebase token
 export const initializeWalletStore = (token?: string) => {
   console.log('[ReactiveWalletStore] Initializing with Firebase token:', token ? 'Present' : 'None');
   firebaseToken = token;
+};
+
+// Get current wallet provider for transaction signing
+const getCurrentWalletProvider = async (): Promise<{
+  provider: any;
+  walletType: 'phantom' | 'metamask' | 'walletconnect';
+  publicKey: any;
+}> => {
+  const currentWallet = wallet();
+  if (!currentWallet) {
+    throw new Error('No wallet connected');
+  }
+
+  if (currentWallet.name === 'Phantom') {
+    const phantomProvider = (window as any).phantom?.solana;
+    if (!phantomProvider?.isPhantom || !phantomProvider.isConnected) {
+      throw new Error('Phantom wallet not found or not connected');
+    }
+    return {
+      provider: phantomProvider,
+      walletType: 'phantom',
+      publicKey: phantomProvider.publicKey
+    };
+  } else if (currentWallet.name === 'MetaMask') {
+    const metamaskProvider = (window as any).ethereum;
+    if (!metamaskProvider?.isMetaMask) {
+      throw new Error('MetaMask wallet not found or not connected');
+    }
+    // Note: MetaMask Solana support would need additional implementation
+    throw new Error('MetaMask Solana support not fully implemented');
+  } else if (currentWallet.name === 'WalletConnect') {
+    // For WalletConnect, we need to use the factory to get the provider
+    if (!walletConnectProviderInstance) {
+      const { WalletConnectProvider } = await import('./providers/walletconnect-provider');
+      walletConnectProviderInstance = new WalletConnectProvider();
+    }
+
+    const publicKey = walletConnectProviderInstance.getPublicKey();
+    if (!publicKey) {
+      throw new Error('WalletConnect not connected or no public key available');
+    }
+
+    return {
+      provider: walletConnectProviderInstance,
+      walletType: 'walletconnect',
+      publicKey: publicKey
+    };
+  } else {
+    throw new Error(`Unsupported wallet type: ${currentWallet.name}`);
+  }
 };
 
 // Phantom readiness verification interface - enhanced with mobile detection
@@ -564,6 +624,18 @@ const connectWallet = async (walletId: string, preTriggeredConnectionPromise?: P
       } else {
         throw new Error('MetaMask wallet not installed. Please install MetaMask from https://metamask.io/');
       }
+    } else if (walletId === 'walletconnect') {
+      // WalletConnect connection - trigger QR modal
+      console.log('[ReactiveWalletStore] Initiating WalletConnect connection...');
+
+      const { openWalletConnectQRModal } = useWalletConnectQRModal();
+
+      // Open the QR modal which will handle the connection process
+      await openWalletConnectQRModal();
+
+      // The connection will be completed through the QR modal event handlers
+      // which will set the wallet info and connection status
+      return; // Exit early since connection is handled by the modal
     }
 
     if (!walletAddress) {
@@ -572,7 +644,9 @@ const connectWallet = async (walletId: string, preTriggeredConnectionPromise?: P
 
     const realWallet: WalletInfo = {
       address: walletAddress,
-      name: walletId === 'phantom' ? 'Phantom' : 'MetaMask'
+      name: walletId === 'phantom' ? 'Phantom' :
+            walletId === 'metamask' ? 'MetaMask' :
+            walletId === 'walletconnect' ? 'WalletConnect' : 'Unknown'
     };
 
     setWallet(realWallet);
@@ -710,21 +784,18 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
     return { success: false, error: 'Not in browser environment' };
   }
 
-  const phantomProvider = (window as any).phantom?.solana;
-  if (!phantomProvider?.isPhantom || !phantomProvider.isConnected) {
-    return { success: false, error: 'Phantom wallet not found or not connected' };
-  }
-
   setSplitdoATA(prev => ({ ...prev, status: 'creating' }));
 
   try {
-    console.log('[ReactiveWalletStore] Creating SPLITDO ATA with signAndSendTransaction (like exchange)...');
-    console.log('[ReactiveWalletStore] Phantom connected?', phantomProvider.isConnected);
-    console.log('[ReactiveWalletStore] Phantom public key:', phantomProvider.publicKey?.toString());
+    // Get current wallet provider (supports Phantom, MetaMask, WalletConnect)
+    const { provider: walletProvider, walletType, publicKey } = await getCurrentWalletProvider();
+
+    console.log(`[ReactiveWalletStore] Creating SPLITDO ATA with ${walletType} wallet...`);
+    console.log('[ReactiveWalletStore] Wallet public key:', publicKey?.toString());
 
     // 1. Create transaction locally (no backend health checks)
     const SPLITDO_TOKEN_MINT = new PublicKey("6vdfHTgLiEXvoGVp8Ga2HaKQsPKj6DrUTee7526SCXoM"); // utility_token_mint
-    const walletPublicKey = phantomProvider.publicKey; // Use Phantom's PublicKey object
+    const walletPublicKey = publicKey; // Use wallet's PublicKey object
     const associatedTokenAddress = await getAssociatedTokenAddress(
       SPLITDO_TOKEN_MINT,
       walletPublicKey
@@ -755,7 +826,8 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
 
     // Check if we're on mobile to use the appropriate signing flow
     const mobileDetection = detectMobilePlatform();
-    const isMobilePhantom = mobileDetection.isMobile;
+    const currentWallet = wallet();
+    const isMobilePhantom = mobileDetection.isMobile || currentWallet?.name === 'WalletConnect';
 
     console.log('[ReactiveWalletStore] Device detection for ATA creation:', {
       isMobile: isMobilePhantom,
@@ -778,8 +850,8 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
 
       const mobileATASigningPromise = async () => {
         // Step 1: Sign transaction (mobile compatible)
-        console.log('[ReactiveWalletStore] Step 1: Signing ATA transaction on mobile...');
-        const signedTransaction = await phantomProvider.signTransaction(transaction);
+        console.log(`[ReactiveWalletStore] Step 1: Signing ATA transaction with ${walletType}...`);
+        const signedTransaction = await walletProvider.signTransaction(transaction);
 
         // Step 2: Serialize transaction
         console.log('[ReactiveWalletStore] Step 2: Serializing signed ATA transaction...');
@@ -788,7 +860,7 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
         // Step 3: Send ATA creation via backend (fixes 403 errors on mobile)
         console.log('[ReactiveWalletStore] Step 3: Sending ATA creation transaction via backend...');
         const result = await middlewareFetch.Endpoints.Devbackend._Api.SplitdoToken.Accounts.Create.POST({
-          wallet_address: phantomProvider.publicKey.toString(),
+          wallet_address: publicKey.toString(),
           token_account_address: associatedTokenAddress.toString(),
           signed_transaction: Buffer.from(rawTransaction).toString('base64')
         });
@@ -806,10 +878,15 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
       ]);
     } else {
       // DESKTOP FLOW: signAndSendTransaction (existing flow)
-      console.log('[ReactiveWalletStore] 🖥️ Using desktop flow for ATA creation: signAndSendTransaction');
+      console.log(`[ReactiveWalletStore] 🖥️ Using desktop flow for ATA creation with ${walletType}: signAndSendTransaction`);
+
+      // Note: Only Phantom supports signAndSendTransaction, others will use mobile flow
+      if (walletType !== 'phantom') {
+        throw new Error(`Desktop flow only supported for Phantom. ${walletType} will use mobile flow.`);
+      }
 
       transactionResult = await Promise.race([
-        phantomProvider.signAndSendTransaction(transaction),  // KEY: Sign AND send (Phantom submits to blockchain)
+        walletProvider.signAndSendTransaction(transaction),  // KEY: Sign AND send (Phantom submits to blockchain)
         timeoutPromise
       ]);
     }
@@ -970,6 +1047,17 @@ export const useMultiWallet = () => {
       installUrl: 'https://metamask.io/'
     });
 
+    // WalletConnect - Always available (doesn't depend on browser extension)
+    wallets.push({
+      id: 'walletconnect',
+      name: 'WalletConnect',
+      icon: '🔗',
+      iconUrl: 'https://walletconnect.com/walletconnect-logo.svg',
+      description: 'Connect mobile wallets via QR code scanning',
+      detected: true, // Always available
+      installUrl: null // No installation required
+    });
+
     console.log('[ReactiveWalletStore] Wallet detection results:',
       wallets.map(w => ({ name: w.name, detected: w.detected })));
     console.log('[ReactiveWalletStore] Full detection details:', wallets);
@@ -1030,6 +1118,100 @@ export const useCreateAccountModal = () => {
       console.log('[ReactiveWalletStore] BEFORE CLOSE: isCreateAccountModalOpen =', isCreateAccountModalOpen());
       setIsCreateAccountModalOpen(false);
       console.log('[ReactiveWalletStore] AFTER CLOSE: isCreateAccountModalOpen =', isCreateAccountModalOpen());
+    }
+  };
+};
+
+// WalletConnect QR Modal Hook
+export const useWalletConnectQRModal = () => {
+  return {
+    isWalletConnectQRModalOpen,
+    walletConnectQRData,
+    walletConnectStatus,
+    walletConnectError,
+    openWalletConnectQRModal: async () => {
+      console.log('[ReactiveWalletStore] Opening WalletConnect QR modal');
+      setIsWalletConnectQRModalOpen(true);
+      setWalletConnectStatus('connecting');
+      setWalletConnectError(null);
+
+      // Initialize WalletConnect and generate QR code
+      try {
+        const { WalletConnectProvider } = await import('./providers/walletconnect-provider');
+        const wcProvider = new WalletConnectProvider({
+          onQRCodeGenerated: (qrData) => {
+            console.log('[ReactiveWalletStore] QR code generated:', qrData);
+            setWalletConnectQRData(qrData);
+          },
+          onSessionConnected: (sessionData) => {
+            console.log('[ReactiveWalletStore] WalletConnect session connected:', sessionData);
+            setWalletConnectStatus('connected');
+            // Set wallet info
+            setWallet({
+              address: sessionData.publicKey.toString(),
+              name: 'WalletConnect'
+            });
+            setConnectionStatus('connected');
+          },
+          onSessionDisconnected: () => {
+            console.log('[ReactiveWalletStore] WalletConnect session disconnected');
+            setWalletConnectStatus('idle');
+            setWalletConnectQRData(null);
+          },
+          onError: (error) => {
+            console.error('[ReactiveWalletStore] WalletConnect error:', error);
+            setWalletConnectStatus('error');
+            setWalletConnectError(error.message);
+          }
+        });
+
+        // Start connection process
+        await wcProvider.connect();
+
+      } catch (error) {
+        console.error('[ReactiveWalletStore] Failed to initialize WalletConnect:', error);
+        setWalletConnectStatus('error');
+        setWalletConnectError(error instanceof Error ? error.message : 'Failed to initialize WalletConnect');
+      }
+    },
+    closeWalletConnectQRModal: () => {
+      console.log('[ReactiveWalletStore] Closing WalletConnect QR modal');
+      setIsWalletConnectQRModalOpen(false);
+      setWalletConnectStatus('idle');
+      setWalletConnectError(null);
+      setWalletConnectQRData(null);
+    },
+    refreshWalletConnectQR: async () => {
+      console.log('[ReactiveWalletStore] Refreshing WalletConnect QR code');
+      setWalletConnectError(null);
+      setWalletConnectQRData(null);
+
+      try {
+        // Re-initialize WalletConnect
+        const { WalletConnectProvider } = await import('./providers/walletconnect-provider');
+        const wcProvider = new WalletConnectProvider({
+          onQRCodeGenerated: (qrData) => {
+            setWalletConnectQRData(qrData);
+          }
+        });
+
+        await wcProvider.connect();
+      } catch (error) {
+        console.error('[ReactiveWalletStore] Failed to refresh QR code:', error);
+        setWalletConnectError(error instanceof Error ? error.message : 'Failed to refresh QR code');
+      }
+    },
+    handleMobileWalletClick: (walletId: string) => {
+      console.log('[ReactiveWalletStore] Mobile wallet clicked:', walletId);
+      const qrData = walletConnectQRData();
+      if (qrData?.uri) {
+        const wallet = SUPPORTED_WALLETS.find(w => w.id === walletId);
+        if (wallet && wallet.universalLink) {
+          const encodedUri = encodeURIComponent(qrData.uri);
+          const deepLink = `${wallet.universalLink}?uri=${encodedUri}`;
+          window.open(deepLink, '_blank');
+        }
+      }
     }
   };
 };
@@ -1204,21 +1386,14 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
       throw new Error('Not in browser environment');
     }
 
-    const phantomProvider = (window as any).phantom?.solana;
-    if (!phantomProvider || !phantomProvider.isPhantom) {
-      throw new Error('Phantom wallet not found');
-    }
+    // Get current wallet provider (supports Phantom, MetaMask, WalletConnect)
+    const { provider: walletProvider, walletType, publicKey } = await getCurrentWalletProvider();
 
-    if (!phantomProvider.isConnected) {
-      throw new Error('Phantom wallet not connected');
-    }
+    console.log(`[ReactiveWalletStore] Using ${walletType} wallet for exchange transaction`);
 
-    if (!phantomProvider.publicKey) {
+    if (!publicKey) {
       throw new Error('No public key available from connected wallet');
     }
-
-    // Use Phantom provider directly for signAndSendTransaction
-    console.log('[ReactiveWalletStore] Using Phantom provider directly for signAndSendTransaction');
 
     // 5. Create SOL transfer transaction
     const lamports = Math.floor(solAmount * 1000000000); // Convert SOL to lamports
@@ -1254,7 +1429,8 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
 
     // Check if we're on mobile to use the appropriate signing flow
     const mobileDetection = detectMobilePlatform();
-    const isMobilePhantom = mobileDetection.isMobile;
+    const currentWallet = wallet();
+    const isMobilePhantom = mobileDetection.isMobile || currentWallet?.name === 'WalletConnect';
 
     console.log('[ReactiveWalletStore] Device detection:', {
       isMobile: isMobilePhantom,
@@ -1278,8 +1454,8 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
 
       const mobileSigningPromise = async () => {
         // Step 1: Sign transaction (mobile compatible)
-        console.log('[ReactiveWalletStore] Step 1: Signing transaction on mobile...');
-        const signedTransaction = await phantomProvider.signTransaction(transaction);
+        console.log(`[ReactiveWalletStore] Step 1: Signing transaction with ${walletType}...`);
+        const signedTransaction = await walletProvider.signTransaction(transaction);
 
         // Step 2: Serialize transaction
         console.log('[ReactiveWalletStore] Step 2: Serializing signed transaction...');
@@ -1310,10 +1486,15 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
       ]);
     } else {
       // DESKTOP FLOW: signAndSendTransaction (existing flow)
-      console.log('[ReactiveWalletStore] 🖥️ Using desktop flow: signAndSendTransaction');
+      console.log(`[ReactiveWalletStore] 🖥️ Using desktop flow with ${walletType}: signAndSendTransaction`);
+
+      // Note: Only Phantom supports signAndSendTransaction, others will use mobile flow
+      if (walletType !== 'phantom') {
+        throw new Error(`Desktop flow only supported for Phantom. ${walletType} will use mobile flow.`);
+      }
 
       transactionResult = await Promise.race([
-        phantomProvider.signAndSendTransaction(transaction),
+        walletProvider.signAndSendTransaction(transaction),
         timeoutPromise
       ]);
     }

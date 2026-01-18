@@ -83,6 +83,85 @@ export const QR_CODE_CONFIG = {
   includeMargin: true
 };
 
+// WalletConnect v2 Configuration
+export const WALLETCONNECT_CONFIG = {
+  projectId: "c5a69bd73c5656741adccb5373df61c6", // WalletConnect Cloud project ID
+
+  // Solana namespace configuration for WalletConnect v2
+  namespaces: {
+    solana: {
+      methods: [
+        "solana_signTransaction",
+        "solana_signMessage",
+        "solana_signAndSendTransaction"
+      ],
+      chains: [
+        "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", // Mainnet
+        "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1", // Devnet
+        "solana:4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z"  // Testnet
+      ],
+      events: ["accountsChanged", "chainChanged"]
+    }
+  },
+
+  // Session configuration
+  sessionConfig: {
+    requiredNamespaces: {
+      solana: {
+        methods: [
+          "solana_signTransaction",
+          "solana_signMessage"
+        ],
+        chains: [
+          `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` // Mainnet
+        ],
+        events: ["accountsChanged"]
+      }
+    },
+    optionalNamespaces: {
+      solana: {
+        methods: [
+          "solana_signAndSendTransaction"
+        ],
+        chains: [
+          "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1", // Devnet
+          "solana:4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z"  // Testnet
+        ],
+        events: ["chainChanged"]
+      }
+    }
+  },
+
+  // Metadata for the DApp
+  metadata: {
+    name: "SPLITDO Exchange",
+    description: "Exchange SOL for SPLITDO tokens with low fees",
+    url: "https://splitdo.app",
+    icons: [
+      "https://splitdo.app/favicon-192x192.png"
+    ]
+  },
+
+  // QR code configuration specific to WalletConnect
+  qrCodeConfig: {
+    size: 280,
+    darkColor: "#000000",
+    lightColor: "#ffffff",
+    logoSize: 0.15,
+    logoMargin: 5,
+    quietZone: 20
+  },
+
+  // Connection timeout and retry settings
+  connectionConfig: {
+    connectionTimeout: 30000, // 30 seconds
+    sessionTimeout: 3600000,  // 1 hour
+    pairingTimeout: 300000,   // 5 minutes
+    retryAttempts: 3,
+    retryDelay: 2000
+  }
+} as const;
+
 // Connection timeouts and retry configuration
 export const CONNECTION_CONFIG = {
   timeoutMs: 30000, // 30 seconds
@@ -158,7 +237,18 @@ export const ERROR_MESSAGES = {
   TIMEOUT: "Connection timed out. Please try again.",
   INVALID_ADDRESS: "Invalid Solana address provided.",
   TOKEN_ACCOUNT_EXISTS: "SPLITDO token account already exists for this wallet.",
-  UNKNOWN_ERROR: "An unexpected error occurred. Please contact support."
+  UNKNOWN_ERROR: "An unexpected error occurred. Please contact support.",
+
+  // WalletConnect specific error messages
+  WALLETCONNECT_INIT_FAILED: "Failed to initialize WalletConnect. Please refresh and try again.",
+  WALLETCONNECT_SESSION_REJECTED: "Connection was rejected by your mobile wallet.",
+  WALLETCONNECT_SESSION_EXPIRED: "WalletConnect session has expired. Please reconnect.",
+  WALLETCONNECT_PAIRING_FAILED: "Failed to pair with mobile wallet. Please try scanning the QR code again.",
+  WALLETCONNECT_NO_SESSION: "No active WalletConnect session found. Please connect first.",
+  WALLETCONNECT_UNSUPPORTED_METHOD: "This action is not supported by your connected mobile wallet.",
+  WALLETCONNECT_QR_EXPIRED: "QR code has expired. Please refresh to generate a new one.",
+  WALLETCONNECT_MOBILE_REQUIRED: "This action requires a mobile wallet. Please use WalletConnect or Phantom mobile.",
+  WALLETCONNECT_CHAIN_MISMATCH: "Your mobile wallet is connected to a different Solana network."
 } as const;
 
 export type SupportedWalletId = typeof SUPPORTED_WALLETS[number]['id'];

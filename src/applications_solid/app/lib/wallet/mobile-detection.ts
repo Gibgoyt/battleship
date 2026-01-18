@@ -139,6 +139,23 @@ export function getInstallationMessage(walletName: string, platform: 'ios' | 'an
 }
 
 /**
+ * Opens the app store for a specific wallet on the current platform
+ * Integrates with app-store-urls.ts for centralized URL management
+ */
+export function openAppStoreForWallet(walletId: string): void {
+  const { platform } = detectMobilePlatform();
+
+  if (platform === 'desktop') {
+    console.warn('[MobileDetection] Cannot open mobile app store on desktop platform');
+    return;
+  }
+
+  // Import here to avoid circular dependency issues
+  const { openAppStore } = require('./app-store-urls');
+  openAppStore(walletId, platform);
+}
+
+/**
  * Debug utility for development and troubleshooting
  * Console logs detailed mobile detection information
  */
