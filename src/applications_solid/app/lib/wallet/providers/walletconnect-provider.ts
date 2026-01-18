@@ -167,6 +167,25 @@ export class WalletConnectProvider implements WalletProvider {
   private classifyError(error: Error, operationName: string): WalletConnectError {
     const message = error.message.toLowerCase();
 
+    // Domain mismatch specific error - CRITICAL for WebSocket 3000 errors
+    if (message.includes('3000') && message.includes('origin not allowed')) {
+      return new WalletConnectError(
+        'Domain not authorized. The current domain is not whitelisted in WalletConnect Cloud project configuration. ' +
+        'Please check that your deployment domain matches the domains configured in your WalletConnect Cloud project.',
+        'DOMAIN_NOT_ALLOWED',
+        error
+      );
+    }
+
+    // WebSocket authorization errors (broader detection)
+    if (message.includes('unauthorized') && (message.includes('origin') || message.includes('websocket'))) {
+      return new WalletConnectError(
+        'WebSocket connection unauthorized. Please verify domain configuration in WalletConnect Cloud.',
+        'WEBSOCKET_UNAUTHORIZED',
+        error
+      );
+    }
+
     // Network-related errors
     if (message.includes('network') || message.includes('fetch') || message.includes('timeout')) {
       return new WalletConnectNetworkError(error);
@@ -258,12 +277,21 @@ export class WalletConnectProvider implements WalletProvider {
 
     try {
       await this.handleErrorWithRetry(async () => {
-        console.log('[WalletConnect] Initializing client with metadata:', WALLETCONNECT_CONFIG.metadata);
+        // Enhanced logging for domain validation debugging
+        console.log('[WalletConnect] Initializing client with enhanced domain validation logging');
+        console.log('[WalletConnect] Project ID:', WALLETCONNECT_CONFIG.projectId);
+        console.log('[WalletConnect] Metadata URL:', WALLETCONNECT_CONFIG.metadata.url);
+        console.log('[WalletConnect] Current window origin:', typeof window !== 'undefined' ? window.location.origin : 'SSR');
+        console.log('[WalletConnect] Current window href:', typeof window !== 'undefined' ? window.location.href : 'SSR');
+        console.log('[WalletConnect] User agent:', typeof navigator !== 'undefined' ? navigator.userAgent : 'SSR');
+        console.log('[WalletConnect] Full metadata:', WALLETCONNECT_CONFIG.metadata);
 
         this.signClient = await SignClient.init({
           projectId: WALLETCONNECT_CONFIG.projectId,
           metadata: WALLETCONNECT_CONFIG.metadata,
         });
+
+        console.log('[WalletConnect] ✅ Client initialization successful');
 
         // Store global reference
         globalWalletConnectClient = this.signClient;
@@ -271,15 +299,27 @@ export class WalletConnectProvider implements WalletProvider {
         // Restore existing sessions
         const activeSessions = this.signClient.session.getAll();
         if (activeSessions.length > 0) {
+          console.log(`[WalletConnect] Found ${activeSessions.length} existing session(s), attempting to restore most recent`);
           // Use the most recent session
           const session = activeSessions[activeSessions.length - 1];
           await this.restoreSession(session);
+        } else {
+          console.log('[WalletConnect] No existing sessions found');
         }
 
         // Set up event listeners
         this.setupEventListeners();
         this.initialized = true;
+        console.log('[WalletConnect] ✅ Full initialization complete');
       }, 'WalletConnect initialization');
+    } catch (initError) {
+      console.error('[WalletConnect] ❌ Initialization failed with error:', initError);
+      console.error('[WalletConnect] Error details:', {
+        message: initError instanceof Error ? initError.message : 'Unknown error',
+        name: initError instanceof Error ? initError.name : 'Unknown',
+        stack: initError instanceof Error ? initError.stack : 'No stack trace'
+      });
+      throw initError;
     } finally {
       isInitializing = false;
     }

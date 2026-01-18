@@ -104,30 +104,22 @@ export const WALLETCONNECT_CONFIG = {
     }
   },
 
-  // Session configuration
+  // Session configuration (modern WalletConnect v2 pattern)
   sessionConfig: {
-    requiredNamespaces: {
-      solana: {
-        methods: [
-          "solana_signTransaction",
-          "solana_signMessage"
-        ],
-        chains: [
-          `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` // Mainnet
-        ],
-        events: ["accountsChanged"]
-      }
-    },
+    // Note: requiredNamespaces is deprecated - using optionalNamespaces only
     optionalNamespaces: {
       solana: {
         methods: [
+          "solana_signTransaction",
+          "solana_signMessage",
           "solana_signAndSendTransaction"
         ],
         chains: [
+          "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", // Mainnet
           "solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1", // Devnet
           "solana:4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z"  // Testnet
         ],
-        events: ["chainChanged"]
+        events: ["accountsChanged", "chainChanged"]
       }
     }
   },

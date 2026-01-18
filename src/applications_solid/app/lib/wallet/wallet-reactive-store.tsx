@@ -127,10 +127,9 @@ const getCurrentWalletProvider = async (): Promise<{
     // Note: MetaMask Solana support would need additional implementation
     throw new Error('MetaMask Solana support not fully implemented');
   } else if (currentWallet.name === 'WalletConnect') {
-    // For WalletConnect, we need to use the factory to get the provider
+    // For WalletConnect, we need to use the singleton provider instance
     if (!walletConnectProviderInstance) {
-      const { WalletConnectProvider } = await import('./providers/walletconnect-provider');
-      walletConnectProviderInstance = new WalletConnectProvider();
+      throw new Error('WalletConnect not connected. Please connect via QR modal first.');
     }
 
     const publicKey = walletConnectProviderInstance.getPublicKey();
@@ -1138,38 +1137,72 @@ export const useWalletConnectQRModal = () => {
       setWalletConnectStatus('connecting');
       setWalletConnectError(null);
 
-      // Initialize WalletConnect and generate QR code
+      // Initialize WalletConnect singleton with event handlers
       try {
         const { WalletConnectProvider } = await import('./providers/walletconnect-provider');
-        const wcProvider = new WalletConnectProvider({
-          onQRCodeGenerated: (qrData) => {
-            console.log('[ReactiveWalletStore] QR code generated:', qrData);
-            setWalletConnectQRData(qrData);
-          },
-          onSessionConnected: (sessionData) => {
-            console.log('[ReactiveWalletStore] WalletConnect session connected:', sessionData);
-            setWalletConnectStatus('connected');
-            // Set wallet info
-            setWallet({
-              address: sessionData.publicKey.toString(),
-              name: 'WalletConnect'
-            });
-            setConnectionStatus('connected');
-          },
-          onSessionDisconnected: () => {
-            console.log('[ReactiveWalletStore] WalletConnect session disconnected');
-            setWalletConnectStatus('idle');
-            setWalletConnectQRData(null);
-          },
-          onError: (error) => {
-            console.error('[ReactiveWalletStore] WalletConnect error:', error);
-            setWalletConnectStatus('error');
-            setWalletConnectError(error.message);
-          }
-        });
 
-        // Start connection process
-        await wcProvider.connect();
+        // Create singleton provider with event handlers if it doesn't exist
+        if (!walletConnectProviderInstance) {
+          console.log('[ReactiveWalletStore] Creating singleton WalletConnect provider with event handlers');
+          walletConnectProviderInstance = new WalletConnectProvider({
+            onQRCodeGenerated: (qrData) => {
+              console.log('[ReactiveWalletStore] QR code generated:', qrData);
+              setWalletConnectQRData(qrData);
+            },
+            onSessionConnected: (sessionData) => {
+              console.log('[ReactiveWalletStore] WalletConnect session connected:', sessionData);
+              setWalletConnectStatus('connected');
+              // Set wallet info
+              setWallet({
+                address: sessionData.publicKey.toString(),
+                name: 'WalletConnect'
+              });
+              setConnectionStatus('connected');
+            },
+            onSessionDisconnected: () => {
+              console.log('[ReactiveWalletStore] WalletConnect session disconnected');
+              setWalletConnectStatus('idle');
+              setWalletConnectQRData(null);
+            },
+            onError: (error) => {
+              console.error('[ReactiveWalletStore] WalletConnect error:', error);
+              setWalletConnectStatus('error');
+              setWalletConnectError(error.message);
+            }
+          });
+        } else {
+          console.log('[ReactiveWalletStore] Using existing singleton WalletConnect provider');
+          // Update event handlers on existing instance to ensure UI state synchronization
+          walletConnectProviderInstance.updateEventHandlers({
+            onQRCodeGenerated: (qrData) => {
+              console.log('[ReactiveWalletStore] QR code generated:', qrData);
+              setWalletConnectQRData(qrData);
+            },
+            onSessionConnected: (sessionData) => {
+              console.log('[ReactiveWalletStore] WalletConnect session connected:', sessionData);
+              setWalletConnectStatus('connected');
+              // Set wallet info
+              setWallet({
+                address: sessionData.publicKey.toString(),
+                name: 'WalletConnect'
+              });
+              setConnectionStatus('connected');
+            },
+            onSessionDisconnected: () => {
+              console.log('[ReactiveWalletStore] WalletConnect session disconnected');
+              setWalletConnectStatus('idle');
+              setWalletConnectQRData(null);
+            },
+            onError: (error) => {
+              console.error('[ReactiveWalletStore] WalletConnect error:', error);
+              setWalletConnectStatus('error');
+              setWalletConnectError(error.message);
+            }
+          });
+        }
+
+        // Start connection process using the singleton instance
+        await walletConnectProviderInstance.connect();
 
       } catch (error) {
         console.error('[ReactiveWalletStore] Failed to initialize WalletConnect:', error);
@@ -1190,15 +1223,22 @@ export const useWalletConnectQRModal = () => {
       setWalletConnectQRData(null);
 
       try {
-        // Re-initialize WalletConnect
-        const { WalletConnectProvider } = await import('./providers/walletconnect-provider');
-        const wcProvider = new WalletConnectProvider({
-          onQRCodeGenerated: (qrData) => {
-            setWalletConnectQRData(qrData);
-          }
-        });
+        // Use the singleton instance for QR refresh
+        if (!walletConnectProviderInstance) {
+          console.error('[ReactiveWalletStore] No WalletConnect provider instance available for refresh');
+          setWalletConnectError('No WalletConnect provider available. Please try connecting again.');
+          return;
+        }
 
-        await wcProvider.connect();
+        console.log('[ReactiveWalletStore] Refreshing QR code using singleton provider');
+
+        // Disconnect existing session if any to generate new QR
+        if (walletConnectProviderInstance.isConnected()) {
+          await walletConnectProviderInstance.disconnect();
+        }
+
+        // Start new connection process which will generate new QR code
+        await walletConnectProviderInstance.connect();
       } catch (error) {
         console.error('[ReactiveWalletStore] Failed to refresh QR code:', error);
         setWalletConnectError(error instanceof Error ? error.message : 'Failed to refresh QR code');
