@@ -728,6 +728,25 @@ body, html {
   .exchange-widget {
     padding: 1.5rem;
   }
+
+  /* Mobile Modal Utilities */
+  .crypto-modal-mobile {
+    max-height: 95vh;
+    overflow-y: auto;
+    padding: 1rem;
+  }
+
+  /* Enhanced modal scrolling for mobile devices */
+  .crypto-modal {
+    max-height: 95vh;
+    margin: 1rem;
+  }
+
+  /* Smooth mobile scrolling */
+  .crypto-modal-content {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
 }
 
 /* Asset Allocation Cards */

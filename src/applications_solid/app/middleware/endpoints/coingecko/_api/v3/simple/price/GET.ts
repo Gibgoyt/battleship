@@ -76,7 +76,6 @@ export async function GET(urlParameters?: UrlParameters): Promise<GetResponse> {
 			method: 'GET',
 			headers: {
 				'Accept': 'application/json',
-				'User-Agent': 'SPLITDO-App/1.0'
 			}
 		})
 

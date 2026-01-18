@@ -51,17 +51,41 @@ export type GetResponse = Response200 | Response400 | Response404 | Response429 
  */
 export async function GET(): Promise<GetResponse> {
 	try {
+		// NEW: Log browser environment details for CORS debugging
+		console.log('[VAULT DEBUG] Browser environment:', {
+			userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
+			origin: typeof window !== 'undefined' ? window.location.origin : 'N/A',
+			href: typeof window !== 'undefined' ? window.location.href : 'N/A',
+			isMobile: typeof navigator !== 'undefined' ? /Mobile|Android|iPhone|iPad/.test(navigator.userAgent) : false,
+			isPhantomBrowser: typeof navigator !== 'undefined' ? /phantom/i.test(navigator.userAgent) : false,
+			platform: typeof navigator !== 'undefined' ? navigator.platform : 'N/A',
+			language: typeof navigator !== 'undefined' ? navigator.language : 'N/A'
+		});
+
 		const url = 'https://devbackend.splitdo.app:8443/api/splitdo-token/exchange/solana/vault'
 
-		console.log('[DevbackendNoAuth Vault GET] Fetching SOL vault address from:', url)
-
-		const response = await fetch(url, {
+		// NEW: Log exact fetch configuration
+		// FIXED: Removed custom User-Agent header that caused CORS rejection on mobile
+		const fetchConfig = {
 			method: 'GET',
 			headers: {
-				'Accept': 'application/json',
-				'User-Agent': 'SPLITDO-App/1.0'
+				'Accept': 'application/json'
+				// User-Agent header removed - browsers send this automatically
+				// Custom User-Agent headers cause CORS issues on mobile browsers
 			}
-		})
+		};
+
+		console.log('[VAULT DEBUG] Fetch configuration:', {
+			url,
+			method: fetchConfig.method,
+			headers: fetchConfig.headers,
+			timestamp: new Date().toISOString()
+		});
+
+		console.log('[DevbackendNoAuth Vault GET] Fetching SOL vault address from:', url)
+		console.log('[VAULT DEBUG] Making fetch request...');
+
+		const response = await fetch(url, fetchConfig)
 
 		const responseData = await response.json()
 
@@ -106,9 +130,26 @@ export async function GET(): Promise<GetResponse> {
 				throw new Error(`Unexpected HTTP status: ${response.status}`)
 		}
 	} catch (error: unknown) {
+		// NEW: Enhanced error logging for CORS debugging
 		if (error instanceof Error) {
+			console.error('[VAULT DEBUG] Fetch failed with details:', {
+				error: error.message,
+				errorType: error.constructor.name,
+				stack: error.stack,
+				url: 'https://devbackend.splitdo.app:8443/api/splitdo-token/exchange/solana/vault',
+				timestamp: new Date().toISOString(),
+				isCorsError: error.message.toLowerCase().includes('cors') ||
+				           error.message.toLowerCase().includes('access-control') ||
+				           error.message.toLowerCase().includes('not allowed'),
+				userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A'
+			});
 			console.log("DevbackendNoAuth Vault API call failed: " + error.message)
 		} else {
+			console.error('[VAULT DEBUG] Unknown error occurred:', {
+				error,
+				type: typeof error,
+				timestamp: new Date().toISOString()
+			});
 			console.log("An unknown error occurred in DevbackendNoAuth Vault API call")
 		}
 		throw error

@@ -14,12 +14,12 @@ import {
   SystemProgram,
   LAMPORTS_PER_SOL,
   TransactionInstruction,
-  sendAndConfirmTransaction
+  sendAndConfirmTransaction,
+  SendOptions
 } from '@solana/web3.js';
 import type {
   Commitment,
   ConfirmOptions,
-  SendOptions,
   TransactionSignature
 } from '@solana/web3.js';
 import {
@@ -134,9 +134,63 @@ export class EnhancedSolanaService {
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
   private readonly BLOCKHASH_CACHE_TTL = 30 * 1000; // 30 seconds
 
+  // Mobile-only Solana connection for direct blockchain interaction
+  private mobileConnection: Connection | null = null;
+
   constructor() {
     // No longer need to initialize Connection - using backend API
     console.debug('[SolanaService] Initialized with backend API integration');
+  }
+
+  /**
+   * Create Solana connection for mobile direct transaction sending
+   * Only used on mobile for signTransaction + sendRawTransaction flow
+   */
+  private createMobileConnection(): Connection {
+    if (!this.mobileConnection) {
+      // Use Phantom's preferred RPC or fallback to public mainnet-beta
+      const rpcEndpoint = 'https://api.mainnet-beta.solana.com';
+      this.mobileConnection = new Connection(rpcEndpoint, 'confirmed');
+      console.debug('[SolanaService] Created mobile Solana connection:', rpcEndpoint);
+    }
+    return this.mobileConnection;
+  }
+
+  /**
+   * Send raw transaction to Solana network (mobile-only)
+   * Used for mobile flow: signTransaction -> sendRawTransaction
+   */
+  async sendRawTransaction(
+    rawTransaction: Uint8Array,
+    options?: SendOptions
+  ): Promise<{ signature: string }> {
+    try {
+      const connection = this.createMobileConnection();
+
+      console.debug('[SolanaService] Sending raw transaction to network...');
+
+      const signature = await connection.sendRawTransaction(rawTransaction, {
+        skipPreflight: false,
+        preflightCommitment: 'processed',
+        ...options
+      });
+
+      console.debug('[SolanaService] Raw transaction sent successfully:', signature);
+
+      // Wait for confirmation
+      const confirmation = await connection.confirmTransaction(signature, 'confirmed');
+
+      if (confirmation.value.err) {
+        throw new Error(`Transaction failed: ${confirmation.value.err}`);
+      }
+
+      console.debug('[SolanaService] Transaction confirmed:', signature);
+
+      return { signature };
+    } catch (error) {
+      console.error('[SolanaService] Failed to send raw transaction:', error);
+      throw new Error(`Failed to send transaction to network: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   /**
@@ -193,23 +247,22 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Get wallet balance via backend API
+   * Get wallet balance via backend API using middlewareFetch
    */
   async getWalletBalance(walletAddress: string): Promise<number> {
     try {
-      const endpoint = BACKEND_SOLANA_API.endpoints.walletBalance.replace(':pubkey', walletAddress);
-      const response = await fetch(`${BACKEND_SOLANA_API.baseUrl}${endpoint}`);
+      // Use middlewareFetch instead of direct fetch
+      const response = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Wallet[walletAddress].Balance.GET(walletAddress);
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(`Backend API error: ${response.status}`);
       }
 
-      const data = await response.json();
-      if (!data.success) {
+      if (!response.data.success) {
         throw new Error('Failed to get wallet balance from backend API');
       }
 
-      return data.balance || 0;
+      return response.data.balance || 0;
     } catch (error) {
       console.error('[SolanaService] Failed to get wallet balance:', error);
       throw new Error('Failed to get wallet balance');
@@ -523,7 +576,7 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Get SPLITDO program information from the backend API
+   * Get SPLITDO program information from the backend API using middlewareFetch
    */
   async getProgramInfo(forceRefresh = false): Promise<ProgramInfo> {
     try {
@@ -536,19 +589,18 @@ export class EnhancedSolanaService {
         return this.programInfoCache.data;
       }
 
-      const response = await fetch(`${SPLITDO_CONFIG.apiBaseUrl}/splitdo-token/program/info`);
+      // Use middlewareFetch instead of direct fetch
+      const response = await middlewareFetch.Endpoints._Api.SplitdoToken.Program.Info.GET();
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(`Failed to fetch program info: ${response.status}`);
       }
 
-      const result = await response.json() as ProgramInfoApiResponse;
-
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to fetch program info');
+      if (!response.data.success) {
+        throw new Error('Failed to fetch program info');
       }
 
-      const programInfo = result.data;
+      const programInfo = response.data.data;
 
       // Update cache
       this.programInfoCache = {
@@ -573,7 +625,7 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Check if a wallet has a SPLITDO token account via backend API
+   * Check if a wallet has a SPLITDO token account via backend API using middlewareFetch
    */
   async checkSplitdoBalance(firebaseToken: string): Promise<{
     hasAccount: boolean;
@@ -581,29 +633,22 @@ export class EnhancedSolanaService {
     error?: string;
   }> {
     try {
-      const response = await fetch(`${SPLITDO_CONFIG.apiBaseUrl}/splitdo-token/balance`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${firebaseToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // Use middlewareFetch instead of direct fetch (firebaseToken not needed - handled automatically)
+      const response = await middlewareFetch.Endpoints.Devbackend._Api.SplitdoToken.Balance.GET();
 
-      const result = await response.json() as APIResponse<TokenBalanceApiData>;
-
-      if (response.ok && result.success) {
+      if (response.status === 200) {
         return {
           hasAccount: true,
-          balance: result.data.balance_tokens
+          balance: response.data.mainnet_response.balance as SplitdoRawAmount
         };
-      } else if (result.error === 'ACCOUNT_NOT_FOUND') {
+      } else if (response.status === 404) {
         return {
           hasAccount: false
         };
       } else {
         return {
           hasAccount: false,
-          error: result.message || 'Unknown error'
+          error: response.data.message || 'Unknown error'
         };
       }
     } catch (error) {
@@ -616,10 +661,10 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Submit a signed transaction to create SPLITDO token account via backend API
+   * Submit a signed transaction to create SPLITDO token account via backend API using middlewareFetch
    */
   async submitATACreation(
-    firebaseToken: string,
+    firebaseToken: string, // Keep for backward compatibility but not used
     walletAddress: string,
     tokenAccountAddress: string,
     signedTransaction: string
@@ -629,30 +674,22 @@ export class EnhancedSolanaService {
     error?: string;
   }> {
     try {
-      const response = await fetch(`${SPLITDO_CONFIG.apiBaseUrl}/splitdo-token/accounts/create`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${firebaseToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          wallet_address: walletAddress,
-          token_account_address: tokenAccountAddress,
-          signed_transaction: signedTransaction
-        })
+      // Use middlewareFetch instead of direct fetch (firebaseToken not needed - handled automatically)
+      const response = await middlewareFetch.Endpoints.Devbackend._Api.SplitdoToken.Accounts.Create.POST({
+        wallet_address: walletAddress,
+        token_account_address: tokenAccountAddress,
+        signed_transaction: signedTransaction
       });
 
-      const result = await response.json() as APIResponse<CreateATAApiData>;
-
-      if (response.ok && result.success) {
+      if (response.status === 200) {
         return {
           success: true,
-          transactionSignature: result.data.transaction_signature
+          transactionSignature: response.data.data?.token_account_pubkey // Use token account as success indicator since no transaction signature is returned
         };
       } else {
         return {
           success: false,
-          error: result.message || 'Failed to create token account'
+          error: response.data.message || 'Failed to create token account'
         };
       }
     } catch (error) {

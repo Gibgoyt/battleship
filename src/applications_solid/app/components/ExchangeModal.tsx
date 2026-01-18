@@ -88,7 +88,7 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
 
       {/* Modal Content */}
       <div
-        class={`relative w-full max-w-2xl mx-4 p-0 rounded-xl shadow-2xl z-10 overflow-hidden transition-all duration-300 ${
+        class={`relative w-full max-w-2xl max-h-screen md:max-h-fit mx-2 sm:mx-4 p-0 rounded-xl shadow-2xl z-10 overflow-hidden transition-all duration-300 ${
           props.isDark
             ? 'bg-crypto-bg-primary border border-crypto-border'
             : 'bg-white/95 border border-gray-200/50 shadow-xl backdrop-blur-sm'
@@ -96,10 +96,10 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Professional Header */}
-        <div class="bg-gradient-to-r from-crypto-primary-blue to-crypto-primary-cyan px-8 py-6">
+        <div class="bg-gradient-to-r from-crypto-primary-blue to-crypto-primary-cyan px-4 py-4 sm:px-8 sm:py-6">
           <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-2xl font-bold text-white mb-1">
+              <h2 class="text-xl sm:text-2xl font-bold text-white mb-1">
                 Exchange SOL for SPLITDO
               </h2>
               <p class="text-blue-100 opacity-90">
@@ -116,7 +116,7 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
         </div>
 
         {/* Content */}
-        <div class="p-8">
+        <div class="p-4 sm:p-8 max-h-[calc(95vh-120px)] md:max-h-none overflow-y-auto">
           <Show
             when={step() === 'wallet'}
             fallback={

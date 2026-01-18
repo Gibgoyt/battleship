@@ -750,8 +750,17 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
     });
     transaction.add(createATAInstruction);
 
-    // 4. PHANTOM POPUP - Use signAndSendTransaction (frontend submits to Solana)
+    // 4. PHANTOM POPUP - Use appropriate signing flow based on device type
     console.log('[ReactiveWalletStore] 🚀 Signing and sending ATA transaction to Solana...');
+
+    // Check if we're on mobile to use the appropriate signing flow
+    const mobileDetection = detectMobilePlatform();
+    const isMobilePhantom = mobileDetection.isMobile;
+
+    console.log('[ReactiveWalletStore] Device detection for ATA creation:', {
+      isMobile: isMobilePhantom,
+      platform: mobileDetection.platform
+    });
 
     let timeoutId: NodeJS.Timeout;
     const timeoutPromise = new Promise<never>((_, reject) => {
@@ -761,10 +770,49 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
       }, 30000);
     });
 
-    const transactionResult = await Promise.race([
-      phantomProvider.signAndSendTransaction(transaction),  // KEY: Sign AND send (Phantom submits to blockchain)
-      timeoutPromise
-    ]);
+    let transactionResult: { signature: string };
+
+    if (isMobilePhantom) {
+      // MOBILE FLOW: signTransaction -> sendRawTransaction
+      console.log('[ReactiveWalletStore] 📱 Using mobile flow for ATA creation: signTransaction + sendRawTransaction');
+
+      const mobileATASigningPromise = async () => {
+        // Step 1: Sign transaction (mobile compatible)
+        console.log('[ReactiveWalletStore] Step 1: Signing ATA transaction on mobile...');
+        const signedTransaction = await phantomProvider.signTransaction(transaction);
+
+        // Step 2: Serialize transaction
+        console.log('[ReactiveWalletStore] Step 2: Serializing signed ATA transaction...');
+        const rawTransaction = signedTransaction.serialize({ requireAllSignatures: false });
+
+        // Step 3: Send ATA creation via backend (fixes 403 errors on mobile)
+        console.log('[ReactiveWalletStore] Step 3: Sending ATA creation transaction via backend...');
+        const result = await middlewareFetch.Endpoints.Devbackend._Api.SplitdoToken.Accounts.Create.POST({
+          wallet_address: phantomProvider.publicKey.toString(),
+          token_account_address: associatedTokenAddress.toString(),
+          signed_transaction: Buffer.from(rawTransaction).toString('base64')
+        });
+
+        if (result.status !== 200) {
+          throw new Error(`ATA creation failed: ${result.data.message || 'Unknown error'}`);
+        }
+
+        return { signature: result.data.data?.token_account_pubkey || 'ata_created' };
+      };
+
+      transactionResult = await Promise.race([
+        mobileATASigningPromise(),
+        timeoutPromise
+      ]);
+    } else {
+      // DESKTOP FLOW: signAndSendTransaction (existing flow)
+      console.log('[ReactiveWalletStore] 🖥️ Using desktop flow for ATA creation: signAndSendTransaction');
+
+      transactionResult = await Promise.race([
+        phantomProvider.signAndSendTransaction(transaction),  // KEY: Sign AND send (Phantom submits to blockchain)
+        timeoutPromise
+      ]);
+    }
 
     clearTimeout(timeoutId);
 
@@ -1118,6 +1166,31 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
 
     // 3. Get SOL vault address from backend
     console.log('[ReactiveWalletStore] Fetching vault address...');
+
+    // NEW: Log environment before vault call for CORS debugging
+    const mobileDetectionForDebug = detectMobilePlatform();
+    console.log('[EXCHANGE DEBUG] Pre-vault call environment:', {
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
+      origin: typeof window !== 'undefined' ? window.location.origin : 'N/A',
+      href: typeof window !== 'undefined' ? window.location.href : 'N/A',
+      timestamp: new Date().toISOString(),
+      mobileDetection: mobileDetectionForDebug,
+      windowSize: typeof window !== 'undefined' ? {
+        innerWidth: window.innerWidth,
+        innerHeight: window.innerHeight
+      } : 'N/A',
+      phantomInfo: {
+        available: typeof window !== 'undefined' ? !!(window as any).phantom?.solana : false,
+        connected: typeof window !== 'undefined' ? !!(window as any).phantom?.solana?.isConnected : false,
+        version: typeof window !== 'undefined' ? (window as any).phantom?.solana?.version : 'N/A'
+      },
+      browserFeatures: {
+        supportsServiceWorker: typeof navigator !== 'undefined' ? 'serviceWorker' in navigator : false,
+        supportsFetch: typeof fetch !== 'undefined',
+        supportsWebGL: typeof window !== 'undefined' ? !!(window as any).WebGLRenderingContext : false
+      }
+    });
+
     const vaultResponse = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.SplitdoToken.Exchange.Solana.Vault.GET();
     if (vaultResponse.status !== 200) {
       throw new Error('Failed to fetch vault address');
@@ -1176,22 +1249,74 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
     transaction.feePayer = phantomProvider.publicKey;
     console.log('[ReactiveWalletStore] Set blockhash and fee payer on transaction');
 
-    // 6. Sign and send transaction with Phantom
+    // 6. Sign and send transaction with Phantom (desktop vs mobile flow)
     console.log('[ReactiveWalletStore] 🚀 Signing and sending transaction with timeout protection...');
 
-    // Add timeout protection for signAndSendTransaction
+    // Check if we're on mobile to use the appropriate signing flow
+    const mobileDetection = detectMobilePlatform();
+    const isMobilePhantom = mobileDetection.isMobile;
+
+    console.log('[ReactiveWalletStore] Device detection:', {
+      isMobile: isMobilePhantom,
+      platform: mobileDetection.platform
+    });
+
+    // Add timeout protection for signing/sending
     let timeoutId: NodeJS.Timeout;
     const timeoutPromise = new Promise<never>((_, reject) => {
       timeoutId = setTimeout(() => {
         console.log('[ReactiveWalletStore] ⏰ Exchange signing and sending timeout - Phantom not responding');
         reject(new Error('Transaction signing and sending timed out. Check for Phantom popup window.'));
-      }, 30000); // Longer timeout since this includes blockchain submission
+      }, 30000); // 30 second timeout for both flows
     });
 
-    const transactionResult = await Promise.race([
-      phantomProvider.signAndSendTransaction(transaction),
-      timeoutPromise
-    ]);
+    let transactionResult: { signature: string };
+
+    if (isMobilePhantom) {
+      // MOBILE FLOW: signTransaction -> sendRawTransaction
+      console.log('[ReactiveWalletStore] 📱 Using mobile flow: signTransaction + sendRawTransaction');
+
+      const mobileSigningPromise = async () => {
+        // Step 1: Sign transaction (mobile compatible)
+        console.log('[ReactiveWalletStore] Step 1: Signing transaction on mobile...');
+        const signedTransaction = await phantomProvider.signTransaction(transaction);
+
+        // Step 2: Serialize transaction
+        console.log('[ReactiveWalletStore] Step 2: Serializing signed transaction...');
+        const rawTransaction = signedTransaction.serialize({ requireAllSignatures: false });
+
+        // Step 3: Send to exchange endpoint via backend (fixes 403 errors on mobile)
+        console.log('[ReactiveWalletStore] Step 3: Sending signed transaction to exchange endpoint...');
+        const result = await middlewareFetch.Endpoints.Devbackend._Api.Testing.Usockets.Exchange.Solana.Splitdo.POST(
+          solAmount * 1_000_000_000, // Convert SOL to lamports for backend
+          Buffer.from(rawTransaction).toString('base64')
+        );
+
+        if (result.status !== 200) {
+          throw new Error(`Exchange submission failed: ${result.data.message || 'Unknown error'}`);
+        }
+
+        // Extract transaction signature from exchange response
+        const exchangeSignature = result.data.stage1_sol_confirmation?.result?.value ? 'exchange_success' :
+                                 result.data.stage2_splitdo_exchange?.result?.value ? 'exchange_success' :
+                                 'exchange_completed';
+
+        return { signature: exchangeSignature };
+      };
+
+      transactionResult = await Promise.race([
+        mobileSigningPromise(),
+        timeoutPromise
+      ]);
+    } else {
+      // DESKTOP FLOW: signAndSendTransaction (existing flow)
+      console.log('[ReactiveWalletStore] 🖥️ Using desktop flow: signAndSendTransaction');
+
+      transactionResult = await Promise.race([
+        phantomProvider.signAndSendTransaction(transaction),
+        timeoutPromise
+      ]);
+    }
 
     // Clear the timeout since signing and sending succeeded
     clearTimeout(timeoutId);
