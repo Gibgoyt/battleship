@@ -28,6 +28,10 @@ import {
   SUPPORTED_WALLETS
 } from '../walletconnect-config';
 
+// Global WalletConnect client singleton to prevent double initialization
+let globalWalletConnectClient: SignClient | null = null;
+let isInitializing = false;
+
 // WalletConnect specific error classes
 export class WalletConnectError extends WalletError {
   constructor(message: string, code: string, originalError?: any) {
@@ -217,11 +221,32 @@ export class WalletConnectProvider implements WalletProvider {
   }
 
   /**
-   * Initialize WalletConnect Sign Client with enhanced error handling
+   * Initialize WalletConnect Sign Client with enhanced error handling and singleton pattern
    */
   private async initializeClient(): Promise<void> {
+    // Use global singleton to prevent double initialization
+    if (globalWalletConnectClient) {
+      this.signClient = globalWalletConnectClient;
+      this.setupEventListeners();
+      this.initialized = true;
+      return;
+    }
+
     if (this.signClient || this.initialized) {
       return;
+    }
+
+    // If already initializing, wait for it to complete
+    if (isInitializing) {
+      while (isInitializing) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      if (globalWalletConnectClient) {
+        this.signClient = globalWalletConnectClient;
+        this.setupEventListeners();
+        this.initialized = true;
+        return;
+      }
     }
 
     // Check project ID configuration
@@ -229,24 +254,35 @@ export class WalletConnectProvider implements WalletProvider {
       throw new WalletConnectProjectIdError();
     }
 
-    await this.handleErrorWithRetry(async () => {
-      this.signClient = await SignClient.init({
-        projectId: WALLETCONNECT_CONFIG.projectId,
-        metadata: WALLETCONNECT_CONFIG.metadata,
-      });
+    isInitializing = true;
 
-      // Restore existing sessions
-      const activeSessions = this.signClient.session.getAll();
-      if (activeSessions.length > 0) {
-        // Use the most recent session
-        const session = activeSessions[activeSessions.length - 1];
-        await this.restoreSession(session);
-      }
+    try {
+      await this.handleErrorWithRetry(async () => {
+        console.log('[WalletConnect] Initializing client with metadata:', WALLETCONNECT_CONFIG.metadata);
 
-      // Set up event listeners
-      this.setupEventListeners();
-      this.initialized = true;
-    }, 'WalletConnect initialization');
+        this.signClient = await SignClient.init({
+          projectId: WALLETCONNECT_CONFIG.projectId,
+          metadata: WALLETCONNECT_CONFIG.metadata,
+        });
+
+        // Store global reference
+        globalWalletConnectClient = this.signClient;
+
+        // Restore existing sessions
+        const activeSessions = this.signClient.session.getAll();
+        if (activeSessions.length > 0) {
+          // Use the most recent session
+          const session = activeSessions[activeSessions.length - 1];
+          await this.restoreSession(session);
+        }
+
+        // Set up event listeners
+        this.setupEventListeners();
+        this.initialized = true;
+      }, 'WalletConnect initialization');
+    } finally {
+      isInitializing = false;
+    }
   }
 
   /**

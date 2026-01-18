@@ -132,11 +132,11 @@ export const WALLETCONNECT_CONFIG = {
     }
   },
 
-  // Metadata for the DApp
+  // Metadata for the DApp - dynamically set based on current origin
   metadata: {
     name: "SPLITDO Exchange",
     description: "Exchange SOL for SPLITDO tokens with low fees",
-    url: "https://splitdo.app",
+    url: typeof window !== 'undefined' ? window.location.origin : "https://splitdo.app",
     icons: [
       "https://splitdo.app/favicon-192x192.png"
     ]
