@@ -250,11 +250,11 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
       {/* WalletConnect QR Modal */}
       <WalletConnectQRModal
         isDark={props.isDark}
-        isOpen={isWalletConnectQRModalOpen()}
+        isOpen={isWalletConnectQRModalOpen}
         onClose={closeWalletConnectQRModal}
-        qrData={walletConnectQRData()}
-        connectionStatus={walletConnectStatus()}
-        error={walletConnectError()}
+        qrData={walletConnectQRData}
+        connectionStatus={walletConnectStatus}
+        error={walletConnectError}
         onRefreshQR={refreshWalletConnectQR}
         onMobileWalletClick={handleMobileWalletClick}
       />
