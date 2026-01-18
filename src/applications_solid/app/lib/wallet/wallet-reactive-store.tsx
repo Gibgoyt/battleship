@@ -4,6 +4,9 @@
  * Manages multi-wallet connections, ATA status, and wallet operations
  */
 
+// CRITICAL: Import browser polyfills FIRST
+import './browser-polyfills';
+
 import {
   createSignal,
   createEffect,

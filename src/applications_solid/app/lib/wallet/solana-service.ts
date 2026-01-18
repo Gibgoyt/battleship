@@ -14,8 +14,7 @@ import {
   SystemProgram,
   LAMPORTS_PER_SOL,
   TransactionInstruction,
-  sendAndConfirmTransaction,
-  SendOptions
+  sendAndConfirmTransaction
 } from '@solana/web3.js';
 import type {
   Commitment,
@@ -162,7 +161,7 @@ export class EnhancedSolanaService {
    */
   async sendRawTransaction(
     rawTransaction: Uint8Array,
-    options?: SendOptions
+    options?: ConfirmOptions
   ): Promise<{ signature: string }> {
     try {
       const connection = this.createMobileConnection();

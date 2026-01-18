@@ -170,6 +170,43 @@ const WalletSelectionModalWithStore: Component<WalletSelectionModalProps> = (pro
             </div>
           </button>
 
+          {/* WalletConnect Option */}
+          <button
+            onClick={() => handleConnect('walletconnect')}
+            disabled={!!isConnecting()}
+            class={`w-full p-4 rounded-lg border transition-all duration-200 text-left ${
+              props.isDark
+                ? 'border-zinc-600 bg-zinc-700 hover:bg-zinc-600'
+                : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+            } ${isConnecting() ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${
+              isConnecting() === 'walletconnect' ? 'animate-pulse' : ''
+            }`}
+          >
+            <div class="flex items-center space-x-4">
+              <div class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg text-xl">
+                🔗
+              </div>
+              <div class="flex-1">
+                <h3 class="font-semibold">WalletConnect</h3>
+                <p class={`text-sm mt-1 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {isConnecting() === 'walletconnect'
+                    ? 'Opening QR modal...'
+                    : 'Scan QR code with mobile wallet'
+                  }
+                </p>
+              </div>
+              <div class="text-right">
+                {isConnecting() === 'walletconnect' ? (
+                  <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+                ) : (
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                  </svg>
+                )}
+              </div>
+            </div>
+          </button>
+
           {/* Backpack Wallet */}
           <button
             disabled

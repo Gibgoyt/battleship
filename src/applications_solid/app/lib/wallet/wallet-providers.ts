@@ -8,7 +8,6 @@
 // Import browser polyfills FIRST to ensure Buffer is available
 import './browser-polyfills';
 import { PublicKey, Transaction } from '@solana/web3.js';
-import { WalletConnectProvider } from './providers/walletconnect-provider';
 
 // Core wallet provider interface
 export interface WalletProvider {
@@ -238,7 +237,7 @@ export class WalletProviderFactory {
   private static providers: Map<string, () => WalletProvider> = new Map([
     ['phantom', () => new PhantomWalletProvider()],
     ['metamask', () => new MetaMaskSolanaProvider()],
-    ['walletconnect', () => new WalletConnectProvider()],
+    // ['walletconnect', () => new WalletConnectProvider()], // Commented out to fix circular dependency
   ]);
 
   static createProvider(id: string): WalletProvider | null {
