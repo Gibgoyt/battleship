@@ -1,0 +1,1 @@
+export { GET, type GetResponse } from './GET'
