@@ -59,16 +59,8 @@ export interface ProcessedTransaction {
     change: number;
   }>;
 }
-import { FirebaseAuthManager } from '../../middleware/firebase/auth-manager';
-import { FirebaseTokenRefreshService } from '../../middleware/firebase/token-refresh-service';
-import type {
-  AuthState,
-  TokenRefreshResult,
-  AuthPollingResult,
-  ServiceHealth,
-  SessionExpiryNotification,
-} from '../../middleware/types';
-import type { CustomFirebaseUser } from '../../middleware/firebase/custom-user';
+// Import existing auth store to integrate with global auth system
+import { getGlobalAuthStore } from '../../middleware/firebase/auth-store';
 import { createLogger } from 'src/lib/logger';
 
 const logger = createLogger('[UnifiedWalletProvider]');
@@ -114,29 +106,6 @@ export interface SolPriceData {
 // ================================
 
 export interface UnifiedWalletContextState {
-  // ===============================
-  // AUTHENTICATION STATE
-  // ===============================
-  authState: Accessor<AuthState>;
-  authError: Accessor<string | null>;
-  tokenStatus: Accessor<'valid' | 'refreshing' | 'expired' | 'error'>;
-  refreshStatus: Accessor<'idle' | 'refreshing' | 'success' | 'error'>;
-  serviceStatus: Accessor<{
-    isRunning: boolean;
-    hasProactiveRefresh: boolean;
-    hasAuthPolling: boolean;
-    refreshAttempts: number;
-    pollingAttempts: number;
-    lastRefreshAttempt: number | null;
-  }>;
-  sessionExpiryNotification: Accessor<SessionExpiryNotification>;
-
-  // Auth actions
-  initializeAuth: (initialToken?: string) => Promise<void>;
-  refreshToken: () => Promise<TokenRefreshResult>;
-  validateAuthState: () => Promise<AuthPollingResult>;
-  logout: () => Promise<void>;
-
   // ===============================
   // WALLET CONNECTION STATE
   // ===============================
@@ -249,43 +218,6 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
   logger.info('Initializing Unified Wallet Provider');
 
   // ===============================
-  // AUTHENTICATION SIGNALS
-  // ===============================
-  const [authState, setAuthState] = createSignal<AuthState>({
-    isAuthenticated: false,
-    user: null,
-    tokenExpiresAt: null,
-    lastRefreshAt: null,
-    nextRefreshAt: null,
-    refreshAttempts: 0,
-  });
-
-  const [authError, setAuthError] = createSignal<string | null>(null);
-  const [tokenStatus, setTokenStatus] = createSignal<'valid' | 'refreshing' | 'expired' | 'error'>('valid');
-  const [refreshStatus, setRefreshStatus] = createSignal<'idle' | 'refreshing' | 'success' | 'error'>('idle');
-
-  const [serviceStatus, setServiceStatus] = createSignal({
-    isRunning: false,
-    hasProactiveRefresh: false,
-    hasAuthPolling: false,
-    refreshAttempts: 0,
-    pollingAttempts: 0,
-    lastRefreshAttempt: null as number | null,
-  });
-
-  const [sessionExpiryNotification, setSessionExpiryNotification] = createSignal<SessionExpiryNotification>({
-    isVisible: false,
-    countdown: 5,
-    message: 'Session expired, please log in',
-    onRedirect: () => {
-      window.location.href = '/auth/sign-in';
-    },
-    onDismiss: () => {
-      setSessionExpiryNotification(prev => ({ ...prev, isVisible: false }));
-    }
-  });
-
-  // ===============================
   // WALLET CONNECTION SIGNALS
   // ===============================
   const [connectionStatus, setConnectionStatus] = createSignal<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected');
@@ -328,51 +260,15 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
   const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = createSignal(false);
 
   // ===============================
-  // INTERNAL STATE
+  // GLOBAL AUTH STORE INTEGRATION
   // ===============================
-  let authManager: FirebaseAuthManager | null = null;
-  let tokenRefreshService: FirebaseTokenRefreshService | null = null;
+  const globalAuthStore = getGlobalAuthStore();
 
   // ===============================
   // COMPUTED SIGNALS
   // ===============================
   const isConnected = () => connectionStatus() === 'connected' && wallet() !== null;
   const hasFirebaseToken = () => !!props.firebaseToken;
-
-  // ===============================
-  // AUTH SERVICE INITIALIZATION
-  // ===============================
-  const initializeAuth = async (initialToken?: string): Promise<void> => {
-    try {
-      logger.info('Initializing authentication services');
-
-      if (!authManager) {
-        authManager = new FirebaseAuthManager();
-      }
-
-      if (!tokenRefreshService) {
-        tokenRefreshService = new FirebaseTokenRefreshService();
-      }
-
-      // Initialize with provided token
-      const token = initialToken || props.firebaseToken;
-      if (token) {
-        logger.debug('Initializing auth with token');
-        await authManager.initialize(token);
-
-        // Set up token refresh service
-        tokenRefreshService.initialize(
-          () => authManager?.refreshToken() || Promise.resolve({ success: false, timestamp: Date.now() }),
-          () => authManager?.validateToken() || Promise.resolve({ isValid: false, shouldRefresh: false, timestamp: Date.now() })
-        );
-      }
-
-      logger.info('Authentication services initialized successfully');
-    } catch (error) {
-      logger.error('Failed to initialize authentication services:', error);
-      setAuthError(error instanceof Error ? error.message : 'Authentication initialization failed');
-    }
-  };
 
   // ===============================
   // WALLET CONNECTION METHODS
@@ -772,62 +668,8 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
   };
 
   // ===============================
-  // UTILITY METHODS
+  // WALLET UTILITY METHODS
   // ===============================
-  const refreshToken = async (): Promise<TokenRefreshResult> => {
-    if (!authManager) {
-      return { success: false, error: 'Auth manager not initialized', timestamp: Date.now() };
-    }
-    return await authManager.refreshToken();
-  };
-
-  const validateAuthState = async (): Promise<AuthPollingResult> => {
-    if (!authManager) {
-      return { isValid: false, shouldRefresh: false, timestamp: Date.now() };
-    }
-    return await authManager.validateToken();
-  };
-
-  const logout = async (): Promise<void> => {
-    try {
-      logger.info('Logging out user');
-
-      // Disconnect wallet
-      await disconnectWallet();
-
-      // Clear auth state
-      if (authManager) {
-        await authManager.logout();
-      }
-
-      // Clear cached data
-      const userId = authState()?.user?.uid;
-      if (userId) {
-        clearUserData(userId);
-      }
-
-      // Reset all signals
-      batch(() => {
-        setAuthState({
-          isAuthenticated: false,
-          user: null,
-          tokenExpiresAt: null,
-          lastRefreshAt: null,
-          nextRefreshAt: null,
-          refreshAttempts: 0,
-        });
-        setAuthError(null);
-        setTokenStatus('valid');
-        setRefreshStatus('idle');
-      });
-
-      logger.info('Logout completed');
-    } catch (error) {
-      logger.error('Error during logout:', error);
-    }
-  };
-
-  // Wallet utility methods
   const isWalletAvailable = (providerId: string): boolean => {
     return availableWallets().some(wallet => wallet.id === providerId && wallet.isAvailable);
   };
@@ -860,11 +702,6 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
     logger.info('UnifiedWalletProvider mounting');
 
     try {
-      // Initialize authentication if token provided
-      if (props.firebaseToken) {
-        await initializeAuth(props.firebaseToken);
-      }
-
       // Initialize wallet service and get available wallets
       await walletConnectService.initialize();
       setAvailableWallets(walletConnectService.getAvailableWallets());
@@ -890,32 +727,13 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
   // Cleanup on unmount
   onCleanup(() => {
     logger.info('UnifiedWalletProvider cleaning up');
-
-    if (tokenRefreshService) {
-      tokenRefreshService.stop();
-    }
-
-    if (authManager) {
-      authManager.cleanup();
-    }
+    // No specific cleanup needed since we use the global auth store
   });
 
   // ===============================
   // CONTEXT VALUE
   // ===============================
   const contextValue: UnifiedWalletContextState = {
-    // Authentication
-    authState,
-    authError,
-    tokenStatus,
-    refreshStatus,
-    serviceStatus,
-    sessionExpiryNotification,
-    initializeAuth,
-    refreshToken,
-    validateAuthState,
-    logout,
-
     // Wallet connection
     connectionStatus,
     wallet,
@@ -1102,24 +920,23 @@ export const usePersistentData = () => {
 
 /**
  * Backward-compatible hook for authentication functionality
+ * Uses the global auth store instead of creating a conflicting auth system
  */
 export const useAuth = () => {
-  const context = useUnifiedWallet();
+  const globalAuthStore = getGlobalAuthStore();
 
   return {
-    // Auth state
-    authState: context.authState,
-    authError: context.authError,
-    tokenStatus: context.tokenStatus,
-    refreshStatus: context.refreshStatus,
-    serviceStatus: context.serviceStatus,
-    sessionExpiryNotification: context.sessionExpiryNotification,
+    // Auth state from global store
+    isAuthenticated: globalAuthStore.isAuthenticated,
+    user: globalAuthStore.currentUser,
+    authError: globalAuthStore.authError,
+    tokenStatus: globalAuthStore.tokenStatus,
 
-    // Auth actions
-    initialize: context.initializeAuth,
-    refreshToken: context.refreshToken,
-    validateAuthState: context.validateAuthState,
-    logout: context.logout,
+    // Auth actions from global store
+    initialize: globalAuthStore.initialize,
+    refreshToken: globalAuthStore.refreshToken,
+    validateAuth: globalAuthStore.validateAuth,
+    logout: globalAuthStore.logout,
   };
 };
 
