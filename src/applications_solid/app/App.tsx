@@ -46,7 +46,6 @@ const logger = createLogger('[SolidJS App]');
 
 const AppContent: Component<{ firebaseToken?: string }> = (props) => {
   const [currentPage, setCurrentPage] = createSignal<Page>('dashboard')
-  const [isDark, setIsDark] = createSignal(false)
   const [isNavOpen, setIsNavOpen] = createSignal(false)
   const [authStore, setAuthStore] = createSignal<ReturnType<typeof import('./middleware/firebase/auth-store').getGlobalAuthStore> | null>(null)
   const middleware = useMiddleware()
@@ -54,15 +53,13 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
   // QR Modal state from wallet context
   const qrModal = useWalletConnectQRModal()
 
-  // Detect theme from localStorage and DOM class (shared with Astro app)
+  // Force dark mode on mount
   onMount(() => {
     if (typeof window === 'undefined') return
-    
-    const isDarkMode = localStorage.getItem('darkMode') === 'true' || 
-      (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches) ||
-      document.documentElement.classList.contains('dark')
-    
-    setIsDark(isDarkMode)
+
+    // Always enable dark mode
+    document.documentElement.classList.add('dark')
+    localStorage.setItem('darkMode', 'true')
     
     // Initialize page from URL pathname
     const pathname = window.location.pathname
@@ -111,27 +108,17 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
     }
   })
 
-  const updateTheme = (dark: boolean) => {
-    setIsDark(dark)
-    localStorage.setItem('darkMode', dark.toString())
-    if (dark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  }
-
   const renderPage = () => {
     const page = currentPage()
     switch (page) {
       case 'dashboard':
-        return <DashboardPage isDark={isDark()} />
+        return <DashboardPage isDark={true} />
       case 'profile':
-        return <ProfilePage isDark={isDark()} />
+        return <ProfilePage isDark={true} />
       case 'splitdo-exchange':
-        return <WalletPage isDark={isDark()} />
+        return <WalletPage isDark={true} />
       default:
-        return <DashboardPage isDark={isDark()} />
+        return <DashboardPage isDark={true} />
     }
   }
 
@@ -242,12 +229,10 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
   })
 
   return (
-    <div class={`h-screen flex overflow-hidden ${isDark() ? 'bg-zinc-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
+    <div class="h-screen flex overflow-hidden bg-zinc-900 text-gray-100">
       <Navigation
         currentPage={currentPage()}
         onPageChange={handlePageChange}
-        isDark={isDark()}
-        updateTheme={updateTheme}
         isOpen={isNavOpen()}
         onClose={() => setIsNavOpen(false)}
       />
@@ -267,14 +252,14 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
             message={sessionNotification.message}
             onRedirect={sessionNotification.onRedirect}
             onDismiss={sessionNotification.onDismiss}
-            isDark={isDark()}
+            isDark={true}
           />
         );
       })()}
 
       {/* WalletConnect QR Modal */}
       <WalletConnectQRModal
-        isDark={isDark()}
+        isDark={true}
         isOpen={qrModal.isQRModalOpen}
         onClose={qrModal.closeQRModal}
         qrData={qrModal.qrData}
