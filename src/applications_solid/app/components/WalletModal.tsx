@@ -70,18 +70,19 @@ const WalletModal: Component<WalletModalProps> = (props) => {
           readyState: phantom.readyState
         });
 
-        // Check if already connected
-        if (phantom.isConnected && phantom.publicKey) {
-          console.log('[WalletModal] Phantom already connected, skipping connect() call');
-          // Create a resolved promise for already connected state
-          phantomConnectionPromise = Promise.resolve({
-            publicKey: phantom.publicKey
-          });
-        } else {
-          // Trigger popup IMMEDIATELY - this must happen before any state updates
-          console.log('[WalletModal] Calling phantom.connect() IMMEDIATELY');
+        // CRITICAL: Always call phantom.connect() when user clicks "Connect"
+        //
+        // Why we don't check isConnected:
+        // - isConnected=true means Phantom was connected to ANY app before
+        // - It does NOT mean this app has permission in this session
+        // - Phantom needs fresh connect() call to establish user consent
+        // - Phantom extension handles popup logic internally
+        //
+        // Let Phantom decide whether to show popup or reuse existing session
+        console.log('[WalletModal] Calling phantom.connect() IMMEDIATELY');
+        console.log('[WalletModal] Letting Phantom handle session management');
 
-          try {
+        try {
             phantomConnectionPromise = phantom.connect();
             console.log('[WalletModal] Phantom connect() called - popup should appear now');
 
@@ -113,11 +114,10 @@ const WalletModal: Component<WalletModalProps> = (props) => {
               }
             }, 5000);
 
-          } catch (error) {
-            console.error('[WalletModal] Error calling phantom.connect():', error);
-            setConnectionError(`Failed to trigger Phantom connection: ${error}`);
-            return;
-          }
+        } catch (error) {
+          console.error('[WalletModal] Error calling phantom.connect():', error);
+          setConnectionError(`Failed to trigger Phantom connection: ${error}`);
+          return;
         }
       } else {
         setConnectionError('Phantom wallet not found. Please install Phantom and refresh the page.');
