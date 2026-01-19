@@ -54,76 +54,10 @@ const WalletModal: Component<WalletModalProps> = (props) => {
       return;
     }
 
-    // CRITICAL: For Phantom, trigger connect() IMMEDIATELY in user gesture context
-    let phantomConnectionPromise: Promise<any> | null = null;
-    if (walletId === 'phantom') {
-      console.log('[WalletModal] IMMEDIATE Phantom connect trigger in user gesture context');
-
-      // Check if Phantom is available
-      const phantom = (window as any).phantom?.solana;
-      if (phantom?.isPhantom) {
-        // Check Phantom state before calling connect
-        console.log('[WalletModal] Phantom state check:', {
-          isPhantom: phantom.isPhantom,
-          isConnected: phantom.isConnected,
-          publicKey: phantom.publicKey,
-          readyState: phantom.readyState
-        });
-
-        // CRITICAL: Always call phantom.connect() when user clicks "Connect"
-        //
-        // Why we don't check isConnected:
-        // - isConnected=true means Phantom was connected to ANY app before
-        // - It does NOT mean this app has permission in this session
-        // - Phantom needs fresh connect() call to establish user consent
-        // - Phantom extension handles popup logic internally
-        //
-        // Let Phantom decide whether to show popup or reuse existing session
-        console.log('[WalletModal] Calling phantom.connect() IMMEDIATELY');
-        console.log('[WalletModal] Letting Phantom handle session management');
-
-        try {
-            phantomConnectionPromise = phantom.connect();
-            console.log('[WalletModal] Phantom connect() called - popup should appear now');
-
-            // Add immediate diagnostics
-            setTimeout(() => {
-              console.log('[WalletModal] 🕐 1 second check - popup appeared?');
-              console.log('[WalletModal] Document state:', {
-                hidden: document.hidden,
-                visibilityState: document.visibilityState,
-                hasFocus: document.hasFocus()
-              });
-            }, 1000);
-
-            // Add promise state monitoring
-            let promiseResolved = false;
-            phantomConnectionPromise.then(() => {
-              promiseResolved = true;
-              console.log('[WalletModal] ✅ Phantom connection promise RESOLVED');
-            }).catch((error) => {
-              promiseResolved = true;
-              console.log('[WalletModal] ❌ Phantom connection promise REJECTED:', error);
-            });
-
-            // Monitor if promise never resolves
-            setTimeout(() => {
-              if (!promiseResolved) {
-                console.log('[WalletModal] ⚠️  WARNING: Phantom connection promise still pending after 5 seconds');
-                console.log('[WalletModal] This suggests Phantom is not responding');
-              }
-            }, 5000);
-
-        } catch (error) {
-          console.error('[WalletModal] Error calling phantom.connect():', error);
-          setConnectionError(`Failed to trigger Phantom connection: ${error}`);
-          return;
-        }
-      } else {
-        setConnectionError('Phantom wallet not found. Please install Phantom and refresh the page.');
-        return;
-      }
-    }
+    // FIXED: Remove direct phantom.connect() call - let wallet service handle it
+    // The previous code was calling phantom.connect() directly AND then calling
+    // wallet.connectWallet() which calls phantom.connect() again, causing double
+    // connection attempts and preventing the popup from showing properly.
 
     try {
       console.log('[WalletModal] Connecting to wallet:', walletId);

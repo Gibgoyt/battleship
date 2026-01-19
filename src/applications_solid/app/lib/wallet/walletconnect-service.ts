@@ -81,62 +81,11 @@ export class EnhancedWalletService {
     // Discover available wallets
     await this.updateAvailableWallets();
 
-    // Check for existing wallet connections BEFORE user interaction
-    await this.checkExistingConnections();
-
     // Set up wallet standard discovery events
     if (walletStandardDiscovery.isSupported()) {
       walletStandardDiscovery.addEventListener(() => {
         this.updateAvailableWallets();
       });
-    }
-  }
-
-  /**
-   * Check for existing wallet connections on page load
-   * This fixes the issue where Phantom is already connected but the app doesn't know it
-   */
-  private async checkExistingConnections() {
-    try {
-      // Check Phantom specifically since it's the primary wallet
-      const phantom = (window as any).phantom?.solana;
-      if (phantom?.isPhantom && phantom?.isConnected && phantom?.publicKey) {
-        console.log('[EnhancedWalletService] Detected existing Phantom connection, restoring session');
-
-        // Restore the connection without showing popup
-        const result = await this.multiWalletService.connectWallet('phantom');
-        if (result.success && result.wallet) {
-          this.updateState({
-            status: 'connected',
-            wallet: result.wallet,
-            connectedProviderId: 'phantom',
-            error: null
-          });
-
-          console.log('[EnhancedWalletService] Successfully restored Phantom connection:', result.wallet.address);
-        }
-      }
-
-      // Check MetaMask if available
-      const metamask = (window as any).ethereum;
-      if (metamask?.isMetaMask && metamask?.solana?.isConnected && metamask?.solana?.publicKey) {
-        console.log('[EnhancedWalletService] Detected existing MetaMask connection, restoring session');
-
-        const result = await this.multiWalletService.connectWallet('metamask');
-        if (result.success && result.wallet) {
-          this.updateState({
-            status: 'connected',
-            wallet: result.wallet,
-            connectedProviderId: 'metamask',
-            error: null
-          });
-
-          console.log('[EnhancedWalletService] Successfully restored MetaMask connection:', result.wallet.address);
-        }
-      }
-    } catch (error) {
-      console.warn('[EnhancedWalletService] Error during existing connection check:', error);
-      // Don't throw - this is just an optimization, not critical
     }
   }
 
