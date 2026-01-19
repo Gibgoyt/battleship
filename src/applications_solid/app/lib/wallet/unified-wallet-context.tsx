@@ -359,6 +359,27 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
     try {
       logger.info('Disconnecting wallet');
 
+      // SECURITY FIX: Also clear browser cache when disconnecting
+      if (typeof window !== 'undefined') {
+        try {
+          const allKeys = [...Object.keys(window.localStorage), ...Object.keys(window.sessionStorage)];
+          const walletKeys = allKeys.filter(key =>
+            key.includes('phantom') || key.includes('solana') || key.includes('wallet') || key.includes('walletconnect')
+          );
+          walletKeys.forEach(key => {
+            try {
+              window.localStorage.removeItem(key);
+              window.sessionStorage.removeItem(key);
+            } catch (e) {
+              // Ignore individual key errors
+            }
+          });
+          logger.debug('Cleared wallet cache data on disconnect');
+        } catch (error) {
+          logger.warn('Failed to clear wallet cache on disconnect:', error);
+        }
+      }
+
       await walletConnectService.disconnect();
 
       batch(() => {
@@ -370,7 +391,7 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
         setSplitdoATA({ status: 'unknown' });
       });
 
-      logger.info('Wallet disconnected successfully');
+      logger.info('Wallet disconnected successfully with cache cleared');
     } catch (error) {
       logger.error('Error disconnecting wallet:', error);
       setConnectionError(error instanceof Error ? error.message : 'Disconnection failed');
@@ -721,6 +742,54 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
     logger.info('UnifiedWalletProvider mounting');
 
     try {
+      // SECURITY FIX: Clear connection state on initialization to prevent false positives
+      logger.info('Clearing any cached connection state on initialization');
+
+      batch(() => {
+        setConnectionStatus('disconnected');
+        setWallet(null);
+        setConnectedProviderId(null);
+        setConnectionError(null);
+        setSolBalance(null);
+        setSplitdoATA({ status: 'unknown' });
+        setQrData(null);
+      });
+
+      // Clear any cached connection data from browser storage
+      if (typeof window !== 'undefined') {
+        try {
+          // Clear WalletConnect session storage if exists
+          const walletConnectKeys = Object.keys(window.localStorage).filter(key =>
+            key.includes('walletconnect') || key.includes('wc@')
+          );
+          walletConnectKeys.forEach(key => {
+            logger.debug(`Clearing cached wallet data: ${key}`);
+            window.localStorage.removeItem(key);
+          });
+
+          // SECURITY FIX: Clear any Phantom-related cached connection data
+          // This ensures Phantom treats each connection request as fresh
+          const phantomKeys = Object.keys(window.localStorage).filter(key =>
+            key.includes('phantom') || key.includes('solana') || key.includes('wallet')
+          );
+          phantomKeys.forEach(key => {
+            logger.debug(`Clearing cached Phantom data: ${key}`);
+            window.localStorage.removeItem(key);
+          });
+
+          // Also clear sessionStorage for wallet data
+          const sessionKeys = Object.keys(window.sessionStorage).filter(key =>
+            key.includes('phantom') || key.includes('solana') || key.includes('wallet') || key.includes('walletconnect')
+          );
+          sessionKeys.forEach(key => {
+            logger.debug(`Clearing cached session wallet data: ${key}`);
+            window.sessionStorage.removeItem(key);
+          });
+        } catch (error) {
+          logger.warn('Failed to clear cached wallet data:', error);
+        }
+      }
+
       // Get available wallets (service auto-initializes in constructor)
       setAvailableWallets(walletConnectService.getAvailableWallets());
 
@@ -736,7 +805,7 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
         }
       });
 
-      logger.info('UnifiedWalletProvider initialized successfully');
+      logger.info('UnifiedWalletProvider initialized successfully with clean state');
     } catch (error) {
       logger.error('Error initializing UnifiedWalletProvider:', error);
     }
