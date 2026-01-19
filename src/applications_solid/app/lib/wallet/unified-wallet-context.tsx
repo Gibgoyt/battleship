@@ -38,6 +38,7 @@ import type { WalletProvider as IWalletProvider } from './wallet-providers';
 import type { WalletConnectQRData } from './providers/walletconnect-provider';
 import { smartFetch, invalidateCache, clearUserCache, getCacheStats, type SmartFetchResult } from '../../data/smart-fetch';
 import { CACHE_POLICIES, type CachePolicy } from '../../data/cache-engine';
+import { middlewareFetch } from '../../middleware/endpoints';
 
 // Define ProcessedTransaction type locally to avoid importing from solana_mainnet
 export interface ProcessedTransaction {
@@ -64,6 +65,45 @@ import { getGlobalAuthStore } from '../../middleware/firebase/auth-store';
 import { createLogger } from 'src/lib/logger';
 
 const logger = createLogger('[UnifiedWalletProvider]');
+
+// ================================
+// DATA TRANSFORMATION FUNCTIONS
+// ================================
+
+/**
+ * Transform balance middleware response to expected BalanceData format
+ */
+function transformBalanceResponse(balanceResponse: any): BalanceData {
+  return {
+    solBalance: 0, // Will need to fetch separately or add to backend
+    splitdoBalance: balanceResponse.mainnet_response?.balance || 0,
+    splitdoATA: {
+      address: balanceResponse.token_account_pubkey || '',
+      status: balanceResponse.token_account_pubkey ? 'exists' as const : 'unknown' as const
+    },
+    lastUpdated: balanceResponse.last_updated || new Date().toISOString()
+  };
+}
+
+/**
+ * Transform signature history response to ProcessedTransaction format
+ */
+function transformHistoryResponse(historyResponse: any): ProcessedTransaction[] {
+  if (!historyResponse.signature_history?.signatures) {
+    return [];
+  }
+
+  return historyResponse.signature_history.signatures.map((sig: any) => ({
+    signature: sig.signature,
+    slot: sig.slot,
+    blockTime: sig.blockTime,
+    timestamp: new Date(sig.blockTime * 1000).toISOString(),
+    fee: 0, // Not provided by this endpoint
+    status: 'success' as const, // Assume success if in history
+    instructions: [], // Not provided by this endpoint
+    balanceChanges: [] // Not provided by this endpoint
+  }));
+}
 
 // ================================
 // TYPE DEFINITIONS
@@ -393,36 +433,27 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       setIsCreatingATA(true);
       setSplitdoATA(prev => ({ ...prev, status: 'creating' }));
 
-      // FIXED: Use backend API instead of direct Solana calls
-      const response = await fetch('/api/splitdo-token/accounts/create', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${props.firebaseToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          walletAddress: wallet()!.address
-        })
-      });
+      // TODO: The middleware POST endpoint requires wallet_address, token_account_address, and signed_transaction
+      // This needs coordination with backend team to either:
+      // 1. Add a simplified account creation endpoint that only requires wallet_address
+      // 2. Implement client-side transaction creation and signing
 
-      if (!response.ok) {
-        throw new Error('Failed to create ATA via backend API');
-      }
+      // For now, return an error indicating this needs implementation
+      logger.error('createSplitdoATA: Middleware endpoint requires signed transaction - needs implementation');
 
-      const result = await response.json();
+      setSplitdoATA(prev => ({ ...prev, status: 'error', error: 'Account creation not implemented with new middleware system' }));
+      return {
+        success: false,
+        error: 'Account creation requires coordination with backend team for proper transaction signing implementation'
+      };
 
-      if (result.success) {
-        setSplitdoATA({
-          status: 'created',
-          address: result.address,
-          balance: { amount: 0, decimals: 9 }
-        });
+      // Future implementation would look like:
+      // const createResponse = await middlewareFetch.Endpoints.Devbackend._Api.SplitdoToken.Accounts.Create.POST({
+      //   wallet_address: wallet()!.address,
+      //   token_account_address: '...', // Generated client-side
+      //   signed_transaction: '...' // Signed client-side
+      // });
 
-        return { success: true, signature: result.signature };
-      } else {
-        setSplitdoATA(prev => ({ ...prev, status: 'error', error: result.error }));
-        return { success: false, error: result.error };
-      }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to create ATA';
       setSplitdoATA(prev => ({ ...prev, status: 'error', error: errorMsg }));
@@ -445,19 +476,15 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
       const result = await smartFetch(
         async () => {
-          // FIXED: Use backend API instead of direct RPC calls
-          const response = await fetch(`/api/splitdo-token/history/${address}?limit=${limit}`, {
-            headers: {
-              'Authorization': `Bearer ${props.firebaseToken}`,
-              'Content-Type': 'application/json',
-            },
-          });
+          // Use middleware system for history API
+          const historyResponse = await middlewareFetch.Endpoints.Devbackend._Api.SplitdoToken.History[':Index'].GET(limit);
 
-          if (!response.ok) {
-            throw new Error('Failed to fetch transaction history from backend API');
+          if (historyResponse.status !== 200) {
+            throw new Error(`History API returned ${historyResponse.status}: ${historyResponse.data.message || 'Unknown error'}`);
           }
 
-          return await response.json();
+          // Transform middleware response to expected format
+          return transformHistoryResponse(historyResponse.data);
         },
         {
           cacheKey: `transactions-${address}`,
@@ -491,19 +518,15 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
       const result = await smartFetch(
         async () => {
-          // This would fetch from your backend API
-          const response = await fetch('/api/user/balances', {
-            headers: {
-              'Authorization': `Bearer ${props.firebaseToken}`,
-              'Content-Type': 'application/json',
-            },
-          });
+          // Use middleware system for balance API
+          const balanceResponse = await middlewareFetch.Endpoints.Devbackend._Api.SplitdoToken.Balance.GET();
 
-          if (!response.ok) {
-            throw new Error('Failed to fetch balances from API');
+          if (balanceResponse.status !== 200) {
+            throw new Error(`Balance API returned ${balanceResponse.status}: ${balanceResponse.data.message || 'Unknown error'}`);
           }
 
-          return await response.json();
+          // Transform middleware response to expected format
+          return transformBalanceResponse(balanceResponse.data);
         },
         {
           cacheKey: 'user-balances',
@@ -537,18 +560,15 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
       const result = await smartFetch(
         async () => {
-          const response = await fetch('/api/exchange/rates', {
-            headers: {
-              'Authorization': `Bearer ${props.firebaseToken}`,
-              'Content-Type': 'application/json',
-            },
-          });
+          // No exchange rate endpoint available in middleware - use default rate
+          // This should be coordinated with backend team to create proper endpoint
+          logger.warn('Using default exchange rate as no middleware endpoint exists');
 
-          if (!response.ok) {
-            throw new Error('Failed to fetch exchange rates');
-          }
-
-          return await response.json();
+          return {
+            exchangeRate: 1000, // Default: 1 SOL = 1000 SPLITDO tokens
+            splitdoTokenMint: '6vdfHTgLiEXvoGVp8Ga2HaKQsPKj6DrUTee7526SCXoM',
+            lastUpdated: new Date().toISOString()
+          };
         },
         {
           cacheKey: 'exchange-rates',
@@ -582,15 +602,18 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
       const result = await smartFetch(
         async () => {
-          const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+          // Use middleware system for CoinGecko API
+          const priceResponse = await middlewareFetch.Endpoints.CoinGecko._Api.V3.Simple.Price.GET({
+            ids: 'solana',
+            vs_currencies: 'usd'
+          });
 
-          if (!response.ok) {
-            throw new Error('Failed to fetch SOL price from CoinGecko');
+          if (priceResponse.status !== 200) {
+            throw new Error(`CoinGecko API returned ${priceResponse.status}: ${priceResponse.data.error || 'Unknown error'}`);
           }
 
-          const data = await response.json();
           return {
-            price: data.solana.usd,
+            price: priceResponse.data.solana?.usd || 0,
             currency: 'usd',
             lastUpdated: new Date().toISOString()
           };
@@ -635,38 +658,28 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
       logger.info(`Executing exchange: ${solAmount} SOL`);
 
-      // FIXED: Use backend API instead of direct Solana calls
-      const response = await fetch('/api/exchange-new/solana/splitdo', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${props.firebaseToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          walletAddress: wallet()!.address,
-          solAmount: solAmount,
-          exchangeRate: exchangeRates()?.exchangeRate || 1
-        })
-      });
+      // TODO: No exchange endpoint exists in middleware system
+      // This needs coordination with backend team to either:
+      // 1. Add an exchange endpoint to the middleware system
+      // 2. Implement client-side exchange logic with proper transaction creation and signing
 
-      if (!response.ok) {
-        throw new Error('Failed to execute exchange via backend API');
-      }
+      logger.error('executeExchange: No exchange endpoint available in middleware system');
 
-      const result = await response.json();
+      setExchangeStatus('error');
+      setExchangeError('Exchange functionality not available - needs backend implementation');
 
-      if (result.success) {
-        setExchangeStatus('success');
+      return {
+        success: false,
+        error: 'Exchange functionality requires coordination with backend team to add proper exchange endpoint'
+      };
 
-        // Refresh balances after successful exchange
-        await refreshBalances();
+      // Future implementation would look like:
+      // const exchangeResponse = await middlewareFetch.Endpoints.Devbackend._Api.Exchange.POST({
+      //   wallet_address: wallet()!.address,
+      //   sol_amount: solAmount,
+      //   exchange_rate: exchangeRates()?.exchangeRate || 1000
+      // });
 
-        return { success: true, signature: result.signature };
-      } else {
-        setExchangeStatus('error');
-        setExchangeError(result.error || 'Exchange failed');
-        return { success: false, error: result.error };
-      }
     } catch (error) {
       setExchangeStatus('error');
       const errorMsg = error instanceof Error ? error.message : 'Exchange failed';
