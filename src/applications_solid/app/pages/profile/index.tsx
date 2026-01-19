@@ -101,7 +101,7 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
   };
 
   return (
-    <div class="min-h-screen bg-gradient-to-b from-zinc-900 to-black">
+    <div class="min-h-screen bg-zinc-900">
       {/* Hero Section */}
       <div class="relative overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-pink-500/10"></div>

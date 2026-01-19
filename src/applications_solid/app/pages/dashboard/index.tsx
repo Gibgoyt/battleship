@@ -69,7 +69,7 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
   };
 
   return (
-    <div class="min-h-screen bg-gradient-to-b from-zinc-900 to-black">
+    <div class="min-h-screen bg-zinc-900">
       {/* Hero Section */}
       <div class="relative overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10"></div>
@@ -92,15 +92,6 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
                   <div class="text-7xl md:text-8xl font-bold text-zinc-700">
                     --
                   </div>
-                  <button
-                    onClick={openModal}
-                    class="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 transition-all text-white font-semibold text-lg shadow-lg shadow-cyan-500/25"
-                  >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                    Connect Wallet
-                  </button>
                 </div>
               }
             >

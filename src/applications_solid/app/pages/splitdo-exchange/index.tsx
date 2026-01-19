@@ -1,5 +1,5 @@
 import type { Component } from 'solid-js';
-import { createSignal, createEffect, Show } from 'solid-js';
+import { createSignal, createEffect, Show, createMemo } from 'solid-js';
 import {
   useSplitdoATA,
   useWalletModal,
@@ -7,22 +7,23 @@ import {
   useWalletConnection,
   useWalletBalances,
   useCreateAccountModal,
-  useExchangeModal
+  useExchangeModal,
+  useSolPrice
 } from 'src/applications_solid/app/lib/wallet/wallet-context';
 import WalletModal from '../../components/WalletModal';
 import { CreateAccountModal } from '../../components/CreateAccountModal';
 import { ExchangeModal } from '../../components/ExchangeModal';
-import EnhancedExchangeWidget from './components/EnhancedExchangeWidget';
 
 const WalletPage: Component<{ isDark: boolean }> = (props) => {
   // SolidJS Wallet Context Hooks
   const { splitdoATA, createSplitdoATA, isCreatingATA } = useSplitdoATA();
   const { openModal, closeModal, isModalOpen } = useWalletModal();
   const { isCreateAccountModalOpen, closeCreateAccountModal, openCreateAccountModal } = useCreateAccountModal();
-  const { isExchangeModalOpen } = useExchangeModal();
+  const { isExchangeModalOpen, openExchangeModal } = useExchangeModal();
   const { wallet, connectionStatus, connectionError } = useWallet();
   const { connectWallet, disconnect } = useWalletConnection();
   const { solBalance, refreshBalances } = useWalletBalances();
+  const { solPrice } = useSolPrice();
 
   // Check SPLITDO account status on page load
   createEffect(() => {
@@ -46,15 +47,11 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
     }
   });
 
-  const formatCurrency = (amount: number, currency: string = 'SPLITDO') => {
-    return `${amount.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })} ${currency}`;
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US');
+  const formatCurrency = (amount: number, decimals: number = 2) => {
+    return amount.toLocaleString('en-US', {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    });
   };
 
   const formatAddress = (address: string) => {
@@ -62,309 +59,247 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Completed':
-        return 'bg-green-100 text-green-800';
-      case 'Pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Failed':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+  // Calculate portfolio value in USD
+  const portfolioValueUSD = createMemo(() => {
+    const splitdoBalance = splitdoATA().balance?.uiAmount || 0;
+    const splitdoPrice = 0.11; // $0.11 per SPLITDO
+    const solValue = (solBalance()?.sol || 0) * (solPrice()?.usd || 0);
+    return (splitdoBalance * splitdoPrice) + solValue;
+  });
 
   return (
-    <div class="p-4 md:p-8 space-y-8">
-      {/* Header */}
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-gray-200 dark:border-zinc-800">
-        <div>
-          <h2 class={`text-2xl md:text-3xl font-bold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-            Your Wallet
-          </h2>
-          <p class={`text-sm mt-1 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Manage your SPLITDO tokens and balances
-          </p>
-        </div>
-        <div class="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
-          {/* Show Connect/Disconnect Button */}
-          <Show
-            when={connectionStatus() === 'connected'}
-            fallback={
-              <button
-                onClick={() => openModal()}
-                class="w-full sm:w-auto px-6 py-3 bg-[#00d9ff] text-white hover:bg-[#00b8d4] transition-colors text-sm md:text-base font-semibold"
-              >
-                Connect Wallet
-              </button>
-            }
-          >
-            <button
-              onClick={() => disconnect()}
-              class={`w-full sm:w-auto px-6 py-3 border transition-colors text-sm md:text-base font-semibold ${
-                props.isDark
-                  ? 'border-red-600 text-red-400 hover:bg-red-600 hover:text-white'
-                  : 'border-red-500 text-red-600 hover:bg-red-500 hover:text-white'
-              }`}
-            >
-              Disconnect
-            </button>
-          </Show>
-        </div>
-      </div>
-
-      {/* Connection Status */}
-      <Show when={connectionStatus() === 'connecting'}>
-        <div class={`p-4 rounded-lg border ${props.isDark ? 'bg-zinc-800 border-zinc-700 text-yellow-400' : 'bg-yellow-50 border-yellow-200 text-yellow-800'}`}>
-          Connecting to wallet...
-        </div>
-      </Show>
-
-      <Show when={connectionStatus() === 'error' && connectionError()}>
-        <div class={`p-4 rounded-lg border ${props.isDark ? 'bg-zinc-800 border-red-700 text-red-400' : 'bg-red-50 border-red-200 text-red-800'}`}>
-          Connection Error: {connectionError()}
-        </div>
-      </Show>
-
-      {/* Enhanced Exchange Widget with both working buttons */}
-      <EnhancedExchangeWidget isDark={props.isDark} />
-
-      {/* Balance Overview - Only show when account exists or is being checked */}
-      <Show when={splitdoATA().status !== 'not_found'}>
-        <div class="space-y-6">
-          <h3 class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-            Balances
-          </h3>
-
-        <div class="space-y-4">
-          {/* SPLITDO Balance */}
-          <div class={`p-6 border-l-4 border-[#00d9ff] ${props.isDark ? 'bg-zinc-800/30' : 'bg-gray-50'}`}>
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-[#00d9ff] rounded-full flex items-center justify-center">
-                  <span class="text-white text-lg font-bold">S</span>
-                </div>
-                <div>
-                  <h4 class={`text-sm font-medium uppercase tracking-wider ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    SPLITDO Token
-                  </h4>
-                </div>
-              </div>
+    <div class="min-h-screen bg-zinc-900">
+      {/* Hero Section */}
+      <div class="relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-blue-500/10"></div>
+        <div class="relative px-4 pt-12 pb-20 md:px-8 md:pt-20 md:pb-32">
+          <div class="max-w-4xl mx-auto text-center space-y-6">
+            <div class="inline-block px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 mb-4">
+              <span class="text-sm font-medium text-cyan-400">
+                {wallet()?.address ? formatAddress(wallet()!.address) : 'Exchange'}
+              </span>
             </div>
 
-            {/* SPLITDO ATA Status - Reactive SolidJS */}
-            <Show when={splitdoATA().status === 'exists'}>
-              <p class={`text-3xl md:text-4xl font-bold mb-2 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                {formatCurrency(splitdoATA().balance?.uiAmount || 0)}
-              </p>
-              <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
-                {formatAddress(splitdoATA().address || '')}
-              </p>
-            </Show>
-
-            <Show when={splitdoATA().status === 'not_found'}>
-              <div class="text-center py-4">
-                <p class={`text-lg mb-2 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  No SPLITDO Account Found
-                </p>
-                <p class={`text-sm ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                  You need to create a SPLITDO token account to start trading
-                </p>
-              </div>
-            </Show>
-
-            <Show when={splitdoATA().status === 'creating'}>
-              <div class="space-y-2 mt-4">
-                <p class="text-lg text-[#00d9ff] font-semibold">
-                  Creating Account...
-                </p>
-                <div class={`w-full h-2 ${props.isDark ? 'bg-zinc-700' : 'bg-gray-200'}`}>
-                  <div class="bg-[#00d9ff] h-2 animate-pulse" style="width: 60%"></div>
-                </div>
-                <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                  Please confirm transaction in your wallet
-                </p>
-              </div>
-            </Show>
-
-            <Show when={splitdoATA().status === 'checking'}>
-              <p class={`text-lg mt-4 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Checking account status...
-              </p>
-            </Show>
-
-            <Show when={splitdoATA().status === 'error' && splitdoATA().error}>
-              <div class="space-y-2 mt-4">
-                <p class="text-lg text-red-500 font-semibold">Error</p>
-                <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  {splitdoATA().error}
-                </p>
-                <button
-                  onClick={() => refreshBalances()}
-                  class="px-6 py-2 bg-gray-600 text-white hover:bg-gray-700 transition-colors"
-                >
-                  Retry
-                </button>
-              </div>
-            </Show>
-          </div>
-
-          {/* SOL Balance */}
-          <div class={`p-6 border-l-4 border-purple-500 ${props.isDark ? 'bg-zinc-800/30' : 'bg-purple-50'}`}>
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
-                  <span class="text-white text-lg font-bold">◎</span>
-                </div>
-                <div>
-                  <h4 class={`text-sm font-medium uppercase tracking-wider ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Solana
-                  </h4>
-                </div>
-              </div>
-            </div>
+            <h1 class="text-4xl md:text-6xl font-bold bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent">
+              Token Exchange
+            </h1>
 
             <Show
-              when={connectionStatus() === 'connected' && wallet()}
+              when={connectionStatus() === 'connected' && splitdoATA().status === 'exists'}
               fallback={
-                <p class={`text-lg ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Connect wallet to see balance
-                </p>
+                <div class="space-y-6">
+                  <div class="text-5xl md:text-6xl font-bold text-zinc-700">
+                    ${formatCurrency(0)}
+                  </div>
+                  <Show
+                    when={connectionStatus() === 'connected'}
+                    fallback={
+                      <button
+                        onClick={openModal}
+                        class="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 transition-all text-white font-semibold text-lg shadow-lg shadow-cyan-500/25"
+                      >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Connect Wallet
+                      </button>
+                    }
+                  >
+                    <button
+                      onClick={openCreateAccountModal}
+                      class="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 transition-all text-white font-semibold text-lg shadow-lg shadow-emerald-500/25"
+                    >
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                      </svg>
+                      Create SPLITDO Account
+                    </button>
+                  </Show>
+                </div>
               }
             >
-              <p class={`text-3xl md:text-4xl font-bold mb-2 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                {formatCurrency(solBalance()?.sol || 0, 'SOL')}
-              </p>
-              <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
-                For transaction fees
-              </p>
-              <Show when={wallet()?.address}>
-                <p class={`text-xs mt-2 ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                  {formatAddress(wallet()?.address || '')}
-                </p>
-              </Show>
+              <div class="space-y-4">
+                <div class="text-5xl md:text-7xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                  ${formatCurrency(portfolioValueUSD())}
+                </div>
+                <div class="text-xl md:text-2xl text-zinc-400 font-medium">
+                  Total Value
+                </div>
+              </div>
             </Show>
           </div>
         </div>
-        </div>
-      </Show>
-
-      {/* Quick Actions - Only show when account exists */}
-      <Show when={splitdoATA().status !== 'not_found'}>
-      <div class="pt-6 border-t border-gray-200 dark:border-zinc-800">
-        <h3 class={`text-lg font-semibold mb-4 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-          Quick Actions
-        </h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button
-            disabled
-            class={`p-6 border-l-4 border-gray-500 text-left ${props.isDark ? 'bg-zinc-800/30' : 'bg-gray-50'} opacity-60 cursor-not-allowed`}
-          >
-            <div class="flex items-center gap-3 mb-2">
-              <div class="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                </svg>
-              </div>
-              <div>
-                <h4 class={`font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>Token Swap</h4>
-                <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>Coming Soon</p>
-              </div>
-            </div>
-            <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Swap SOL for SPLITDO tokens
-            </p>
-          </button>
-
-          <button
-            disabled
-            class={`p-6 border-l-4 border-gray-500 text-left ${props.isDark ? 'bg-zinc-800/30' : 'bg-gray-50'} opacity-60 cursor-not-allowed`}
-          >
-            <div class="flex items-center gap-3 mb-2">
-              <div class="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <h4 class={`font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>Send Tokens</h4>
-                <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>Coming Soon</p>
-              </div>
-            </div>
-            <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Transfer SPLITDO to another wallet
-            </p>
-          </button>
-        </div>
       </div>
 
-      {/* Transaction History */}
-      <div class="pt-6 border-t border-gray-200 dark:border-zinc-800">
-        <h3 class={`text-lg font-semibold mb-4 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-          Recent Activity
-        </h3>
+      {/* Balance Cards */}
+      <div class="px-4 md:px-8 pb-12 -mt-8">
+        <div class="max-w-4xl mx-auto">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* SPLITDO Balance */}
+            <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-medium text-zinc-500 uppercase tracking-wider">SPLITDO</span>
+                <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+              </div>
+              <Show
+                when={connectionStatus() === 'connected' && splitdoATA().status === 'exists'}
+                fallback={
+                  <div>
+                    <div class="text-3xl font-bold text-zinc-700 mb-2">--</div>
+                    <p class="text-xs text-zinc-500">
+                      {connectionStatus() === 'connected' ? 'Create account to trade' : 'Connect wallet to view'}
+                    </p>
+                  </div>
+                }
+              >
+                <div class="text-3xl font-bold text-white mb-2">
+                  {formatCurrency(splitdoATA().balance?.uiAmount || 0)}
+                </div>
+                <p class="text-xs text-zinc-500 font-mono">
+                  {formatAddress(splitdoATA().address || '')}
+                </p>
+              </Show>
+            </div>
 
-        <div class="overflow-x-auto -mx-4 md:mx-0">
-          <div class="inline-block min-w-full align-middle">
-            <table class="min-w-full">
-              <thead class={`border-b-2 ${props.isDark ? 'border-zinc-800' : 'border-gray-200'}`}>
-                <tr>
-                  <th class={`text-left py-3 px-2 md:px-4 font-semibold text-xs uppercase tracking-wider ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Type
-                  </th>
-                  <th class={`text-left py-3 px-2 md:px-4 font-semibold text-xs uppercase tracking-wider ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Amount
-                  </th>
-                  <th class={`text-left py-3 px-2 md:px-4 font-semibold text-xs uppercase tracking-wider hidden sm:table-cell ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Date
-                  </th>
-                  <th class={`text-left py-3 px-2 md:px-4 font-semibold text-xs uppercase tracking-wider ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Status
-                  </th>
-                  <th class={`text-left py-3 px-2 md:px-4 font-semibold text-xs uppercase tracking-wider hidden md:table-cell ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Hash
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <Show
-                  when={connectionStatus() === 'connected'}
-                  fallback={
-                    <tr>
-                      <td colspan="5" class={`py-12 px-2 md:px-4 text-center ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
-                        <div class="flex flex-col items-center gap-3">
-                          <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                          </svg>
-                          <p class="text-sm font-medium">Connect your wallet to view transaction history</p>
-                        </div>
-                      </td>
-                    </tr>
-                  }
-                >
-                  <tr>
-                    <td colspan="5" class={`py-12 px-2 md:px-4 text-center ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
-                      <div class="flex flex-col items-center gap-3">
-                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                        <p class="text-sm font-medium">No transactions yet</p>
-                      </div>
-                    </td>
-                  </tr>
-                </Show>
-              </tbody>
-            </table>
+            {/* SOL Balance */}
+            <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-medium text-zinc-500 uppercase tracking-wider">Solana</span>
+                <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                  </svg>
+                </div>
+              </div>
+              <Show
+                when={connectionStatus() === 'connected' && solBalance()}
+                fallback={
+                  <div>
+                    <div class="text-3xl font-bold text-zinc-700 mb-2">--</div>
+                    <p class="text-xs text-zinc-500">Connect wallet to view</p>
+                  </div>
+                }
+              >
+                <div class="text-3xl font-bold text-white mb-2">
+                  {formatCurrency(solBalance()?.sol || 0, 4)}
+                </div>
+                <p class="text-xs text-zinc-500">For transaction fees</p>
+              </Show>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Exchange Action */}
+      <Show when={connectionStatus() === 'connected' && splitdoATA().status === 'exists'}>
+        <div class="px-4 md:px-8 pb-12">
+          <div class="max-w-4xl mx-auto">
+            <button
+              onClick={openExchangeModal}
+              class="group w-full bg-gradient-to-r from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 border border-cyan-500/20 rounded-3xl p-8 transition-all"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-6">
+                  <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                    </svg>
+                  </div>
+                  <div class="text-left">
+                    <h3 class="text-2xl font-bold text-white mb-1">Exchange Tokens</h3>
+                    <p class="text-sm text-zinc-400">Trade SOL for SPLITDO at $0.11 each</p>
+                  </div>
+                </div>
+                <svg class="w-8 h-8 text-zinc-600 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </div>
+            </button>
+          </div>
+        </div>
       </Show>
 
-      {/* Wallet Selection Modal for ATA Creation */}
+      {/* Quick Actions */}
+      <Show when={connectionStatus() === 'connected'}>
+        <div class="px-4 md:px-8 pb-12">
+          <div class="max-w-4xl mx-auto space-y-4">
+            <h2 class="text-lg font-semibold text-white mb-4">Quick Actions</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                onClick={disconnect}
+                class="group block bg-zinc-900/50 hover:bg-red-500/10 border border-zinc-800 hover:border-red-500/20 rounded-3xl p-6 transition-all text-left"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-zinc-800 group-hover:bg-red-500/20 flex items-center justify-center transition-colors">
+                      <svg class="w-6 h-6 text-zinc-400 group-hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 class="text-base font-bold text-white group-hover:text-red-400 transition-colors">Disconnect</h3>
+                      <p class="text-sm text-zinc-400">End wallet session</p>
+                    </div>
+                  </div>
+                  <svg class="w-6 h-6 text-zinc-600 group-hover:text-red-400 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </div>
+              </button>
+
+              <button
+                onClick={refreshBalances}
+                class="group block bg-zinc-900/50 hover:bg-zinc-900/80 border border-zinc-800 rounded-3xl p-6 transition-all text-left"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-zinc-800 flex items-center justify-center">
+                      <svg class="w-6 h-6 text-zinc-400 group-hover:text-cyan-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 class="text-base font-bold text-white">Refresh</h3>
+                      <p class="text-sm text-zinc-400">Update balances</p>
+                    </div>
+                  </div>
+                  <svg class="w-6 h-6 text-zinc-600 group-hover:text-zinc-400 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Show>
+
+      {/* Transaction History */}
+      <Show when={connectionStatus() === 'connected'}>
+        <div class="px-4 md:px-8 pb-12">
+          <div class="max-w-4xl mx-auto">
+            <h2 class="text-lg font-semibold text-white mb-4">Recent Activity</h2>
+            <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl p-8 border border-zinc-800">
+              <div class="flex flex-col items-center justify-center py-12 text-center">
+                <svg class="w-16 h-16 text-zinc-700 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <h3 class="text-lg font-semibold text-zinc-400 mb-2">No transactions yet</h3>
+                <p class="text-sm text-zinc-500">Your transaction history will appear here</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Show>
+
+      {/* Wallet Selection Modal */}
       <WalletModal
         isOpen={isModalOpen}
-        onClose={() => closeModal()}
+        onClose={closeModal}
         isDark={props.isDark}
       />
 
@@ -372,9 +307,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
       <ExchangeModal isDark={props.isDark} />
 
       {/* Create Account Modal */}
-      <CreateAccountModal
-        isDark={props.isDark}
-      />
+      <CreateAccountModal isDark={props.isDark} />
     </div>
   );
 };
