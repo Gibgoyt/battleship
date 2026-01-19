@@ -2,6 +2,20 @@ import type { Component, Accessor } from 'solid-js';
 import { createSignal, Show, For } from 'solid-js';
 import { useMultiWallet, useWalletConnection } from 'src/applications_solid/app/lib/wallet/wallet-context';
 
+// Import install URLs for wallet installation
+const WALLET_INSTALL_URLS = {
+  phantom: 'https://phantom.app',
+  metamask: 'https://metamask.io',
+  solflare: 'https://solflare.com',
+  backpack: 'https://backpack.app',
+  glow: 'https://glow.app',
+  slope: 'https://slope.finance',
+  trust: 'https://trustwallet.com',
+  coinbase: 'https://wallet.coinbase.com',
+  ledger: 'https://www.ledger.com/ledger-live',
+  trezor: 'https://trezor.io'
+} as const;
+
 interface WalletModalProps {
   isOpen: Accessor<boolean>;
   onClose: () => void;
@@ -32,10 +46,11 @@ const WalletModal: Component<WalletModalProps> = (props) => {
     const wallet = multiWallet.availableWallets().find(w => w.id === walletId);
 
     // If wallet not detected, open installation page
-    if (!wallet?.detected) {
+    if (!wallet?.isAvailable) {
       console.log('[WalletModal] Wallet not detected, opening installation page:', walletId);
-      if (wallet?.installUrl) {
-        window.open(wallet.installUrl, '_blank');
+      const installUrl = WALLET_INSTALL_URLS[walletId as keyof typeof WALLET_INSTALL_URLS];
+      if (installUrl) {
+        window.open(installUrl, '_blank');
       }
       return;
     }
@@ -193,7 +208,7 @@ const WalletModal: Component<WalletModalProps> = (props) => {
                     : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
                 } ${isConnecting() ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${
                   isConnecting() === wallet.id ? 'animate-pulse' : ''
-                } ${!wallet.detected ? 'border-dashed' : ''}`}
+                } ${!wallet.isAvailable ? 'border-dashed' : ''}`}
               >
                 <div class="flex items-center space-x-4">
                   <Show
@@ -222,7 +237,7 @@ const WalletModal: Component<WalletModalProps> = (props) => {
                   <div class="flex-1">
                     <div class="flex items-center space-x-2">
                       <h3 class="font-semibold text-lg">{wallet.name}</h3>
-                      <Show when={wallet.detected} fallback={
+                      <Show when={wallet.isAvailable} fallback={
                         <span class={`px-2 py-1 rounded-full text-xs font-medium ${
                           props.isDark ? 'bg-red-900 text-red-200' : 'bg-red-100 text-red-800'
                         }`}>
@@ -240,7 +255,7 @@ const WalletModal: Component<WalletModalProps> = (props) => {
                     </div>
                     <p class={`text-sm mt-1 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                       <Show when={isConnecting() === wallet.id} fallback={wallet.description}>
-                        <Show when={wallet.detected} fallback={`Connecting to ${wallet.name}...`}>
+                        <Show when={wallet.isAvailable} fallback={`Connecting to ${wallet.name}...`}>
                           <span class="inline-flex items-center space-x-2">
                             <div class="animate-pulse w-2 h-2 bg-blue-500 rounded-full"></div>
                             <span>
@@ -250,12 +265,12 @@ const WalletModal: Component<WalletModalProps> = (props) => {
                         </Show>
                       </Show>
                     </p>
-                    <Show when={!wallet.detected}>
+                    <Show when={!wallet.isAvailable}>
                       <p class={`text-xs mt-1 ${props.isDark ? 'text-yellow-400' : 'text-yellow-600'}`}>
                         Click to install • Opens {wallet.name} website
                       </p>
                     </Show>
-                    <Show when={wallet.detected}>
+                    <Show when={wallet.isAvailable}>
                       <p class={`text-xs mt-1 ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>
                         {wallet.id === 'phantom' ? 'Best for Solana and SPLITDO tokens' : 'For Ethereum and cross-chain tokens'}
                       </p>
@@ -263,7 +278,7 @@ const WalletModal: Component<WalletModalProps> = (props) => {
                   </div>
                   <div class="text-right">
                     <Show when={isConnecting() === wallet.id} fallback={
-                      <Show when={wallet.detected} fallback={
+                      <Show when={wallet.isAvailable} fallback={
                         <svg class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                           <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                         </svg>
