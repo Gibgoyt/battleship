@@ -59,9 +59,6 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
     } catch (error) {
       console.error('Error extracting email:', error);
     }
-
-    // Initial balance check
-    checkSplitdoBalance();
   });
 
   const formatCurrency = (amount: number, decimals: number = 2) => {

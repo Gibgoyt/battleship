@@ -675,9 +675,7 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
   };
 
   const getCurrentProvider = (): IWalletProvider | null => {
-    const providerId = connectedProviderId();
-    if (!providerId) return null;
-    return walletConnectService.getProvider(providerId);
+    return walletConnectService.getCurrentWallet();
   };
 
   const getWalletDescription = (providerId: string): string => {
@@ -702,12 +700,11 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
     logger.info('UnifiedWalletProvider mounting');
 
     try {
-      // Initialize wallet service and get available wallets
-      await walletConnectService.initialize();
+      // Get available wallets (service auto-initializes in constructor)
       setAvailableWallets(walletConnectService.getAvailableWallets());
 
       // Set up wallet service listeners
-      walletConnectService.onConnectionStateChange((state: ConnectionState) => {
+      walletConnectService.subscribe((state: ConnectionState) => {
         logger.debug('Wallet connection state changed:', state);
         setConnectionStatus(state.status);
         if (state.wallet) {
