@@ -449,11 +449,22 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
       </Show>
 
       {/* Transaction History */}
-      <Show when={connectionStatus() === 'connected'}>
-        <div class="px-4 md:px-8 pb-12">
-          <div class="max-w-4xl mx-auto">
-            <h2 class="text-lg font-semibold text-white mb-4">Recent Activity</h2>
-            <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl border border-zinc-800 overflow-hidden">
+      <div class="px-4 md:px-8 pb-12">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-lg font-semibold text-white mb-4">Recent Activity</h2>
+          <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl border border-zinc-800 overflow-hidden">
+            <Show
+              when={connectionStatus() === 'connected'}
+              fallback={
+                <div class="flex flex-col items-center justify-center py-12 text-center">
+                  <svg class="w-16 h-16 text-zinc-700 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                  </svg>
+                  <h3 class="text-lg font-semibold text-zinc-400 mb-2">Connect wallet to view</h3>
+                  <p class="text-sm text-zinc-500">Your transaction history will appear here</p>
+                </div>
+              }
+            >
               <Show
                 when={!isLoadingTransactions() && transactions().length > 0}
                 fallback={
@@ -550,10 +561,10 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
                   </For>
                 </div>
               </Show>
-            </div>
+            </Show>
           </div>
         </div>
-      </Show>
+      </div>
 
       {/* Wallet Selection Modal */}
       <WalletModal
