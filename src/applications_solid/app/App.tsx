@@ -147,6 +147,11 @@ const AppContent: Component = () => {
       const authStoreInstance = getGlobalAuthStore();
       setAuthStore(authStoreInstance);
 
+      // CRITICAL FIX: Initialize the auth store BEFORE the middleware
+      logger.info('🔑 Initializing auth store with firebase token...');
+      await authStoreInstance.initialize(props.firebaseToken);
+      logger.info('✅ Auth store initialization complete');
+
       // Setup Firebase auth middleware
       const authSetup = setupAuthMiddleware({
         protectedRoutes: ['/app'],
@@ -155,7 +160,7 @@ const AppContent: Component = () => {
         dashboardRoute: '/app/dashboard',
       });
 
-      // Initialize auth middleware
+      // Initialize auth middleware (now that auth store is ready)
       await authSetup.initialize();
 
       // Setup manual navigation handling for browser back/forward

@@ -91,33 +91,55 @@ export function createFirebaseAuthStore(): AuthStore {
   // Initialize services
   const initialize = async (initialToken?: string) => {
     try {
-      logger.debug('Initializing Firebase Auth Store', {
+      logger.info('🚀 STARTING Firebase Auth Store initialization', {
         hasInitialToken: Boolean(initialToken),
+        tokenPreview: initialToken ? `${initialToken.substring(0, 20)}...` : 'none'
       });
 
       setIsLoading(true);
       setAuthError(null);
 
+      logger.debug('📋 Step 1: Getting service instances...');
+
       // Get service instances
       authManager = FirebaseAuthManager.getInstance();
+      logger.debug('✅ AuthManager instance obtained', { hasAuthManager: !!authManager });
+
       tokenRefreshService = FirebaseTokenRefreshService.getInstance();
+      logger.debug('✅ TokenRefreshService instance obtained', {
+        hasTokenRefreshService: !!tokenRefreshService,
+        serviceType: tokenRefreshService?.constructor?.name || 'unknown'
+      });
 
-      // Initialize auth manager
+      logger.debug('📋 Step 2: Initializing auth manager...');
       await authManager.initialize(initialToken);
+      logger.debug('✅ Auth manager initialized successfully');
 
-      // Start refresh services
+      logger.debug('📋 Step 3: Starting refresh services...');
       tokenRefreshService.startServices();
+      logger.debug('✅ Refresh services started');
 
-      // Start periodic state updates
+      logger.debug('📋 Step 4: Starting periodic state updates...');
       startPeriodicUpdates();
+      logger.debug('✅ Periodic updates started');
 
-      // Initial state update
+      logger.debug('📋 Step 5: Running initial state update...');
       await updateAuthState();
+      logger.debug('✅ Initial state update completed');
 
       setIsLoading(false);
-      logger.debug('Firebase Auth Store initialized successfully');
+      logger.info('🎉 Firebase Auth Store initialized successfully', {
+        hasAuthManager: !!authManager,
+        hasTokenRefreshService: !!tokenRefreshService
+      });
     } catch (error) {
-      logger.error('Failed to initialize Firebase Auth Store:', error);
+      logger.error('❌ Failed to initialize Firebase Auth Store:', error);
+      logger.error('💥 Initialization failure details:', {
+        errorMessage: (error as Error).message,
+        errorStack: (error as Error).stack,
+        hasAuthManager: !!authManager,
+        hasTokenRefreshService: !!tokenRefreshService
+      });
       setAuthError((error as Error).message);
       setIsLoading(false);
       throw error;
@@ -262,12 +284,29 @@ export function createFirebaseAuthStore(): AuthStore {
 
   // Manual auth validation
   const validateAuth = async (): Promise<void> => {
+    logger.info('🔍 VALIDATEAUTH CALLED - Checking auth store state', {
+      hasTokenRefreshService: !!tokenRefreshService,
+      hasAuthManager: !!authManager,
+      isLoading: isLoading(),
+      currentAuthState: {
+        isAuthenticated: isAuthenticated(),
+        tokenStatus: tokenStatus(),
+        hasError: !!authError()
+      }
+    });
+
     if (!tokenRefreshService) {
+      logger.error('❌ CRITICAL: Token refresh service not initialized!', {
+        hasAuthManager: !!authManager,
+        isLoading: isLoading(),
+        authError: authError(),
+        callStack: new Error().stack
+      });
       throw new Error('Token refresh service not initialized');
     }
 
     try {
-      logger.debug('Manual auth validation triggered');
+      logger.debug('🔄 Starting manual auth validation...');
       setPollingStatus('polling');
       setAuthError(null);
 
@@ -644,7 +683,14 @@ let globalAuthStore: ReturnType<typeof createFirebaseAuthStore> | null = null;
 
 export function getGlobalAuthStore(): ReturnType<typeof createFirebaseAuthStore> {
   if (!globalAuthStore) {
+    logger.info('🏗️ CREATING new global auth store instance');
     globalAuthStore = createFirebaseAuthStore();
+    logger.info('✅ Global auth store created', {
+      hasStore: !!globalAuthStore,
+      storeType: globalAuthStore?.constructor?.name || 'unknown'
+    });
+  } else {
+    logger.debug('♻️ Returning existing global auth store instance');
   }
   return globalAuthStore;
 }
