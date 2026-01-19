@@ -906,7 +906,7 @@ const createSplitdoATA = async (): Promise<{ success: boolean; signature?: strin
     // 5. Send transaction signature to backend for verification using middlewareFetch (automatic JWT)
     const backendResult = await middlewareFetch.Endpoints.Devbackend._Api.Testing.Usockets.TokenAccount.Create.POST(
       txSignature,
-      phantomProvider.publicKey.toString(),
+      publicKey.toString(),
       associatedTokenAddress.toString()
     );
 
@@ -1444,7 +1444,7 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
 
     const transaction = new Transaction().add(
       SystemProgram.transfer({
-        fromPubkey: phantomProvider.publicKey,
+        fromPubkey: publicKey,
         toPubkey: new PublicKey(solVaultAddress),
         lamports: lamports
       })
@@ -1464,7 +1464,7 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
     }
 
     transaction.recentBlockhash = blockhashResponse.data.blockhash;
-    transaction.feePayer = phantomProvider.publicKey;
+    transaction.feePayer = publicKey;
     console.log('[ReactiveWalletStore] Set blockhash and fee payer on transaction');
 
     // 6. Sign and send transaction with Phantom (desktop vs mobile flow)
@@ -1554,7 +1554,7 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
     console.log('[ReactiveWalletStore] 📤 Submitting signature to backend for verification:', JSON.stringify({
       endpoint: 'exchange-new (signAndSendTransaction flow)',
       transactionSignature: transactionResult.signature,
-      userWallet: phantomProvider.publicKey.toString(),
+      userWallet: publicKey.toString(),
       tokenAccountPubkey: ataAddress,
       hasFirebaseToken: !!firebaseToken
     }, null, 2));
@@ -1562,7 +1562,7 @@ const executeExchange = async (solAmount: number): Promise<ExchangeResult> => {
     // Call the new endpoint with transaction signature
     const result = await splitdoExchangePost(
       transactionResult.signature,
-      phantomProvider.publicKey.toString(),
+      publicKey.toString(),
       ataAddress
     );
 

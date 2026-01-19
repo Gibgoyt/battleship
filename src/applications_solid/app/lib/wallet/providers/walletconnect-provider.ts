@@ -123,10 +123,7 @@ export class WalletConnectProvider implements WalletProvider {
 
   constructor(eventHandlers?: WalletConnectEvents) {
     this.eventHandlers = eventHandlers || {};
-    this.initializeClient().catch(error => {
-      console.error('Failed to initialize WalletConnect:', error);
-      this.eventHandlers.onError?.(new WalletConnectInitError(error));
-    });
+    // Initialization moved to connect() method to avoid async race conditions
   }
 
   /**

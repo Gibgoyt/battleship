@@ -3,31 +3,31 @@ import { createSignal, createEffect, Show } from 'solid-js';
 import {
   useSplitdoATA,
   useWalletModal,
-  useCreateAccountModal,
   useWallet,
   useWalletConnection,
-  useWalletBalances,
-  useExchangeModal
-} from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
+  useWalletBalances
+} from 'src/applications_solid/app/lib/wallet/wallet-context';
+// Temporary: Import remaining modal hooks from reactive store until fully migrated
+import { useCreateAccountModal, useExchangeModal } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
 import WalletModal from '../../components/WalletModal';
 import { CreateAccountModal } from '../../components/CreateAccountModal';
 import { ExchangeModal } from '../../components/ExchangeModal';
 import EnhancedExchangeWidget from './components/EnhancedExchangeWidget';
 
 const WalletPage: Component<{ isDark: boolean }> = (props) => {
-  // SolidJS Wallet Reactive Store Hooks
-  const { splitdoATA, checkSplitdoBalance } = useSplitdoATA();
+  // SolidJS Wallet Context Hooks
+  const { splitdoATA, createSplitdoATA, isCreatingATA } = useSplitdoATA();
   const { openModal, closeModal, isModalOpen } = useWalletModal();
   const { isCreateAccountModalOpen, closeCreateAccountModal, openCreateAccountModal } = useCreateAccountModal();
   const { isExchangeModalOpen } = useExchangeModal();
   const { wallet, connectionStatus, connectionError } = useWallet();
-  const { connectWallet, disconnectWallet } = useWalletConnection();
+  const { connectWallet, disconnect } = useWalletConnection();
   const { solBalance, refreshBalances } = useWalletBalances();
 
   // Check SPLITDO account status on page load
   createEffect(() => {
     console.log('[WalletPage] Checking SPLITDO balance on page load');
-    checkSplitdoBalance();
+    refreshBalances();
   });
 
   // Refresh balances when wallet is connected
@@ -101,7 +101,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
             }
           >
             <button
-              onClick={() => disconnectWallet()}
+              onClick={() => disconnect()}
               class={`w-full sm:w-auto px-6 py-3 border transition-colors text-sm md:text-base font-semibold ${
                 props.isDark
                   ? 'border-red-600 text-red-400 hover:bg-red-600 hover:text-white'
@@ -201,7 +201,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
                   {splitdoATA().error}
                 </p>
                 <button
-                  onClick={() => checkSplitdoBalance()}
+                  onClick={() => refreshBalances()}
                   class="px-6 py-2 bg-gray-600 text-white hover:bg-gray-700 transition-colors"
                 >
                   Retry

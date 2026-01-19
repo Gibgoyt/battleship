@@ -24,6 +24,7 @@ import {
 import { solanaService, type SolanaBalance, type TokenBalance } from './solana-service';
 import { ERROR_MESSAGES } from './walletconnect-config';
 import type { WalletProvider as IWalletProvider } from './wallet-providers';
+import type { WalletConnectQRData } from './providers/walletconnect-provider';
 
 export type ATAStatus = 'unknown' | 'checking' | 'exists' | 'not_found' | 'creating' | 'created' | 'error';
 
@@ -45,6 +46,10 @@ export interface WalletContextState {
   availableWallets: Accessor<AvailableWallet[]>;
   connectedProviderId: Accessor<string | null>;
 
+  // WalletConnect QR modal state
+  isQRModalOpen: Accessor<boolean>;
+  qrData: Accessor<WalletConnectQRData | null>;
+
   // Balances
   solBalance: Accessor<SolanaBalance | null>;
   splitdoATA: Accessor<ATAInfo>;
@@ -64,6 +69,10 @@ export interface WalletContextState {
   // Modal controls
   openModal: () => void;
   closeModal: () => void;
+
+  // QR modal controls
+  openQRModal: () => void;
+  closeQRModal: () => void;
 
   // Multi-wallet utilities
   isWalletAvailable: (providerId: string) => boolean;
@@ -91,6 +100,10 @@ export const WalletProvider: ParentComponent<WalletProviderProps> = (props) => {
   // Multi-wallet signals
   const [availableWallets, setAvailableWallets] = createSignal<AvailableWallet[]>([]);
   const [connectedProviderId, setConnectedProviderId] = createSignal<string | null>(null);
+
+  // QR modal signals
+  const [isQRModalOpen, setIsQRModalOpen] = createSignal(false);
+  const [qrData, setQrData] = createSignal<WalletConnectQRData | null>(null);
 
   // Balance signals
   const [solBalance, setSolBalance] = createSignal<SolanaBalance | null>(null);
@@ -398,6 +411,15 @@ export const WalletProvider: ParentComponent<WalletProviderProps> = (props) => {
     walletConnectService.closeModal();
   };
 
+  const openQRModal = (): void => {
+    setIsQRModalOpen(true);
+  };
+
+  const closeQRModal = (): void => {
+    setIsQRModalOpen(false);
+    setQrData(null);
+  };
+
   // Multi-wallet utilities
   const isWalletAvailable = (providerId: string): boolean => {
     return walletConnectService.isWalletAvailable(providerId);
@@ -432,6 +454,10 @@ export const WalletProvider: ParentComponent<WalletProviderProps> = (props) => {
     availableWallets,
     connectedProviderId,
 
+    // QR modal state
+    isQRModalOpen,
+    qrData,
+
     // Balances
     solBalance,
     splitdoATA,
@@ -449,6 +475,8 @@ export const WalletProvider: ParentComponent<WalletProviderProps> = (props) => {
     createSplitdoATA,
     openModal,
     closeModal,
+    openQRModal,
+    closeQRModal,
 
     // Multi-wallet utilities
     isWalletAvailable,
@@ -535,4 +563,9 @@ export const useSplitdoATA = () => {
 export const useWalletModal = () => {
   const { isModalOpen, openModal, closeModal } = useWallet();
   return { isModalOpen, openModal, closeModal };
+};
+
+export const useWalletConnectQRModal = () => {
+  const { isQRModalOpen, qrData, openQRModal, closeQRModal } = useWallet();
+  return { isQRModalOpen, qrData, openQRModal, closeQRModal };
 };

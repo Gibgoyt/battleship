@@ -17,7 +17,7 @@ import {
   loggingMiddleware,
   authMiddleware
 } from './middleware'
-import { WalletProvider } from 'src/applications_solid/app/lib/wallet/wallet-context'
+import { WalletProvider, useWalletConnectQRModal } from 'src/applications_solid/app/lib/wallet/wallet-context'
 import { AuthStoreProvider } from './middleware/firebase/auth-store'
 import { createLogger } from 'src/lib/logger'
 import DashboardPage from './pages/dashboard/index'
@@ -25,6 +25,7 @@ import CounterPage from './pages/counter/index'
 import ProfilePage from './pages/profile/index'
 import WalletPage from './pages/splitdo-exchange/index'
 import { SessionExpiryNotification } from './components/SessionExpiryNotification'
+import { WalletConnectQRModal } from './components/WalletConnectQRModal'
 
 /*
  * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
@@ -46,6 +47,9 @@ const AppContent: Component = () => {
   const [isDark, setIsDark] = createSignal(false)
   const [authStore, setAuthStore] = createSignal<ReturnType<typeof import('./middleware/firebase/auth-store').getGlobalAuthStore> | null>(null)
   const middleware = useMiddleware()
+
+  // QR Modal state from wallet context
+  const qrModal = useWalletConnectQRModal()
 
   // Detect theme from localStorage and DOM class (shared with Astro app)
   onMount(() => {
@@ -238,6 +242,25 @@ const AppContent: Component = () => {
           />
         );
       })()}
+
+      {/* WalletConnect QR Modal */}
+      <WalletConnectQRModal
+        isDark={isDark()}
+        isOpen={qrModal.isQRModalOpen}
+        onClose={qrModal.closeQRModal}
+        qrData={qrModal.qrData}
+        connectionStatus={() => 'idle'}
+        error={() => null}
+        onRefreshQR={() => {
+          // TODO: Implement refresh QR functionality
+          qrModal.closeQRModal();
+          // Would trigger new connection attempt
+        }}
+        onMobileWalletClick={(walletId: string) => {
+          // TODO: Implement mobile wallet click handler
+          console.log('Mobile wallet clicked:', walletId);
+        }}
+      />
     </div>
   )
 }
