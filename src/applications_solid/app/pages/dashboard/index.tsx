@@ -20,7 +20,7 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
   createEffect(() => {
     if (connectionStatus() === 'connected' && wallet()) {
       console.log('[Dashboard] Wallet connected, refreshing balances');
-      refreshBalances(); // This now includes SPLITDO ATA checking
+      refreshBalances();
     }
   });
 
@@ -68,185 +68,188 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
     });
   };
 
-  const quickActions = [
-    {
-      title: 'SPLITDO Exchange',
-      description: 'Manage your SPLITDO tokens',
-      action: '/app/splitdo-exchange',
-      label: 'Go to Exchange'
-    },
-    {
-      title: 'Profile',
-      description: 'View account details',
-      action: '/app/profile',
-      label: 'View Profile'
-    }
-  ];
-
   return (
-    <div class="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8">
-      {/* Header */}
-      <div>
-        <h1 class="text-2xl md:text-3xl font-bold crypto-text-primary mb-1">
-          Dashboard
-        </h1>
-        <p class="text-sm crypto-text-secondary">
-          {userEmail() ? `Welcome back, ${userEmail()}` : 'Welcome to SPLITDO'}
-        </p>
+    <div class="min-h-screen bg-gradient-to-b from-zinc-900 to-black">
+      {/* Hero Section */}
+      <div class="relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10"></div>
+        <div class="relative px-4 pt-12 pb-20 md:px-8 md:pt-20 md:pb-32">
+          <div class="max-w-4xl mx-auto text-center space-y-6">
+            <div class="inline-block px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 mb-4">
+              <span class="text-sm font-medium text-cyan-400">
+                {userEmail() ? userEmail() : 'Welcome to SPLITDO'}
+              </span>
+            </div>
+
+            <h1 class="text-4xl md:text-6xl font-bold bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent">
+              Your Portfolio
+            </h1>
+
+            <Show
+              when={connectionStatus() === 'connected' && splitdoATA().status === 'exists'}
+              fallback={
+                <div class="space-y-6">
+                  <div class="text-7xl md:text-8xl font-bold text-zinc-700">
+                    --
+                  </div>
+                  <button
+                    onClick={openModal}
+                    class="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 transition-all text-white font-semibold text-lg shadow-lg shadow-cyan-500/25"
+                  >
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    Connect Wallet
+                  </button>
+                </div>
+              }
+            >
+              <div class="space-y-4">
+                <div class="text-6xl md:text-8xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                  {formatCurrency(portfolioValueSOL(), 4)}
+                </div>
+                <div class="text-xl md:text-2xl text-zinc-400 font-medium">
+                  SOL
+                </div>
+              </div>
+            </Show>
+          </div>
+        </div>
       </div>
 
-      {/* Stats Overview */}
-      <div class="space-y-4">
-        <h2 class="text-lg md:text-xl font-semibold crypto-text-primary">
-          Account Overview
-        </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Portfolio Value */}
-          <div class="bg-crypto-bg-secondary/50 backdrop-blur-sm rounded-2xl p-5 space-y-3">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center">
-                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
-              <span class="text-xs font-medium uppercase tracking-wide crypto-text-secondary">Portfolio Value</span>
-            </div>
-            <Show
-              when={connectionStatus() === 'connected' && splitdoATA().status === 'exists'}
-              fallback={
-                <div class="pt-2">
-                  <div class="text-2xl md:text-3xl font-bold crypto-text-muted">--</div>
-                  <p class="text-xs crypto-text-muted mt-1">Connect wallet to view</p>
+      {/* Stats Grid */}
+      <div class="px-4 md:px-8 pb-12 -mt-8">
+        <div class="max-w-4xl mx-auto">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* SPLITDO Balance */}
+            <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-medium text-zinc-500 uppercase tracking-wider">SPLITDO</span>
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
                 </div>
-              }
-            >
-              <div class="pt-2">
-                <div class="text-2xl md:text-3xl font-bold crypto-text-primary">
-                  {formatCurrency(portfolioValueSOL())} <span class="text-lg crypto-text-secondary">SOL</span>
-                </div>
-                <p class="text-xs crypto-text-secondary mt-1">SPLITDO holdings value</p>
               </div>
-            </Show>
-          </div>
-
-          {/* SPLITDO Balance */}
-          <div class="bg-crypto-bg-secondary/50 backdrop-blur-sm rounded-2xl p-5 space-y-3">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center">
-                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
-              <span class="text-xs font-medium uppercase tracking-wide crypto-text-secondary">SPLITDO Balance</span>
-            </div>
-            <Show
-              when={connectionStatus() === 'connected' && splitdoATA().status === 'exists'}
-              fallback={
-                <div class="pt-2">
-                  <div class="text-2xl md:text-3xl font-bold crypto-text-muted">--</div>
-                  <p class="text-xs crypto-text-muted mt-1">
-                    <Show when={connectionStatus() === 'connected'} fallback="Connect wallet to view">
-                      Create SPLITDO account
-                    </Show>
-                  </p>
-                </div>
-              }
-            >
-              <div class="pt-2">
-                <div class="text-2xl md:text-3xl font-bold crypto-text-primary">
+              <Show
+                when={connectionStatus() === 'connected' && splitdoATA().status === 'exists'}
+                fallback={
+                  <div class="text-3xl font-bold text-zinc-700">--</div>
+                }
+              >
+                <div class="text-3xl font-bold text-white">
                   {formatCurrency(splitdoATA().balance?.uiAmount || 0)}
                 </div>
-                <p class="text-xs crypto-text-secondary mt-1">SPLITDO tokens</p>
-              </div>
-            </Show>
-          </div>
-
-          {/* SOL Balance */}
-          <div class="bg-crypto-bg-secondary/50 backdrop-blur-sm rounded-2xl p-5 space-y-3 sm:col-span-2 lg:col-span-1">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
-                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
-              </div>
-              <span class="text-xs font-medium uppercase tracking-wide crypto-text-secondary">SOL Balance</span>
+              </Show>
             </div>
-            <Show
-              when={connectionStatus() === 'connected' && solBalance()}
-              fallback={
-                <div class="pt-2">
-                  <div class="text-2xl md:text-3xl font-bold crypto-text-muted">--</div>
-                  <p class="text-xs crypto-text-muted mt-1">Connect wallet to view</p>
+
+            {/* SOL Balance */}
+            <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-medium text-zinc-500 uppercase tracking-wider">Solana</span>
+                <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                  </svg>
                 </div>
-              }
-            >
-              <div class="pt-2">
-                <div class="text-2xl md:text-3xl font-bold crypto-text-primary">
-                  {formatCurrency(solBalance()?.sol || 0, 4)} <span class="text-lg crypto-text-secondary">SOL</span>
-                </div>
-                <p class="text-xs crypto-text-secondary mt-1">For transaction fees</p>
               </div>
-            </Show>
+              <Show
+                when={connectionStatus() === 'connected' && solBalance()}
+                fallback={
+                  <div class="text-3xl font-bold text-zinc-700">--</div>
+                }
+              >
+                <div class="text-3xl font-bold text-white">
+                  {formatCurrency(solBalance()?.sol || 0, 4)}
+                </div>
+              </Show>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div class="space-y-4">
-        <h2 class="text-lg md:text-xl font-semibold crypto-text-primary">
-          Quick Actions
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {quickActions.map((action) => (
-            <a
-              href={action.action}
-              class="group bg-crypto-bg-secondary/50 backdrop-blur-sm rounded-2xl p-5 hover:bg-crypto-bg-secondary/70 transition-all"
-            >
-              <div class="flex items-center justify-between mb-3">
-                <h3 class="text-base md:text-lg font-semibold crypto-text-primary">
-                  {action.title}
-                </h3>
-                <svg class="w-5 h-5 text-cyan-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                </svg>
+      <div class="px-4 md:px-8 pb-12">
+        <div class="max-w-4xl mx-auto space-y-4">
+          <a
+            href="/app/splitdo-exchange"
+            class="group block bg-gradient-to-r from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 border border-cyan-500/20 rounded-3xl p-6 transition-all"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-white">Exchange Tokens</h3>
+                  <p class="text-sm text-zinc-400">Trade SOL for SPLITDO</p>
+                </div>
               </div>
-              <p class="text-sm crypto-text-secondary">
-                {action.description}
-              </p>
-            </a>
-          ))}
+              <svg class="w-6 h-6 text-zinc-600 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </div>
+          </a>
+
+          <a
+            href="/app/profile"
+            class="group block bg-zinc-900/50 hover:bg-zinc-900/80 border border-zinc-800 rounded-3xl p-6 transition-all"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-zinc-800 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-white">Profile Settings</h3>
+                  <p class="text-sm text-zinc-400">Manage your account</p>
+                </div>
+              </div>
+              <svg class="w-6 h-6 text-zinc-600 group-hover:text-zinc-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </div>
+          </a>
         </div>
       </div>
 
-      {/* Getting Started Guide */}
-      <div class="bg-crypto-bg-secondary/30 backdrop-blur-sm rounded-2xl p-5 md:p-6">
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center flex-shrink-0">
-            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h2 class="text-base md:text-lg font-semibold crypto-text-primary mb-3">
-              Getting Started
-            </h2>
-            <ol class="space-y-2.5 text-sm crypto-text-secondary">
-              <li class="flex items-start gap-2">
-                <span class="text-cyan-400 font-semibold flex-shrink-0">1.</span>
-                <span>Go to the Wallet page and connect your Solana wallet</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-cyan-400 font-semibold flex-shrink-0">2.</span>
-                <span>Create your SPLITDO token account if you don't have one</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-cyan-400 font-semibold flex-shrink-0">3.</span>
-                <span>Exchange SOL for SPLITDO tokens to get started</span>
-              </li>
-            </ol>
+      {/* Getting Started */}
+      <Show when={connectionStatus() !== 'connected'}>
+        <div class="px-4 md:px-8 pb-12">
+          <div class="max-w-4xl mx-auto">
+            <div class="bg-amber-500/5 border border-amber-500/20 rounded-3xl p-6 md:p-8">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-lg font-bold text-white mb-3">Getting Started</h3>
+                  <ol class="space-y-2 text-sm text-zinc-400">
+                    <li class="flex gap-2">
+                      <span class="text-cyan-400 font-semibold">1.</span>
+                      <span>Connect your Solana wallet</span>
+                    </li>
+                    <li class="flex gap-2">
+                      <span class="text-cyan-400 font-semibold">2.</span>
+                      <span>Create your SPLITDO token account</span>
+                    </li>
+                    <li class="flex gap-2">
+                      <span class="text-cyan-400 font-semibold">3.</span>
+                      <span>Exchange SOL for SPLITDO tokens</span>
+                    </li>
+                  </ol>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </Show>
     </div>
   );
 };

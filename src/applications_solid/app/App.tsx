@@ -237,8 +237,18 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
         onClose={() => setIsNavOpen(false)}
       />
 
+      {/* Hamburger Menu Button (Mobile Only) */}
+      <button
+        onClick={() => setIsNavOpen(true)}
+        class="fixed top-4 left-4 z-40 lg:hidden w-10 h-10 rounded-lg bg-crypto-bg-secondary border border-crypto-border flex items-center justify-center"
+      >
+        <svg class="w-6 h-6 crypto-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+
       {/* Main Content */}
-      <main class={`flex-1 overflow-auto ml-64 transition-all duration-300`}>
+      <main class="flex-1 overflow-auto lg:ml-64 pt-16 lg:pt-0 transition-all duration-300">
         {renderPage()}
       </main>
 
