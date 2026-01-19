@@ -84,63 +84,79 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
   ];
 
   return (
-    <div class="p-6 md:p-8 max-w-screen-2xl mx-auto space-y-6">
+    <div class="p-6 md:p-8 max-w-screen-2xl mx-auto space-y-8">
       {/* Header */}
-      <div class="border-b pb-4" style={props.isDark ? 'border-color: #27272a;' : 'border-color: #e5e7eb;'}>
-        <h1 class={`text-2xl md:text-3xl font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+      <div class="space-y-2">
+        <h1 class="text-3xl md:text-4xl font-bold crypto-text-primary">
           Dashboard
         </h1>
-        <p class={`mt-2 text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+        <p class="text-sm crypto-text-secondary">
           {userEmail() ? `Welcome back, ${userEmail()}` : 'Welcome to SPLITDO'}
         </p>
       </div>
 
       {/* Stats Overview */}
-      <div>
-        <h2 class={`text-lg font-semibold mb-4 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+      <div class="space-y-4">
+        <h2 class="text-xl font-bold crypto-text-primary">
           Account Overview
         </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Portfolio Value */}
-          <div class={`p-6 border-l-4 border-blue-500 ${props.isDark ? 'bg-zinc-800/30' : 'bg-blue-50'}`}>
-            <div class={`text-sm font-medium uppercase tracking-wider ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Portfolio Value
+          <div class="relative overflow-hidden rounded-xl bg-crypto-bg-secondary border border-crypto-border p-6 hover:border-crypto-primary-blue/50 transition-all duration-300 group">
+            <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-crypto-primary-blue to-crypto-primary-cyan"></div>
+            <div class="flex items-start justify-between mb-4">
+              <div class="text-sm font-semibold uppercase tracking-wider crypto-text-secondary">
+                Portfolio Value
+              </div>
+              <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-crypto-primary-blue/20 to-crypto-primary-cyan/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg class="w-5 h-5 text-crypto-primary-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
             </div>
             <Show
               when={connectionStatus() === 'connected' && splitdoATA().status === 'exists'}
               fallback={
                 <div>
-                  <div class={`mt-2 text-2xl font-semibold ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  <div class="text-3xl font-bold crypto-text-muted mb-2">
                     --
                   </div>
-                  <div class={`text-xs mt-1 ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+                  <div class="text-sm crypto-text-secondary">
                     Connect wallet to view
                   </div>
                 </div>
               }
             >
-              <div class={`mt-2 text-2xl font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+              <div class="text-3xl font-bold crypto-text-primary mb-2">
                 {formatCurrency(portfolioValueSOL())} SOL
               </div>
-              <div class={`text-xs mt-1 ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+              <div class="text-sm crypto-text-secondary">
                 SPLITDO holdings value
               </div>
             </Show>
           </div>
 
           {/* SPLITDO Balance */}
-          <div class={`p-6 border-l-4 border-green-500 ${props.isDark ? 'bg-zinc-800/30' : 'bg-green-50'}`}>
-            <div class={`text-sm font-medium uppercase tracking-wider ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              SPLITDO Balance
+          <div class="relative overflow-hidden rounded-xl bg-crypto-bg-secondary border border-crypto-border p-6 hover:border-crypto-accent-green/50 transition-all duration-300 group">
+            <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-crypto-accent-green to-emerald-400"></div>
+            <div class="flex items-start justify-between mb-4">
+              <div class="text-sm font-semibold uppercase tracking-wider crypto-text-secondary">
+                SPLITDO Balance
+              </div>
+              <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-crypto-accent-green/20 to-emerald-400/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg class="w-5 h-5 text-crypto-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
             </div>
             <Show
               when={connectionStatus() === 'connected' && splitdoATA().status === 'exists'}
               fallback={
                 <div>
-                  <div class={`mt-2 text-2xl font-semibold ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  <div class="text-3xl font-bold crypto-text-muted mb-2">
                     --
                   </div>
-                  <div class={`text-xs mt-1 ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+                  <div class="text-sm crypto-text-secondary">
                     <Show
                       when={connectionStatus() === 'connected'}
                       fallback="Connect wallet to view"
@@ -151,70 +167,81 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
                 </div>
               }
             >
-              <div class={`mt-2 text-2xl font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+              <div class="text-3xl font-bold crypto-text-primary mb-2">
                 {formatCurrency(splitdoATA().balance?.uiAmount || 0)}
               </div>
-              <div class={`text-xs mt-1 ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+              <div class="text-sm crypto-text-secondary">
                 SPLITDO tokens
               </div>
             </Show>
           </div>
 
           {/* SOL Balance */}
-          <div class={`p-6 border-l-4 border-purple-500 ${props.isDark ? 'bg-zinc-800/30' : 'bg-purple-50'}`}>
-            <div class={`text-sm font-medium uppercase tracking-wider ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              SOL Balance
+          <div class="relative overflow-hidden rounded-xl bg-crypto-bg-secondary border border-crypto-border p-6 hover:border-crypto-accent-purple/50 transition-all duration-300 group">
+            <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-crypto-accent-purple to-purple-400"></div>
+            <div class="flex items-start justify-between mb-4">
+              <div class="text-sm font-semibold uppercase tracking-wider crypto-text-secondary">
+                SOL Balance
+              </div>
+              <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-crypto-accent-purple/20 to-purple-400/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg class="w-5 h-5 text-crypto-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
             </div>
             <Show
               when={connectionStatus() === 'connected' && solBalance()}
               fallback={
                 <div>
-                  <div class={`mt-2 text-2xl font-semibold ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  <div class="text-3xl font-bold crypto-text-muted mb-2">
                     --
                   </div>
-                  <div class={`text-xs mt-1 ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+                  <div class="text-sm crypto-text-secondary">
                     Connect wallet to view
                   </div>
                 </div>
               }
             >
-              <div class={`mt-2 text-2xl font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+              <div class="text-3xl font-bold crypto-text-primary mb-2">
                 {formatCurrency(solBalance()?.sol || 0, 4)} SOL
               </div>
-              <div class={`text-xs mt-1 ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
+              <div class="text-sm crypto-text-secondary">
                 For transaction fees
               </div>
             </Show>
           </div>
         </div>
-
       </div>
 
       {/* Quick Actions */}
-      <div>
-        <h2 class={`text-lg font-semibold mb-4 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+      <div class="space-y-4">
+        <h2 class="text-xl font-bold crypto-text-primary">
           Quick Actions
         </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {quickActions.map((action) => (
             <a
               href={action.action}
-              class={`p-6 border transition-colors ${
-                props.isDark
-                  ? 'bg-zinc-800/30 border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800/50'
-                  : 'bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-              }`}
+              class="group relative overflow-hidden rounded-xl bg-crypto-bg-secondary border border-crypto-border p-6 hover:border-crypto-primary-cyan/50 transition-all duration-300 hover:shadow-lg hover:shadow-crypto-primary-cyan/10"
             >
-              <h3 class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                {action.title}
-              </h3>
-              <p class={`mt-1 text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <div class="flex items-start justify-between mb-3">
+                <h3 class="text-lg font-bold crypto-text-primary">
+                  {action.title}
+                </h3>
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-crypto-primary-blue/20 to-crypto-primary-cyan/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <svg class="w-4 h-4 text-crypto-primary-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </div>
+              </div>
+              <p class="text-sm crypto-text-secondary mb-4">
                 {action.description}
               </p>
-              <div class="mt-4">
-                <span class="text-sm font-medium text-blue-600 dark:text-blue-400">
-                  {action.label} →
-                </span>
+              <div class="flex items-center gap-2 text-sm font-semibold text-crypto-primary-cyan group-hover:gap-3 transition-all">
+                <span>{action.label}</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                </svg>
               </div>
             </a>
           ))}
@@ -222,18 +249,37 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
       </div>
 
       {/* Getting Started Guide */}
-      <div class={`p-6 border-l-4 border-yellow-500 ${props.isDark ? 'bg-zinc-800/30' : 'bg-yellow-50'}`}>
-        <h2 class={`text-lg font-semibold mb-2 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-          Getting Started
-        </h2>
-        <p class={`text-sm mb-4 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-          Follow these steps to start using SPLITDO:
-        </p>
-        <ol class={`list-decimal list-inside space-y-2 text-sm ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-          <li>Go to the Wallet page and connect your Solana wallet</li>
-          <li>Create your SPLITDO token account if you don't have one</li>
-          <li>Exchange SOL for SPLITDO tokens to get started</li>
-        </ol>
+      <div class="relative overflow-hidden rounded-xl bg-crypto-bg-secondary border border-crypto-border p-6">
+        <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-amber-400 to-orange-500"></div>
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-amber-400/20 to-orange-500/20 flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h2 class="text-lg font-bold crypto-text-primary mb-2">
+              Getting Started
+            </h2>
+            <p class="text-sm crypto-text-secondary mb-4">
+              Follow these steps to start using SPLITDO:
+            </p>
+            <ol class="space-y-3 text-sm crypto-text-primary">
+              <li class="flex items-start gap-3">
+                <span class="flex items-center justify-center w-6 h-6 rounded-full bg-crypto-primary-blue/20 text-crypto-primary-blue font-semibold text-xs flex-shrink-0">1</span>
+                <span>Go to the Wallet page and connect your Solana wallet</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="flex items-center justify-center w-6 h-6 rounded-full bg-crypto-primary-blue/20 text-crypto-primary-blue font-semibold text-xs flex-shrink-0">2</span>
+                <span>Create your SPLITDO token account if you don't have one</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="flex items-center justify-center w-6 h-6 rounded-full bg-crypto-primary-blue/20 text-crypto-primary-blue font-semibold text-xs flex-shrink-0">3</span>
+                <span>Exchange SOL for SPLITDO tokens to get started</span>
+              </li>
+            </ol>
+          </div>
+        </div>
       </div>
     </div>
   );
