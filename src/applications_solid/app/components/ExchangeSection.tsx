@@ -1,35 +1,33 @@
 import type { Component } from 'solid-js';
 import { Show, createEffect, createMemo, createSignal } from 'solid-js';
-import { useSplitdoATA, useExchangeModal, useProgramInfo } from 'src/applications_solid/app/lib/wallet/wallet-context';
+import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
 
 export interface ExchangeSectionProps {
   isDark: boolean;
 }
 
 export const ExchangeSection: Component<ExchangeSectionProps> = (props) => {
-  const { splitdoATA } = useSplitdoATA();
-  const { openExchangeModal } = useExchangeModal();
-  const { programInfo, fetchProgramInfo } = useProgramInfo();
+  const wallet = useUnifiedWallet();
 
   // Track whether we've already fetched program info for this session
   const [hasFetchedProgramInfo, setHasFetchedProgramInfo] = createSignal(false);
 
   // Fetch program info when section is mounted and user has SPLITDO account
   createEffect(() => {
-    if (splitdoATA().status === 'exists' && !hasFetchedProgramInfo()) {
+    if (wallet.splitdoATA().status === 'exists' && !hasFetchedProgramInfo()) {
       setHasFetchedProgramInfo(true);
-      fetchProgramInfo();
+      wallet.fetchExchangeRates();
     }
   });
 
   const splitdoUsdRate = createMemo(() => {
-    const rate = programInfo().exchangeRate;
+    const rate = wallet.exchangeRates()?.exchangeRate || 0;
     if (rate <= 0) return 0;
     return rate.toFixed(2);
   });
 
   const handleExchangeClick = () => {
-    openExchangeModal();
+    wallet.openExchangeModal();
   };
 
   // Only show exchange section if user has a SPLITDO account
@@ -62,7 +60,7 @@ export const ExchangeSection: Component<ExchangeSectionProps> = (props) => {
                 Exchange Rate
               </div>
               <div class={`text-sm font-medium ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                <Show when={!programInfo().loading} fallback="Loading...">
+                <Show when={!wallet.exchangeRates().loading} fallback="Loading...">
                   1 SPLITDO = USDC {splitdoUsdRate()}
                 </Show>
               </div>

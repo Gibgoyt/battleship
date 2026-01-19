@@ -1,6 +1,6 @@
 import type { Component } from 'solid-js';
 import { Show, createSignal, createMemo, createEffect } from 'solid-js';
-import { useExchangeModal, useExchange, useWallet, useWalletConnection, useProgramInfo } from 'src/applications_solid/app/lib/wallet/wallet-context';
+import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
 import { MobileWalletInstallation } from './MobileWalletInstallation';
 import { detectMobilePlatform } from 'src/applications_solid/app/lib/wallet/mobile-detection';
 import { executeMobileWalletDeepLink, attemptMobileWalletConnection } from 'src/applications_solid/app/lib/wallet/mobile-wallet-connector';
@@ -11,11 +11,7 @@ export interface ExchangeModalProps {
 }
 
 export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
-  const { isExchangeModalOpen, closeExchangeModal } = useExchangeModal();
-  const { exchangeStatus, exchangeError, executeExchange } = useExchange();
-  const { connectionStatus } = useWallet();
-  const { connectWallet } = useWalletConnection();
-  const { programInfo, fetchProgramInfo } = useProgramInfo();
+  const wallet = useUnifiedWallet();
 
   const [step, setStep] = createSignal<'wallet' | 'exchange'>('wallet');
   const [solAmount, setSolAmount] = createSignal('');
@@ -49,21 +45,21 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
 
   // Fetch program info and SOL price when modal opens and setup mobile listeners
   createEffect(() => {
-    if (isExchangeModalOpen() && !hasFetchedForCurrentModal()) {
+    if (wallet.isExchangeModalOpen() && !hasFetchedForCurrentModal()) {
       setHasFetchedForCurrentModal(true);
-      fetchProgramInfo();
+      wallet.fetchExchangeRates();
       fetchSolPrice();
 
       // Setup mobile wallet return listeners for iOS/Android deep links
       setupMobileReturnListener();
-    } else if (!isExchangeModalOpen()) {
+    } else if (!wallet.isExchangeModalOpen()) {
       // Reset when modal closes so next open triggers fetch
       setHasFetchedForCurrentModal(false);
     }
   });
 
   const handleClose = () => {
-    closeExchangeModal();
+    wallet.closeExchangeModal();
     setStep('wallet');
     setSolAmount('');
     setShowMobileInstallation(false);
@@ -76,7 +72,7 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
   };
 
   return (
-    <Show when={isExchangeModalOpen()}>
+    <Show when={wallet.isExchangeModalOpen()}>
     <div
       class="fixed inset-0 z-50 flex items-center justify-center"
       onClick={handleBackdropClick}
@@ -124,37 +120,37 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
                 isDark={props.isDark}
                 solAmount={solAmount()}
                 setSolAmount={setSolAmount}
-                exchangeStatus={exchangeStatus()}
-                exchangeError={exchangeError()}
-                executeExchange={executeExchange}
+                exchangeStatus={wallet.exchangeStatus()}
+                exchangeError={wallet.exchangeError()}
+                executeExchange={wallet.executeExchange}
                 onBack={() => setStep('wallet')}
-                exchangeRate={programInfo().exchangeRate}
+                exchangeRate={wallet.exchangeRates()?.exchangeRate || 1}
                 solPriceUSD={solPriceUSD()}
               />
             }
           >
             <WalletSelection
               isDark={props.isDark}
-              connectionStatus={connectionStatus()}
+              connectionStatus={wallet.connectionStatus()}
               isConnecting={isConnecting()}
               showMobileInstallation={showMobileInstallation()}
               mobileInstallationPlatform={mobileInstallationPlatform()}
               onSelectPhantom={async () => {
-              if (connectionStatus() === 'connected') {
+              if (wallet.connectionStatus() === 'connected') {
                 // Already connected, go to exchange
                 setStep('exchange');
               } else {
                 // Need to connect wallet first
                 setIsConnecting(true);
                 try {
-                  await connectWallet('phantom');
+                  await wallet.connectWallet('phantom');
                   setStep('exchange');
                 } catch (error) {
                   console.error('Failed to connect wallet:', error);
                 } finally {
                   // Check if this should trigger mobile deep link flow (when desktop connection fails)
                   const mobileDetection = detectMobilePlatform();
-                  if (mobileDetection.isMobile && connectionStatus() !== 'connected') {
+                  if (mobileDetection.isMobile && wallet.connectionStatus() !== 'connected') {
                     console.log('[ExchangeModal] Mobile device detected - attempting deep link connection');
 
                     // Try mobile wallet connection
@@ -174,7 +170,7 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
 
                             try {
                               // Re-attempt wallet connection now that mobile app has approved
-                              await connectWallet('phantom');
+                              await wallet.connectWallet('phantom');
                               setStep('exchange');
                               console.log('[ExchangeModal] Desktop wallet connection successful after mobile approval');
                             } catch (retryError) {
@@ -182,7 +178,7 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
                               // Keep trying - sometimes there's a delay
                               setTimeout(async () => {
                                 try {
-                                  await connectWallet('phantom');
+                                  await wallet.connectWallet('phantom');
                                   setStep('exchange');
                                 } catch (delayedError) {
                                   console.error('[ExchangeModal] Delayed wallet connection also failed:', delayedError);
@@ -215,14 +211,14 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
               }
             }}
             onSelectWalletConnect={async () => {
-              if (connectionStatus() === 'connected') {
+              if (wallet.connectionStatus() === 'connected') {
                 // Already connected, go to exchange
                 setStep('exchange');
               } else {
                 // Need to connect WalletConnect
                 setIsConnecting(true);
                 try {
-                  await connectWallet('walletconnect');  // This opens QR modal
+                  await wallet.connectWallet('walletconnect');  // This opens QR modal
                   setStep('exchange');
                 } catch (error) {
                   console.error('Failed to connect WalletConnect:', error);

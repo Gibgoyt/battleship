@@ -1,32 +1,24 @@
 import type { Component } from 'solid-js';
 import { createSignal, onMount, createEffect, Show, createMemo } from 'solid-js';
-import {
-  useSplitdoATA,
-  useWallet,
-  useWalletBalances,
-  useWalletModal
-} from 'src/applications_solid/app/lib/wallet/wallet-context';
+import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
 
 const DashboardPage: Component<{ isDark: boolean }> = (props) => {
   const [userEmail, setUserEmail] = createSignal<string>('');
 
   // Wallet hooks
-  const { splitdoATA } = useSplitdoATA();
-  const { wallet, connectionStatus } = useWallet();
-  const { solBalance, refreshBalances } = useWalletBalances();
-  const { openModal } = useWalletModal();
+  const wallet = useUnifiedWallet();
 
   // Check balances when wallet is connected
   createEffect(() => {
-    if (connectionStatus() === 'connected' && wallet()) {
+    if (wallet.connectionStatus() === 'connected' && wallet.wallet()) {
       console.log('[Dashboard] Wallet connected, refreshing balances');
-      refreshBalances(); // This now includes SPLITDO ATA checking
+      wallet.refreshBalances(); // This now includes SPLITDO ATA checking
     }
   });
 
   // Calculate portfolio value (SPLITDO value in SOL)
   const portfolioValueSOL = createMemo(() => {
-    const splitdoBalance = splitdoATA().balance?.uiAmount || 0;
+    const splitdoBalance = wallet.splitdoATA().balance?.uiAmount || 0;
     const exchangeRate = 0.11; // 1 SPLITDO = 0.11 SOL
     return splitdoBalance * exchangeRate;
   });
@@ -107,7 +99,7 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
               Portfolio Value
             </div>
             <Show
-              when={connectionStatus() === 'connected' && splitdoATA().status === 'exists'}
+              when={wallet.connectionStatus() === 'connected' && wallet.splitdoATA().status === 'exists'}
               fallback={
                 <div>
                   <div class={`mt-2 text-2xl font-semibold ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
@@ -134,7 +126,7 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
               SPLITDO Balance
             </div>
             <Show
-              when={connectionStatus() === 'connected' && splitdoATA().status === 'exists'}
+              when={wallet.connectionStatus() === 'connected' && wallet.splitdoATA().status === 'exists'}
               fallback={
                 <div>
                   <div class={`mt-2 text-2xl font-semibold ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
@@ -142,7 +134,7 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
                   </div>
                   <div class={`text-xs mt-1 ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
                     <Show
-                      when={connectionStatus() === 'connected'}
+                      when={wallet.connectionStatus() === 'connected'}
                       fallback="Connect wallet to view"
                     >
                       Create SPLITDO account
@@ -152,7 +144,7 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
               }
             >
               <div class={`mt-2 text-2xl font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                {formatCurrency(splitdoATA().balance?.uiAmount || 0)}
+                {formatCurrency(wallet.splitdoATA().balance?.uiAmount || 0)}
               </div>
               <div class={`text-xs mt-1 ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
                 SPLITDO tokens
@@ -166,7 +158,7 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
               SOL Balance
             </div>
             <Show
-              when={connectionStatus() === 'connected' && solBalance()}
+              when={wallet.connectionStatus() === 'connected' && wallet.solBalance()}
               fallback={
                 <div>
                   <div class={`mt-2 text-2xl font-semibold ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
@@ -179,7 +171,7 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
               }
             >
               <div class={`mt-2 text-2xl font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                {formatCurrency(solBalance()?.sol || 0, 4)} SOL
+                {formatCurrency(wallet.solBalance()?.sol || 0, 4)} SOL
               </div>
               <div class={`text-xs mt-1 ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
                 For transaction fees

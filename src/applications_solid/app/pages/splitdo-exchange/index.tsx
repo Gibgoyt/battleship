@@ -1,14 +1,6 @@
 import type { Component } from 'solid-js';
 import { createSignal, createEffect, Show } from 'solid-js';
-import {
-  useSplitdoATA,
-  useWalletModal,
-  useWallet,
-  useWalletConnection,
-  useWalletBalances,
-  useCreateAccountModal,
-  useExchangeModal
-} from 'src/applications_solid/app/lib/wallet/wallet-context';
+import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
 import WalletModal from '../../components/WalletModal';
 import { CreateAccountModal } from '../../components/CreateAccountModal';
 import { ExchangeModal } from '../../components/ExchangeModal';
@@ -16,33 +8,27 @@ import EnhancedExchangeWidget from './components/EnhancedExchangeWidget';
 
 const WalletPage: Component<{ isDark: boolean }> = (props) => {
   // SolidJS Wallet Context Hooks
-  const { splitdoATA, createSplitdoATA, isCreatingATA } = useSplitdoATA();
-  const { openModal, closeModal, isModalOpen } = useWalletModal();
-  const { isCreateAccountModalOpen, closeCreateAccountModal, openCreateAccountModal } = useCreateAccountModal();
-  const { isExchangeModalOpen } = useExchangeModal();
-  const { wallet, connectionStatus, connectionError } = useWallet();
-  const { connectWallet, disconnect } = useWalletConnection();
-  const { solBalance, refreshBalances } = useWalletBalances();
+  const wallet = useUnifiedWallet();
 
   // Check SPLITDO account status on page load
   createEffect(() => {
     console.log('[WalletPage] Checking SPLITDO balance on page load');
-    refreshBalances();
+    wallet.refreshBalances();
   });
 
   // Refresh balances when wallet is connected
   createEffect(() => {
-    if (connectionStatus() === 'connected' && wallet()) {
+    if (wallet.connectionStatus() === 'connected' && wallet.wallet()) {
       console.log('[WalletPage] Wallet connected, refreshing balances');
-      refreshBalances();
+      wallet.refreshBalances();
     }
   });
 
   // Auto-open modal when no SPLITDO account exists and wallet is connected
   createEffect(() => {
-    if (splitdoATA().status === 'not_found' && connectionStatus() === 'connected') {
+    if (wallet.splitdoATA().status === 'not_found' && wallet.connectionStatus() === 'connected') {
       console.log('[WalletPage] No SPLITDO account found, opening creation modal');
-      openCreateAccountModal();
+      wallet.openCreateAccountModal();
     }
   });
 
@@ -90,10 +76,10 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
         <div class="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
           {/* Show Connect/Disconnect Button */}
           <Show
-            when={connectionStatus() === 'connected'}
+            when={wallet.connectionStatus() === 'connected'}
             fallback={
               <button
-                onClick={() => openModal()}
+                onClick={() => wallet.openWalletModal()}
                 class="w-full sm:w-auto px-6 py-3 bg-[#00d9ff] text-white hover:bg-[#00b8d4] transition-colors text-sm md:text-base font-semibold"
               >
                 Connect Wallet
@@ -101,7 +87,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
             }
           >
             <button
-              onClick={() => disconnect()}
+              onClick={() => wallet.disconnectWallet()}
               class={`w-full sm:w-auto px-6 py-3 border transition-colors text-sm md:text-base font-semibold ${
                 props.isDark
                   ? 'border-red-600 text-red-400 hover:bg-red-600 hover:text-white'
@@ -115,15 +101,15 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
       </div>
 
       {/* Connection Status */}
-      <Show when={connectionStatus() === 'connecting'}>
+      <Show when={wallet.connectionStatus() === 'connecting'}>
         <div class={`p-4 rounded-lg border ${props.isDark ? 'bg-zinc-800 border-zinc-700 text-yellow-400' : 'bg-yellow-50 border-yellow-200 text-yellow-800'}`}>
           Connecting to wallet...
         </div>
       </Show>
 
-      <Show when={connectionStatus() === 'error' && connectionError()}>
+      <Show when={wallet.connectionStatus() === 'error' && wallet.connectionError()}>
         <div class={`p-4 rounded-lg border ${props.isDark ? 'bg-zinc-800 border-red-700 text-red-400' : 'bg-red-50 border-red-200 text-red-800'}`}>
-          Connection Error: {connectionError()}
+          Connection Error: {wallet.connectionError()}
         </div>
       </Show>
 
@@ -131,7 +117,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
       <EnhancedExchangeWidget isDark={props.isDark} />
 
       {/* Balance Overview - Only show when account exists or is being checked */}
-      <Show when={splitdoATA().status !== 'not_found'}>
+      <Show when={wallet.splitdoATA().status !== 'not_found'}>
         <div class="space-y-6">
           <h3 class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
             Balances
@@ -154,16 +140,16 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
             </div>
 
             {/* SPLITDO ATA Status - Reactive SolidJS */}
-            <Show when={splitdoATA().status === 'exists'}>
+            <Show when={wallet.splitdoATA().status === 'exists'}>
               <p class={`text-3xl md:text-4xl font-bold mb-2 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                {formatCurrency(splitdoATA().balance?.uiAmount || 0)}
+                {formatCurrency(wallet.splitdoATA().balance?.amount || 0)}
               </p>
               <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
-                {formatAddress(splitdoATA().address || '')}
+                {formatAddress(wallet.splitdoATA().address || '')}
               </p>
             </Show>
 
-            <Show when={splitdoATA().status === 'not_found'}>
+            <Show when={wallet.splitdoATA().status === 'not_found'}>
               <div class="text-center py-4">
                 <p class={`text-lg mb-2 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                   No SPLITDO Account Found
@@ -174,7 +160,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
               </div>
             </Show>
 
-            <Show when={splitdoATA().status === 'creating'}>
+            <Show when={wallet.splitdoATA().status === 'creating'}>
               <div class="space-y-2 mt-4">
                 <p class="text-lg text-[#00d9ff] font-semibold">
                   Creating Account...
@@ -188,20 +174,20 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
               </div>
             </Show>
 
-            <Show when={splitdoATA().status === 'checking'}>
+            <Show when={wallet.splitdoATA().status === 'checking'}>
               <p class={`text-lg mt-4 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Checking account status...
               </p>
             </Show>
 
-            <Show when={splitdoATA().status === 'error' && splitdoATA().error}>
+            <Show when={wallet.splitdoATA().status === 'error' && wallet.splitdoATA().error}>
               <div class="space-y-2 mt-4">
                 <p class="text-lg text-red-500 font-semibold">Error</p>
                 <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  {splitdoATA().error}
+                  {wallet.splitdoATA().error}
                 </p>
                 <button
-                  onClick={() => refreshBalances()}
+                  onClick={() => wallet.refreshBalances()}
                   class="px-6 py-2 bg-gray-600 text-white hover:bg-gray-700 transition-colors"
                 >
                   Retry
@@ -226,7 +212,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
             </div>
 
             <Show
-              when={connectionStatus() === 'connected' && wallet()}
+              when={wallet.connectionStatus() === 'connected' && wallet.wallet()}
               fallback={
                 <p class={`text-lg ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                   Connect wallet to see balance
@@ -234,14 +220,14 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
               }
             >
               <p class={`text-3xl md:text-4xl font-bold mb-2 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                {formatCurrency(solBalance()?.sol || 0, 'SOL')}
+                {formatCurrency(wallet.solBalance()?.sol || 0, 'SOL')}
               </p>
               <p class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
                 For transaction fees
               </p>
-              <Show when={wallet()?.address}>
+              <Show when={wallet.wallet()?.address}>
                 <p class={`text-xs mt-2 ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                  {formatAddress(wallet()?.address || '')}
+                  {formatAddress(wallet.wallet()?.address || '')}
                 </p>
               </Show>
             </Show>
@@ -251,7 +237,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
       </Show>
 
       {/* Quick Actions - Only show when account exists */}
-      <Show when={splitdoATA().status !== 'not_found'}>
+      <Show when={wallet.splitdoATA().status !== 'not_found'}>
       <div class="pt-6 border-t border-gray-200 dark:border-zinc-800">
         <h3 class={`text-lg font-semibold mb-4 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
           Quick Actions
@@ -329,7 +315,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
               </thead>
               <tbody>
                 <Show
-                  when={connectionStatus() === 'connected'}
+                  when={wallet.connectionStatus() === 'connected'}
                   fallback={
                     <tr>
                       <td colspan="5" class={`py-12 px-2 md:px-4 text-center ${props.isDark ? 'text-gray-500' : 'text-gray-600'}`}>
@@ -363,8 +349,8 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
 
       {/* Wallet Selection Modal for ATA Creation */}
       <WalletModal
-        isOpen={isModalOpen}
-        onClose={() => closeModal()}
+        isOpen={wallet.isWalletModalOpen}
+        onClose={() => wallet.closeWalletModal()}
         isDark={props.isDark}
       />
 

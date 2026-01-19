@@ -1,24 +1,18 @@
 import type { Component } from 'solid-js';
 import { createMemo, Show } from 'solid-js';
-import {
-  useWallet,
-  useWalletBalances,
-  useSplitdoATA
-} from 'src/applications_solid/app/lib/wallet/wallet-context';
+import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
 
 interface PortfolioOverviewProps {
   isDark: boolean;
 }
 
 const PortfolioOverview: Component<PortfolioOverviewProps> = (props) => {
-  const { wallet, connectionStatus } = useWallet();
-  const { solBalance } = useWalletBalances();
-  const { splitdoATA } = useSplitdoATA();
+  const wallet = useUnifiedWallet();
 
   // Calculate total portfolio value in USD
   const totalPortfolioValue = createMemo(() => {
-    const solValue = (solBalance()?.sol || 0) * 100; // Assume $100 per SOL for demo
-    const splitdoValue = (splitdoATA().balance?.uiAmount || 0) * 0.11; // $0.11 per SPLITDO (presale price)
+    const solValue = (wallet.solBalance()?.sol || 0) * 100; // Assume $100 per SOL for demo
+    const splitdoValue = (wallet.splitdoATA().balance?.amount || 0) * 0.11; // $0.11 per SPLITDO (presale price)
     return solValue + splitdoValue;
   });
 
@@ -49,12 +43,12 @@ const PortfolioOverview: Component<PortfolioOverviewProps> = (props) => {
             </h2>
           </div>
           <div class="portfolio-value">
-            <Show when={connectionStatus() === 'connected'} fallback="$0.00">
+            <Show when={wallet.connectionStatus() === 'connected'} fallback="$0.00">
               ${formatCurrency(totalPortfolioValue())}
             </Show>
           </div>
           <div class={`portfolio-change ${portfolioChange().percentage >= 0 ? 'positive' : 'negative'}`}>
-            <Show when={connectionStatus() === 'connected'}>
+            <Show when={wallet.connectionStatus() === 'connected'}>
               <svg width="16" height="16" viewBox="0 0 16 16" class="fill-current">
                 <Show when={portfolioChange().percentage >= 0} fallback={
                   <path d="M8 12l-4-4h8l-4 4z"/> // Down arrow
@@ -76,7 +70,7 @@ const PortfolioOverview: Component<PortfolioOverviewProps> = (props) => {
 
 
       {/* Wallet Status for Disconnected State */}
-      <Show when={connectionStatus() !== 'connected'}>
+      <Show when={wallet.connectionStatus() !== 'connected'}>
         <div class="text-center py-8">
           <div class="w-16 h-16 mx-auto mb-4 bg-crypto-border rounded-full flex items-center justify-center">
             <svg width="32" height="32" viewBox="0 0 32 32" class="fill-current text-crypto-text-muted">

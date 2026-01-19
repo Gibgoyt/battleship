@@ -1,6 +1,6 @@
 import type { Component, Accessor } from 'solid-js';
 import { createSignal, Show, For } from 'solid-js';
-import { useMultiWallet, useWalletConnection } from 'src/applications_solid/app/lib/wallet/wallet-context';
+import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
 
 // Import install URLs for wallet installation
 const WALLET_INSTALL_URLS = {
@@ -23,8 +23,7 @@ interface WalletModalProps {
 }
 
 const WalletModal: Component<WalletModalProps> = (props) => {
-  const multiWallet = useMultiWallet();
-  const { connectWallet } = useWalletConnection();
+  const wallet = useUnifiedWallet();
   const [isConnecting, setIsConnecting] = createSignal<string | null>(null);
   const [connectionError, setConnectionError] = createSignal<string | null>(null);
 
@@ -43,10 +42,10 @@ const WalletModal: Component<WalletModalProps> = (props) => {
   const handleConnect = async (walletId: string) => {
     if (isConnecting()) return; // Prevent double-clicks
 
-    const wallet = multiWallet.availableWallets().find(w => w.id === walletId);
+    const availableWallet = wallet.availableWallets().find(w => w.id === walletId);
 
     // If wallet not detected, open installation page
-    if (!wallet?.isAvailable) {
+    if (!availableWallet?.isAvailable) {
       console.log('[WalletModal] Wallet not detected, opening installation page:', walletId);
       const installUrl = WALLET_INSTALL_URLS[walletId as keyof typeof WALLET_INSTALL_URLS];
       if (installUrl) {
@@ -133,7 +132,7 @@ const WalletModal: Component<WalletModalProps> = (props) => {
 
       // Connect wallet using context system
       // Note: Phantom-specific optimization moved to context layer
-      await connectWallet(walletId);
+      await wallet.connectWallet(walletId);
 
       // Close modal on successful connection
       props.onClose?.();
@@ -197,7 +196,7 @@ const WalletModal: Component<WalletModalProps> = (props) => {
 
         {/* Dynamic Wallet List */}
         <div class="space-y-3">
-          <For each={multiWallet.availableWallets()}>
+          <For each={wallet.availableWallets()}>
             {(wallet) => (
               <button
                 onClick={() => handleConnect(wallet.id)}
