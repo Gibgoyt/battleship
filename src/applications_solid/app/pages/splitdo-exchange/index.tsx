@@ -1,5 +1,5 @@
 import type { Component } from 'solid-js';
-import { createSignal, createEffect, Show, createMemo } from 'solid-js';
+import { createSignal, createEffect, Show, createMemo, For } from 'solid-js';
 import {
   useSplitdoATA,
   useWalletModal,
@@ -14,6 +14,20 @@ import WalletModal from '../../components/WalletModal';
 import { CreateAccountModal } from '../../components/CreateAccountModal';
 import { ExchangeModal } from '../../components/ExchangeModal';
 
+interface TokenTransaction {
+  transaction_id: string;
+  type: string;
+  from_user_id: string;
+  to_user_id: string;
+  amount_tokens: number;
+  amount_usdc?: number;
+  tx_signature: string;
+  status: string;
+  created_at: string;
+  completed_at: string;
+  error_message?: string;
+}
+
 const WalletPage: Component<{ isDark: boolean }> = (props) => {
   // SolidJS Wallet Context Hooks
   const { splitdoATA, createSplitdoATA, isCreatingATA } = useSplitdoATA();
@@ -24,6 +38,60 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
   const { connectWallet, disconnect } = useWalletConnection();
   const { solBalance, refreshBalances } = useWalletBalances();
   const { solPrice } = useSolPrice();
+
+  // Transaction history state
+  const [transactions, setTransactions] = createSignal<TokenTransaction[]>([]);
+  const [isLoadingTransactions, setIsLoadingTransactions] = createSignal(false);
+
+  // Fetch transactions
+  const fetchTransactions = async () => {
+    if (connectionStatus() !== 'connected') return;
+
+    try {
+      setIsLoadingTransactions(true);
+
+      // Get Firebase token from cookies or storage
+      let token = null;
+      const cookieNames = ['firebase-auth-token', 'firebase-idToken', 'auth-token'];
+      for (const cookieName of cookieNames) {
+        const cookieValue = document.cookie
+          .split('; ')
+          .find(row => row.startsWith(`${cookieName}=`))
+          ?.split('=')[1];
+        if (cookieValue) {
+          token = cookieValue;
+          break;
+        }
+      }
+
+      if (!token) {
+        token = sessionStorage.getItem('firebase-idToken') || localStorage.getItem('firebase-idToken');
+      }
+
+      if (!token) {
+        console.log('[WalletPage] No auth token found, skipping transaction fetch');
+        return;
+      }
+
+      const response = await fetch('/api/splitdo-token/transactions?limit=10', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.transactions) {
+          setTransactions(data.data.transactions);
+        }
+      }
+    } catch (error) {
+      console.error('[WalletPage] Failed to fetch transactions:', error);
+    } finally {
+      setIsLoadingTransactions(false);
+    }
+  };
 
   // Check SPLITDO account status on page load
   createEffect(() => {
@@ -36,6 +104,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
     if (connectionStatus() === 'connected' && wallet()) {
       console.log('[WalletPage] Wallet connected, refreshing balances');
       refreshBalances();
+      fetchTransactions();
     }
   });
 
@@ -57,6 +126,56 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
   const formatAddress = (address: string) => {
     if (address.length <= 8) return address;
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    try {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      if (diffDays < 7) return `${diffDays}d ago`;
+
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    } catch {
+      return timestamp;
+    }
+  };
+
+  const getTransactionIcon = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'buy':
+      case 'purchase':
+        return (
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+        );
+      case 'sell':
+        return (
+          <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+          </svg>
+        );
+      case 'transfer':
+        return (
+          <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+          </svg>
+        );
+      default:
+        return (
+          <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+          </svg>
+        );
+    }
   };
 
   // Calculate portfolio value in USD
@@ -334,14 +453,103 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
         <div class="px-4 md:px-8 pb-12">
           <div class="max-w-4xl mx-auto">
             <h2 class="text-lg font-semibold text-white mb-4">Recent Activity</h2>
-            <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl p-8 border border-zinc-800">
-              <div class="flex flex-col items-center justify-center py-12 text-center">
-                <svg class="w-16 h-16 text-zinc-700 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                </svg>
-                <h3 class="text-lg font-semibold text-zinc-400 mb-2">No transactions yet</h3>
-                <p class="text-sm text-zinc-500">Your transaction history will appear here</p>
-              </div>
+            <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl border border-zinc-800 overflow-hidden">
+              <Show
+                when={!isLoadingTransactions() && transactions().length > 0}
+                fallback={
+                  <div class="flex flex-col items-center justify-center py-12 text-center">
+                    <Show
+                      when={isLoadingTransactions()}
+                      fallback={
+                        <>
+                          <svg class="w-16 h-16 text-zinc-700 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                          </svg>
+                          <h3 class="text-lg font-semibold text-zinc-400 mb-2">No transactions yet</h3>
+                          <p class="text-sm text-zinc-500">Your transaction history will appear here</p>
+                        </>
+                      }
+                    >
+                      <div class="flex items-center gap-3">
+                        <svg class="animate-spin w-8 h-8 text-cyan-400" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="text-sm text-zinc-400">Loading transactions...</p>
+                      </div>
+                    </Show>
+                  </div>
+                }
+              >
+                <div class="divide-y divide-zinc-800">
+                  <For each={transactions()}>
+                    {(tx) => (
+                      <div class="p-6 hover:bg-zinc-800/50 transition-colors">
+                        <div class="flex items-center justify-between">
+                          <div class="flex items-center gap-4 flex-1">
+                            {/* Transaction Icon */}
+                            <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                              {getTransactionIcon(tx.type)}
+                            </div>
+
+                            {/* Transaction Details */}
+                            <div class="flex-1 min-w-0">
+                              <div class="flex items-center gap-2 mb-1">
+                                <h3 class="text-sm font-semibold text-white capitalize">
+                                  {tx.type}
+                                </h3>
+                                <Show when={tx.status === 'completed'}>
+                                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400">
+                                    Success
+                                  </span>
+                                </Show>
+                                <Show when={tx.status === 'pending'}>
+                                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400">
+                                    Pending
+                                  </span>
+                                </Show>
+                                <Show when={tx.status === 'failed'}>
+                                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400">
+                                    Failed
+                                  </span>
+                                </Show>
+                              </div>
+                              <p class="text-xs text-zinc-500 font-mono truncate">
+                                {formatAddress(tx.tx_signature)}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Amount and Time */}
+                          <div class="text-right ml-4">
+                            <p class="text-sm font-bold text-white mb-1">
+                              {formatCurrency(tx.amount_tokens)} SPLITDO
+                            </p>
+                            <p class="text-xs text-zinc-500">
+                              {formatTimestamp(tx.completed_at || tx.created_at)}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* View on Explorer Link */}
+                        <Show when={tx.tx_signature}>
+                          <a
+                            href={`https://solscan.io/tx/${tx.tx_signature}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex items-center gap-1 mt-3 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                          >
+                            View on Solscan
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                          </a>
+                        </Show>
+                      </div>
+                    )}
+                  </For>
+                </div>
+              </Show>
             </div>
           </div>
         </div>
