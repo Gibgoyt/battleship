@@ -2,7 +2,7 @@
 import 'src/styles/global.css'
 import { firebaseJwtValidator } from 'src/lib/auth/firebase-jwt-validator'
 import { createLogger } from 'src/lib/logger'
-import AppWithStore from 'src/applications_solid/app/AppWithStore.tsx'
+import App from 'src/applications_solid/app/App.tsx'
 
 /**
  * IMPORTANT: THIS IS A CATCH-ALL ROUTE FOR A SOLIDJS SINGLE PAGE APPLICATION
@@ -175,6 +175,6 @@ Astro.response.headers.set('X-Frame-Options', 'DENY')
 </head>
 <body class="h-full overflow-x-hidden" style="background: var(--crypto-bg-primary); color: var(--crypto-text-primary);">
 <!-- Render SolidJS App with Astro's integration -->
-<AppWithStore client:only="solid-js" firebaseToken={firebaseAuthToken?.value} />
+<App client:only="solid-js" firebaseToken={firebaseAuthToken?.value} />
 </body>
 </html>

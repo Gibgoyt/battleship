@@ -22,7 +22,6 @@ import { AuthStoreProvider } from './middleware/firebase/auth-store'
 import { PersistentDataProvider } from './data'
 import { createLogger } from 'src/lib/logger'
 import DashboardPage from './pages/dashboard/index'
-import CounterPage from './pages/counter/index'
 import ProfilePage from './pages/profile/index'
 import WalletPage from './pages/splitdo-exchange/index'
 import { SessionExpiryNotification } from './components/SessionExpiryNotification'
@@ -78,7 +77,7 @@ const AppContent: Component = () => {
       ? pathSegments[1] 
       : 'dashboard'
     
-    if (['dashboard', 'counter', 'profile', 'splitdo-exchange'].includes(pageName)) {
+    if (['dashboard', 'profile', 'splitdo-exchange'].includes(pageName)) {
       setCurrentPage(pageName as Page)
     }
   })
@@ -99,7 +98,7 @@ const AppContent: Component = () => {
       ? pathSegments[1]
       : 'dashboard'
 
-    if (['dashboard', 'counter', 'profile', 'splitdo-exchange'].includes(pageName)) {
+    if (['dashboard', 'profile', 'splitdo-exchange'].includes(pageName)) {
       const newPage = pageName as Page;
       // CRITICAL: Only update if different to prevent loops
       if (currentPage() !== newPage) {
@@ -124,8 +123,6 @@ const AppContent: Component = () => {
     switch (page) {
       case 'dashboard':
         return <DashboardPage isDark={isDark()} />
-      case 'counter':
-        return <CounterPage isDark={isDark()} />
       case 'profile':
         return <ProfilePage isDark={isDark()} />
       case 'splitdo-exchange':
