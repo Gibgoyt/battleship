@@ -194,6 +194,57 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
         </div>
       </div>
 
+      {/* Current Prices */}
+      <div class="px-4 md:px-8 pb-12">
+        <div class="max-w-4xl mx-auto space-y-4">
+          <h2 class="text-lg font-semibold text-white mb-4">Current Prices</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* SPLITDO Price */}
+            <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-medium text-zinc-500 uppercase tracking-wider">SPLITDO/USD</span>
+                <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+              </div>
+              <div class="text-3xl font-bold text-white mb-1">
+                ${formatCurrency(0.11, 2)}
+              </div>
+              <p class="text-xs text-zinc-500">Fixed exchange rate</p>
+            </div>
+
+            {/* SOL Price */}
+            <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-medium text-zinc-500 uppercase tracking-wider">SOL/USD</span>
+                <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                  </svg>
+                </div>
+              </div>
+              <Show
+                when={solPrice()?.usd}
+                fallback={
+                  <div>
+                    <div class="text-3xl font-bold text-zinc-700 mb-1">--</div>
+                    <p class="text-xs text-zinc-500">Loading price...</p>
+                  </div>
+                }
+              >
+                <div class="text-3xl font-bold text-white mb-1">
+                  ${formatCurrency(solPrice()?.usd || 0, 2)}
+                </div>
+                <p class="text-xs text-zinc-500">Live market price</p>
+              </Show>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Exchange Action */}
       <Show when={connectionStatus() === 'connected' && splitdoATA().status === 'exists'}>
         <div class="px-4 md:px-8 pb-12">
