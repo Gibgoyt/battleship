@@ -3,7 +3,8 @@
  * Catches authentication errors globally and triggers proper logout flow
  */
 
-import { Component, ErrorBoundary } from 'solid-js'
+import { ErrorBoundary } from 'solid-js'
+import type { Component } from 'solid-js'
 
 interface AuthErrorBoundaryProps {
   children: any
