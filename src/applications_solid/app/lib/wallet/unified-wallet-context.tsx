@@ -461,7 +461,7 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
         },
         {
           cacheKey: `transactions-${address}`,
-          policy: CACHE_POLICIES.TRANSACTIONS,
+          policy: CACHE_POLICIES.TRANSACTION_HISTORY,
           bypassCache: options.force
         }
       );
@@ -507,7 +507,7 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
         },
         {
           cacheKey: 'user-balances',
-          policy: CACHE_POLICIES.BALANCES,
+          policy: CACHE_POLICIES.BALANCE_DATA,
           bypassCache: options.force
         }
       );
