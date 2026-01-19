@@ -5,13 +5,13 @@ import {
   useWallet,
   useWalletBalances,
   useWalletModal
-} from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
+} from 'src/applications_solid/app/lib/wallet/wallet-context';
 
 const DashboardPage: Component<{ isDark: boolean }> = (props) => {
   const [userEmail, setUserEmail] = createSignal<string>('');
 
   // Wallet hooks
-  const { splitdoATA, checkSplitdoBalance } = useSplitdoATA();
+  const { splitdoATA } = useSplitdoATA();
   const { wallet, connectionStatus } = useWallet();
   const { solBalance, refreshBalances } = useWalletBalances();
   const { openModal } = useWalletModal();
@@ -20,8 +20,7 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
   createEffect(() => {
     if (connectionStatus() === 'connected' && wallet()) {
       console.log('[Dashboard] Wallet connected, refreshing balances');
-      checkSplitdoBalance();
-      refreshBalances();
+      refreshBalances(); // This now includes SPLITDO ATA checking
     }
   });
 

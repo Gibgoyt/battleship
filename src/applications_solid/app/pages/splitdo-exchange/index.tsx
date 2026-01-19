@@ -5,10 +5,10 @@ import {
   useWalletModal,
   useWallet,
   useWalletConnection,
-  useWalletBalances
+  useWalletBalances,
+  useCreateAccountModal,
+  useExchangeModal
 } from 'src/applications_solid/app/lib/wallet/wallet-context';
-// Temporary: Import remaining modal hooks from reactive store until fully migrated
-import { useCreateAccountModal, useExchangeModal } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
 import WalletModal from '../../components/WalletModal';
 import { CreateAccountModal } from '../../components/CreateAccountModal';
 import { ExchangeModal } from '../../components/ExchangeModal';

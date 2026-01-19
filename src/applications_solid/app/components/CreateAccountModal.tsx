@@ -1,6 +1,6 @@
 import type { Component } from 'solid-js';
 import { Show, createSignal, createEffect } from 'solid-js';
-import { useCreateAccountModal, useWallet, useWalletConnection, useSplitdoATA } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
+import { useCreateAccountModal, useWallet, useWalletConnection, useSplitdoATA } from 'src/applications_solid/app/lib/wallet/wallet-context';
 import { MobileWalletInstallation } from './MobileWalletInstallation';
 import { detectMobilePlatform } from 'src/applications_solid/app/lib/wallet/mobile-detection';
 import { executeMobileWalletDeepLink, attemptMobileWalletConnection } from 'src/applications_solid/app/lib/wallet/mobile-wallet-connector';

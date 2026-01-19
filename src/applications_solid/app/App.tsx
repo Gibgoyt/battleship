@@ -19,6 +19,7 @@ import {
 } from './middleware'
 import { WalletProvider, useWalletConnectQRModal } from 'src/applications_solid/app/lib/wallet/wallet-context'
 import { AuthStoreProvider } from './middleware/firebase/auth-store'
+import { PersistentDataProvider } from './data'
 import { createLogger } from 'src/lib/logger'
 import DashboardPage from './pages/dashboard/index'
 import CounterPage from './pages/counter/index'
@@ -94,12 +95,17 @@ const AppContent: Component = () => {
     const currentRoute = middleware.currentRoute()
     const pathSegments = currentRoute.split('/').filter(Boolean)
     const rootPath = 'app';
-    const pageName = pathSegments.length >= 2 && pathSegments[0] === rootPath 
-      ? pathSegments[1] 
+    const pageName = pathSegments.length >= 2 && pathSegments[0] === rootPath
+      ? pathSegments[1]
       : 'dashboard'
-    
+
     if (['dashboard', 'counter', 'profile', 'splitdo-exchange'].includes(pageName)) {
-      setCurrentPage(pageName as Page)
+      const newPage = pageName as Page;
+      // CRITICAL: Only update if different to prevent loops
+      if (currentPage() !== newPage) {
+        logger.debug(`Route change detected: ${currentPage()} -> ${newPage}`);
+        setCurrentPage(newPage);
+      }
     }
   })
 
@@ -183,6 +189,7 @@ const AppContent: Component = () => {
       });
 
       // Setup auth state change listeners
+      let isProcessingAuthChange = false;
       createEffect(() => {
         const isAuthenticated = authStoreInstance.isAuthenticated();
         const tokenStatus = authStoreInstance.tokenStatus();
@@ -193,9 +200,23 @@ const AppContent: Component = () => {
           currentRoute: middleware.currentRoute(),
         });
 
-        // Handle auth state changes
-        authSetup.middleware.onAuthStateChange(isAuthenticated);
-        authSetup.middleware.onTokenStatusChange(tokenStatus);
+        // PREVENT LOOP: Skip if already processing auth changes
+        if (isProcessingAuthChange) {
+          logger.debug('Skipping auth state change handling - already processing');
+          return;
+        }
+
+        isProcessingAuthChange = true;
+        try {
+          // Handle auth state changes
+          authSetup.middleware.onAuthStateChange(isAuthenticated);
+          authSetup.middleware.onTokenStatusChange(tokenStatus);
+        } finally {
+          // Reset flag after a brief timeout to allow processing to complete
+          setTimeout(() => {
+            isProcessingAuthChange = false;
+          }, 100);
+        }
       });
 
       // Cleanup on unmount
@@ -269,9 +290,11 @@ const App: Component<{ firebaseToken?: string }> = (props) => {
   return (
     <MiddlewareProvider>
       <AuthStoreProvider initialToken={props.firebaseToken}>
-        <WalletProvider firebaseToken={props.firebaseToken}>
-          <AppContent />
-        </WalletProvider>
+        <PersistentDataProvider>
+          <WalletProvider firebaseToken={props.firebaseToken}>
+            <AppContent />
+          </WalletProvider>
+        </PersistentDataProvider>
       </AuthStoreProvider>
     </MiddlewareProvider>
   )

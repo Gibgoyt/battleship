@@ -191,9 +191,14 @@ const AppContent: Component = () => {
 }
 
 const AppWithStore: Component<{ firebaseToken?: string }> = (props) => {
+  // DEPRECATION WARNING: This component is deprecated
+  console.warn('⚠️ AppWithStore is DEPRECATED. Please use App.tsx instead. This component will be removed in a future version.');
+  console.warn('⚠️ Migration: Replace AppWithStore imports with App from ./App.tsx');
+
   // Initialize reactive wallet store with Firebase token
   onMount(() => {
     console.log('[AppWithStore] Initializing reactive wallet store with Firebase token:', props.firebaseToken ? 'Present' : 'None');
+    console.warn('⚠️ [DEPRECATED] AppWithStore: Using legacy reactive wallet store. Migrate to wallet-context in App.tsx');
     initializeWalletStore(props.firebaseToken);
   });
 

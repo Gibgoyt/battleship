@@ -9,7 +9,7 @@ import {
   useWalletBalances,
   useWalletModal,
   useSolPrice
-} from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
+} from 'src/applications_solid/app/lib/wallet/wallet-context';
 
 interface EnhancedExchangeWidgetProps {
   isDark: boolean;
