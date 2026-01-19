@@ -280,7 +280,7 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
       logger.info(`Connecting to wallet provider: ${providerId}`);
 
-      const result = await walletConnectService.connect(providerId);
+      const result = await walletConnectService.connectWallet(providerId);
 
       if (result.success && result.wallet) {
         batch(() => {
@@ -444,7 +444,6 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       setIsPersistentDataLoading(true);
 
       const result = await smartFetch(
-        `transactions-${address}`,
         async () => {
           // FIXED: Use backend API instead of direct RPC calls
           const response = await fetch(`/api/splitdo-token/history/${address}?limit=${limit}`, {
@@ -460,8 +459,11 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
           return await response.json();
         },
-        CACHE_POLICIES.TRANSACTIONS,
-        options.force
+        {
+          cacheKey: `transactions-${address}`,
+          policy: CACHE_POLICIES.TRANSACTIONS,
+          bypassCache: options.force
+        }
       );
 
       if (result.success && result.data) {
@@ -488,7 +490,6 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       setIsPersistentDataLoading(true);
 
       const result = await smartFetch(
-        'user-balances',
         async () => {
           // This would fetch from your backend API
           const response = await fetch('/api/user/balances', {
@@ -504,8 +505,11 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
           return await response.json();
         },
-        CACHE_POLICIES.BALANCES,
-        options.force
+        {
+          cacheKey: 'user-balances',
+          policy: CACHE_POLICIES.BALANCES,
+          bypassCache: options.force
+        }
       );
 
       if (result.success && result.data) {
@@ -532,7 +536,6 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       setIsPersistentDataLoading(true);
 
       const result = await smartFetch(
-        'exchange-rates',
         async () => {
           const response = await fetch('/api/exchange/rates', {
             headers: {
@@ -547,8 +550,11 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
           return await response.json();
         },
-        CACHE_POLICIES.EXCHANGE_RATES,
-        options.force
+        {
+          cacheKey: 'exchange-rates',
+          policy: CACHE_POLICIES.EXCHANGE_RATES,
+          bypassCache: options.force
+        }
       );
 
       if (result.success && result.data) {
@@ -575,7 +581,6 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       setIsPersistentDataLoading(true);
 
       const result = await smartFetch(
-        'sol-price',
         async () => {
           const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
 
@@ -590,8 +595,11 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
             lastUpdated: new Date().toISOString()
           };
         },
-        CACHE_POLICIES.SOL_PRICE,
-        options.force
+        {
+          cacheKey: 'sol-price',
+          policy: CACHE_POLICIES.SOL_PRICE,
+          bypassCache: options.force
+        }
       );
 
       if (result.success && result.data) {

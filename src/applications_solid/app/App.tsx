@@ -49,10 +49,63 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
   const [isDark, setIsDark] = createSignal(false)
   const [isNavOpen, setIsNavOpen] = createSignal(false)
   const [authStore, setAuthStore] = createSignal<ReturnType<typeof import('./middleware/firebase/auth-store').getGlobalAuthStore> | null>(null)
+  const [authSetup, setAuthSetup] = createSignal<ReturnType<typeof import('./middleware/firebase/auth-middleware').setupAuthMiddleware> | null>(null)
   const middleware = useMiddleware()
 
   // QR Modal state from wallet context
   const qrModal = useWalletConnectQRModal()
+
+  // Setup auth state change listeners (moved from onMount)
+  let isProcessingAuthChange = false;
+  createEffect(() => {
+    const authStoreInstance = authStore();
+    const authSetupInstance = authSetup();
+
+    if (!authStoreInstance || !authSetupInstance) {
+      return; // Wait for initialization
+    }
+
+    const isAuthenticated = authStoreInstance.isAuthenticated();
+    const tokenStatus = authStoreInstance.tokenStatus();
+
+    logger.debug('Auth state changed', {
+      isAuthenticated,
+      tokenStatus,
+      currentRoute: middleware.currentRoute(),
+    });
+
+    // PREVENT LOOP: Skip if already processing auth changes
+    if (isProcessingAuthChange) {
+      logger.debug('Skipping auth state change handling - already processing');
+      return;
+    }
+
+    isProcessingAuthChange = true;
+    try {
+      // Handle auth state changes
+      authSetupInstance.middleware.onAuthStateChange(isAuthenticated);
+      authSetupInstance.middleware.onTokenStatusChange(tokenStatus);
+    } finally {
+      // Reset flag after a brief timeout to allow processing to complete
+      setTimeout(() => {
+        isProcessingAuthChange = false;
+      }, 100);
+    }
+  });
+
+  // Cleanup on unmount (moved from onMount)
+  onCleanup(() => {
+    logger.debug('Cleaning up Firebase auth services');
+    const authSetupInstance = authSetup();
+    const authStoreInstance = authStore();
+
+    if (authSetupInstance) {
+      authSetupInstance.middleware.cleanup();
+    }
+    if (authStoreInstance) {
+      authStoreInstance.cleanup();
+    }
+  });
 
   // Detect theme from localStorage and DOM class (shared with Astro app)
   onMount(() => {
@@ -154,25 +207,28 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
       logger.info('✅ Auth store initialization complete');
 
       // Setup Firebase auth middleware
-      const authSetup = setupAuthMiddleware({
+      const authSetupInstance = setupAuthMiddleware({
         protectedRoutes: ['/app'],
         publicOnlyRoutes: ['/auth/sign-in', '/auth/sign-up'],
         loginRoute: '/auth/sign-in',
         dashboardRoute: '/app/dashboard',
       });
 
+      // Set the authSetup signal for use in effects
+      setAuthSetup(authSetupInstance);
+
       // Initialize auth middleware (now that auth store is ready)
-      await authSetup.initialize();
+      await authSetupInstance.initialize();
 
       // Setup manual navigation handling for browser back/forward
-      authSetup.setupManualNavigation();
+      authSetupInstance.setupManualNavigation();
 
       // Integrate with existing middleware system
       middleware.beforeNavigate(async (from, to) => {
         logger.debug('Before navigate middleware', { from, to });
 
         // Use Firebase auth middleware for auth checks
-        const allowed = await authSetup.middleware.beforeNavigate(from, to);
+        const allowed = await authSetupInstance.middleware.beforeNavigate(from, to);
 
         if (allowed) {
           logger.debug('Navigation allowed by Firebase auth middleware');
@@ -187,48 +243,10 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
         logger.debug('After navigate middleware', { to });
 
         // Run Firebase auth middleware after navigation
-        await authSetup.middleware.afterNavigate('', to);
+        await authSetupInstance.middleware.afterNavigate('', to);
 
         // Keep existing logging middleware
         loggingMiddleware()(to);
-      });
-
-      // Setup auth state change listeners
-      let isProcessingAuthChange = false;
-      createEffect(() => {
-        const isAuthenticated = authStoreInstance.isAuthenticated();
-        const tokenStatus = authStoreInstance.tokenStatus();
-
-        logger.debug('Auth state changed', {
-          isAuthenticated,
-          tokenStatus,
-          currentRoute: middleware.currentRoute(),
-        });
-
-        // PREVENT LOOP: Skip if already processing auth changes
-        if (isProcessingAuthChange) {
-          logger.debug('Skipping auth state change handling - already processing');
-          return;
-        }
-
-        isProcessingAuthChange = true;
-        try {
-          // Handle auth state changes
-          authSetup.middleware.onAuthStateChange(isAuthenticated);
-          authSetup.middleware.onTokenStatusChange(tokenStatus);
-        } finally {
-          // Reset flag after a brief timeout to allow processing to complete
-          setTimeout(() => {
-            isProcessingAuthChange = false;
-          }, 100);
-        }
-      });
-
-      // Cleanup on unmount
-      onCleanup(() => {
-        logger.debug('Cleaning up Firebase auth services');
-        authSetup.middleware.cleanup();
-        authStoreInstance.cleanup();
       });
 
       logger.debug('Firebase auth services initialized successfully');
