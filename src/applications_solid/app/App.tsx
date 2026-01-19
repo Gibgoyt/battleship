@@ -17,11 +17,11 @@ import {
   loggingMiddleware,
   authMiddleware
 } from './middleware'
-import { EnhancedMiddlewareProvider } from './middleware/EnhancedMiddlewareProvider'
+// REMOVED: EnhancedMiddlewareProvider was redundant passthrough
 import { AuthErrorBoundary } from './components/AuthErrorBoundary'
-import { WalletProvider, useWalletConnectQRModal } from 'src/applications_solid/app/lib/wallet/wallet-context'
-import { AuthStoreProvider } from './middleware/firebase/auth-store'
-import { PersistentDataProvider } from './data'
+// MIGRATED: Now using UnifiedWalletProvider instead of separate providers
+import { UnifiedWalletProvider, useWalletConnectQRModal } from 'src/applications_solid/app/lib/wallet/unified-wallet-context'
+// REMOVED: AuthStoreProvider and PersistentDataProvider are now integrated into UnifiedWalletProvider
 import { createLogger } from 'src/lib/logger'
 import DashboardPage from './pages/dashboard/index'
 import ProfilePage from './pages/profile/index'
@@ -287,19 +287,13 @@ const AppContent: Component = () => {
 
 const App: Component<{ firebaseToken?: string }> = (props) => {
   return (
-    <EnhancedMiddlewareProvider firebaseToken={props.firebaseToken}>
-      <MiddlewareProvider>
-        <AuthErrorBoundary>
-          <AuthStoreProvider initialToken={props.firebaseToken}>
-            <PersistentDataProvider>
-              <WalletProvider firebaseToken={props.firebaseToken}>
-                <AppContent />
-              </WalletProvider>
-            </PersistentDataProvider>
-          </AuthStoreProvider>
-        </AuthErrorBoundary>
-      </MiddlewareProvider>
-    </EnhancedMiddlewareProvider>
+    <MiddlewareProvider>
+      <AuthErrorBoundary>
+        <UnifiedWalletProvider firebaseToken={props.firebaseToken}>
+          <AppContent />
+        </UnifiedWalletProvider>
+      </AuthErrorBoundary>
+    </MiddlewareProvider>
   )
 }
 

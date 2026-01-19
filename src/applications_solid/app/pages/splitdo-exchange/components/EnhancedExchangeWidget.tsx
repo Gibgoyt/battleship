@@ -25,32 +25,24 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
   const { solBalance } = useWalletBalances();
   const { openModal } = useWalletModal();
 
-  // Smart initialization - check cache first, only fetch if needed
-  onMount(async () => {
-    try {
-      // Check if data is already available in cache
-      const { usePersistentData } = await import('../../../data/PersistentDataProvider');
-      const { exchangeRates, solPrice: cachedSolPrice } = usePersistentData();
-
-      // Only trigger fetch if data is not in cache/signals
-      if (!exchangeRates() && !programInfo().loading) {
-        console.log('[EnhancedExchangeWidget] No exchange rate in cache, fetching...');
-        fetchProgramInfo();
-      } else if (exchangeRates()) {
-        console.log('[EnhancedExchangeWidget] Using cached exchange rate:', exchangeRates()?.exchangeRate);
-      }
-
-      if (!cachedSolPrice() && !solPrice().loading) {
-        console.log('[EnhancedExchangeWidget] No SOL price in cache, fetching...');
-        fetchSolPrice();
-      } else if (cachedSolPrice()) {
-        console.log('[EnhancedExchangeWidget] Using cached SOL price:', cachedSolPrice()?.price);
-      }
-    } catch (error) {
-      console.warn('[EnhancedExchangeWidget] Cache check failed, falling back to direct fetch:', error);
-      // Fallback to direct fetch if cache access fails
+  // Smart initialization - check if data needs to be fetched
+  onMount(() => {
+    // Check if exchange rate data is available, if not fetch it
+    const currentProgramInfo = programInfo();
+    if (!currentProgramInfo.loading && currentProgramInfo.exchangeRate === 0) {
+      console.log('[EnhancedExchangeWidget] No exchange rate available, fetching...');
       fetchProgramInfo();
+    } else if (currentProgramInfo.exchangeRate > 0) {
+      console.log('[EnhancedExchangeWidget] Using available exchange rate:', currentProgramInfo.exchangeRate);
+    }
+
+    // Check if SOL price data is available, if not fetch it
+    const currentSolPrice = solPrice();
+    if (!currentSolPrice.loading && currentSolPrice.usd === 0) {
+      console.log('[EnhancedExchangeWidget] No SOL price available, fetching...');
       fetchSolPrice();
+    } else if (currentSolPrice.usd > 0) {
+      console.log('[EnhancedExchangeWidget] Using available SOL price:', currentSolPrice.usd);
     }
   });
 

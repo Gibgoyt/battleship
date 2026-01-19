@@ -635,6 +635,10 @@ export function createFirebaseAuthStore(): AuthStore {
 /**
  * Global Firebase Auth Store instance
  * Singleton pattern for consistent state across components
+ *
+ * FIXED: This ensures there's only ONE auth store instance across the entire app
+ * preventing the triple singleton anti-pattern that was causing auth conflicts.
+ * Both getGlobalAuthStore() and AuthStoreProvider now use the same instance.
  */
 let globalAuthStore: ReturnType<typeof createFirebaseAuthStore> | null = null;
 
@@ -657,7 +661,9 @@ export const AuthStoreProvider: ParentComponent<{
   children: any;
   initialToken?: string;
 }> = (props) => {
-  const authStore = createFirebaseAuthStore();
+  // FIXED: Use the global auth store instead of creating a new one
+  // This prevents the triple singleton anti-pattern
+  const authStore = getGlobalAuthStore();
 
   // Initialize the store with initial token if provided
   createEffect(async () => {
