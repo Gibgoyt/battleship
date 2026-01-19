@@ -17,6 +17,8 @@ import {
   loggingMiddleware,
   authMiddleware
 } from './middleware'
+import { EnhancedMiddlewareProvider } from './middleware/EnhancedMiddlewareProvider'
+import { AuthErrorBoundary } from './components/AuthErrorBoundary'
 import { WalletProvider, useWalletConnectQRModal } from 'src/applications_solid/app/lib/wallet/wallet-context'
 import { AuthStoreProvider } from './middleware/firebase/auth-store'
 import { PersistentDataProvider } from './data'
@@ -285,15 +287,19 @@ const AppContent: Component = () => {
 
 const App: Component<{ firebaseToken?: string }> = (props) => {
   return (
-    <MiddlewareProvider>
-      <AuthStoreProvider initialToken={props.firebaseToken}>
-        <PersistentDataProvider>
-          <WalletProvider firebaseToken={props.firebaseToken}>
-            <AppContent />
-          </WalletProvider>
-        </PersistentDataProvider>
-      </AuthStoreProvider>
-    </MiddlewareProvider>
+    <EnhancedMiddlewareProvider firebaseToken={props.firebaseToken}>
+      <MiddlewareProvider>
+        <AuthErrorBoundary>
+          <AuthStoreProvider initialToken={props.firebaseToken}>
+            <PersistentDataProvider>
+              <WalletProvider firebaseToken={props.firebaseToken}>
+                <AppContent />
+              </WalletProvider>
+            </PersistentDataProvider>
+          </AuthStoreProvider>
+        </AuthErrorBoundary>
+      </MiddlewareProvider>
+    </EnhancedMiddlewareProvider>
   )
 }
 

@@ -108,9 +108,58 @@ export async function smartFetch<T>(
   // Make fresh request
   console.log(`[SmartFetch] Making fresh request for: ${cacheKey}`);
 
+  // Enhanced fetch function with auth error handling
+  const executeWithAuth = async (): Promise<T> => {
+    try {
+      const result = await fetchFn();
+      return result;
+    } catch (error: any) {
+      // Handle 401/403 responses
+      if (error.status === 401 || error.status === 403) {
+        console.warn('[SmartFetch] Auth error detected, invalidating cache and triggering auth flow', {
+          status: error.status,
+          cacheKey,
+          userId
+        });
+
+        // Invalidate cache for this user
+        if (userId) {
+          clearUserCache(userId);
+        }
+
+        // Notify auth system
+        try {
+          const { getGlobalAuthStore } = await import('../middleware/firebase/auth-store');
+          const authStore = getGlobalAuthStore();
+
+          // Attempt token refresh
+          try {
+            await authStore.refreshToken();
+            console.log('[SmartFetch] Token refresh successful, retrying request');
+
+            // Retry request once with new token
+            return await fetchFn();
+          } catch (refreshError) {
+            console.error('[SmartFetch] Token refresh failed during 401 handling', refreshError);
+
+            // Refresh failed - trigger session expiry
+            authStore.triggerSessionExpiryNotification();
+            throw error;
+          }
+        } catch (importError) {
+          console.error('[SmartFetch] Failed to import auth store for 401 handling', importError);
+          throw error;
+        }
+      }
+
+      // Re-throw non-auth errors
+      throw error;
+    }
+  };
+
   const fetchPromise = (async () => {
     try {
-      const data = await fetchFn();
+      const data = await executeWithAuth();
 
       // Cache the successful response
       cacheEngine.set(cacheKey, data, policy, userId);
@@ -120,11 +169,13 @@ export async function smartFetch<T>(
     } catch (error) {
       console.error(`[SmartFetch] Request failed for ${cacheKey}:`, error);
 
-      // Try to return stale cache on error
-      const fallbackCache = cacheEngine.get<T>(cacheKey, policy, userId);
-      if (fallbackCache.data !== null) {
-        console.log(`[SmartFetch] Using stale cache as fallback for: ${cacheKey}`);
-        return fallbackCache.data;
+      // Try to return stale cache on error (but not for auth errors)
+      if (!((error as any)?.status === 401 || (error as any)?.status === 403)) {
+        const fallbackCache = cacheEngine.get<T>(cacheKey, policy, userId);
+        if (fallbackCache.data !== null) {
+          console.log(`[SmartFetch] Using stale cache as fallback for: ${cacheKey}`);
+          return fallbackCache.data;
+        }
       }
 
       throw error;

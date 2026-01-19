@@ -87,11 +87,75 @@ export const PersistentDataProvider: Component<{ children: any }> = (props) => {
     }
   };
 
-  // Initialize user context
+  // Initialize user context and auth state listeners
   onMount(async () => {
     const userId = await getCurrentUserId();
     setCurrentUserId(userId);
     console.log('[PersistentDataProvider] Initialized with user ID:', userId);
+
+    // Set up auth state listeners for cache invalidation
+    try {
+      const { getGlobalAuthStore } = await import('../middleware/firebase/auth-store');
+      const authStore = getGlobalAuthStore();
+
+      // Listen to session expiry notifications
+      createEffect(() => {
+        try {
+          const sessionNotification = authStore.getSessionExpiryNotification();
+          if (sessionNotification && sessionNotification.isVisible) {
+            console.log('[PersistentDataProvider] Session expiry detected - clearing all caches');
+            invalidateAll();
+
+            // Clear user-specific data
+            const currentUser = currentUserId();
+            if (currentUser) {
+              clearUserData(currentUser);
+            }
+            setCurrentUserId(null);
+          }
+        } catch (error) {
+          console.warn('[PersistentDataProvider] Error checking session notification:', error);
+        }
+      });
+
+      // Listen to auth state changes
+      createEffect(() => {
+        try {
+          const isAuthenticated = authStore.isAuthenticated();
+          if (!isAuthenticated) {
+            // User logged out - clear caches
+            console.log('[PersistentDataProvider] User logged out - clearing caches');
+            invalidateAll();
+            setCurrentUserId(null);
+          }
+        } catch (error) {
+          console.warn('[PersistentDataProvider] Error checking auth state:', error);
+        }
+      });
+
+      // Listen for auth errors via custom events (from fetch-wrapper and smart-fetch)
+      const handleAuthError = (event: CustomEvent) => {
+        console.warn('[PersistentDataProvider] Auth error event received:', event.detail);
+
+        // Clear cache for affected user
+        const currentUser = currentUserId();
+        if (currentUser) {
+          clearUserData(currentUser);
+        }
+
+        // If this was a session-ending error, clear current user
+        if (event.detail?.statusCode === 401 || event.detail?.statusCode === 403) {
+          setCurrentUserId(null);
+        }
+      };
+
+      // Listen for auth error events from window
+      window.addEventListener('authError', handleAuthError as EventListener);
+
+      console.log('[PersistentDataProvider] Auth state listeners initialized successfully');
+    } catch (authError) {
+      console.warn('[PersistentDataProvider] Could not initialize auth state listeners:', authError);
+    }
   });
 
   // Smart fetch function for transactions

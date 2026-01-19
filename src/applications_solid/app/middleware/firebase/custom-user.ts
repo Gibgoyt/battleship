@@ -93,7 +93,7 @@ export class CustomFirebaseUserImpl implements CustomFirebaseUser {
           refreshAttempts: 0 // Reset on successful refresh
         }
 
-        firebaseTokenStorage.setTokens(newTokenData)
+        firebaseTokenStorage.storeTokens(newTokenData)
 
         // Update internal state
         this.currentIdToken = refreshResult.idToken

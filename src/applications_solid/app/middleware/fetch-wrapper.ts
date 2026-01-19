@@ -10,6 +10,74 @@ import { firebaseTokenStorage } from '../../../lib/auth/firebase-token-storage'
 const logger = createLogger('[fetchMiddleware]')
 
 /**
+ * Context-aware auth error handler
+ * Coordinates auth refresh with context providers
+ */
+async function handleAuthError(response: Response, retryCount: number, correlationId: string): Promise<{
+  shouldRetry: boolean
+  newToken: boolean
+  error?: Error
+}> {
+  if ((response.status === 401 || response.status === 403) && retryCount < 1) {
+    logger.warn('Context-aware auth error handling initiated', {
+      correlationId,
+      status: response.status,
+      attempt: retryCount + 1
+    })
+
+    try {
+      // Primary: Use global auth store with enhanced error handling
+      const authStore = getGlobalAuthStore()
+      await authStore.refreshToken()
+
+      logger.info('Context-aware token refresh successful', { correlationId })
+
+      // Notify contexts of successful auth state change
+      const authSuccessEvent = new CustomEvent('authSuccess', {
+        detail: {
+          message: 'Token refreshed successfully',
+          correlationId,
+          timestamp: Date.now()
+        }
+      })
+      window.dispatchEvent(authSuccessEvent)
+
+      return { shouldRetry: true, newToken: true }
+
+    } catch (refreshError) {
+      logger.error('Context-aware token refresh failed', {
+        correlationId,
+        error: refreshError instanceof Error ? refreshError.message : 'Unknown error'
+      })
+
+      // Refresh failed - trigger session expiry AND context cleanup
+      const authStore = getGlobalAuthStore()
+      authStore.triggerSessionExpiryNotification()
+
+      // Emit context event for cache cleanup and error handling
+      const authErrorEvent = new CustomEvent('authError', {
+        detail: {
+          error: refreshError,
+          statusCode: response.status,
+          correlationId,
+          timestamp: Date.now(),
+          source: 'fetchMiddleware'
+        }
+      })
+      window.dispatchEvent(authErrorEvent)
+
+      return {
+        shouldRetry: false,
+        newToken: false,
+        error: refreshError instanceof Error ? refreshError : new Error('Token refresh failed')
+      }
+    }
+  }
+
+  return { shouldRetry: false, newToken: false }
+}
+
+/**
  * Check if global rate limit is active using auth store
  */
 function isRateLimited(): boolean {
@@ -164,52 +232,41 @@ export async function fetchMiddleware(url: string, options: RequestInit = {}): P
         }
       }
 
-      // Enhanced authentication error handling (401 and 403)
-      if ((response.status === 401 || response.status === 403) && retryCount < MAX_RETRIES) {
-        logger.warn(`Authentication error ${response.status}, attempting enhanced token refresh with fallback`, {
+      // Enhanced context-aware authentication error handling (401 and 403)
+      const authErrorResult = await handleAuthError(response, retryCount, correlationId)
+
+      if (authErrorResult.shouldRetry && authErrorResult.newToken) {
+        // Get updated tokens after successful refresh
+        tokens = firebaseTokenStorage.getTokens()
+
+        if (!tokens.idToken) {
+          logger.error('Context-aware token refresh succeeded but no new token available', { correlationId })
+          authStore.triggerSessionExpiryNotification()
+          throw new Error('Token refresh succeeded but no new token available')
+        }
+
+        // Update Authorization header with new token
+        const newHeaders = new Headers(fetchOptions.headers)
+        newHeaders.set('Authorization', `Bearer ${tokens.idToken}`)
+        fetchOptions.headers = newHeaders
+
+        logger.info('Context-aware token refresh completed, retrying request', {
           correlationId,
-          attempt: retryCount + 1,
-          status: response.status
+          newTokenLength: tokens.idToken.length
         })
 
-        try {
-          // Enhanced token refresh with fallback mechanism
-          await authStore.refreshToken() // Now has built-in fallback support
+        retryCount++
+        continue // Retry the request
 
-          // Get updated tokens
-          tokens = firebaseTokenStorage.getTokens()
+      } else if (authErrorResult.error) {
+        // Auth error handling failed
+        logger.error('Context-aware auth error handling failed', {
+          correlationId,
+          error: authErrorResult.error.message,
+          responseTime: Date.now() - startTime
+        })
 
-          if (!tokens.idToken) {
-            logger.error('Enhanced token refresh failed, no new token available', { correlationId })
-            // Use graceful session expiry notification instead of abrupt redirect
-            authStore.triggerSessionExpiryNotification()
-            throw new Error('Token refresh failed - session expiry notification triggered')
-          }
-
-          // Update Authorization header with new token
-          const newHeaders = new Headers(fetchOptions.headers)
-          newHeaders.set('Authorization', `Bearer ${tokens.idToken}`)
-          fetchOptions.headers = newHeaders
-
-          logger.info('Enhanced token refresh successful, retrying request', {
-            correlationId,
-            newTokenLength: tokens.idToken.length
-          })
-
-          retryCount++
-          continue // Retry the request
-
-        } catch (refreshError) {
-          logger.error('All token refresh mechanisms failed', {
-            correlationId,
-            error: refreshError instanceof Error ? refreshError.message : 'Unknown error',
-            responseTime: Date.now() - startTime
-          })
-
-          // Use graceful session expiry notification instead of abrupt redirect
-          authStore.triggerSessionExpiryNotification()
-          throw new Error('Authentication failed after all refresh attempts')
-        }
+        throw new Error(`Context-aware authentication failed: ${authErrorResult.error.message}`)
       }
 
       // Handle final authentication failure after retry
