@@ -1,6 +1,6 @@
 import type { Component } from 'solid-js';
 import { createSignal } from 'solid-js';
-import { useMultiWallet, useWalletConnection } from 'src/applications_solid/app/lib/wallet/wallet-global-store';
+import { useWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
 
 interface WalletSelectionModalProps {
   isOpen: boolean;
@@ -18,8 +18,7 @@ interface WalletOption {
 }
 
 const WalletSelectionModalWithStore: Component<WalletSelectionModalProps> = (props) => {
-  const multiWallet = useMultiWallet();
-  const { connectWallet } = useWalletConnection();
+  const { connectWallet } = useWallet();
   const [isConnecting, setIsConnecting] = createSignal<string | null>(null);
   const [connectionError, setConnectionError] = createSignal<string | null>(null);
 

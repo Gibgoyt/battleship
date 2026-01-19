@@ -1,7 +1,7 @@
 import type { Component } from 'solid-js';
 import { createSignal, createMemo, createEffect, Show, For, onMount } from 'solid-js';
 import { usePersistedTransactions } from '../../../data';
-import { useSplitdoATA, useWallet } from 'src/applications_solid/app/lib/wallet/wallet-reactive-store';
+import { useWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
 
 interface TransactionHistoryProps {
   isDark: boolean;
@@ -13,8 +13,7 @@ const TransactionHistory: Component<TransactionHistoryProps> = (props) => {
 
   // Persistent transaction history with smart caching
   const { transactions, isLoading, error, fetchIfStale, refreshTransactions } = usePersistedTransactions();
-  const { splitdoATA } = useSplitdoATA();
-  const { wallet, connectionStatus } = useWallet();
+  const { wallet, connectionStatus, splitdoATA } = useWallet();
 
   // Memoize ATA address to prevent unnecessary re-execution
   const memoizedATA = createMemo(() => {

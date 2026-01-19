@@ -44,9 +44,10 @@ import { WalletConnectQRModal } from './components/WalletConnectQRModal'
 
 const logger = createLogger('[SolidJS App]');
 
-const AppContent: Component = () => {
+const AppContent: Component<{ firebaseToken?: string }> = (props) => {
   const [currentPage, setCurrentPage] = createSignal<Page>('dashboard')
   const [isDark, setIsDark] = createSignal(false)
+  const [isNavOpen, setIsNavOpen] = createSignal(false)
   const [authStore, setAuthStore] = createSignal<ReturnType<typeof import('./middleware/firebase/auth-store').getGlobalAuthStore> | null>(null)
   const middleware = useMiddleware()
 
@@ -246,6 +247,9 @@ const AppContent: Component = () => {
         currentPage={currentPage()}
         onPageChange={handlePageChange}
         isDark={isDark()}
+        updateTheme={updateTheme}
+        isOpen={isNavOpen()}
+        onClose={() => setIsNavOpen(false)}
       />
 
       {/* Main Content */}
@@ -295,7 +299,7 @@ const App: Component<{ firebaseToken?: string }> = (props) => {
     <MiddlewareProvider>
       <AuthErrorBoundary>
         <UnifiedWalletProvider firebaseToken={props.firebaseToken}>
-          <AppContent />
+          <AppContent firebaseToken={props.firebaseToken} />
         </UnifiedWalletProvider>
       </AuthErrorBoundary>
     </MiddlewareProvider>

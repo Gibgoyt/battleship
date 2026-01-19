@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js'
 import type { Component } from 'solid-js'
-import { useWallet } from 'src/applications_solid/app/lib/wallet/wallet-store'
+import { useWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context'
 
 const WalletStoreTest: Component = () => {
   const { connectionStatus, connectWallet, disconnectWallet } = useWallet();
