@@ -565,16 +565,21 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
             throw new Error(`Balance API returned ${balanceResponse.status}: ${balanceResponse.data.message || 'Unknown error'}`);
           }
 
-          // Fetch SOL balance from Solana if we have a connected wallet
+          // Fetch SOL balance directly from Phantom wallet
           let solBalanceValue = 0;
           const currentWallet = wallet();
-          if (currentWallet?.address) {
+          const provider = getCurrentProvider();
+
+          if (currentWallet?.address && provider) {
             try {
-              // Use solana service to get SOL balance
-              const { solanaService } = await import('./solana-service');
-              const solBalanceResult = await solanaService.getSOLBalance(currentWallet.address);
-              solBalanceValue = solBalanceResult.sol;
-              logger.debug('✅ Fetched SOL balance:', solBalanceValue);
+              // Get SOL balance from Phantom using Connection
+              const { Connection, PublicKey, LAMPORTS_PER_SOL } = await import('@solana/web3.js');
+              const connection = new Connection('https://api.mainnet-beta.solana.com');
+              const publicKey = new PublicKey(currentWallet.address);
+
+              const balance = await connection.getBalance(publicKey);
+              solBalanceValue = balance / LAMPORTS_PER_SOL;
+              logger.debug('✅ Fetched SOL balance from Phantom:', solBalanceValue);
             } catch (error) {
               logger.warn('⚠️ Failed to fetch SOL balance, defaulting to 0:', error);
             }
