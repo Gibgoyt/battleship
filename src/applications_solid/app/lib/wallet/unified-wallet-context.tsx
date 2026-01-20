@@ -438,7 +438,8 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
           address: balanceData.splitdoATA.address,
           balance: {
             amount: balanceData.splitdoBalance,
-            decimals: 9 // SPLITDO token decimals
+            decimals: 9, // SPLITDO token decimals
+            uiAmount: balanceData.splitdoBalance / 1_000_000 // Convert from raw amount (6 decimals)
           }
         });
 
