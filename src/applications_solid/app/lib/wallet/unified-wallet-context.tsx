@@ -436,6 +436,12 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       if (balanceResult.data) {
         const balanceData = balanceResult.data;
 
+        logger.debug('📊 Balance data received:', {
+          solBalance: balanceData.solBalance,
+          splitdoBalance: balanceData.splitdoBalance,
+          splitdoATA: balanceData.splitdoATA
+        });
+
         // Set SOL balance
         setSolBalance({
           sol: balanceData.solBalance,
@@ -443,16 +449,21 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
         });
 
         // Set SPLITDO ATA info
+        const splitdoUiAmount = balanceData.splitdoBalance / 1_000_000; // Convert from raw amount (6 decimals)
         setSplitdoATA({
           status: balanceData.splitdoATA.status as ATAStatus,
           address: balanceData.splitdoATA.address,
           balance: {
             amount: balanceData.splitdoBalance,
-            decimals: 9 // SPLITDO token decimals
+            decimals: 9, // SPLITDO token decimals
+            uiAmount: splitdoUiAmount
           }
         });
 
-        logger.debug('✅ Balances refreshed successfully via backend API');
+        logger.debug('✅ Balances refreshed successfully via backend API', {
+          sol: balanceData.solBalance,
+          splitdo: splitdoUiAmount
+        });
       } else {
         logger.warn('⚠️ No balance data received from backend API');
       }
@@ -564,8 +575,29 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
             throw new Error(`Balance API returned ${balanceResponse.status}: ${balanceResponse.data.message || 'Unknown error'}`);
           }
 
-          // Transform middleware response to expected format
-          return transformBalanceResponse(balanceResponse.data);
+          // Fetch SOL balance directly from Solana RPC
+          let solBalanceValue = 0;
+          const currentWallet = wallet();
+
+          if (currentWallet?.address) {
+            try {
+              // Import solanaService dynamically
+              const { solanaService } = await import('./solana-service');
+
+              // Get SOL balance directly from Solana blockchain
+              const solBalance = await solanaService.getSolBalance(currentWallet.address);
+              solBalanceValue = solBalance.sol;
+              logger.debug('✅ Fetched SOL balance directly from Solana:', solBalanceValue, 'SOL');
+            } catch (error) {
+              logger.warn('⚠️ Failed to fetch SOL balance from Solana, defaulting to 0:', error);
+            }
+          }
+
+          // Transform middleware response to expected format and add SOL balance
+          const transformedData = transformBalanceResponse(balanceResponse.data);
+          transformedData.solBalance = solBalanceValue;
+
+          return transformedData;
         },
         {
           cacheKey: 'user-balances',
