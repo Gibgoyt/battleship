@@ -162,14 +162,35 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
     }
   };
 
-  // Calculate portfolio value in USD
+  // Helper to get SPLITDO balance as a readable number
+  const splitdoBalanceTokens = createMemo(() => {
+    const balance = wallet.splitdoATA().balance;
+    if (!balance) return 0;
+
+    // Try uiAmount first (if available), otherwise convert from raw amount
+    if (balance.uiAmount !== undefined && balance.uiAmount !== null) {
+      return balance.uiAmount;
+    }
+
+    // Fallback: convert from raw amount (9 decimals like SOL)
+    return (balance.amount || 0) / 1_000_000_000;
+  });
+
+  // Calculate portfolio value in USD using SOL price from CoinGecko
   const portfolioValueUSD = createMemo(() => {
-    const splitdoBalance = wallet.splitdoATA().balance?.uiAmount || 0;
-    const splitdoPrice = 0.11; // $0.11 per SPLITDO
-    const solBalance = wallet.solBalance();
-    const solPrice = wallet.solPrice();
-    const solValue = (solBalance?.sol || 0) * (solPrice?.price || 0);
-    return (splitdoBalance * splitdoPrice) + solValue;
+    const splitdoBalance = splitdoBalanceTokens();
+
+    // SPLITDO exchange rate: 1 SPLITDO = 0.00004545 SOL (price is $0.11 when SOL is ~$242)
+    const splitdoToSolRate = 0.00004545;
+    const splitdoValueInSol = splitdoBalance * splitdoToSolRate;
+
+    // Get SOL balance and price
+    const solBalance = wallet.solBalance()?.sol || 0;
+    const solPriceUSD = wallet.solPrice()?.price || 0;
+
+    // Calculate total value: (SPLITDO in SOL + SOL balance) * SOL price in USD
+    const totalSol = splitdoValueInSol + solBalance;
+    return totalSol * solPriceUSD;
   });
 
   return (
@@ -262,7 +283,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
                 }
               >
                 <div class="text-3xl font-bold text-white mb-2">
-                  {formatCurrency(wallet.splitdoATA().balance?.uiAmount || 0)}
+                  {formatCurrency(splitdoBalanceTokens())}
                 </div>
                 <p class="text-xs text-zinc-500 font-mono">
                   {formatAddress(wallet.splitdoATA().address || '')}

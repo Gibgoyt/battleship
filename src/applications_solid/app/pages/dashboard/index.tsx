@@ -16,11 +16,28 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
     }
   });
 
+  // Helper to get SPLITDO balance as a readable number
+  const splitdoBalanceTokens = createMemo(() => {
+    const balance = wallet.splitdoATA().balance;
+    if (!balance) return 0;
+
+    // Try uiAmount first (if available), otherwise convert from raw amount
+    if (balance.uiAmount !== undefined && balance.uiAmount !== null) {
+      return balance.uiAmount;
+    }
+
+    // Fallback: convert from raw amount (9 decimals like SOL)
+    return (balance.amount || 0) / 1_000_000_000;
+  });
+
   // Calculate portfolio value (SPLITDO value in SOL)
   const portfolioValueSOL = createMemo(() => {
-    const splitdoBalance = wallet.splitdoATA().balance?.uiAmount || 0;
-    const exchangeRate = 0.11; // 1 SPLITDO = 0.11 SOL
-    return splitdoBalance * exchangeRate;
+    const splitdoBalance = splitdoBalanceTokens();
+    // SPLITDO exchange rate: 1 SPLITDO = 0.00004545 SOL
+    const splitdoToSolRate = 0.00004545;
+    const splitdoValueInSol = splitdoBalance * splitdoToSolRate;
+    const solBalance = wallet.solBalance()?.sol || 0;
+    return splitdoValueInSol + solBalance;
   });
 
   onMount(() => {
@@ -121,7 +138,7 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
                 }
               >
                 <div class="text-3xl font-bold text-white">
-                  {formatCurrency(wallet.splitdoATA().balance?.uiAmount || 0)}
+                  {formatCurrency(splitdoBalanceTokens())}
                 </div>
               </Show>
             </div>
