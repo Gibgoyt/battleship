@@ -11,6 +11,7 @@ import { PublicKey, Transaction } from '@solana/web3.js';
 import { getDeviceInfo } from './exchange-utils';
 // Import PhantomMobileProvider statically to avoid require() issues
 import { PhantomMobileProvider } from './phantom-mobile-provider';
+import { iOSPhantomAuthManager } from './ios-phantom-auth-manager';
 
 // Core wallet provider interface
 export interface WalletProvider {
@@ -163,36 +164,91 @@ export class PhantomWalletProvider implements WalletProvider {
     }
 
     this.provider = provider;
+    const deviceInfo = getDeviceInfo();
+    const isIOS = deviceInfo.platform === 'iOS';
+    const isPhantomApp = deviceInfo.isPhantomApp;
 
+    console.log('[Phantom] Starting enhanced connection...', { isIOS, isPhantomApp });
+
+    // Use enhanced iOS authorization manager for iOS Phantom app
+    if (isIOS && isPhantomApp) {
+      console.log('[Phantom] 🚀 Using enhanced iOS authorization flow');
+      
+      const authManager = new iOSPhantomAuthManager(provider);
+      
+      try {
+        // Record user gesture for iOS validation
+        authManager.recordUserGesture();
+        
+        // Attempt connection with iOS-specific handling
+        const result = await authManager.connect({
+          timeout: 30000,
+          retryAttempts: 3,
+          requireUserGesture: true,
+          clearStateFirst: true,
+          onlyIfTrusted: false
+        });
+
+        if (result.success && result.publicKey) {
+          this.publicKey = new PublicKey(result.publicKey.toString());
+          console.log('[Phantom] ✅ iOS authorization successful');
+          return { publicKey: this.publicKey };
+        } else {
+          // Enhanced error handling with recovery steps
+          const errorMessage = result.error?.message || 'Authorization failed';
+          console.log('[Phantom] iOS authorization failed:', errorMessage);
+          
+          if (result.recoverySteps && result.recoverySteps.length > 0) {
+            console.log('[Phantom] Recovery steps:', result.recoverySteps);
+            
+            // Create enhanced error with recovery information
+            const enhancedError = new WalletError(
+              errorMessage,
+              'IOS_AUTHORIZATION_FAILED',
+              'Phantom'
+            );
+            
+            // Add recovery information to error (if supported)
+            (enhancedError as any).recoverySteps = result.recoverySteps;
+            (enhancedError as any).retryable = result.retryable;
+            
+            throw enhancedError;
+          } else {
+            throw new WalletError(errorMessage, 'IOS_AUTHORIZATION_FAILED', 'Phantom');
+          }
+        }
+      } finally {
+        authManager.destroy();
+      }
+    }
+
+    // Fallback to standard connection flow for non-iOS or non-Phantom-app scenarios
     try {
-      console.log('[Phantom] Starting fresh connection...');
+      console.log('[Phantom] Using standard connection flow...');
 
       // Ensure clean state by disconnecting first
-      // This handles cases where the wallet thinks it's connected but the app doesn't
       try {
         await this.provider.disconnect();
       } catch (e) {
         // Ignore disconnect errors
+        console.log('[Phantom] Ignoring disconnect error:', e);
       }
 
       // Clear local state
       this.publicKey = null;
 
-      // Connect to Phantom
-      // NOTE: If the app is "Trusted" by Phantom, this will resolve immediately without a popup.
-      // This is standard Phantom behavior and cannot be bypassed programmatically.
-      // Passing { onlyIfTrusted: false } is the default behavior.
+      // Connect to Phantom with standard flow
       console.log('[Phantom] Requesting connection (popup will appear if not already trusted)...');
-      const response = await this.provider.connect();
+      const response = await this.provider.connect({ onlyIfTrusted: false });
       
       this.publicKey = new PublicKey(response.publicKey.toString());
-      console.log('[Phantom] ✅ Connection established');
+      console.log('[Phantom] ✅ Standard connection established');
       
       return { publicKey: this.publicKey };
     } catch (error) {
       // Clear state on error
       this.publicKey = null;
-      console.log('[Phantom] Connection failed with error:', error);
+      console.log('[Phantom] Standard connection failed with error:', error);
 
       // Enhanced error handling for better user feedback
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -201,15 +257,36 @@ export class PhantomWalletProvider implements WalletProvider {
       if (errorCode === 4001 || errorMessage.includes('rejected') || errorMessage.includes('cancelled')) {
         console.log('[Phantom] User cancelled connection request');
         throw new WalletError('User cancelled connection request', 'USER_REJECTED', 'Phantom');
-      } else if (errorCode === 4100 || errorMessage.includes('unauthorized')) {
+      } else if (errorCode === 4100 || errorMessage.includes('unauthorized') || errorMessage.includes('not been authorized')) {
         console.log('[Phantom] App not authorized by user');
-        throw new WalletError('App not authorized. Please try connecting again.', 'UNAUTHORIZED', 'Phantom');
+        
+        // iOS-specific authorization error message
+        if (isIOS && isPhantomApp) {
+          throw new WalletError('Authorization required. Please try connecting again or refresh the Phantom app.', 'IOS_AUTHORIZATION_REQUIRED', 'Phantom');
+        } else {
+          throw new WalletError('App not authorized. Please try connecting again.', 'UNAUTHORIZED', 'Phantom');
+        }
       } else if (errorMessage.includes('popup') || errorMessage.includes('blocked')) {
         console.log('[Phantom] Popup blocked or failed');
         throw new WalletError('Popup blocked. Please allow popups for this site and try again.', 'POPUP_BLOCKED', 'Phantom');
+      } else if (errorMessage.includes('timeout') || errorMessage.includes('Connection timeout')) {
+        console.log('[Phantom] Connection timeout');
+        
+        // iOS-specific timeout message
+        if (isIOS && isPhantomApp) {
+          throw new WalletError('Connection timeout. Please refresh the Phantom app and try again.', 'IOS_CONNECTION_TIMEOUT', 'Phantom');
+        } else {
+          throw new WalletError('Connection timeout. Please try again.', 'CONNECTION_TIMEOUT', 'Phantom');
+        }
       } else {
         console.error('[Phantom] Unexpected connection error:', error);
-        throw new WalletConnectionError('Phantom', error);
+        
+        // iOS-specific generic error message
+        if (isIOS && isPhantomApp) {
+          throw new WalletError('Connection failed. Please refresh the Phantom app and try again.', 'IOS_CONNECTION_ERROR', 'Phantom');
+        } else {
+          throw new WalletConnectionError('Phantom', error);
+        }
       }
     }
   }

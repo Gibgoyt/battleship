@@ -1,6 +1,7 @@
 import type { Component, Accessor } from 'solid-js';
 import { createSignal, Show, For } from 'solid-js';
 import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
+import { getDeviceInfo } from '../lib/wallet/exchange-utils';
 
 // Import install URLs for wallet installation
 const WALLET_INSTALL_URLS = {
@@ -59,31 +60,74 @@ const WalletModal: Component<WalletModalProps> = (props) => {
     // wallet.connectWallet() which calls phantom.connect() again, causing double
     // connection attempts and preventing the popup from showing properly.
 
+    // Set loading state before try block
+    console.log('[WalletModal] Connecting to wallet:', walletId);
+    setIsConnecting(walletId);
+    setConnectionError(null);
+
+    // Record user gesture for iOS authorization validation
+    const deviceInfo = getDeviceInfo();
+    if (deviceInfo.platform === 'iOS' && deviceInfo.isPhantomApp && walletId === 'phantom') {
+      console.log('[WalletModal] 🎯 Recording iOS user gesture for Phantom authorization');
+      // Store gesture timestamp for validation
+      if (typeof window !== 'undefined') {
+        (window as any).__lastUserGestureTime = Date.now();
+      }
+    }
+
     try {
-      console.log('[WalletModal] Connecting to wallet:', walletId);
-      setIsConnecting(walletId);
-      setConnectionError(null);
+      // Connect wallet using context system with timeout
+      const connectionPromise = wallet.connectWallet(walletId);
+      
+      // Add 30-second timeout to prevent infinite loading
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Connection timeout - Please try again')), 30000);
+      });
 
-      // Connect wallet using context system
-      // Note: Phantom-specific optimization moved to context layer
-      await wallet.connectWallet(walletId);
+      await Promise.race([connectionPromise, timeoutPromise]);
 
-      // Close modal on successful connection
-      props.onClose?.();
+      // Only execute success flow if we reach here without error
       console.log('[WalletModal] Wallet connected successfully, closing modal');
+      props.onClose?.();
 
     } catch (error) {
       console.error('[WalletModal] Wallet connection failed:', error);
 
-      // Show user-friendly error message
-      const errorMessage = error instanceof Error ? error.message : 'Connection failed';
+      // Enhanced error handling with iOS-specific messages
+      let errorMessage = 'Connection failed';
+      const deviceInfo = getDeviceInfo();
+      
+      if (error instanceof Error) {
+        if (error.message.includes('not been authorized') || error.message.includes('Authorization required')) {
+          if (deviceInfo.platform === 'iOS' && deviceInfo.isPhantomApp) {
+            errorMessage = 'Authorization required. Try refreshing the Phantom app or connecting again.';
+          } else {
+            errorMessage = 'App not authorized. Please try connecting again.';
+          }
+        } else if (error.message.includes('timeout')) {
+          errorMessage = 'Connection timeout - Please try again';
+        } else if (error.message.includes('User rejected') || error.message.includes('cancelled')) {
+          errorMessage = 'Connection cancelled by user';
+        } else if (error.message.includes('IOS_AUTHORIZATION_FAILED')) {
+          errorMessage = 'iOS authorization failed. Try refreshing Phantom app and connecting again.';
+        } else {
+          errorMessage = error.message;
+        }
+        
+        // Log recovery steps if available
+        if ((error as any).recoverySteps) {
+          console.log('[WalletModal] Recovery steps available:', (error as any).recoverySteps);
+        }
+      }
+      
       setConnectionError(errorMessage);
-
-      // Stop the connecting animation
-      setIsConnecting(null);
 
       // Don't close modal so user can see the error and try again
       console.log('[WalletModal] Connection failed, keeping modal open for retry');
+    } finally {
+      // CRITICAL: Always clear loading state, no matter what happens
+      setIsConnecting(null);
+      console.log('[WalletModal] Loading state cleared');
     }
   };
 
@@ -123,8 +167,51 @@ const WalletModal: Component<WalletModalProps> = (props) => {
           <div class={`p-3 mb-4 rounded-lg border ${
             props.isDark ? 'bg-red-900 border-red-700 text-red-200' : 'bg-red-50 border-red-200 text-red-800'
           }`}>
-            <p class="text-sm font-medium">Connection Error</p>
-            <p class="text-sm mt-1">{connectionError()}</p>
+            <div class="flex items-start space-x-2">
+              <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+              </svg>
+              <div class="flex-1">
+                <p class="text-sm font-medium">Connection Failed</p>
+                <p class="text-sm mt-1">{connectionError()}</p>
+                
+                {/* iOS-specific recovery hints */}
+                <Show when={connectionError()?.includes('Authorization required') || connectionError()?.includes('Phantom app')}>
+                  <div class="mt-2 text-xs opacity-90 space-y-1">
+                    <p class="font-medium">💡 Try these steps:</p>
+                    <ul class="space-y-1 ml-4">
+                      <li>• Pull down to refresh the Phantom app</li>
+                      <li>• Clear the app's cache in iOS Settings</li>
+                      <li>• Force close and reopen the app</li>
+                    </ul>
+                  </div>
+                </Show>
+                
+                {/* Timeout recovery hints */}
+                <Show when={connectionError()?.includes('timeout')}>
+                  <div class="mt-2 text-xs opacity-90 space-y-1">
+                    <p class="font-medium">💡 Connection tips:</p>
+                    <ul class="space-y-1 ml-4">
+                      <li>• Check your internet connection</li>
+                      <li>• Ensure Phantom app is running</li>
+                      <li>• Try again in a few seconds</li>
+                    </ul>
+                  </div>
+                </Show>
+                
+                {/* General authorization recovery hints */}
+                <Show when={connectionError()?.includes('not authorized') && !connectionError()?.includes('Phantom app')}>
+                  <div class="mt-2 text-xs opacity-90 space-y-1">
+                    <p class="font-medium">💡 Authorization help:</p>
+                    <ul class="space-y-1 ml-4">
+                      <li>• Make sure to approve the connection</li>
+                      <li>• Check if Phantom shows a permission popup</li>
+                      <li>• Try refreshing and connecting again</li>
+                    </ul>
+                  </div>
+                </Show>
+              </div>
+            </div>
           </div>
         </Show>
 
