@@ -333,15 +333,24 @@ export class WalletProviderFactory {
    * Smart Phantom provider creation based on device capabilities
    */
   private static createPhantomProvider(): WalletProvider {
+    const deviceInfo = getDeviceInfo();
+    
     // DEBUG: Log routing decision
     console.log("[WalletProviderFactory] 🐛 DEBUG - createPhantomProvider called");
     console.log("[WalletProviderFactory] 🐛 DEBUG - Device info:", deviceInfo);
+    console.log("[WalletProviderFactory] 🐛 DEBUG - isPhantomApp:", deviceInfo.isPhantomApp);
     console.log("[WalletProviderFactory] 🐛 DEBUG - requiresDeepLinks:", deviceInfo.requiresDeepLinks);
-    const deviceInfo = getDeviceInfo();
     
-    // Route to mobile deep link provider for iOS/Android Phantom app
+    // CRITICAL: Check if user is already INSIDE Phantom app
+    // If so, use the native provider instead of deep links
+    if (typeof window !== 'undefined' && (window as any).phantom?.solana) {
+      console.log("[WalletProviderFactory] 🐛 DEBUG - ✅ Using PhantomWalletProvider (ALREADY INSIDE Phantom app - native provider available)");
+      return new PhantomWalletProvider();
+    }
+    
+    // If user is on mobile but NOT in Phantom app, use deep links to open Phantom
     if (deviceInfo.requiresDeepLinks) {
-      console.log("[WalletProviderFactory] 🐛 DEBUG - ✅ Using PhantomMobileProvider (deep links required)");
+      console.log("[WalletProviderFactory] 🐛 DEBUG - ✅ Using PhantomMobileProvider (mobile browser - deep links needed)");
       return new PhantomMobileProvider();
     }
     
@@ -356,33 +365,48 @@ export class WalletProviderFactory {
   }
 
   static getAvailableProviders(): WalletProvider[] {
+    const deviceInfo = getDeviceInfo();
+    const providers: WalletProvider[] = [];
+    
     // DEBUG: Log device info
     console.log("[WalletProviderFactory] 🐛 DEBUG - getAvailableProviders called");
     console.log("[WalletProviderFactory] 🐛 DEBUG - Device Info:", deviceInfo);
-    const providers: WalletProvider[] = [];
-    const deviceInfo = getDeviceInfo();
 
     for (const [id, factory] of this.providers) {
       try {
+        console.log(`[WalletProviderFactory] 🐛 DEBUG - Creating provider: ${id}`);
         const provider = factory();
+        console.log(`[WalletProviderFactory] 🐛 DEBUG - Provider created:`, {
+          id: provider.id,
+          name: provider.name,
+          constructor: provider.constructor.name,
+          isAvailable: provider.isAvailable()
+        });
         
         // Special handling for mobile-only providers
         if (provider.id === 'phantom-mobile' && !deviceInfo.requiresDeepLinks) {
+          console.log(`[WalletProviderFactory] 🐛 DEBUG - ❌ Skipping phantom-mobile (not on mobile/no deep links needed)`);
           continue; // Skip mobile provider on desktop
         }
         
         // Special handling for desktop-only providers  
         if (provider.id === 'phantom' && provider.constructor.name === 'PhantomWalletProvider' && deviceInfo.requiresDeepLinks) {
+          console.log(`[WalletProviderFactory] 🐛 DEBUG - ❌ Skipping phantom desktop (on mobile/deep links needed)`);
           continue; // Skip desktop provider on mobile
         }
         
         if (provider.isAvailable()) {
+          console.log(`[WalletProviderFactory] 🐛 DEBUG - ✅ Adding available provider: ${provider.id}`);
           providers.push(provider);
+        } else {
+          console.log(`[WalletProviderFactory] 🐛 DEBUG - ❌ Provider not available: ${provider.id}`);
         }
       } catch (error) {
         console.warn(`Failed to create provider ${id}:`, error);
       }
     }
+
+    console.log(`[WalletProviderFactory] 🐛 DEBUG - Final provider list:`, providers.map(p => ({ id: p.id, name: p.name })));
 
     return providers;
   }

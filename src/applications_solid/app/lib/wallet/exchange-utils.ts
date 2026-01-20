@@ -109,6 +109,9 @@ export function getDeviceInfo() {
   const isPhantomMobile = isPhantomApp && (isIOS || isAndroid);
   const isPhantomiOS = isPhantomApp && isIOS;
   
+  // CRITICAL: Check if native Phantom provider is available (user is inside Phantom app)
+  const hasNativePhantomProvider = typeof window !== 'undefined' && !!(window as any)?.phantom?.solana;
+  
   // Browser detection
   const isInAppBrowser = /instagram|facebook|whatsapp|line|wechat|tiktok/i.test(userAgent);
   const isSafari = /safari/i.test(userAgent) && !/chrome/i.test(userAgent);
@@ -116,8 +119,13 @@ export function getDeviceInfo() {
   
   // Wallet capabilities based on environment
   const supportsSignAndSend = deviceType === 'desktop' && !isPhantomMobile;
-  const requiresDeepLinks = isPhantomMobile;
-  const preferredFlow = requiresDeepLinks ? 'deepLink' : (deviceType === 'desktop' ? 'signAndSendTransaction' : 'signTransaction');
+  
+  // FIXED LOGIC: Only require deep links if on mobile BUT NOT already in Phantom app
+  const requiresDeepLinks = (isIOS || isAndroid) && !hasNativePhantomProvider;
+  
+  const preferredFlow = requiresDeepLinks ? 'deepLink' : 
+                       hasNativePhantomProvider ? 'nativeProvider' :
+                       (deviceType === 'desktop' ? 'signAndSendTransaction' : 'signTransaction');
   
   const deviceInfo = {
     type: deviceType,
@@ -127,6 +135,7 @@ export function getDeviceInfo() {
     isPhantomMobile,
     isPhantomiOS,
     isPhantomApp,
+    hasNativePhantomProvider,
     
     // Browser detection  
     isInAppBrowser,
@@ -139,9 +148,11 @@ export function getDeviceInfo() {
     preferredFlow,
     
     // Backend endpoint routing
-    backendEndpoint: requiresDeepLinks ? 
-      '/api/testing/usockets/exchange/solana/splitdo' : 
-      '/api/testing/usockets/exchange-new/solana/splitdo'
+    backendEndpoint: hasNativePhantomProvider ? 
+      '/api/testing/usockets/exchange-new/solana/splitdo' :  // Use desktop endpoint when in Phantom app
+      (requiresDeepLinks ? 
+        '/api/testing/usockets/exchange/solana/splitdo' : 
+        '/api/testing/usockets/exchange-new/solana/splitdo')
   };
   
   logger.debug('Enhanced device info:', deviceInfo);
