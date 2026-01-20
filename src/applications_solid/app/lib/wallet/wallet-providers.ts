@@ -115,6 +115,99 @@ export class PhantomWalletProvider implements WalletProvider {
     // We'll defer this to when user explicitly requests connection
   }
 
+  /**
+   * 🚨 ENHANCED SECURITY FIX: Force complete disconnect with multiple methods
+   * This ensures Phantom doesn't cache connection state between sessions
+   */
+  private async forceCompleteDisconnect(): Promise<void> {
+    if (!this.provider) return;
+    
+    try {
+      console.log('[Phantom] 🧹 Starting aggressive disconnect sequence...');
+      
+      // Method 1: Standard disconnect
+      await this.provider.disconnect();
+      console.log('[Phantom] ✅ Standard disconnect completed');
+      
+      // Method 2: Try to clear any cached permissions (if supported)
+      if ((this.provider as any).request) {
+        try {
+          await (this.provider as any).request({
+            method: 'wallet_revokePermissions',
+            params: [{ 
+              eth_accounts: {} 
+            }]
+          });
+          console.log('[Phantom] ✅ Permissions revoked');
+        } catch (e) {
+          // Not all wallets support this - ignore errors
+          console.log('[Phantom] Permission revoke not supported (this is normal)');
+        }
+      }
+      
+      // Method 3: Multiple disconnect attempts to be extra sure
+      try {
+        await this.provider.disconnect();
+        console.log('[Phantom] ✅ Second disconnect completed');
+      } catch (e) {
+        // Already disconnected - this is fine
+      }
+      
+    } catch (error) {
+      console.log('[Phantom] Disconnect sequence completed with warnings:', error);
+      // Don't throw - we want to continue with connection attempt
+    }
+  }
+
+  /**
+   * 🚨 ENHANCED SECURITY FIX: Force domain untrusting
+   * This attempts to clear trusted domain status to ensure authorization popup
+   */
+  private async forceDomainUntrusting(): Promise<void> {
+    if (!this.provider) return;
+    
+    try {
+      console.log('[Phantom] 🔓 Attempting to clear trusted domain status...');
+      
+      // Method 1: Try to request permissions (this can reset trust state)
+      if ((this.provider as any).request) {
+        try {
+          await (this.provider as any).request({
+            method: 'wallet_requestPermissions',
+            params: [{}]
+          });
+          console.log('[Phantom] ✅ Permission request sent to reset trust state');
+        } catch (e) {
+          // This might fail - that's okay
+          console.log('[Phantom] Permission request method not supported (normal)');
+        }
+      }
+      
+      // Method 2: Clear any window.solana reference temporarily
+      const originalSolana = window.solana;
+      try {
+        // @ts-ignore - Temporarily clear reference
+        delete window.solana;
+        // @ts-ignore
+        window.solana = undefined;
+        
+        // Short delay to let Phantom detect the clearing
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+        // Restore reference
+        window.solana = originalSolana;
+        console.log('[Phantom] ✅ Provider reference cleared and restored');
+      } catch (e) {
+        // Restore reference if clearing failed
+        window.solana = originalSolana;
+      }
+      
+    } catch (error) {
+      console.log('[Phantom] Domain untrusting completed with warnings:', error);
+      // Don't throw - we want to continue with connection attempt
+    }
+  }
+
   isAvailable(): boolean {
     // 🚨 SECURITY FIX: Check availability without auto-connecting
     if (typeof window === 'undefined') return false;
@@ -140,19 +233,17 @@ export class PhantomWalletProvider implements WalletProvider {
     try {
       console.log('[Phantom] Starting fresh connection with explicit user authorization');
 
-      // Force disconnect first to ensure popup appears every time
-      try {
-        await this.provider.disconnect();
-        console.log('[Phantom] Pre-connection disconnect completed');
-      } catch (disconnectError) {
-        console.log('[Phantom] Pre-connection disconnect failed (may not be connected):', disconnectError);
-      }
+      // 🚨 ENHANCED SECURITY FIX: Aggressive permission clearing and disconnect
+      await this.forceCompleteDisconnect();
+
+      // 🚨 ENHANCED SECURITY FIX: Force domain untrusting to ensure popup appears
+      await this.forceDomainUntrusting();
 
       // Clear local state to ensure clean slate
       this.publicKey = null;
 
-      // Small delay to allow Phantom to process the disconnect
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Longer delay to allow Phantom to process all clearing operations
+      await new Promise(resolve => setTimeout(resolve, 250));
 
       // Connect with onlyIfTrusted: false to force popup
       console.log('[Phantom] Initiating connection with forced popup...');
@@ -203,23 +294,19 @@ export class PhantomWalletProvider implements WalletProvider {
   }
 
   async disconnect(): Promise<void> {
-    console.log('[Phantom] Starting clean disconnect to prevent cached connections');
+    console.log('[Phantom] 🔌 Starting comprehensive disconnect to prevent cached connections');
 
-    // SECURITY FIX: Enhanced disconnect handling to prevent cached connections
-    if (this.provider) {
-      try {
-        await this.provider.disconnect();
-        console.log('[Phantom] ✅ Provider disconnect completed');
-      } catch (error) {
-        console.warn('Error disconnecting Phantom wallet:', error);
-      }
-    }
+    // 🚨 ENHANCED SECURITY FIX: Use aggressive disconnect sequence
+    await this.forceCompleteDisconnect();
+
+    // 🚨 ENHANCED SECURITY FIX: Force domain untrusting on disconnect too
+    await this.forceDomainUntrusting();
 
     // 🚨 SECURITY FIX: Clear provider reference to force fresh connection next time
     this.provider = null;
     this.publicKey = null;
 
-    console.log('[Phantom] ✅ Provider reference and local state cleared, disconnect completed');
+    console.log('[Phantom] ✅ Comprehensive disconnect completed - provider and state cleared');
   }
 
   isConnected(): boolean {

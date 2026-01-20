@@ -318,7 +318,7 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       setConnectionStatus('connecting');
       setConnectionError(null);
 
-      logger.info(`Connecting to wallet provider: ${providerId}`);
+      logger.info(`🔌 Connecting to wallet provider: ${providerId}`);
 
       const result = await walletConnectService.connectWallet(providerId);
 
@@ -329,19 +329,27 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
           setConnectionStatus('connected');
         });
 
-        logger.info('Wallet connected successfully:', result.wallet);
+        logger.info('✅ Wallet connected successfully:', result.wallet);
 
-        // Refresh balances after connection
-        await refreshBalances();
+        // 🚨 CRITICAL FIX: Wait for state to properly settle before refreshing balances
+        await new Promise(resolve => setTimeout(resolve, 150));
+
+        // Validate connection state before refreshing balances
+        if (isConnected() && wallet()?.address) {
+          logger.debug('🔄 Connection state validated, refreshing balances...');
+          await refreshBalances();
+        } else {
+          logger.warn('⚠️ Connection state validation failed, skipping balance refresh');
+        }
       } else {
         setConnectionStatus('error');
         setConnectionError(result.error || 'Failed to connect wallet');
-        logger.error('Wallet connection failed:', result.error);
+        logger.error('❌ Wallet connection failed:', result.error);
       }
     } catch (error) {
       setConnectionStatus('error');
       setConnectionError(error instanceof Error ? error.message : 'Connection failed');
-      logger.error('Wallet connection error:', error);
+      logger.error('❌ Wallet connection error:', error);
     }
   };
 
@@ -357,28 +365,10 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
   const disconnectWallet = async (): Promise<void> => {
     try {
-      logger.info('Disconnecting wallet');
+      logger.info('🔌 Disconnecting wallet with comprehensive cache clearing...');
 
-      // SECURITY FIX: Also clear browser cache when disconnecting
-      if (typeof window !== 'undefined') {
-        try {
-          const allKeys = [...Object.keys(window.localStorage), ...Object.keys(window.sessionStorage)];
-          const walletKeys = allKeys.filter(key =>
-            key.includes('phantom') || key.includes('solana') || key.includes('wallet') || key.includes('walletconnect')
-          );
-          walletKeys.forEach(key => {
-            try {
-              window.localStorage.removeItem(key);
-              window.sessionStorage.removeItem(key);
-            } catch (e) {
-              // Ignore individual key errors
-            }
-          });
-          logger.debug('Cleared wallet cache data on disconnect');
-        } catch (error) {
-          logger.warn('Failed to clear wallet cache on disconnect:', error);
-        }
-      }
+      // 🚨 ENHANCED SECURITY FIX: Use comprehensive cache clearing on disconnect
+      await clearAllWalletData();
 
       await walletConnectService.disconnect();
 
@@ -391,9 +381,9 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
         setSplitdoATA({ status: 'unknown' });
       });
 
-      logger.info('Wallet disconnected successfully with cache cleared');
+      logger.info('✅ Wallet disconnected successfully with comprehensive cache clearing');
     } catch (error) {
-      logger.error('Error disconnecting wallet:', error);
+      logger.error('❌ Error disconnecting wallet:', error);
       setConnectionError(error instanceof Error ? error.message : 'Disconnection failed');
     }
   };
@@ -402,22 +392,38 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
   // BALANCE AND ATA METHODS
   // ===============================
   const refreshBalances = async (): Promise<void> => {
+    // 🚨 ENHANCED VALIDATION: Check both internal state and provider state
     if (!isConnected() || !wallet()?.address) {
-      logger.warn('Cannot refresh balances: wallet not connected');
+      logger.warn('⚠️ Cannot refresh balances: wallet not connected');
       return;
+    }
+
+    // Double-check provider is actually connected
+    const provider = getCurrentProvider();
+    const currentWallet = wallet();
+    if (provider && currentWallet && provider.getPublicKey()) {
+      const providerKey = provider.getPublicKey()!.toString();
+      const walletKey = currentWallet.address;
+      
+      if (providerKey !== walletKey) {
+        logger.warn('⚠️ Provider state mismatch detected - forcing reconnection');
+        logger.debug('Provider key:', providerKey, 'Wallet key:', walletKey);
+        await disconnectWallet();
+        return;
+      }
     }
 
     try {
       setIsLoadingBalance(true);
 
-      const address = wallet()!.address;
-      logger.debug('Refreshing balances for address:', address);
+      const address = currentWallet!.address;
+      logger.debug('🔄 Refreshing balances for address:', address);
 
       // FIXED: Use backend API instead of direct Solana calls
       // Fetch balance data from cached backend API
       const balanceResult = await fetchCachedBalances({ force: true });
 
-      if (balanceResult.success && balanceResult.data) {
+      if (balanceResult.data) {
         const balanceData = balanceResult.data;
 
         // Set SOL balance
@@ -435,11 +441,13 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
             decimals: 9 // SPLITDO token decimals
           }
         });
-      }
 
-      logger.debug('Balances refreshed successfully via backend API');
+        logger.debug('✅ Balances refreshed successfully via backend API');
+      } else {
+        logger.warn('⚠️ No balance data received from backend API');
+      }
     } catch (error) {
-      logger.error('Error refreshing balances:', error);
+      logger.error('❌ Error refreshing balances:', error);
     } finally {
       setIsLoadingBalance(false);
     }
@@ -734,6 +742,114 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
   const clearUserData = (userId: string) => clearUserCache(userId);
 
   // ===============================
+  // ENHANCED WALLET CACHE CLEARING
+  // ===============================
+  
+  /**
+   * 🚨 CRITICAL SECURITY FIX: Enhanced wallet cache clearing
+   * This function aggressively clears ALL wallet-related data from ALL storage types
+   * to prevent Phantom from persisting connection state across page refreshes
+   */
+  const clearAllWalletData = async (): Promise<void> => {
+    if (typeof window === 'undefined') return;
+    
+    logger.debug('🧹 Starting comprehensive wallet cache clearing...');
+    
+    try {
+      // 1. Clear localStorage with expanded Phantom-specific keys
+      const localStorageKeys = Object.keys(window.localStorage);
+      const phantomStoragePatterns = [
+        'phantom',
+        'solana',
+        'wallet',
+        'walletconnect',
+        'wc@',
+        'phantom_auto_connect',
+        'phantom_connected', 
+        'phantom_permissions',
+        'phantom_trusted_origins',
+        'phantom-wallet',
+        'solana-wallet',
+        'wallet-standard',
+        'standard:connect',
+        'wallet-adapter',
+        'sol-wallet-adapter'
+      ];
+      
+      localStorageKeys.forEach(key => {
+        const shouldClear = phantomStoragePatterns.some(pattern => 
+          key.toLowerCase().includes(pattern.toLowerCase())
+        );
+        if (shouldClear) {
+          try {
+            window.localStorage.removeItem(key);
+            logger.debug(`🗑️ Cleared localStorage: ${key}`);
+          } catch (e) {
+            // Ignore individual key errors
+          }
+        }
+      });
+
+      // 2. Clear sessionStorage with same patterns
+      const sessionStorageKeys = Object.keys(window.sessionStorage);
+      sessionStorageKeys.forEach(key => {
+        const shouldClear = phantomStoragePatterns.some(pattern => 
+          key.toLowerCase().includes(pattern.toLowerCase())
+        );
+        if (shouldClear) {
+          try {
+            window.sessionStorage.removeItem(key);
+            logger.debug(`🗑️ Cleared sessionStorage: ${key}`);
+          } catch (e) {
+            // Ignore individual key errors
+          }
+        }
+      });
+
+      // 3. Clear IndexedDB databases that might store wallet data
+      try {
+        if ('indexedDB' in window && typeof indexedDB.databases === 'function') {
+          const databases = await indexedDB.databases();
+          for (const db of databases) {
+            const dbName = db.name?.toLowerCase() || '';
+            if (dbName.includes('phantom') || 
+                dbName.includes('wallet') || 
+                dbName.includes('solana') ||
+                dbName.includes('standard')) {
+              try {
+                indexedDB.deleteDatabase(db.name!);
+                logger.debug(`🗑️ Cleared IndexedDB: ${db.name}`);
+              } catch (e) {
+                // Ignore individual DB errors
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // IndexedDB not supported or access denied
+        logger.debug('IndexedDB clearing not available:', e);
+      }
+
+      // 4. Force nullify window.solana provider reference
+      try {
+        if (window.solana) {
+          // @ts-ignore - Force clear the provider
+          delete window.solana;
+          // @ts-ignore - Ensure it's completely removed
+          window.solana = undefined;
+          logger.debug('🗑️ Cleared window.solana provider reference');
+        }
+      } catch (e) {
+        // Ignore provider clearing errors
+      }
+
+      logger.debug('✅ Comprehensive wallet cache clearing completed successfully');
+    } catch (error) {
+      logger.warn('⚠️ Error during comprehensive wallet cache clearing:', error);
+    }
+  };
+
+  // ===============================
   // EFFECTS AND INITIALIZATION
   // ===============================
 
@@ -755,40 +871,8 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
         setQrData(null);
       });
 
-      // Clear any cached connection data from browser storage
-      if (typeof window !== 'undefined') {
-        try {
-          // Clear WalletConnect session storage if exists
-          const walletConnectKeys = Object.keys(window.localStorage).filter(key =>
-            key.includes('walletconnect') || key.includes('wc@')
-          );
-          walletConnectKeys.forEach(key => {
-            logger.debug(`Clearing cached wallet data: ${key}`);
-            window.localStorage.removeItem(key);
-          });
-
-          // SECURITY FIX: Clear any Phantom-related cached connection data
-          // This ensures Phantom treats each connection request as fresh
-          const phantomKeys = Object.keys(window.localStorage).filter(key =>
-            key.includes('phantom') || key.includes('solana') || key.includes('wallet')
-          );
-          phantomKeys.forEach(key => {
-            logger.debug(`Clearing cached Phantom data: ${key}`);
-            window.localStorage.removeItem(key);
-          });
-
-          // Also clear sessionStorage for wallet data
-          const sessionKeys = Object.keys(window.sessionStorage).filter(key =>
-            key.includes('phantom') || key.includes('solana') || key.includes('wallet') || key.includes('walletconnect')
-          );
-          sessionKeys.forEach(key => {
-            logger.debug(`Clearing cached session wallet data: ${key}`);
-            window.sessionStorage.removeItem(key);
-          });
-        } catch (error) {
-          logger.warn('Failed to clear cached wallet data:', error);
-        }
-      }
+      // ENHANCED PHANTOM CACHE CLEARING: Clear comprehensive wallet data from browser storage
+      await clearAllWalletData();
 
       // Get available wallets (service auto-initializes in constructor)
       setAvailableWallets(walletConnectService.getAvailableWallets());
