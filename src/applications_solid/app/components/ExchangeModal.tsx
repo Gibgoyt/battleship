@@ -590,27 +590,7 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
         </Show>
       </button>
 
-      {/* Status Messages */}
-      <Show when={props.exchangeStatus === 'error' && props.exchangeError}>
-        <div class={`p-4 border-2 border-crypto-accent-red rounded-xl ${
-          props.isDark
-            ? 'bg-red-900/20 text-red-100'
-            : 'bg-red-50 text-red-900'
-        }`}>
-          <div class="flex items-center gap-3">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="text-crypto-accent-red flex-shrink-0">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-            </svg>
-            <div>
-              <div class="font-semibold text-crypto-accent-red mb-1">Exchange Failed</div>
-              <p class={`text-sm ${props.isDark ? 'text-red-200' : 'text-red-700'}`}>
-                {props.exchangeError}
-              </p>
-            </div>
-          </div>
-        </div>
-      </Show>
-
+      {/* Success Message */}
       <Show when={props.exchangeStatus === 'success'}>
         <div class={`p-4 border-2 border-crypto-accent-green rounded-xl ${
           props.isDark
