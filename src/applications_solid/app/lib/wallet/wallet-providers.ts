@@ -198,18 +198,43 @@ export class PhantomWalletProvider implements WalletProvider {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       const errorCode = (error as any)?.code;
 
+      // iOS-specific error detection
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isPhantomMobile = navigator.userAgent.includes('Phantom');
+
       if (errorCode === 4001 || errorMessage.includes('rejected') || errorMessage.includes('cancelled')) {
         console.log('[Phantom] User cancelled connection request');
         throw new WalletError('User cancelled connection request', 'USER_REJECTED', 'Phantom');
-      } else if (errorCode === 4100 || errorMessage.includes('unauthorized')) {
+      } else if (errorCode === 4100 || errorMessage.includes('unauthorized') || errorMessage.includes('not been authorized')) {
         console.log('[Phantom] App not authorized by user');
-        throw new WalletError('App not authorized. Please try connecting again.', 'UNAUTHORIZED', 'Phantom');
+        
+        // iOS-specific authorization error message
+        if (isIOS && isPhantomMobile) {
+          throw new WalletError('Authorization required. Please try connecting again or refresh the Phantom app.', 'IOS_AUTHORIZATION_REQUIRED', 'Phantom');
+        } else {
+          throw new WalletError('App not authorized. Please try connecting again.', 'UNAUTHORIZED', 'Phantom');
+        }
       } else if (errorMessage.includes('popup') || errorMessage.includes('blocked')) {
         console.log('[Phantom] Popup blocked or failed');
         throw new WalletError('Popup blocked. Please allow popups for this site and try again.', 'POPUP_BLOCKED', 'Phantom');
+      } else if (errorMessage.includes('timeout') || errorMessage.includes('Connection timeout')) {
+        console.log('[Phantom] Connection timeout');
+        
+        // iOS-specific timeout message
+        if (isIOS && isPhantomMobile) {
+          throw new WalletError('Connection timeout. Please refresh the Phantom app and try again.', 'IOS_CONNECTION_TIMEOUT', 'Phantom');
+        } else {
+          throw new WalletError('Connection timeout. Please try again.', 'CONNECTION_TIMEOUT', 'Phantom');
+        }
       } else {
         console.error('[Phantom] Unexpected connection error:', error);
-        throw new WalletConnectionError('Phantom', error);
+        
+        // iOS-specific generic error message
+        if (isIOS && isPhantomMobile) {
+          throw new WalletError('Connection failed. Please refresh the Phantom app and try again.', 'IOS_CONNECTION_ERROR', 'Phantom');
+        } else {
+          throw new WalletConnectionError('Phantom', error);
+        }
       }
     }
   }

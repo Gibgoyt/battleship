@@ -342,14 +342,24 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
           logger.warn('⚠️ Connection state validation failed, skipping balance refresh');
         }
       } else {
+        // CRITICAL FIX: Ensure error state is set and error is thrown
+        const errorMsg = result.error || 'Failed to connect wallet';
         setConnectionStatus('error');
-        setConnectionError(result.error || 'Failed to connect wallet');
-        logger.error('❌ Wallet connection failed:', result.error);
+        setConnectionError(errorMsg);
+        logger.error('❌ Wallet connection failed:', errorMsg);
+        
+        // CRITICAL: Throw error to prevent success path in WalletModal
+        throw new Error(errorMsg);
       }
     } catch (error) {
+      // CRITICAL FIX: Ensure error state is always set properly
+      const errorMsg = error instanceof Error ? error.message : 'Connection failed';
       setConnectionStatus('error');
-      setConnectionError(error instanceof Error ? error.message : 'Connection failed');
+      setConnectionError(errorMsg);
       logger.error('❌ Wallet connection error:', error);
+      
+      // CRITICAL: Re-throw to ensure WalletModal handleConnect gets the error
+      throw error;
     }
   };
 
