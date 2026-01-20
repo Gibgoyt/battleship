@@ -110,13 +110,16 @@ export class PhantomWalletProvider implements WalletProvider {
   private publicKey: PublicKey | null = null;
 
   constructor() {
-    if (typeof window !== 'undefined') {
-      this.provider = window.solana || null;
-    }
+    // 🚨 SECURITY FIX: Do NOT access window.solana in constructor
+    // Accessing window.solana auto-connects for trusted sites
+    // We'll defer this to when user explicitly requests connection
   }
 
   isAvailable(): boolean {
-    return !!(this.provider?.isPhantom);
+    // 🚨 SECURITY FIX: Check availability without auto-connecting
+    if (typeof window === 'undefined') return false;
+    // Only check if phantom exists, don't store reference yet
+    return !!(window.solana?.isPhantom);
   }
 
   async connect(): Promise<{ publicKey: PublicKey }> {
@@ -124,111 +127,60 @@ export class PhantomWalletProvider implements WalletProvider {
       throw new WalletNotFoundError('Phantom');
     }
 
+    // 🚨 SECURITY FIX: Only get provider reference when user explicitly connects
+    if (!this.provider && typeof window !== 'undefined') {
+      this.provider = window.solana || null;
+      console.log('🚨 [Phantom DEBUG] Provider reference obtained on explicit user connection');
+    }
+
+    if (!this.provider) {
+      throw new WalletNotFoundError('Phantom');
+    }
+
     try {
-      // EXTENSIVE DEBUGGING: Log initial Phantom state
-      console.log('🚨 [Phantom DEBUG] ===== DETAILED CONNECTION DEBUGGING =====');
-      console.log('🚨 [Phantom DEBUG] Initial provider state:', {
-        isPhantom: !!this.provider?.isPhantom,
-        isConnected: !!this.provider?.isConnected,
-        publicKey: this.provider?.publicKey?.toString() || 'null',
-        localPublicKey: this.publicKey?.toString() || 'null'
-      });
+      console.log('[Phantom] Starting fresh connection with explicit user authorization');
 
-      // SECURITY FIX: Force disconnect first to ensure popup appears every time
-      // This is necessary because once a site is "trusted" by Phantom,
-      // it will auto-connect without popup even with onlyIfTrusted: false
-      console.log('🚨 [Phantom DEBUG] Forcing disconnect to ensure fresh connection popup...');
-
-      const preDisconnectState = {
-        isConnected: !!this.provider?.isConnected,
-        publicKey: this.provider?.publicKey?.toString() || 'null'
-      };
-      console.log('🚨 [Phantom DEBUG] State before disconnect:', preDisconnectState);
-
+      // Force disconnect first to ensure popup appears every time
       try {
-        console.log('🚨 [Phantom DEBUG] Calling provider.disconnect()...');
-        await this.provider!.disconnect();
-        console.log('🚨 [Phantom DEBUG] provider.disconnect() call completed');
+        await this.provider.disconnect();
+        console.log('[Phantom] Pre-connection disconnect completed');
       } catch (disconnectError) {
-        console.log('🚨 [Phantom DEBUG] Pre-connection disconnect failed:', disconnectError);
-        console.log('🚨 [Phantom DEBUG] This might be expected if not previously connected');
+        console.log('[Phantom] Pre-connection disconnect failed (may not be connected):', disconnectError);
       }
-
-      const postDisconnectState = {
-        isConnected: !!this.provider?.isConnected,
-        publicKey: this.provider?.publicKey?.toString() || 'null'
-      };
-      console.log('🚨 [Phantom DEBUG] State after disconnect:', postDisconnectState);
 
       // Clear local state to ensure clean slate
       this.publicKey = null;
-      console.log('🚨 [Phantom DEBUG] Cleared local publicKey state');
 
       // Small delay to allow Phantom to process the disconnect
-      console.log('🚨 [Phantom DEBUG] Waiting 100ms for Phantom to process disconnect...');
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const preConnectState = {
-        isConnected: !!this.provider?.isConnected,
-        publicKey: this.provider?.publicKey?.toString() || 'null'
-      };
-      console.log('🚨 [Phantom DEBUG] State before connect attempt:', preConnectState);
-
-      // SECURITY FIX: Now connect with onlyIfTrusted: false to force popup
-      console.log('🚨 [Phantom DEBUG] 🔥 CRITICAL: Calling connect({ onlyIfTrusted: false })...');
-      console.log('🚨 [Phantom DEBUG] 🔥 IF NO POPUP APPEARS, THIS IS THE BUG!');
-
-      const startTime = Date.now();
-      const response = await this.provider!.connect({ onlyIfTrusted: false });
-      const endTime = Date.now();
-      const connectionTime = endTime - startTime;
-
-      console.log('🚨 [Phantom DEBUG] connect() call completed in', connectionTime, 'ms');
-      console.log('🚨 [Phantom DEBUG] 🔥 CRITICAL: If this was < 500ms, NO POPUP appeared!');
-      console.log('🚨 [Phantom DEBUG] Response:', {
-        publicKey: response?.publicKey?.toString() || 'null',
-        responseObject: response
-      });
-
-      const finalState = {
-        isConnected: !!this.provider?.isConnected,
-        publicKey: this.provider?.publicKey?.toString() || 'null',
-        responsePublicKey: response?.publicKey?.toString() || 'null'
-      };
-      console.log('🚨 [Phantom DEBUG] Final state after connect:', finalState);
-
+      // Connect with onlyIfTrusted: false to force popup
+      console.log('[Phantom] Initiating connection with forced popup...');
+      const response = await this.provider.connect({ onlyIfTrusted: false });
       this.publicKey = new PublicKey(response.publicKey.toString());
 
-      if (connectionTime < 500) {
-        console.error('🚨 [Phantom DEBUG] 💥 FALSE POSITIVE DETECTED!');
-        console.error('🚨 [Phantom DEBUG] 💥 Connection completed too fast - NO USER INTERACTION!');
-        console.error('🚨 [Phantom DEBUG] 💥 This proves the site is TRUSTED and auto-connecting!');
-      } else {
-        console.log('🚨 [Phantom DEBUG] ✅ Connection took long enough - likely genuine popup interaction');
-      }
-
-      console.log('🚨 [Phantom DEBUG] ===== END DETAILED DEBUGGING =====');
+      console.log('[Phantom] ✅ Connection established with explicit user authorization');
       return { publicKey: this.publicKey };
     } catch (error) {
       // Clear state on error
       this.publicKey = null;
-      console.log('🚨 [Phantom DEBUG] Connection failed with error:', error);
+      console.log('[Phantom] Connection failed with error:', error);
 
       // Enhanced error handling for better user feedback
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       const errorCode = (error as any)?.code;
 
       if (errorCode === 4001 || errorMessage.includes('rejected') || errorMessage.includes('cancelled')) {
-        console.log('🚨 [Phantom DEBUG] ℹ️ User cancelled connection request');
+        console.log('[Phantom] User cancelled connection request');
         throw new WalletError('User cancelled connection request', 'USER_REJECTED', 'Phantom');
       } else if (errorCode === 4100 || errorMessage.includes('unauthorized')) {
-        console.log('🚨 [Phantom DEBUG] ⚠️ App not authorized by user');
+        console.log('[Phantom] App not authorized by user');
         throw new WalletError('App not authorized. Please try connecting again.', 'UNAUTHORIZED', 'Phantom');
       } else if (errorMessage.includes('popup') || errorMessage.includes('blocked')) {
-        console.log('🚨 [Phantom DEBUG] ⚠️ Popup blocked or failed');
+        console.log('[Phantom] Popup blocked or failed');
         throw new WalletError('Popup blocked. Please allow popups for this site and try again.', 'POPUP_BLOCKED', 'Phantom');
       } else {
-        console.error('🚨 [Phantom DEBUG] ❌ Unexpected connection error:', error);
+        console.error('[Phantom] Unexpected connection error:', error);
         throw new WalletConnectionError('Phantom', error);
       }
     }
@@ -239,8 +191,12 @@ export class PhantomWalletProvider implements WalletProvider {
       throw new WalletError('Wallet not connected', 'NOT_CONNECTED', 'Phantom');
     }
 
+    if (!this.provider) {
+      throw new WalletError('Phantom provider not available', 'PROVIDER_ERROR', 'Phantom');
+    }
+
     try {
-      return await this.provider!.signTransaction(transaction);
+      return await this.provider.signTransaction(transaction);
     } catch (error) {
       throw new WalletSigningError('Phantom', error);
     }
@@ -259,18 +215,19 @@ export class PhantomWalletProvider implements WalletProvider {
       }
     }
 
-    // Always clear local state regardless of provider disconnect result
+    // 🚨 SECURITY FIX: Clear provider reference to force fresh connection next time
+    this.provider = null;
     this.publicKey = null;
 
-    // Additional validation to ensure clean state
-    if (this.provider?.isConnected) {
-      console.warn('[Phantom] Provider still reports connected after disconnect - state inconsistency detected');
-    }
-
-    console.log('[Phantom] ✅ Local state cleared, disconnect completed');
+    console.log('[Phantom] ✅ Provider reference and local state cleared, disconnect completed');
   }
 
   isConnected(): boolean {
+    // 🚨 SECURITY FIX: If no provider reference, we're definitely not connected
+    if (!this.provider) {
+      return false;
+    }
+
     // SECURITY FIX: Enhanced connection state validation
     // Ensure connection state matches actual user authorization
     const hasProvider = !!this.provider;
@@ -288,8 +245,9 @@ export class PhantomWalletProvider implements WalletProvider {
                    providerPublicKey === localPublicKey;
 
     if (!isValid && (hasProvider || hasPublicKey || providerConnected)) {
-      console.warn('[Phantom] Connection state inconsistency detected, forcing disconnect');
+      console.warn('[Phantom] Connection state inconsistency detected, forcing clean state');
       // Clear inconsistent state
+      this.provider = null;
       this.publicKey = null;
     }
 
