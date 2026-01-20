@@ -709,30 +709,15 @@ export class EnhancedSolanaService {
   // ================================
 
   /**
-   * Get vault address from backend API for exchange transactions
+   * Get vault address for exchange transactions
+   * HARDCODED to the correct receiving address as specified
    */
   async getVaultAddress(): Promise<string> {
-    try {
-      const programInfo = await this.getProgramInfo();
-      
-      // Use the program vault USDC address as the SOL destination
-      // In a real implementation, this might be a separate SOL vault
-      const vaultAddress = programInfo.program_vault_usdc;
-      
-      if (!vaultAddress) {
-        throw new Error('Vault address not available from program info');
-      }
-
-      console.debug('[SolanaService] Retrieved vault address:', vaultAddress);
-      return vaultAddress;
-    } catch (error) {
-      console.error('[SolanaService] Failed to get vault address:', error);
-      
-      // Fallback to a default vault address from config
-      const fallbackVault = '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU';
-      console.warn(`[SolanaService] Using fallback vault address: ${fallbackVault}`);
-      return fallbackVault;
-    }
+    // HARDCODED VAULT ADDRESS AS REQUIRED
+    const vaultAddress = 'F5bUwq7ttSzqgqVJEA1toXbc31BjPReCoSh9fqkLH62B';
+    
+    console.debug('[SolanaService] Using HARDCODED vault address:', vaultAddress);
+    return vaultAddress;
   }
 
   /**

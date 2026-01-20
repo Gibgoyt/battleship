@@ -221,39 +221,33 @@ export function validateExchangeParams(
 // ================================
 
 /**
- * Fetch vault information from backend
+ * Get vault information with HARDCODED receiving address
  */
 export async function getVaultInfo(): Promise<VaultInfo> {
   try {
-    logger.info('Fetching vault information from backend...');
+    logger.info('Using HARDCODED vault information...');
     
-    // Use middleware to fetch vault information
-    // This would typically be from a dedicated vault info endpoint
-    // For now, we'll use the exchange rate endpoint and derive vault info
-    const response = await middlewareFetch.Endpoints.CoinGecko._Api.V3.Simple.Price.GET({
-      ids: 'solana',
-      vs_currencies: 'usd'
-    });
-    
-    if (response.status !== 200) {
-      throw new Error(`Failed to fetch vault info: ${response.status}`);
-    }
-    
-    // TODO: Replace with actual vault endpoint when available
-    // For now, return configuration-based vault info
+    // HARDCODED VAULT ADDRESS AS REQUIRED
     const vaultInfo: VaultInfo = {
-      address: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU', // Placeholder vault address
-      exchangeRate: 1173, // Default rate - should come from backend
+      address: 'F5bUwq7ttSzqgqVJEA1toXbc31BjPReCoSh9fqkLH62B', // HARDCODED RECEIVING ADDRESS
+      exchangeRate: 1173, // Default rate
       isActive: true,
       lastUpdated: new Date().toISOString()
     };
     
-    logger.info('Vault information retrieved:', vaultInfo);
+    logger.info('HARDCODED vault information:', vaultInfo);
     return vaultInfo;
     
   } catch (error) {
-    logger.error('Error fetching vault information:', error);
-    throw new Error(`Failed to get vault information: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    logger.error('Error with hardcoded vault information:', error);
+    
+    // Even in error case, return the hardcoded address
+    return {
+      address: 'F5bUwq7ttSzqgqVJEA1toXbc31BjPReCoSh9fqkLH62B',
+      exchangeRate: 1173,
+      isActive: true,
+      lastUpdated: new Date().toISOString()
+    };
   }
 }
 
