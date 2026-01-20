@@ -347,8 +347,11 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
               }`
         }`}
       >
-        <div class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg text-white text-xl font-bold">
-          🔗
+        <div class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-white">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
         <div class="flex-1 text-left">
           <div class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -461,7 +464,7 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
                 placeholder="0.00"
                 min={MIN_SOL_AMOUNT}
                 step="0.01"
-                class={`w-full px-6 py-4 text-xl font-semibold rounded-xl border-2 transition-all focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-20 ${
+                class={`w-full px-6 py-4 text-xl font-semibold rounded-xl border-2 transition-all focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                   props.isDark
                     ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-500 focus:border-blue-500'
                     : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:border-blue-500'
@@ -473,7 +476,9 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
             </div>
             <Show when={props.solAmount && !isValidAmount()}>
               <div class="flex items-center gap-2 mt-3 text-crypto-accent-red text-sm">
-                <span>⚠️</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="flex-shrink-0">
+                  <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM7 4h2v5H7V4zm0 6h2v2H7v-2z"/>
+                </svg>
                 Minimum amount is {MIN_SOL_AMOUNT} SOL
               </div>
             </Show>
@@ -491,7 +496,12 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
           <h4 class={`text-xl font-bold mb-4 flex items-center gap-2 ${
             props.isDark ? 'text-white' : 'text-gray-900'
           }`}>
-            <span>📊</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-blue-500">
+              <rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+              <rect x="14" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+              <rect x="14" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+              <rect x="3" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+            </svg>
             Exchange Preview
           </h4>
           <div class="space-y-4">
@@ -571,7 +581,11 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
           }
         >
           <span class="flex items-center justify-center gap-3">
-            🔄 Exchange Tokens
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-white">
+              <path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Exchange Tokens
           </span>
         </Show>
       </button>
@@ -584,7 +598,9 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
             : 'bg-red-50 text-red-900'
         }`}>
           <div class="flex items-center gap-3">
-            <span class="text-crypto-accent-red text-xl">⚠️</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="text-crypto-accent-red flex-shrink-0">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
             <div>
               <div class="font-semibold text-crypto-accent-red mb-1">Exchange Failed</div>
               <p class={`text-sm ${props.isDark ? 'text-red-200' : 'text-red-700'}`}>
@@ -602,7 +618,9 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
             : 'bg-green-50 text-green-900'
         }`}>
           <div class="flex items-center gap-3">
-            <span class="text-crypto-accent-green text-xl">✅</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="text-crypto-accent-green flex-shrink-0">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
             <div>
               <div class="font-semibold text-crypto-accent-green mb-1">Exchange Successful!</div>
               <p class={`text-sm ${props.isDark ? 'text-green-200' : 'text-green-700'}`}>

@@ -30,7 +30,7 @@ import {
   TokenAccountNotFoundError,
   TokenInvalidAccountOwnerError
 } from '@solana/spl-token';
-import { SPLITDO_CONFIG, ERROR_MESSAGES, BACKEND_SOLANA_API, SOLANA_NETWORKS, CURRENT_NETWORK, SOLANA_RPC_FALLBACKS } from './walletconnect-config';
+import { SPLITDO_CONFIG, ERROR_MESSAGES, BACKEND_SOLANA_API } from './walletconnect-config';
 import { SolanaBrowserError } from './solana-browser-safe';
 import type { WalletProvider } from './wallet-providers';
 import { type SplitdoRawAmount } from './token-utils';
@@ -209,35 +209,26 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Get wallet balance directly from Solana RPC with fallbacks
+   * Get wallet balance via backend API using middlewareFetch
    */
   async getWalletBalance(walletAddress: string): Promise<number> {
-    const publicKey = new PublicKey(walletAddress);
-    const rpcEndpoints = SOLANA_RPC_FALLBACKS;
+    try {
+      // Use middlewareFetch instead of direct fetch
+      const response = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Wallet[walletAddress].Balance.GET(walletAddress);
 
-    // Try each RPC endpoint until one works
-    for (let i = 0; i < rpcEndpoints.length; i++) {
-      try {
-        const connection = new Connection(rpcEndpoints[i], 'confirmed');
-        const balance = await connection.getBalance(publicKey);
-
-        console.debug(`[SolanaService] ✅ Fetched SOL balance from RPC ${i + 1}/${rpcEndpoints.length}:`, balance / LAMPORTS_PER_SOL, 'SOL');
-        return balance;
-      } catch (error) {
-        console.warn(`[SolanaService] RPC ${i + 1}/${rpcEndpoints.length} failed:`, error);
-
-        // If this was the last RPC, throw the error
-        if (i === rpcEndpoints.length - 1) {
-          console.error('[SolanaService] All RPC endpoints failed');
-          throw new Error('Failed to get wallet balance from all RPC endpoints');
-        }
-
-        // Otherwise, continue to next RPC
-        continue;
+      if (response.status !== 200) {
+        throw new Error(`Backend API error: ${response.status}`);
       }
-    }
 
-    throw new Error('Failed to get wallet balance');
+      if (!response.data.success) {
+        throw new Error('Failed to get wallet balance from backend API');
+      }
+
+      return response.data.balance || 0;
+    } catch (error) {
+      console.error('[SolanaService] Failed to get wallet balance:', error);
+      throw new Error('Failed to get wallet balance');
+    }
   }
 
   /**
@@ -274,11 +265,11 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Get SOL balance for a wallet address (directly from Solana RPC)
+   * Get SOL balance for a wallet address (via backend API)
    */
   async getSolBalance(walletAddress: string): Promise<SolanaBalance> {
     try {
-      // No need to check backend availability - we're talking directly to Solana!
+      await this.ensureBackendAvailable();
       const lamports = await this.getWalletBalance(walletAddress);
 
       return {

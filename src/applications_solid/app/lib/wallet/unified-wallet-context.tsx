@@ -565,23 +565,9 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
             throw new Error(`Balance API returned ${balanceResponse.status}: ${balanceResponse.data.message || 'Unknown error'}`);
           }
 
-          // Fetch SOL balance directly from Solana RPC
+          // Default SOL balance to 0 for now
           let solBalanceValue = 0;
-          const currentWallet = wallet();
-
-          if (currentWallet?.address) {
-            try {
-              // Import solanaService dynamically
-              const { solanaService } = await import('./solana-service');
-
-              // Get SOL balance directly from Solana blockchain
-              const solBalance = await solanaService.getSolBalance(currentWallet.address);
-              solBalanceValue = solBalance.sol;
-              logger.debug('✅ Fetched SOL balance directly from Solana:', solBalanceValue, 'SOL');
-            } catch (error) {
-              logger.warn('⚠️ Failed to fetch SOL balance from Solana, defaulting to 0:', error);
-            }
-          }
+          logger.debug('SOL balance defaulted to 0');
 
           // Transform middleware response to expected format and add SOL balance
           const transformedData = transformBalanceResponse(balanceResponse.data);
