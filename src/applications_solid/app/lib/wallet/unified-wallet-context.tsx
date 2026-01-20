@@ -565,23 +565,25 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
             throw new Error(`Balance API returned ${balanceResponse.status}: ${balanceResponse.data.message || 'Unknown error'}`);
           }
 
-          // Fetch SOL balance directly from Phantom wallet
+          // Fetch SOL balance from backend API endpoint
           let solBalanceValue = 0;
           const currentWallet = wallet();
-          const provider = getCurrentProvider();
 
-          if (currentWallet?.address && provider) {
+          if (currentWallet?.address) {
             try {
-              // Get SOL balance from Phantom using Connection
-              const { Connection, PublicKey, LAMPORTS_PER_SOL } = await import('@solana/web3.js');
-              const connection = new Connection('https://api.mainnet-beta.solana.com');
-              const publicKey = new PublicKey(currentWallet.address);
+              // Use backend API to get SOL balance
+              const solResponse = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Wallet[currentWallet.address].Balance.GET(currentWallet.address);
 
-              const balance = await connection.getBalance(publicKey);
-              solBalanceValue = balance / LAMPORTS_PER_SOL;
-              logger.debug('✅ Fetched SOL balance from Phantom:', solBalanceValue);
+              if (solResponse.status === 200 && solResponse.data.success) {
+                const lamports = solResponse.data.balance || 0;
+                const LAMPORTS_PER_SOL = 1_000_000_000;
+                solBalanceValue = lamports / LAMPORTS_PER_SOL;
+                logger.debug('✅ Fetched SOL balance from backend:', solBalanceValue, 'SOL');
+              } else {
+                logger.warn('⚠️ Backend API returned non-success response for SOL balance');
+              }
             } catch (error) {
-              logger.warn('⚠️ Failed to fetch SOL balance, defaulting to 0:', error);
+              logger.warn('⚠️ Failed to fetch SOL balance from backend, defaulting to 0:', error);
             }
           }
 
