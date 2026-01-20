@@ -572,7 +572,8 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
           if (currentWallet?.address) {
             try {
               // Use backend API to get SOL balance - endpoint format: /api/solana/wallet/:pubkey/balance
-              const solResponse = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Wallet._Pubkey.Balance.GET(currentWallet.address);
+              // Use bracket notation for dynamic path parameter
+              const solResponse = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Wallet[currentWallet.address].Balance.GET(currentWallet.address);
 
               if (solResponse.status === 200 && solResponse.data.success) {
                 // Response already has sol field converted
