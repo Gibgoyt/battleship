@@ -162,35 +162,39 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
     }
   };
 
-  // Helper to get SPLITDO balance as a readable number
+  // Get SPLITDO balance - just use it as is, no conversion
   const splitdoBalanceTokens = createMemo(() => {
     const balance = wallet.splitdoATA().balance;
     if (!balance) return 0;
 
-    // Try uiAmount first (if available), otherwise convert from raw amount
-    if (balance.uiAmount !== undefined && balance.uiAmount !== null) {
-      return balance.uiAmount;
-    }
-
-    // Fallback: convert from raw amount (9 decimals like SOL)
-    return (balance.amount || 0) / 1_000_000_000;
+    // Use uiAmount directly - the API already gives us the formatted balance
+    return balance.uiAmount || 0;
   });
 
-  // Calculate portfolio value in USD using SOL price from CoinGecko
+  // Calculate portfolio value in USD
+  // Formula: (SOL balance × SOL price) + (SPLITDO balance × SPLITDO price)
   const portfolioValueUSD = createMemo(() => {
     const splitdoBalance = splitdoBalanceTokens();
+    const splitdoPriceUSD = 0.11; // $0.11 per SPLITDO (can be from API later)
 
-    // SPLITDO exchange rate: 1 SPLITDO = 0.00004545 SOL (price is $0.11 when SOL is ~$242)
-    const splitdoToSolRate = 0.00004545;
-    const splitdoValueInSol = splitdoBalance * splitdoToSolRate;
-
-    // Get SOL balance and price
     const solBalance = wallet.solBalance()?.sol || 0;
     const solPriceUSD = wallet.solPrice()?.price || 0;
 
-    // Calculate total value: (SPLITDO in SOL + SOL balance) * SOL price in USD
-    const totalSol = splitdoValueInSol + solBalance;
-    return totalSol * solPriceUSD;
+    // Direct USD calculation
+    const splitdoValueUSD = splitdoBalance * splitdoPriceUSD;
+    const solValueUSD = solBalance * solPriceUSD;
+
+    console.log('[Exchange Portfolio Calculation]', {
+      splitdoBalance,
+      splitdoPriceUSD,
+      splitdoValueUSD,
+      solBalance,
+      solPriceUSD,
+      solValueUSD,
+      total: splitdoValueUSD + solValueUSD
+    });
+
+    return splitdoValueUSD + solValueUSD;
   });
 
   return (
@@ -283,7 +287,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
                 }
               >
                 <div class="text-3xl font-bold text-white mb-2">
-                  {formatCurrency(splitdoBalanceTokens())}
+                  {formatCurrency(splitdoBalanceTokens(), 2)}
                 </div>
                 <p class="text-xs text-zinc-500 font-mono">
                   {formatAddress(wallet.splitdoATA().address || '')}

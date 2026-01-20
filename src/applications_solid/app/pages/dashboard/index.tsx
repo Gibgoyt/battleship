@@ -16,28 +16,29 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
     }
   });
 
-  // Helper to get SPLITDO balance as a readable number
+  // Get SPLITDO balance - just use it as is, no conversion
   const splitdoBalanceTokens = createMemo(() => {
     const balance = wallet.splitdoATA().balance;
     if (!balance) return 0;
 
-    // Try uiAmount first (if available), otherwise convert from raw amount
-    if (balance.uiAmount !== undefined && balance.uiAmount !== null) {
-      return balance.uiAmount;
-    }
-
-    // Fallback: convert from raw amount (9 decimals like SOL)
-    return (balance.amount || 0) / 1_000_000_000;
+    // Use uiAmount directly - the API already gives us the formatted balance
+    return balance.uiAmount || 0;
   });
 
-  // Calculate portfolio value (SPLITDO value in SOL)
-  const portfolioValueSOL = createMemo(() => {
+  // Calculate portfolio value in USD
+  // Formula: (SOL balance × SOL price) + (SPLITDO balance × SPLITDO price)
+  const portfolioValueUSD = createMemo(() => {
     const splitdoBalance = splitdoBalanceTokens();
-    // SPLITDO exchange rate: 1 SPLITDO = 0.00004545 SOL
-    const splitdoToSolRate = 0.00004545;
-    const splitdoValueInSol = splitdoBalance * splitdoToSolRate;
+    const splitdoPriceUSD = 0.11; // $0.11 per SPLITDO (can be from API later)
+
     const solBalance = wallet.solBalance()?.sol || 0;
-    return splitdoValueInSol + solBalance;
+    const solPriceUSD = wallet.solPrice()?.price || 0;
+
+    // Direct USD calculation
+    const splitdoValueUSD = splitdoBalance * splitdoPriceUSD;
+    const solValueUSD = solBalance * solPriceUSD;
+
+    return splitdoValueUSD + solValueUSD;
   });
 
   onMount(() => {
@@ -106,10 +107,10 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
             >
               <div class="space-y-4">
                 <div class="text-6xl md:text-8xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                  {formatCurrency(portfolioValueSOL(), 4)}
+                  ${formatCurrency(portfolioValueUSD(), 2)}
                 </div>
                 <div class="text-xl md:text-2xl text-zinc-400 font-medium">
-                  SOL
+                  Total Value
                 </div>
               </div>
             </Show>
@@ -138,7 +139,7 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
                 }
               >
                 <div class="text-3xl font-bold text-white">
-                  {formatCurrency(splitdoBalanceTokens())}
+                  {formatCurrency(splitdoBalanceTokens(), 2)}
                 </div>
               </Show>
             </div>
