@@ -11,10 +11,11 @@ export interface SolanaWalletConfig {
 }
 
 // Solana network configuration
+// Using Ankr public RPC - better rate limits than default Solana RPC
 export const SOLANA_NETWORKS = {
   devnet: "https://api.devnet.solana.com",
   testnet: "https://api.testnet.solana.com",
-  mainnet: "https://api.mainnet-beta.solana.com"
+  mainnet: "https://rpc.ankr.com/solana"
 } as const;
 
 // Current network - MAINNET for production
