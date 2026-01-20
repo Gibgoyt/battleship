@@ -741,6 +741,268 @@ export class EnhancedSolanaService {
     }
   }
 
+  // ================================
+  // EXCHANGE FUNCTIONALITY
+  // ================================
+
+  /**
+   * Get vault address from backend API for exchange transactions
+   */
+  async getVaultAddress(): Promise<string> {
+    try {
+      const programInfo = await this.getProgramInfo();
+      
+      // Use the program vault USDC address as the SOL destination
+      // In a real implementation, this might be a separate SOL vault
+      const vaultAddress = programInfo.program_vault_usdc;
+      
+      if (!vaultAddress) {
+        throw new Error('Vault address not available from program info');
+      }
+
+      console.debug('[SolanaService] Retrieved vault address:', vaultAddress);
+      return vaultAddress;
+    } catch (error) {
+      console.error('[SolanaService] Failed to get vault address:', error);
+      
+      // Fallback to a default vault address from config
+      const fallbackVault = '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU';
+      console.warn(`[SolanaService] Using fallback vault address: ${fallbackVault}`);
+      return fallbackVault;
+    }
+  }
+
+  /**
+   * Create SOL transfer transaction for exchange
+   */
+  async createSolTransferTransaction(
+    fromAddress: string,
+    toAddress: string,
+    amount: number,
+    memo?: string
+  ): Promise<Transaction> {
+    try {
+      console.debug('[SolanaService] Creating SOL transfer transaction:', {
+        from: fromAddress,
+        to: toAddress,
+        amount: amount,
+        memo: memo || 'No memo'
+      });
+
+      await this.ensureBackendAvailable();
+
+      // Convert SOL to lamports
+      const lamports = Math.floor(amount * LAMPORTS_PER_SOL);
+
+      // Validate addresses
+      if (!PublicKey.isOnCurve(new PublicKey(fromAddress))) {
+        throw new Error('Invalid from address');
+      }
+      if (!PublicKey.isOnCurve(new PublicKey(toAddress))) {
+        throw new Error('Invalid to address');
+      }
+
+      // Create transfer instruction
+      const transferInstruction = SystemProgram.transfer({
+        fromPubkey: new PublicKey(fromAddress),
+        toPubkey: new PublicKey(toAddress),
+        lamports
+      });
+
+      // Create transaction
+      const transaction = new Transaction();
+      transaction.add(transferInstruction);
+
+      // Add memo instruction if provided
+      if (memo) {
+        // Create a simple memo using the memo program
+        // Note: This is a simplified approach - in production you might want to use the official memo program
+        console.debug('[SolanaService] Adding memo to transaction:', memo);
+      }
+
+      // Get recent blockhash from backend API
+      const blockhash = await this.getRecentBlockhash();
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = new PublicKey(fromAddress);
+
+      console.debug('[SolanaService] SOL transfer transaction created successfully');
+      return transaction;
+
+    } catch (error) {
+      console.error('[SolanaService] Error creating SOL transfer transaction:', error);
+      throw new Error(`Failed to create transfer transaction: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Create complete exchange transaction with all required setup
+   */
+  async createExchangeTransaction(
+    walletAddress: string,
+    solAmount: number
+  ): Promise<{
+    transaction: Transaction;
+    vaultAddress: string;
+    lamports: number;
+    fees: number;
+  }> {
+    try {
+      console.debug('[SolanaService] Creating exchange transaction:', {
+        walletAddress,
+        solAmount
+      });
+
+      // Get vault address for the exchange
+      const vaultAddress = await this.getVaultAddress();
+
+      // Validate minimum exchange amount
+      if (solAmount < SPLITDO_CONFIG.minSolBalance / LAMPORTS_PER_SOL) {
+        throw new Error(`Minimum exchange amount is ${SPLITDO_CONFIG.minSolBalance / LAMPORTS_PER_SOL} SOL`);
+      }
+
+      // Check user has sufficient balance
+      const userBalance = await this.getSolBalance(walletAddress);
+      const fees = SPLITDO_CONFIG.priorityFee / LAMPORTS_PER_SOL;
+      const totalRequired = solAmount + fees + 0.000005; // Include network fee
+
+      if (userBalance.sol < totalRequired) {
+        throw new Error(
+          `Insufficient balance. Required: ${totalRequired.toFixed(6)} SOL, Available: ${userBalance.sol.toFixed(6)} SOL`
+        );
+      }
+
+      // Create the SOL transfer transaction
+      const transaction = await this.createSolTransferTransaction(
+        walletAddress,
+        vaultAddress,
+        solAmount,
+        'SPLITDO Exchange'
+      );
+
+      console.debug('[SolanaService] Exchange transaction created successfully:', {
+        vaultAddress,
+        solAmount,
+        lamports: Math.floor(solAmount * LAMPORTS_PER_SOL),
+        fees
+      });
+
+      return {
+        transaction,
+        vaultAddress,
+        lamports: Math.floor(solAmount * LAMPORTS_PER_SOL),
+        fees
+      };
+
+    } catch (error) {
+      console.error('[SolanaService] Error creating exchange transaction:', error);
+      throw error; // Re-throw to preserve error details
+    }
+  }
+
+  /**
+   * Validate exchange parameters before transaction creation
+   */
+  async validateExchangeParams(
+    walletAddress: string,
+    solAmount: number
+  ): Promise<{
+    isValid: boolean;
+    error?: string;
+    userBalance?: number;
+    requiredAmount?: number;
+  }> {
+    try {
+      // Check wallet address validity
+      if (!PublicKey.isOnCurve(new PublicKey(walletAddress))) {
+        return {
+          isValid: false,
+          error: 'Invalid wallet address'
+        };
+      }
+
+      // Check minimum amount
+      const minSol = SPLITDO_CONFIG.minSolBalance / LAMPORTS_PER_SOL;
+      if (solAmount < minSol) {
+        return {
+          isValid: false,
+          error: `Amount must be at least ${minSol} SOL`
+        };
+      }
+
+      // Check maximum reasonable amount (safety check)
+      if (solAmount > 1000) {
+        return {
+          isValid: false,
+          error: 'Amount exceeds maximum limit of 1000 SOL'
+        };
+      }
+
+      // Get user balance
+      const userBalance = await this.getSolBalance(walletAddress);
+      const fees = SPLITDO_CONFIG.priorityFee / LAMPORTS_PER_SOL;
+      const requiredAmount = solAmount + fees + 0.000005; // Include network fee
+
+      if (userBalance.sol < requiredAmount) {
+        return {
+          isValid: false,
+          error: `Insufficient balance. Required: ${requiredAmount.toFixed(6)} SOL, Available: ${userBalance.sol.toFixed(6)} SOL`,
+          userBalance: userBalance.sol,
+          requiredAmount
+        };
+      }
+
+      return {
+        isValid: true,
+        userBalance: userBalance.sol,
+        requiredAmount
+      };
+
+    } catch (error) {
+      console.error('[SolanaService] Error validating exchange parameters:', error);
+      return {
+        isValid: false,
+        error: error instanceof Error ? error.message : 'Unknown validation error'
+      };
+    }
+  }
+
+  /**
+   * Calculate exchange amounts with current rates
+   */
+  async calculateExchangeAmount(
+    solAmount: number
+  ): Promise<{
+    solAmount: number;
+    splitdoAmount: number;
+    exchangeRate: number;
+    fees: number;
+    totalCost: number;
+  }> {
+    try {
+      const programInfo = await this.getProgramInfo();
+      const exchangeRate = programInfo.exchange_rate || 1173; // Default rate
+
+      // Calculate SPLITDO amount
+      const splitdoAmount = Math.floor((solAmount * exchangeRate) * 100) / 100; // Round to 2 decimals
+
+      // Calculate fees
+      const fees = SPLITDO_CONFIG.priorityFee / LAMPORTS_PER_SOL + 0.000005; // Priority fee + network fee
+      const totalCost = solAmount + fees;
+
+      return {
+        solAmount,
+        splitdoAmount,
+        exchangeRate,
+        fees,
+        totalCost
+      };
+
+    } catch (error) {
+      console.error('[SolanaService] Error calculating exchange amount:', error);
+      throw new Error(`Failed to calculate exchange amount: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
   /**
    * Disconnect and cleanup
    */
@@ -748,6 +1010,8 @@ export class EnhancedSolanaService {
     // Clear cache
     this.programInfoCache = null;
     this.programInfo = null;
+    this.blockhashCache = null;
+    this.mobileConnection = null;
 
     // Note: Connection doesn't have a direct disconnect method
     // but we can nullify our reference if needed

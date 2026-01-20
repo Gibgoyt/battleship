@@ -28,6 +28,7 @@ import ProfilePage from './pages/profile/index'
 import WalletPage from './pages/splitdo-exchange/index'
 import { SessionExpiryNotification } from './components/SessionExpiryNotification'
 import { WalletConnectQRModal } from './components/WalletConnectQRModal'
+import { ToastContainer } from './components/ToastNotification'
 
 /*
  * **THIS IS A SOLIDJS APP NOT A REACT APP!!!!**
@@ -308,6 +309,9 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
           console.log('Mobile wallet clicked:', walletId);
         }}
       />
+
+      {/* Toast Notifications */}
+      <ToastContainer isDark={isDark()} />
     </div>
   )
 }

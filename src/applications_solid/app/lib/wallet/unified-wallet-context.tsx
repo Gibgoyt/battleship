@@ -685,35 +685,215 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       setExchangeStatus('loading');
       setExchangeError(null);
 
-      logger.info(`Executing exchange: ${solAmount} SOL`);
+      logger.info(`🚀 Executing exchange: ${solAmount} SOL`);
 
-      // TODO: No exchange endpoint exists in middleware system
-      // This needs coordination with backend team to either:
-      // 1. Add an exchange endpoint to the middleware system
-      // 2. Implement client-side exchange logic with proper transaction creation and signing
+      // Import exchange utilities dynamically to avoid circular dependencies
+      const { ExchangeUtils } = await import('./exchange-utils');
+      const { solanaService } = await import('./solana-service');
 
-      logger.error('executeExchange: No exchange endpoint available in middleware system');
+      const currentWallet = wallet()!;
+      const walletAddress = currentWallet.address;
 
-      setExchangeStatus('error');
-      setExchangeError('Exchange functionality not available - needs backend implementation');
+      // Step 1: Device detection and validation
+      const deviceInfo = ExchangeUtils.getDeviceInfo();
+      logger.debug('📱 Device info for exchange:', deviceInfo);
 
-      return {
-        success: false,
-        error: 'Exchange functionality requires coordination with backend team to add proper exchange endpoint'
-      };
+      // Step 2: Validate exchange parameters
+      const validation = await solanaService.validateExchangeParams(walletAddress, solAmount);
+      if (!validation.isValid) {
+        setExchangeStatus('error');
+        setExchangeError(validation.error || 'Invalid exchange parameters');
+        return { success: false, error: validation.error };
+      }
 
-      // Future implementation would look like:
-      // const exchangeResponse = await middlewareFetch.Endpoints.Devbackend._Api.Exchange.POST({
-      //   wallet_address: wallet()!.address,
-      //   sol_amount: solAmount,
-      //   exchange_rate: exchangeRates()?.exchangeRate || 1000
-      // });
+      // Step 3: Get current wallet provider
+      const provider = getCurrentProvider();
+      if (!provider) {
+        setExchangeStatus('error');
+        setExchangeError('Wallet provider not available');
+        return { success: false, error: 'Wallet provider not available' };
+      }
+
+      // Step 4: Calculate exchange amounts
+      const calculation = await solanaService.calculateExchangeAmount(solAmount);
+      logger.info('💰 Exchange calculation:', calculation);
+
+      // Step 5: Device-specific transaction flow
+      let result: { success: boolean; signature?: string; error?: string };
+
+      if (deviceInfo.type === 'mobile') {
+        // Mobile flow: signTransaction + sendRawTransaction + submit to exchange endpoint
+        result = await executeMobileExchange(provider, solanaService, walletAddress, solAmount);
+      } else {
+        // Desktop flow: signAndSendTransaction + submit signature to exchange-new endpoint
+        result = await executeDesktopExchange(provider, solanaService, walletAddress, solAmount, calculation);
+      }
+
+      // Step 6: Update UI state based on result
+      if (result.success) {
+        setExchangeStatus('success');
+        setExchangeError(null);
+        
+        // Show success toast with transaction link
+        const { showExchangeSuccess } = await import('../../components/ToastNotification');
+        showExchangeSuccess(solAmount, calculation.splitdoAmount, result.signature || '');
+        
+        // Refresh balances after successful exchange
+        setTimeout(() => {
+          refreshBalances();
+        }, 2000);
+
+        logger.info('✅ Exchange completed successfully:', result);
+      } else {
+        setExchangeStatus('error');
+        setExchangeError(result.error || 'Exchange failed');
+        
+        // Show error toast
+        const { showExchangeError } = await import('../../components/ToastNotification');
+        showExchangeError(result.error || 'Exchange failed', true, () => executeExchange(solAmount));
+        
+        logger.error('❌ Exchange failed:', result.error);
+      }
+
+      return result;
 
     } catch (error) {
       setExchangeStatus('error');
       const errorMsg = error instanceof Error ? error.message : 'Exchange failed';
       setExchangeError(errorMsg);
+      logger.error('❌ Exchange error:', error);
       return { success: false, error: errorMsg };
+    }
+  };
+
+  // ===============================
+  // MOBILE EXCHANGE FLOW
+  // ===============================
+  const executeMobileExchange = async (
+    provider: IWalletProvider,
+    solanaService: typeof import('./solana-service').solanaService,
+    walletAddress: string,
+    solAmount: number
+  ): Promise<{ success: boolean; signature?: string; error?: string }> => {
+    try {
+      logger.info('📱 Starting mobile exchange flow...');
+
+      // Create exchange transaction
+      const exchangeTx = await solanaService.createExchangeTransaction(walletAddress, solAmount);
+      
+      // Sign transaction (mobile wallets return signed transaction)
+      logger.debug('✍️ Requesting wallet signature (mobile flow)...');
+      const signedTransaction = await provider.signTransaction(exchangeTx.transaction);
+      
+      // Serialize signed transaction for backend
+      const serializedTx = signedTransaction.serialize({ requireAllSignatures: false }).toString('base64');
+      
+      // Send via backend first (mobile flow), then submit to exchange endpoint
+      logger.debug('📡 Sending signed transaction via backend...');
+      const networkResult = await solanaService.sendRawTransaction(signedTransaction.serialize({ requireAllSignatures: false }));
+      
+      // Submit to exchange endpoint with signed transaction
+      logger.debug('💱 Submitting to exchange endpoint...');
+      const exchangeResponse = await middlewareFetch.Endpoints.Devbackend._Api.Testing.Usockets.Exchange.Solana.Splitdo.POST(
+        Math.floor(solAmount * 1e9), // Convert to lamports
+        serializedTx
+      );
+
+      if (exchangeResponse.status === 200) {
+        logger.info('✅ Mobile exchange completed successfully');
+        return {
+          success: true,
+          signature: networkResult.signature
+        };
+      } else {
+        logger.error('❌ Exchange endpoint error:', exchangeResponse);
+        return {
+          success: false,
+          error: `Exchange failed: ${exchangeResponse.data?.message || 'Unknown error'}`
+        };
+      }
+
+    } catch (error) {
+      logger.error('❌ Mobile exchange error:', error);
+      
+      // Parse wallet-specific errors
+      const { ExchangeUtils } = await import('./exchange-utils');
+      const parsedError = ExchangeUtils.parseWalletError(error);
+      
+      return {
+        success: false,
+        error: parsedError.message
+      };
+    }
+  };
+
+  // ===============================
+  // DESKTOP EXCHANGE FLOW
+  // ===============================
+  const executeDesktopExchange = async (
+    provider: IWalletProvider,
+    solanaService: typeof import('./solana-service').solanaService,
+    walletAddress: string,
+    solAmount: number,
+    calculation: { splitdoAmount: number; exchangeRate: number }
+  ): Promise<{ success: boolean; signature?: string; error?: string }> => {
+    try {
+      logger.info('🖥️ Starting desktop exchange flow...');
+
+      // Create exchange transaction
+      const exchangeTx = await solanaService.createExchangeTransaction(walletAddress, solAmount);
+      
+      // Sign and send transaction (desktop flow)
+      logger.debug('✍️ Requesting wallet signature (desktop flow)...');
+      
+      // For desktop, we use signTransaction + sendRawTransaction for consistency
+      // This ensures compatibility with all wallet types
+      const signedTransaction = await provider.signTransaction(exchangeTx.transaction);
+      const networkResult = await solanaService.sendRawTransaction(signedTransaction.serialize({ requireAllSignatures: false }));
+      
+      if (!networkResult.signature) {
+        throw new Error('No transaction signature received from network');
+      }
+      
+      const result = { signature: networkResult.signature };
+
+      // Get user's SPLITDO token account address
+      const splitdoMint = await solanaService.getSplitdoMint();
+      const tokenAccountAddress = await solanaService.getAssociatedTokenAddress(walletAddress, splitdoMint);
+
+      // Submit to exchange-new endpoint with signature
+      logger.debug('💱 Submitting to exchange-new endpoint...');
+      const exchangeResponse = await middlewareFetch.Endpoints.Devbackend._Api.Testing.Usockets.ExchangeNew.Solana.Splitdo.POST(
+        result.signature,
+        walletAddress,
+        tokenAccountAddress
+      );
+
+      if (exchangeResponse.status === 200) {
+        logger.info('✅ Desktop exchange completed successfully');
+        return {
+          success: true,
+          signature: result.signature
+        };
+      } else {
+        logger.error('❌ Exchange-new endpoint error:', exchangeResponse);
+        return {
+          success: false,
+          error: `Exchange failed: ${exchangeResponse.data?.message || 'Unknown error'}`
+        };
+      }
+
+    } catch (error) {
+      logger.error('❌ Desktop exchange error:', error);
+      
+      // Parse wallet-specific errors
+      const { ExchangeUtils } = await import('./exchange-utils');
+      const parsedError = ExchangeUtils.parseWalletError(error);
+      
+      return {
+        success: false,
+        error: parsedError.message
+      };
     }
   };
 
