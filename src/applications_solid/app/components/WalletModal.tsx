@@ -1,6 +1,7 @@
 import type { Component, Accessor } from 'solid-js';
 import { createSignal, Show, For } from 'solid-js';
 import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
+import { getDeviceInfo } from '../lib/wallet/exchange-utils';
 
 // Import install URLs for wallet installation
 const WALLET_INSTALL_URLS = {
@@ -64,6 +65,16 @@ const WalletModal: Component<WalletModalProps> = (props) => {
     setIsConnecting(walletId);
     setConnectionError(null);
 
+    // Record user gesture for iOS authorization validation
+    const deviceInfo = getDeviceInfo();
+    if (deviceInfo.platform === 'iOS' && deviceInfo.isPhantomApp && walletId === 'phantom') {
+      console.log('[WalletModal] 🎯 Recording iOS user gesture for Phantom authorization');
+      // Store gesture timestamp for validation
+      if (typeof window !== 'undefined') {
+        (window as any).__lastUserGestureTime = Date.now();
+      }
+    }
+
     try {
       // Connect wallet using context system with timeout
       const connectionPromise = wallet.connectWallet(walletId);
@@ -82,17 +93,30 @@ const WalletModal: Component<WalletModalProps> = (props) => {
     } catch (error) {
       console.error('[WalletModal] Wallet connection failed:', error);
 
-      // Show user-friendly error message
+      // Enhanced error handling with iOS-specific messages
       let errorMessage = 'Connection failed';
+      const deviceInfo = getDeviceInfo();
+      
       if (error instanceof Error) {
-        if (error.message.includes('not been authorized')) {
-          errorMessage = 'App not authorized. Please try connecting again.';
+        if (error.message.includes('not been authorized') || error.message.includes('Authorization required')) {
+          if (deviceInfo.platform === 'iOS' && deviceInfo.isPhantomApp) {
+            errorMessage = 'Authorization required. Try refreshing the Phantom app or connecting again.';
+          } else {
+            errorMessage = 'App not authorized. Please try connecting again.';
+          }
         } else if (error.message.includes('timeout')) {
           errorMessage = 'Connection timeout - Please try again';
-        } else if (error.message.includes('User rejected')) {
+        } else if (error.message.includes('User rejected') || error.message.includes('cancelled')) {
           errorMessage = 'Connection cancelled by user';
+        } else if (error.message.includes('IOS_AUTHORIZATION_FAILED')) {
+          errorMessage = 'iOS authorization failed. Try refreshing Phantom app and connecting again.';
         } else {
           errorMessage = error.message;
+        }
+        
+        // Log recovery steps if available
+        if ((error as any).recoverySteps) {
+          console.log('[WalletModal] Recovery steps available:', (error as any).recoverySteps);
         }
       }
       
