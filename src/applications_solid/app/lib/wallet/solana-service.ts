@@ -133,8 +133,7 @@ export class EnhancedSolanaService {
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
   private readonly BLOCKHASH_CACHE_TTL = 30 * 1000; // 30 seconds
 
-  // Mobile-only Solana connection for direct blockchain interaction
-  private mobileConnection: Connection | null = null;
+  // REMOVED: mobileConnection - we never call Solana RPC from frontend
 
   constructor() {
     // No longer need to initialize Connection - using backend API
@@ -142,55 +141,19 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Create Solana connection for mobile direct transaction sending
-   * Only used on mobile for signTransaction + sendRawTransaction flow
+   * REMOVED: createMobileConnection
+   * We never call Solana RPC from the frontend!
    */
-  private createMobileConnection(): Connection {
-    if (!this.mobileConnection) {
-      // Use Phantom's preferred RPC or fallback to public mainnet-beta
-      const rpcEndpoint = 'https://api.mainnet-beta.solana.com';
-      this.mobileConnection = new Connection(rpcEndpoint, 'confirmed');
-      console.debug('[SolanaService] Created mobile Solana connection:', rpcEndpoint);
-    }
-    return this.mobileConnection;
-  }
 
   /**
-   * Send raw transaction to Solana network (mobile-only)
-   * Used for mobile flow: signTransaction -> sendRawTransaction
+   * REMOVED: sendRawTransaction
+   * 
+   * We NEVER submit Solana RPC calls from the frontend!
+   * All transaction submissions are handled by the backend.
+   * 
+   * For mobile: signTransaction -> submit signed tx to backend
+   * For desktop: signAndSendTransaction -> submit signature to backend
    */
-  async sendRawTransaction(
-    rawTransaction: Uint8Array,
-    options?: ConfirmOptions
-  ): Promise<{ signature: string }> {
-    try {
-      const connection = this.createMobileConnection();
-
-      console.debug('[SolanaService] Sending raw transaction to network...');
-
-      const signature = await connection.sendRawTransaction(rawTransaction, {
-        skipPreflight: false,
-        preflightCommitment: 'processed',
-        ...options
-      });
-
-      console.debug('[SolanaService] Raw transaction sent successfully:', signature);
-
-      // Wait for confirmation
-      const confirmation = await connection.confirmTransaction(signature, 'confirmed');
-
-      if (confirmation.value.err) {
-        throw new Error(`Transaction failed: ${confirmation.value.err}`);
-      }
-
-      console.debug('[SolanaService] Transaction confirmed:', signature);
-
-      return { signature };
-    } catch (error) {
-      console.error('[SolanaService] Failed to send raw transaction:', error);
-      throw new Error(`Failed to send transaction to network: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
 
   /**
    * Get recent blockhash from backend API (no rate limits)
@@ -998,7 +961,6 @@ export class EnhancedSolanaService {
     this.programInfoCache = null;
     this.programInfo = null;
     this.blockhashCache = null;
-    this.mobileConnection = null;
 
     // Note: Connection doesn't have a direct disconnect method
     // but we can nullify our reference if needed

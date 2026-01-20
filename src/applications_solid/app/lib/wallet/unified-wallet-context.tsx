@@ -788,12 +788,10 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       // Serialize signed transaction for backend
       const serializedTx = signedTransaction.serialize({ requireAllSignatures: false }).toString('base64');
       
-      // Send via backend first (mobile flow), then submit to exchange endpoint
-      logger.debug('📡 Sending signed transaction via backend...');
-      const networkResult = await solanaService.sendRawTransaction(signedTransaction.serialize({ requireAllSignatures: false }));
-      
-      // Submit to exchange endpoint with signed transaction
-      logger.debug('💱 Submitting to exchange endpoint...');
+      // **CRITICAL: For mobile, we submit the signed transaction to backend**
+      // **Backend will handle the submission to Solana mainnet**
+      // **WE NEVER SUBMIT SOLANA RPC CALLS FROM THE FRONTEND!**
+      logger.debug('💱 Submitting signed transaction to backend exchange endpoint...');
       const exchangeResponse = await middlewareFetch.Endpoints.Devbackend._Api.Testing.Usockets.Exchange.Solana.Splitdo.POST(
         Math.floor(solAmount * 1e9), // Convert to lamports
         serializedTx
@@ -801,9 +799,12 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
       if (exchangeResponse.status === 200) {
         logger.info('✅ Mobile exchange completed successfully');
+        
+        // The backend handles the transaction submission, so we don't have the signature yet
+        // but the exchange endpoint should return transaction info
         return {
           success: true,
-          signature: networkResult.signature
+          signature: exchangeResponse.data?.stage1_sol_confirmation?.result?.value?.slot ? 'backend-submitted' : undefined
         };
       } else {
         logger.error('❌ Exchange endpoint error:', exchangeResponse);
@@ -843,19 +844,28 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       // Create exchange transaction
       const exchangeTx = await solanaService.createExchangeTransaction(walletAddress, solAmount);
       
-      // Sign and send transaction (desktop flow)
-      logger.debug('✍️ Requesting wallet signature (desktop flow)...');
+      // Check if provider has signAndSendTransaction (Phantom desktop)
+      logger.debug('✍️ Requesting wallet sign and send (desktop flow)...');
       
-      // For desktop, we use signTransaction + sendRawTransaction for consistency
-      // This ensures compatibility with all wallet types
-      const signedTransaction = await provider.signTransaction(exchangeTx.transaction);
-      const networkResult = await solanaService.sendRawTransaction(signedTransaction.serialize({ requireAllSignatures: false }));
+      let result: { signature?: string };
       
-      if (!networkResult.signature) {
-        throw new Error('No transaction signature received from network');
+      // Try to access signAndSendTransaction on the provider if available
+      const phantomProvider = (provider as any);
+      if (typeof phantomProvider.signAndSendTransaction === 'function') {
+        // Desktop Phantom has signAndSendTransaction
+        logger.debug('🖥️ Using Phantom signAndSendTransaction');
+        result = await phantomProvider.signAndSendTransaction(exchangeTx.transaction);
+      } else if (typeof window !== 'undefined' && (window as any).solana?.signAndSendTransaction) {
+        // Fallback: try window.solana directly
+        logger.debug('🖥️ Using window.solana.signAndSendTransaction');
+        result = await (window as any).solana.signAndSendTransaction(exchangeTx.transaction);
+      } else {
+        throw new Error('signAndSendTransaction not available on this wallet provider');
       }
       
-      const result = { signature: networkResult.signature };
+      if (!result.signature) {
+        throw new Error('No transaction signature received from wallet');
+      }
 
       // Get user's SPLITDO token account address
       const splitdoMint = await solanaService.getSplitdoMint();
