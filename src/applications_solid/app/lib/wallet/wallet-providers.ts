@@ -29,6 +29,7 @@ export interface WalletConnectionResult {
     address: string;
     publicKey: PublicKey;
     provider: WalletProvider;
+    name: string;
   };
   error?: string;
 }
@@ -110,147 +111,80 @@ export class PhantomWalletProvider implements WalletProvider {
   private publicKey: PublicKey | null = null;
 
   constructor() {
-    // 🚨 SECURITY FIX: Do NOT access window.solana in constructor
-    // Accessing window.solana auto-connects for trusted sites
+    // 🚨 SECURITY FIX: Do NOT access provider in constructor
+    // Accessing provider properties might trigger auto-connect behavior for trusted sites
     // We'll defer this to when user explicitly requests connection
   }
 
   /**
-   * 🚨 ENHANCED SECURITY FIX: Force complete disconnect with multiple methods
-   * This ensures Phantom doesn't cache connection state between sessions
+   * Helper to get the Phantom provider from window
+   * Follows official docs: https://docs.phantom.app/solana/detecting-the-provider
    */
-  private async forceCompleteDisconnect(): Promise<void> {
-    if (!this.provider) return;
-    
-    try {
-      console.log('[Phantom] 🧹 Starting aggressive disconnect sequence...');
-      
-      // Method 1: Standard disconnect
-      await this.provider.disconnect();
-      console.log('[Phantom] ✅ Standard disconnect completed');
-      
-      // Method 2: Try to clear any cached permissions (if supported)
-      if ((this.provider as any).request) {
-        try {
-          await (this.provider as any).request({
-            method: 'wallet_revokePermissions',
-            params: [{ 
-              eth_accounts: {} 
-            }]
-          });
-          console.log('[Phantom] ✅ Permissions revoked');
-        } catch (e) {
-          // Not all wallets support this - ignore errors
-          console.log('[Phantom] Permission revoke not supported (this is normal)');
-        }
-      }
-      
-      // Method 3: Multiple disconnect attempts to be extra sure
-      try {
-        await this.provider.disconnect();
-        console.log('[Phantom] ✅ Second disconnect completed');
-      } catch (e) {
-        // Already disconnected - this is fine
-      }
-      
-    } catch (error) {
-      console.log('[Phantom] Disconnect sequence completed with warnings:', error);
-      // Don't throw - we want to continue with connection attempt
-    }
-  }
+  private getProvider(): PhantomProvider | null {
+    if (typeof window === 'undefined') return null;
 
-  /**
-   * 🚨 ENHANCED SECURITY FIX: Force domain untrusting
-   * This attempts to clear trusted domain status to ensure authorization popup
-   */
-  private async forceDomainUntrusting(): Promise<void> {
-    if (!this.provider) return;
-    
-    try {
-      console.log('[Phantom] 🔓 Attempting to clear trusted domain status...');
-      
-      // Method 1: Try to request permissions (this can reset trust state)
-      if ((this.provider as any).request) {
-        try {
-          await (this.provider as any).request({
-            method: 'wallet_requestPermissions',
-            params: [{}]
-          });
-          console.log('[Phantom] ✅ Permission request sent to reset trust state');
-        } catch (e) {
-          // This might fail - that's okay
-          console.log('[Phantom] Permission request method not supported (normal)');
-        }
+    // 1. Check for window.phantom.solana (Recommended)
+    if ('phantom' in window) {
+      const provider = (window as any).phantom?.solana;
+      if (provider?.isPhantom) {
+        return provider;
       }
-      
-      // Method 2: Clear any window.solana reference temporarily
-      const originalSolana = window.solana;
-      try {
-        // @ts-ignore - Temporarily clear reference
-        delete window.solana;
-        // @ts-ignore
-        window.solana = undefined;
-        
-        // Short delay to let Phantom detect the clearing
-        await new Promise(resolve => setTimeout(resolve, 50));
-        
-        // Restore reference
-        window.solana = originalSolana;
-        console.log('[Phantom] ✅ Provider reference cleared and restored');
-      } catch (e) {
-        // Restore reference if clearing failed
-        window.solana = originalSolana;
-      }
-      
-    } catch (error) {
-      console.log('[Phantom] Domain untrusting completed with warnings:', error);
-      // Don't throw - we want to continue with connection attempt
     }
+
+    // 2. Fallback to window.solana (Legacy)
+    const legacyProvider = window.solana;
+    if (legacyProvider?.isPhantom) {
+      return legacyProvider;
+    }
+
+    return null;
   }
 
   isAvailable(): boolean {
-    // 🚨 SECURITY FIX: Check availability without auto-connecting
-    if (typeof window === 'undefined') return false;
-    // Only check if phantom exists, don't store reference yet
-    return !!(window.solana?.isPhantom);
+    return !!this.getProvider();
+  }
+
+  isConnected(): boolean {
+    return !!this.provider?.isConnected && !!this.publicKey;
+  }
+
+  getPublicKey(): PublicKey | null {
+    return this.publicKey;
   }
 
   async connect(): Promise<{ publicKey: PublicKey }> {
-    if (!this.isAvailable()) {
+    const provider = this.getProvider();
+    
+    if (!provider) {
       throw new WalletNotFoundError('Phantom');
     }
 
-    // 🚨 SECURITY FIX: Only get provider reference when user explicitly connects
-    if (!this.provider && typeof window !== 'undefined') {
-      this.provider = window.solana || null;
-      console.log('🚨 [Phantom DEBUG] Provider reference obtained on explicit user connection');
-    }
-
-    if (!this.provider) {
-      throw new WalletNotFoundError('Phantom');
-    }
+    this.provider = provider;
 
     try {
-      console.log('[Phantom] Starting fresh connection with explicit user authorization');
+      console.log('[Phantom] Starting fresh connection...');
 
-      // 🚨 ENHANCED SECURITY FIX: Aggressive permission clearing and disconnect
-      await this.forceCompleteDisconnect();
+      // Ensure clean state by disconnecting first
+      // This handles cases where the wallet thinks it's connected but the app doesn't
+      try {
+        await this.provider.disconnect();
+      } catch (e) {
+        // Ignore disconnect errors
+      }
 
-      // 🚨 ENHANCED SECURITY FIX: Force domain untrusting to ensure popup appears
-      await this.forceDomainUntrusting();
-
-      // Clear local state to ensure clean slate
+      // Clear local state
       this.publicKey = null;
 
-      // Longer delay to allow Phantom to process all clearing operations
-      await new Promise(resolve => setTimeout(resolve, 250));
-
-      // Connect with onlyIfTrusted: false to force popup
-      console.log('[Phantom] Initiating connection with forced popup...');
-      const response = await this.provider.connect({ onlyIfTrusted: false });
+      // Connect to Phantom
+      // NOTE: If the app is "Trusted" by Phantom, this will resolve immediately without a popup.
+      // This is standard Phantom behavior and cannot be bypassed programmatically.
+      // Passing { onlyIfTrusted: false } is the default behavior.
+      console.log('[Phantom] Requesting connection (popup will appear if not already trusted)...');
+      const response = await this.provider.connect();
+      
       this.publicKey = new PublicKey(response.publicKey.toString());
-
-      console.log('[Phantom] ✅ Connection established with explicit user authorization');
+      console.log('[Phantom] ✅ Connection established');
+      
       return { publicKey: this.publicKey };
     } catch (error) {
       // Clear state on error
@@ -283,6 +217,11 @@ export class PhantomWalletProvider implements WalletProvider {
     }
 
     if (!this.provider) {
+      // Try to re-acquire provider if missing but logically connected
+      this.provider = this.getProvider();
+    }
+
+    if (!this.provider) {
       throw new WalletError('Phantom provider not available', 'PROVIDER_ERROR', 'Phantom');
     }
 
@@ -294,55 +233,22 @@ export class PhantomWalletProvider implements WalletProvider {
   }
 
   async disconnect(): Promise<void> {
-    console.log('[Phantom] 🔌 Starting comprehensive disconnect to prevent cached connections');
+    console.log('[Phantom] 🔌 Disconnecting...');
 
-    // 🚨 ENHANCED SECURITY FIX: Use aggressive disconnect sequence
-    await this.forceCompleteDisconnect();
+    if (this.provider) {
+      try {
+        await this.provider.disconnect();
+        console.log('[Phantom] ✅ Provider disconnected');
+      } catch (error) {
+        console.warn('[Phantom] Error disconnecting provider:', error);
+      }
+    }
 
-    // 🚨 ENHANCED SECURITY FIX: Force domain untrusting on disconnect too
-    await this.forceDomainUntrusting();
-
-    // 🚨 SECURITY FIX: Clear provider reference to force fresh connection next time
+    // Clear local state
     this.provider = null;
     this.publicKey = null;
 
-    console.log('[Phantom] ✅ Comprehensive disconnect completed - provider and state cleared');
-  }
-
-  isConnected(): boolean {
-    // 🚨 SECURITY FIX: If no provider reference, we're definitely not connected
-    if (!this.provider) {
-      return false;
-    }
-
-    // SECURITY FIX: Enhanced connection state validation
-    // Ensure connection state matches actual user authorization
-    const hasProvider = !!this.provider;
-    const hasPublicKey = !!this.publicKey;
-    const providerConnected = !!this.provider?.isConnected;
-    const providerPublicKey = this.provider?.publicKey?.toString();
-    const localPublicKey = this.publicKey?.toString();
-
-    // Validate that all connection states are consistent
-    const isValid = hasProvider &&
-                   hasPublicKey &&
-                   providerConnected &&
-                   providerPublicKey &&
-                   localPublicKey &&
-                   providerPublicKey === localPublicKey;
-
-    if (!isValid && (hasProvider || hasPublicKey || providerConnected)) {
-      console.warn('[Phantom] Connection state inconsistency detected, forcing clean state');
-      // Clear inconsistent state
-      this.provider = null;
-      this.publicKey = null;
-    }
-
-    return isValid;
-  }
-
-  getPublicKey(): PublicKey | null {
-    return this.publicKey;
+    console.log('[Phantom] ✅ Disconnect completed');
   }
 }
 
@@ -357,7 +263,7 @@ export class MetaMaskSolanaProvider implements WalletProvider {
 
   constructor() {
     if (typeof window !== 'undefined') {
-      this.provider = window.ethereum;
+      this.provider = window.ethereum || null;
     }
   }
 
@@ -418,7 +324,7 @@ export class WalletProviderFactory {
     ['phantom', () => new PhantomWalletProvider()],
     ['metamask', () => new MetaMaskSolanaProvider()],
     // ['walletconnect', () => new WalletConnectProvider()], // Commented out to fix circular dependency
-  ]);
+  ] as [string, () => WalletProvider][]);
 
   static createProvider(id: string): WalletProvider | null {
     const factory = this.providers.get(id);
@@ -485,7 +391,8 @@ export class MultiWalletService {
       const wallet = {
         address: publicKey.toString(),
         publicKey,
-        provider
+        provider,
+        name: provider.name
       };
 
       this.emitEvent({ type: 'connected', providerId, wallet });
@@ -575,7 +482,7 @@ export class MultiWalletService {
 // Wallet event types
 export type WalletEvent =
   | { type: 'connecting'; providerId: string }
-  | { type: 'connected'; providerId: string; wallet: { address: string; publicKey: PublicKey; provider: WalletProvider } }
+  | { type: 'connected'; providerId: string; wallet: { address: string; publicKey: PublicKey; provider: WalletProvider; name: string } }
   | { type: 'disconnected'; providerId: string }
   | { type: 'error'; error: string; providerId?: string };
 
