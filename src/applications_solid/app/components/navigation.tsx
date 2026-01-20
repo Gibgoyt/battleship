@@ -1,14 +1,11 @@
 import type { Component } from 'solid-js';
 import { Show } from 'solid-js';
-import ThemeToggle from './ThemeToggle';
 
 export type Page = 'dashboard' | 'profile' | 'splitdo-exchange';
 
 interface NavigationProps {
   currentPage: Page;
   onPageChange: (page: Page) => void;
-  isDark: boolean;
-  updateTheme: (isDark: boolean) => void;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -91,14 +88,10 @@ const Navigation: Component<NavigationProps> = (props) => {
           </button>
         </div>
 
-        {/* Theme Toggle at Bottom */}
+        {/* App Info at Bottom */}
         <div class="p-6 border-t" style="border-color: var(--crypto-border);">
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-sm font-medium" style="color: var(--crypto-text-secondary);">Appearance</span>
-            <ThemeToggle isDark={props.isDark} onToggle={props.updateTheme} />
-          </div>
           <p class="text-xs" style="color: var(--crypto-text-muted);">
-            {props.isDark ? 'Dark mode active' : 'Light mode active'}
+            SPLITDO v1.0
           </p>
         </div>
       </nav>

@@ -47,76 +47,20 @@ const logger = createLogger('[SolidJS App]');
 
 const AppContent: Component<{ firebaseToken?: string }> = (props) => {
   const [currentPage, setCurrentPage] = createSignal<Page>('dashboard')
-  const [isDark, setIsDark] = createSignal(false)
   const [isNavOpen, setIsNavOpen] = createSignal(false)
   const [authStore, setAuthStore] = createSignal<ReturnType<typeof import('./middleware/firebase/auth-store').getGlobalAuthStore> | null>(null)
-  const [authSetup, setAuthSetup] = createSignal<ReturnType<typeof import('./middleware/firebase/auth-middleware').setupAuthMiddleware> | null>(null)
   const middleware = useMiddleware()
 
   // QR Modal state from wallet context
   const qrModal = useWalletConnectQRModal()
 
-  // Setup auth state change listeners (moved from onMount)
-  let isProcessingAuthChange = false;
-  createEffect(() => {
-    const authStoreInstance = authStore();
-    const authSetupInstance = authSetup();
-
-    if (!authStoreInstance || !authSetupInstance) {
-      return; // Wait for initialization
-    }
-
-    const isAuthenticated = authStoreInstance.isAuthenticated();
-    const tokenStatus = authStoreInstance.tokenStatus();
-
-    logger.debug('Auth state changed', {
-      isAuthenticated,
-      tokenStatus,
-      currentRoute: middleware.currentRoute(),
-    });
-
-    // PREVENT LOOP: Skip if already processing auth changes
-    if (isProcessingAuthChange) {
-      logger.debug('Skipping auth state change handling - already processing');
-      return;
-    }
-
-    isProcessingAuthChange = true;
-    try {
-      // Handle auth state changes
-      authSetupInstance.middleware.onAuthStateChange(isAuthenticated);
-      authSetupInstance.middleware.onTokenStatusChange(tokenStatus);
-    } finally {
-      // Reset flag after a brief timeout to allow processing to complete
-      setTimeout(() => {
-        isProcessingAuthChange = false;
-      }, 100);
-    }
-  });
-
-  // Cleanup on unmount (moved from onMount)
-  onCleanup(() => {
-    logger.debug('Cleaning up Firebase auth services');
-    const authSetupInstance = authSetup();
-    const authStoreInstance = authStore();
-
-    if (authSetupInstance) {
-      authSetupInstance.middleware.cleanup();
-    }
-    if (authStoreInstance) {
-      authStoreInstance.cleanup();
-    }
-  });
-
-  // Detect theme from localStorage and DOM class (shared with Astro app)
+  // Force dark mode on mount
   onMount(() => {
     if (typeof window === 'undefined') return
-    
-    const isDarkMode = localStorage.getItem('darkMode') === 'true' || 
-      (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches) ||
-      document.documentElement.classList.contains('dark')
-    
-    setIsDark(isDarkMode)
+
+    // Always enable dark mode
+    document.documentElement.classList.add('dark')
+    localStorage.setItem('darkMode', 'true')
     
     // Initialize page from URL pathname
     const pathname = window.location.pathname
@@ -165,27 +109,17 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
     }
   })
 
-  const updateTheme = (dark: boolean) => {
-    setIsDark(dark)
-    localStorage.setItem('darkMode', dark.toString())
-    if (dark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  }
-
   const renderPage = () => {
     const page = currentPage()
     switch (page) {
       case 'dashboard':
-        return <DashboardPage isDark={isDark()} />
+        return <DashboardPage isDark={true} />
       case 'profile':
-        return <ProfilePage isDark={isDark()} />
+        return <ProfilePage isDark={true} />
       case 'splitdo-exchange':
-        return <WalletPage isDark={isDark()} />
+        return <WalletPage isDark={true} />
       default:
-        return <DashboardPage isDark={isDark()} />
+        return <DashboardPage isDark={true} />
     }
   }
 
@@ -208,28 +142,25 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
       logger.info('✅ Auth store initialization complete');
 
       // Setup Firebase auth middleware
-      const authSetupInstance = setupAuthMiddleware({
+      const authSetup = setupAuthMiddleware({
         protectedRoutes: ['/app'],
         publicOnlyRoutes: ['/auth/sign-in', '/auth/sign-up'],
         loginRoute: '/auth/sign-in',
         dashboardRoute: '/app/dashboard',
       });
 
-      // Set the authSetup signal for use in effects
-      setAuthSetup(authSetupInstance);
-
       // Initialize auth middleware (now that auth store is ready)
-      await authSetupInstance.initialize();
+      await authSetup.initialize();
 
       // Setup manual navigation handling for browser back/forward
-      authSetupInstance.setupManualNavigation();
+      authSetup.setupManualNavigation();
 
       // Integrate with existing middleware system
       middleware.beforeNavigate(async (from, to) => {
         logger.debug('Before navigate middleware', { from, to });
 
         // Use Firebase auth middleware for auth checks
-        const allowed = await authSetupInstance.middleware.beforeNavigate(from, to);
+        const allowed = await authSetup.middleware.beforeNavigate(from, to);
 
         if (allowed) {
           logger.debug('Navigation allowed by Firebase auth middleware');
@@ -244,10 +175,48 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
         logger.debug('After navigate middleware', { to });
 
         // Run Firebase auth middleware after navigation
-        await authSetupInstance.middleware.afterNavigate('', to);
+        await authSetup.middleware.afterNavigate('', to);
 
         // Keep existing logging middleware
         loggingMiddleware()(to);
+      });
+
+      // Setup auth state change listeners
+      let isProcessingAuthChange = false;
+      createEffect(() => {
+        const isAuthenticated = authStoreInstance.isAuthenticated();
+        const tokenStatus = authStoreInstance.tokenStatus();
+
+        logger.debug('Auth state changed', {
+          isAuthenticated,
+          tokenStatus,
+          currentRoute: middleware.currentRoute(),
+        });
+
+        // PREVENT LOOP: Skip if already processing auth changes
+        if (isProcessingAuthChange) {
+          logger.debug('Skipping auth state change handling - already processing');
+          return;
+        }
+
+        isProcessingAuthChange = true;
+        try {
+          // Handle auth state changes
+          authSetup.middleware.onAuthStateChange(isAuthenticated);
+          authSetup.middleware.onTokenStatusChange(tokenStatus);
+        } finally {
+          // Reset flag after a brief timeout to allow processing to complete
+          setTimeout(() => {
+            isProcessingAuthChange = false;
+          }, 100);
+        }
+      });
+
+      // Cleanup on unmount
+      onCleanup(() => {
+        logger.debug('Cleaning up Firebase auth services');
+        authSetup.middleware.cleanup();
+        authStoreInstance.cleanup();
       });
 
       logger.debug('Firebase auth services initialized successfully');
@@ -261,18 +230,26 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
   })
 
   return (
-    <div class={`h-screen flex overflow-hidden ${isDark() ? 'bg-zinc-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
+    <div class="h-screen flex overflow-hidden bg-zinc-900 text-gray-100">
       <Navigation
         currentPage={currentPage()}
         onPageChange={handlePageChange}
-        isDark={isDark()}
-        updateTheme={updateTheme}
         isOpen={isNavOpen()}
         onClose={() => setIsNavOpen(false)}
       />
 
+      {/* Hamburger Menu Button (Mobile Only) */}
+      <button
+        onClick={() => setIsNavOpen(true)}
+        class="fixed top-4 left-4 z-40 lg:hidden w-10 h-10 rounded-lg bg-crypto-bg-secondary border border-crypto-border flex items-center justify-center"
+      >
+        <svg class="w-6 h-6 crypto-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+
       {/* Main Content */}
-      <main class={`flex-1 overflow-auto ml-64 transition-all duration-300`}>
+      <main class="flex-1 overflow-auto lg:ml-64 pt-16 lg:pt-0 transition-all duration-300">
         {renderPage()}
       </main>
 
@@ -286,14 +263,14 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
             message={sessionNotification.message}
             onRedirect={sessionNotification.onRedirect}
             onDismiss={sessionNotification.onDismiss}
-            isDark={isDark()}
+            isDark={true}
           />
         );
       })()}
 
       {/* WalletConnect QR Modal */}
       <WalletConnectQRModal
-        isDark={isDark()}
+        isDark={true}
         isOpen={qrModal.isQRModalOpen}
         onClose={qrModal.closeQRModal}
         qrData={qrModal.qrData}
