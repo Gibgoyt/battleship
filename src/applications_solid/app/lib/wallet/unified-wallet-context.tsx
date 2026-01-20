@@ -571,13 +571,12 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
           if (currentWallet?.address) {
             try {
-              // Use backend API to get SOL balance
-              const solResponse = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Wallet[currentWallet.address].Balance.GET(currentWallet.address);
+              // Use backend API to get SOL balance - endpoint format: /api/solana/wallet/:pubkey/balance
+              const solResponse = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Wallet._Pubkey.Balance.GET(currentWallet.address);
 
               if (solResponse.status === 200 && solResponse.data.success) {
-                const lamports = solResponse.data.balance || 0;
-                const LAMPORTS_PER_SOL = 1_000_000_000;
-                solBalanceValue = lamports / LAMPORTS_PER_SOL;
+                // Response already has sol field converted
+                solBalanceValue = solResponse.data.sol || 0;
                 logger.debug('✅ Fetched SOL balance from backend:', solBalanceValue, 'SOL');
               } else {
                 logger.warn('⚠️ Backend API returned non-success response for SOL balance');
