@@ -11,12 +11,20 @@ export interface SolanaWalletConfig {
 }
 
 // Solana network configuration
-// Using Ankr public RPC - better rate limits than default Solana RPC
+// Multiple fallback RPCs to avoid rate limiting
 export const SOLANA_NETWORKS = {
   devnet: "https://api.devnet.solana.com",
   testnet: "https://api.testnet.solana.com",
-  mainnet: "https://rpc.ankr.com/solana"
+  mainnet: "https://api.mainnet-beta.solana.com"
 } as const;
+
+// Fallback RPC endpoints if primary fails
+export const SOLANA_RPC_FALLBACKS = [
+  "https://api.mainnet-beta.solana.com",
+  "https://solana.public-rpc.com",
+  "https://api.metaplex.solana.com",
+  "https://solana-api.projectserum.com"
+];
 
 // Current network - MAINNET for production
 export const CURRENT_NETWORK = "mainnet" as keyof typeof SOLANA_NETWORKS;

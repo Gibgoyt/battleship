@@ -30,7 +30,7 @@ import {
   TokenAccountNotFoundError,
   TokenInvalidAccountOwnerError
 } from '@solana/spl-token';
-import { SPLITDO_CONFIG, ERROR_MESSAGES, BACKEND_SOLANA_API, SOLANA_NETWORKS, CURRENT_NETWORK } from './walletconnect-config';
+import { SPLITDO_CONFIG, ERROR_MESSAGES, BACKEND_SOLANA_API, SOLANA_NETWORKS, CURRENT_NETWORK, SOLANA_RPC_FALLBACKS } from './walletconnect-config';
 import { SolanaBrowserError } from './solana-browser-safe';
 import type { WalletProvider } from './wallet-providers';
 import { type SplitdoRawAmount } from './token-utils';
@@ -209,23 +209,35 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Get wallet balance directly from Solana RPC
+   * Get wallet balance directly from Solana RPC with fallbacks
    */
   async getWalletBalance(walletAddress: string): Promise<number> {
-    try {
-      // Create a connection to Solana mainnet
-      const connection = new Connection(SOLANA_NETWORKS[CURRENT_NETWORK], 'confirmed');
+    const publicKey = new PublicKey(walletAddress);
+    const rpcEndpoints = SOLANA_RPC_FALLBACKS;
 
-      // Query balance directly from Solana
-      const publicKey = new PublicKey(walletAddress);
-      const balance = await connection.getBalance(publicKey);
+    // Try each RPC endpoint until one works
+    for (let i = 0; i < rpcEndpoints.length; i++) {
+      try {
+        const connection = new Connection(rpcEndpoints[i], 'confirmed');
+        const balance = await connection.getBalance(publicKey);
 
-      console.debug('[SolanaService] ✅ Fetched SOL balance directly from Solana:', balance / LAMPORTS_PER_SOL, 'SOL');
-      return balance;
-    } catch (error) {
-      console.error('[SolanaService] Failed to get wallet balance:', error);
-      throw new Error('Failed to get wallet balance');
+        console.debug(`[SolanaService] ✅ Fetched SOL balance from RPC ${i + 1}/${rpcEndpoints.length}:`, balance / LAMPORTS_PER_SOL, 'SOL');
+        return balance;
+      } catch (error) {
+        console.warn(`[SolanaService] RPC ${i + 1}/${rpcEndpoints.length} failed:`, error);
+
+        // If this was the last RPC, throw the error
+        if (i === rpcEndpoints.length - 1) {
+          console.error('[SolanaService] All RPC endpoints failed');
+          throw new Error('Failed to get wallet balance from all RPC endpoints');
+        }
+
+        // Otherwise, continue to next RPC
+        continue;
+      }
     }
+
+    throw new Error('Failed to get wallet balance');
   }
 
   /**
