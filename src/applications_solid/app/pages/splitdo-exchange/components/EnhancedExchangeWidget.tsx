@@ -1,48 +1,32 @@
 import type { Component } from 'solid-js';
 import { createSignal, createEffect, createMemo, Show, onMount } from 'solid-js';
-import {
-  useProgramInfo,
-  useExchangeModal,
-  useCreateAccountModal,
-  useWallet,
-  useSplitdoATA,
-  useWalletBalances,
-  useWalletModal,
-  useSolPrice
-} from 'src/applications_solid/app/lib/wallet/wallet-context';
+import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
 
 interface EnhancedExchangeWidgetProps {
   isDark: boolean;
 }
 
 const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) => {
-  const { programInfo, fetchProgramInfo } = useProgramInfo();
-  const { solPrice, fetchSolPrice } = useSolPrice();
-  const { openExchangeModal } = useExchangeModal();
-  const { openCreateAccountModal } = useCreateAccountModal();
-  const { wallet, connectionStatus } = useWallet();
-  const { splitdoATA, createSplitdoATA } = useSplitdoATA();
-  const { solBalance } = useWalletBalances();
-  const { openModal } = useWalletModal();
+  const wallet = useUnifiedWallet();
 
   // Smart initialization - check if data needs to be fetched
   onMount(() => {
     // Check if exchange rate data is available, if not fetch it
-    const currentProgramInfo = programInfo();
-    if (!currentProgramInfo.loading && currentProgramInfo.exchangeRate === 0) {
+    const currentExchangeRates = wallet.exchangeRates();
+    if (!wallet.isPersistentDataLoading() && (!currentExchangeRates || currentExchangeRates.exchangeRate === 0)) {
       console.log('[EnhancedExchangeWidget] No exchange rate available, fetching...');
-      fetchProgramInfo();
-    } else if (currentProgramInfo.exchangeRate > 0) {
-      console.log('[EnhancedExchangeWidget] Using available exchange rate:', currentProgramInfo.exchangeRate);
+      wallet.fetchExchangeRates();
+    } else if (currentExchangeRates && currentExchangeRates.exchangeRate > 0) {
+      console.log('[EnhancedExchangeWidget] Using available exchange rate:', currentExchangeRates.exchangeRate);
     }
 
     // Check if SOL price data is available, if not fetch it
-    const currentSolPrice = solPrice();
-    if (!currentSolPrice.loading && currentSolPrice.usd === 0) {
+    const currentSolPrice = wallet.solPrice();
+    if (!wallet.isPersistentDataLoading() && (!currentSolPrice || currentSolPrice.price === 0)) {
       console.log('[EnhancedExchangeWidget] No SOL price available, fetching...');
-      fetchSolPrice();
-    } else if (currentSolPrice.usd > 0) {
-      console.log('[EnhancedExchangeWidget] Using available SOL price:', currentSolPrice.usd);
+      wallet.fetchSolPrice();
+    } else if (currentSolPrice && currentSolPrice.price > 0) {
+      console.log('[EnhancedExchangeWidget] Using available SOL price:', currentSolPrice.price);
     }
   });
 
@@ -57,12 +41,12 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
 
   const handleExchange = () => {
     // Open exchange modal directly like the original ExchangeSection
-    openExchangeModal();
+    wallet.openExchangeModal();
   };
 
   const handleCreateAccount = () => {
     console.log('[EnhancedExchangeWidget] Opening create account modal...');
-    openCreateAccountModal();
+    wallet.openCreateAccountModal();
   };
 
   return (
@@ -94,11 +78,11 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
             </span>
             <div class="text-right">
               <div class="exchange-rate">
-                1 SOL = {formatCurrency((solPrice().usd || 135.98) / 0.11, 2)} SPLITDO
+                1 SOL = {formatCurrency((wallet.solPrice()?.price || 135.98) / 0.11, 2)} SPLITDO
               </div>
-              <Show when={solPrice().usd > 0}>
+              <Show when={wallet.solPrice()?.price && wallet.solPrice()!.price > 0}>
                 <div class={`text-xs crypto-text-muted`}>
-                  SOL: ${formatCurrency(solPrice().usd)} USD
+                  SOL: ${formatCurrency(wallet.solPrice()!.price)} USD
                 </div>
               </Show>
             </div>
@@ -133,11 +117,11 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
           </div>
           <div class="text-right">
             <div class={`text-lg font-bold crypto-text-primary`}>
-              {formatCurrency(solBalance()?.sol || 0, 4)}
+              {formatCurrency(wallet.solBalance()?.sol || 0, 4)}
             </div>
-            <Show when={solPrice().usd > 0 && solBalance()?.sol}>
+            <Show when={wallet.solPrice()?.price && wallet.solPrice()!.price > 0 && wallet.solBalance()?.sol}>
               <div class={`text-xs crypto-text-muted`}>
-                ≈ ${formatCurrency((solBalance()?.sol || 0) * solPrice().usd)}
+                ≈ ${formatCurrency((wallet.solBalance()?.sol || 0) * wallet.solPrice()!.price)}
               </div>
             </Show>
           </div>
@@ -158,11 +142,11 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
           </div>
           <div class="text-right">
             <div class={`text-lg font-bold crypto-text-primary`}>
-              {formatCurrency(splitdoATA().balance?.uiAmount || 0)}
+              {formatCurrency(wallet.splitdoATA().balance?.amount || 0)}
             </div>
-            <Show when={splitdoATA().balance?.uiAmount}>
+            <Show when={wallet.splitdoATA().balance?.amount}>
               <div class={`text-xs crypto-text-muted`}>
-                ≈ ${formatCurrency((splitdoATA().balance?.uiAmount || 0) * 0.11)}
+                ≈ ${formatCurrency((wallet.splitdoATA().balance?.amount || 0) * 0.11)}
               </div>
             </Show>
           </div>
@@ -171,8 +155,8 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
 
       {/* Action Button */}
       <div class="mt-6">
-        <Show when={connectionStatus() !== 'connected'} fallback={
-          <Show when={splitdoATA().status !== 'exists'} fallback={
+        <Show when={wallet.connectionStatus() !== 'connected'} fallback={
+          <Show when={wallet.splitdoATA().status !== 'exists'} fallback={
             <button
               onClick={handleExchange}
               class="btn-crypto-success w-full py-4 px-6 rounded-xl font-bold text-lg transition-all hover:shadow-lg hover:shadow-crypto-accent-green/20"
@@ -196,7 +180,7 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
           </Show>
         }>
           <button
-            onClick={openModal}
+            onClick={wallet.openWalletModal}
             class="btn-crypto-primary w-full py-4 text-lg"
           >
             Connect Wallet to Exchange

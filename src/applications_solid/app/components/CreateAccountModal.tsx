@@ -1,6 +1,6 @@
 import type { Component } from 'solid-js';
 import { Show, createSignal, createEffect } from 'solid-js';
-import { useCreateAccountModal, useWallet, useWalletConnection, useSplitdoATA } from 'src/applications_solid/app/lib/wallet/wallet-context';
+import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
 import { MobileWalletInstallation } from './MobileWalletInstallation';
 import { detectMobilePlatform } from 'src/applications_solid/app/lib/wallet/mobile-detection';
 import { executeMobileWalletDeepLink, attemptMobileWalletConnection } from 'src/applications_solid/app/lib/wallet/mobile-wallet-connector';
@@ -11,15 +11,12 @@ export interface CreateAccountModalProps {
 }
 
 export const CreateAccountModal: Component<CreateAccountModalProps> = (props) => {
-  const { isCreateAccountModalOpen, closeCreateAccountModal } = useCreateAccountModal();
-  const { wallet, connectionStatus } = useWallet();
-  const { connectWallet } = useWalletConnection();
-  const { createSplitdoATA, splitdoATA } = useSplitdoATA();
+  const wallet = useUnifiedWallet();
 
   // DEBUG: Log modal state changes
   createEffect(() => {
     console.log('[CreateAccountModal] Modal state changed:', {
-      isOpen: isCreateAccountModalOpen(),
+      isOpen: wallet.isCreateAccountModalOpen(),
       componentRendered: true,
       props: props
     });
@@ -35,14 +32,14 @@ export const CreateAccountModal: Component<CreateAccountModalProps> = (props) =>
 
   // Auto-advance to create step if wallet already connected
   const checkWalletAndAdvance = () => {
-    if (connectionStatus() === 'connected' && wallet()) {
+    if (wallet.connectionStatus() === 'connected' && wallet.wallet()) {
       setStep('create');
     }
   };
 
   // Auto-advance to create step when modal opens and wallet is connected
   createEffect(() => {
-    if (isCreateAccountModalOpen() && connectionStatus() === 'connected' && wallet()) {
+    if (wallet.isCreateAccountModalOpen() && wallet.connectionStatus() === 'connected' && wallet.wallet()) {
       console.log('[CreateAccountModal] Wallet connected, advancing to create step');
       setStep('create');
     }
@@ -56,7 +53,7 @@ export const CreateAccountModal: Component<CreateAccountModalProps> = (props) =>
   };
 
   const handleClose = () => {
-    closeCreateAccountModal();
+    wallet.closeCreateAccountModal();
     // Reset all state when closing
     setStep('wallet');
     setIsConnecting(false);
@@ -68,7 +65,7 @@ export const CreateAccountModal: Component<CreateAccountModalProps> = (props) =>
 
 
   return (
-    <Show when={isCreateAccountModalOpen()}>
+    <Show when={wallet.isCreateAccountModalOpen()}>
     <div
       class="fixed inset-0 z-50 flex items-center justify-center"
       onClick={handleBackdropClick}
@@ -117,7 +114,7 @@ export const CreateAccountModal: Component<CreateAccountModalProps> = (props) =>
                 isCreating={isCreating}
                 creationError={creationError}
                 creationSuccess={creationSuccess}
-                createSplitdoATA={createSplitdoATA}
+                createSplitdoATA={wallet.createSplitdoATA}
                 setIsCreating={setIsCreating}
                 setCreationError={setCreationError}
                 setCreationSuccess={setCreationSuccess}
@@ -127,19 +124,19 @@ export const CreateAccountModal: Component<CreateAccountModalProps> = (props) =>
           >
             <WalletSelection
               isDark={props.isDark}
-              connectionStatus={connectionStatus}
+              connectionStatus={wallet.connectionStatus}
               isConnecting={isConnecting}
               showMobileInstallation={showMobileInstallation}
               mobileInstallationPlatform={mobileInstallationPlatform}
               onSelectPhantom={async () => {
-                if (connectionStatus() === 'connected') {
+                if (wallet.connectionStatus() === 'connected') {
                   // Already connected, go to create
                   setStep('create');
                 } else {
                   // Need to connect wallet first
                   setIsConnecting(true);
                   try {
-                    await connectWallet('phantom');
+                    await wallet.connectWallet('phantom');
                     setStep('create');
                   } catch (error: any) {
                     console.error('[CreateAccountModal] Connection failed:', error);

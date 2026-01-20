@@ -38,6 +38,7 @@ import type { WalletProvider as IWalletProvider } from './wallet-providers';
 import type { WalletConnectQRData } from './providers/walletconnect-provider';
 import { smartFetch, invalidateCache, clearUserCache, getCacheStats, type SmartFetchResult } from '../../data/smart-fetch';
 import { CACHE_POLICIES, type CachePolicy } from '../../data/cache-engine';
+import { middlewareFetch } from '../../middleware/endpoints';
 
 // Define ProcessedTransaction type locally to avoid importing from solana_mainnet
 export interface ProcessedTransaction {
@@ -64,6 +65,45 @@ import { getGlobalAuthStore } from '../../middleware/firebase/auth-store';
 import { createLogger } from 'src/lib/logger';
 
 const logger = createLogger('[UnifiedWalletProvider]');
+
+// ================================
+// DATA TRANSFORMATION FUNCTIONS
+// ================================
+
+/**
+ * Transform balance middleware response to expected BalanceData format
+ */
+function transformBalanceResponse(balanceResponse: any): BalanceData {
+  return {
+    solBalance: 0, // Will need to fetch separately or add to backend
+    splitdoBalance: balanceResponse.mainnet_response?.balance || 0,
+    splitdoATA: {
+      address: balanceResponse.token_account_pubkey || '',
+      status: balanceResponse.token_account_pubkey ? 'exists' as const : 'unknown' as const
+    },
+    lastUpdated: balanceResponse.last_updated || new Date().toISOString()
+  };
+}
+
+/**
+ * Transform signature history response to ProcessedTransaction format
+ */
+function transformHistoryResponse(historyResponse: any): ProcessedTransaction[] {
+  if (!historyResponse.signature_history?.signatures) {
+    return [];
+  }
+
+  return historyResponse.signature_history.signatures.map((sig: any) => ({
+    signature: sig.signature,
+    slot: sig.slot,
+    blockTime: sig.blockTime,
+    timestamp: new Date(sig.blockTime * 1000).toISOString(),
+    fee: 0, // Not provided by this endpoint
+    status: 'success' as const, // Assume success if in history
+    instructions: [], // Not provided by this endpoint
+    balanceChanges: [] // Not provided by this endpoint
+  }));
+}
 
 // ================================
 // TYPE DEFINITIONS
@@ -278,9 +318,9 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       setConnectionStatus('connecting');
       setConnectionError(null);
 
-      logger.info(`Connecting to wallet provider: ${providerId}`);
+      logger.info(`🔌 Connecting to wallet provider: ${providerId}`);
 
-      const result = await walletConnectService.connect(providerId);
+      const result = await walletConnectService.connectWallet(providerId);
 
       if (result.success && result.wallet) {
         batch(() => {
@@ -289,19 +329,27 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
           setConnectionStatus('connected');
         });
 
-        logger.info('Wallet connected successfully:', result.wallet);
+        logger.info('✅ Wallet connected successfully:', result.wallet);
 
-        // Refresh balances after connection
-        await refreshBalances();
+        // 🚨 CRITICAL FIX: Wait for state to properly settle before refreshing balances
+        await new Promise(resolve => setTimeout(resolve, 150));
+
+        // Validate connection state before refreshing balances
+        if (isConnected() && wallet()?.address) {
+          logger.debug('🔄 Connection state validated, refreshing balances...');
+          await refreshBalances();
+        } else {
+          logger.warn('⚠️ Connection state validation failed, skipping balance refresh');
+        }
       } else {
         setConnectionStatus('error');
         setConnectionError(result.error || 'Failed to connect wallet');
-        logger.error('Wallet connection failed:', result.error);
+        logger.error('❌ Wallet connection failed:', result.error);
       }
     } catch (error) {
       setConnectionStatus('error');
       setConnectionError(error instanceof Error ? error.message : 'Connection failed');
-      logger.error('Wallet connection error:', error);
+      logger.error('❌ Wallet connection error:', error);
     }
   };
 
@@ -317,7 +365,10 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
   const disconnectWallet = async (): Promise<void> => {
     try {
-      logger.info('Disconnecting wallet');
+      logger.info('🔌 Disconnecting wallet with comprehensive cache clearing...');
+
+      // 🚨 ENHANCED SECURITY FIX: Use comprehensive cache clearing on disconnect
+      await clearAllWalletData();
 
       await walletConnectService.disconnect();
 
@@ -330,9 +381,9 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
         setSplitdoATA({ status: 'unknown' });
       });
 
-      logger.info('Wallet disconnected successfully');
+      logger.info('✅ Wallet disconnected successfully with comprehensive cache clearing');
     } catch (error) {
-      logger.error('Error disconnecting wallet:', error);
+      logger.error('❌ Error disconnecting wallet:', error);
       setConnectionError(error instanceof Error ? error.message : 'Disconnection failed');
     }
   };
@@ -341,22 +392,38 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
   // BALANCE AND ATA METHODS
   // ===============================
   const refreshBalances = async (): Promise<void> => {
+    // 🚨 ENHANCED VALIDATION: Check both internal state and provider state
     if (!isConnected() || !wallet()?.address) {
-      logger.warn('Cannot refresh balances: wallet not connected');
+      logger.warn('⚠️ Cannot refresh balances: wallet not connected');
       return;
+    }
+
+    // Double-check provider is actually connected
+    const provider = getCurrentProvider();
+    const currentWallet = wallet();
+    if (provider && currentWallet && provider.getPublicKey()) {
+      const providerKey = provider.getPublicKey()!.toString();
+      const walletKey = currentWallet.address;
+      
+      if (providerKey !== walletKey) {
+        logger.warn('⚠️ Provider state mismatch detected - forcing reconnection');
+        logger.debug('Provider key:', providerKey, 'Wallet key:', walletKey);
+        await disconnectWallet();
+        return;
+      }
     }
 
     try {
       setIsLoadingBalance(true);
 
-      const address = wallet()!.address;
-      logger.debug('Refreshing balances for address:', address);
+      const address = currentWallet!.address;
+      logger.debug('🔄 Refreshing balances for address:', address);
 
       // FIXED: Use backend API instead of direct Solana calls
       // Fetch balance data from cached backend API
       const balanceResult = await fetchCachedBalances({ force: true });
 
-      if (balanceResult.success && balanceResult.data) {
+      if (balanceResult.data) {
         const balanceData = balanceResult.data;
 
         // Set SOL balance
@@ -374,11 +441,13 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
             decimals: 9 // SPLITDO token decimals
           }
         });
-      }
 
-      logger.debug('Balances refreshed successfully via backend API');
+        logger.debug('✅ Balances refreshed successfully via backend API');
+      } else {
+        logger.warn('⚠️ No balance data received from backend API');
+      }
     } catch (error) {
-      logger.error('Error refreshing balances:', error);
+      logger.error('❌ Error refreshing balances:', error);
     } finally {
       setIsLoadingBalance(false);
     }
@@ -393,36 +462,27 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       setIsCreatingATA(true);
       setSplitdoATA(prev => ({ ...prev, status: 'creating' }));
 
-      // FIXED: Use backend API instead of direct Solana calls
-      const response = await fetch('/api/splitdo-token/accounts/create', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${props.firebaseToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          walletAddress: wallet()!.address
-        })
-      });
+      // TODO: The middleware POST endpoint requires wallet_address, token_account_address, and signed_transaction
+      // This needs coordination with backend team to either:
+      // 1. Add a simplified account creation endpoint that only requires wallet_address
+      // 2. Implement client-side transaction creation and signing
 
-      if (!response.ok) {
-        throw new Error('Failed to create ATA via backend API');
-      }
+      // For now, return an error indicating this needs implementation
+      logger.error('createSplitdoATA: Middleware endpoint requires signed transaction - needs implementation');
 
-      const result = await response.json();
+      setSplitdoATA(prev => ({ ...prev, status: 'error', error: 'Account creation not implemented with new middleware system' }));
+      return {
+        success: false,
+        error: 'Account creation requires coordination with backend team for proper transaction signing implementation'
+      };
 
-      if (result.success) {
-        setSplitdoATA({
-          status: 'created',
-          address: result.address,
-          balance: { amount: 0, decimals: 9 }
-        });
+      // Future implementation would look like:
+      // const createResponse = await middlewareFetch.Endpoints.Devbackend._Api.SplitdoToken.Accounts.Create.POST({
+      //   wallet_address: wallet()!.address,
+      //   token_account_address: '...', // Generated client-side
+      //   signed_transaction: '...' // Signed client-side
+      // });
 
-        return { success: true, signature: result.signature };
-      } else {
-        setSplitdoATA(prev => ({ ...prev, status: 'error', error: result.error }));
-        return { success: false, error: result.error };
-      }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to create ATA';
       setSplitdoATA(prev => ({ ...prev, status: 'error', error: errorMsg }));
@@ -444,24 +504,22 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       setIsPersistentDataLoading(true);
 
       const result = await smartFetch(
-        `transactions-${address}`,
         async () => {
-          // FIXED: Use backend API instead of direct RPC calls
-          const response = await fetch(`/api/splitdo-token/history/${address}?limit=${limit}`, {
-            headers: {
-              'Authorization': `Bearer ${props.firebaseToken}`,
-              'Content-Type': 'application/json',
-            },
-          });
+          // Use middleware system for history API
+          const historyResponse = await middlewareFetch.Endpoints.Devbackend._Api.SplitdoToken.History[':Index'].GET(limit);
 
-          if (!response.ok) {
-            throw new Error('Failed to fetch transaction history from backend API');
+          if (historyResponse.status !== 200) {
+            throw new Error(`History API returned ${historyResponse.status}: ${historyResponse.data.message || 'Unknown error'}`);
           }
 
-          return await response.json();
+          // Transform middleware response to expected format
+          return transformHistoryResponse(historyResponse.data);
         },
-        CACHE_POLICIES.TRANSACTIONS,
-        options.force
+        {
+          cacheKey: `transactions-${address}`,
+          policy: CACHE_POLICIES.TRANSACTION_HISTORY,
+          bypassCache: options.force
+        }
       );
 
       if (result.success && result.data) {
@@ -488,24 +546,22 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       setIsPersistentDataLoading(true);
 
       const result = await smartFetch(
-        'user-balances',
         async () => {
-          // This would fetch from your backend API
-          const response = await fetch('/api/user/balances', {
-            headers: {
-              'Authorization': `Bearer ${props.firebaseToken}`,
-              'Content-Type': 'application/json',
-            },
-          });
+          // Use middleware system for balance API
+          const balanceResponse = await middlewareFetch.Endpoints.Devbackend._Api.SplitdoToken.Balance.GET();
 
-          if (!response.ok) {
-            throw new Error('Failed to fetch balances from API');
+          if (balanceResponse.status !== 200) {
+            throw new Error(`Balance API returned ${balanceResponse.status}: ${balanceResponse.data.message || 'Unknown error'}`);
           }
 
-          return await response.json();
+          // Transform middleware response to expected format
+          return transformBalanceResponse(balanceResponse.data);
         },
-        CACHE_POLICIES.BALANCES,
-        options.force
+        {
+          cacheKey: 'user-balances',
+          policy: CACHE_POLICIES.BALANCE_DATA,
+          bypassCache: options.force
+        }
       );
 
       if (result.success && result.data) {
@@ -532,23 +588,22 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       setIsPersistentDataLoading(true);
 
       const result = await smartFetch(
-        'exchange-rates',
         async () => {
-          const response = await fetch('/api/exchange/rates', {
-            headers: {
-              'Authorization': `Bearer ${props.firebaseToken}`,
-              'Content-Type': 'application/json',
-            },
-          });
+          // No exchange rate endpoint available in middleware - use default rate
+          // This should be coordinated with backend team to create proper endpoint
+          logger.warn('Using default exchange rate as no middleware endpoint exists');
 
-          if (!response.ok) {
-            throw new Error('Failed to fetch exchange rates');
-          }
-
-          return await response.json();
+          return {
+            exchangeRate: 1000, // Default: 1 SOL = 1000 SPLITDO tokens
+            splitdoTokenMint: '6vdfHTgLiEXvoGVp8Ga2HaKQsPKj6DrUTee7526SCXoM',
+            lastUpdated: new Date().toISOString()
+          };
         },
-        CACHE_POLICIES.EXCHANGE_RATES,
-        options.force
+        {
+          cacheKey: 'exchange-rates',
+          policy: CACHE_POLICIES.EXCHANGE_RATES,
+          bypassCache: options.force
+        }
       );
 
       if (result.success && result.data) {
@@ -575,23 +630,28 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       setIsPersistentDataLoading(true);
 
       const result = await smartFetch(
-        'sol-price',
         async () => {
-          const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+          // Use middleware system for CoinGecko API
+          const priceResponse = await middlewareFetch.Endpoints.CoinGecko._Api.V3.Simple.Price.GET({
+            ids: 'solana',
+            vs_currencies: 'usd'
+          });
 
-          if (!response.ok) {
-            throw new Error('Failed to fetch SOL price from CoinGecko');
+          if (priceResponse.status !== 200) {
+            throw new Error(`CoinGecko API returned ${priceResponse.status}: ${priceResponse.data.error || 'Unknown error'}`);
           }
 
-          const data = await response.json();
           return {
-            price: data.solana.usd,
+            price: priceResponse.data.solana?.usd || 0,
             currency: 'usd',
             lastUpdated: new Date().toISOString()
           };
         },
-        CACHE_POLICIES.SOL_PRICE,
-        options.force
+        {
+          cacheKey: 'sol-price',
+          policy: CACHE_POLICIES.SOL_PRICE,
+          bypassCache: options.force
+        }
       );
 
       if (result.success && result.data) {
@@ -627,38 +687,28 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
       logger.info(`Executing exchange: ${solAmount} SOL`);
 
-      // FIXED: Use backend API instead of direct Solana calls
-      const response = await fetch('/api/exchange-new/solana/splitdo', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${props.firebaseToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          walletAddress: wallet()!.address,
-          solAmount: solAmount,
-          exchangeRate: exchangeRates()?.exchangeRate || 1
-        })
-      });
+      // TODO: No exchange endpoint exists in middleware system
+      // This needs coordination with backend team to either:
+      // 1. Add an exchange endpoint to the middleware system
+      // 2. Implement client-side exchange logic with proper transaction creation and signing
 
-      if (!response.ok) {
-        throw new Error('Failed to execute exchange via backend API');
-      }
+      logger.error('executeExchange: No exchange endpoint available in middleware system');
 
-      const result = await response.json();
+      setExchangeStatus('error');
+      setExchangeError('Exchange functionality not available - needs backend implementation');
 
-      if (result.success) {
-        setExchangeStatus('success');
+      return {
+        success: false,
+        error: 'Exchange functionality requires coordination with backend team to add proper exchange endpoint'
+      };
 
-        // Refresh balances after successful exchange
-        await refreshBalances();
+      // Future implementation would look like:
+      // const exchangeResponse = await middlewareFetch.Endpoints.Devbackend._Api.Exchange.POST({
+      //   wallet_address: wallet()!.address,
+      //   sol_amount: solAmount,
+      //   exchange_rate: exchangeRates()?.exchangeRate || 1000
+      // });
 
-        return { success: true, signature: result.signature };
-      } else {
-        setExchangeStatus('error');
-        setExchangeError(result.error || 'Exchange failed');
-        return { success: false, error: result.error };
-      }
     } catch (error) {
       setExchangeStatus('error');
       const errorMsg = error instanceof Error ? error.message : 'Exchange failed';
@@ -692,6 +742,114 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
   const clearUserData = (userId: string) => clearUserCache(userId);
 
   // ===============================
+  // ENHANCED WALLET CACHE CLEARING
+  // ===============================
+  
+  /**
+   * 🚨 CRITICAL SECURITY FIX: Enhanced wallet cache clearing
+   * This function aggressively clears ALL wallet-related data from ALL storage types
+   * to prevent Phantom from persisting connection state across page refreshes
+   */
+  const clearAllWalletData = async (): Promise<void> => {
+    if (typeof window === 'undefined') return;
+    
+    logger.debug('🧹 Starting comprehensive wallet cache clearing...');
+    
+    try {
+      // 1. Clear localStorage with expanded Phantom-specific keys
+      const localStorageKeys = Object.keys(window.localStorage);
+      const phantomStoragePatterns = [
+        'phantom',
+        'solana',
+        'wallet',
+        'walletconnect',
+        'wc@',
+        'phantom_auto_connect',
+        'phantom_connected', 
+        'phantom_permissions',
+        'phantom_trusted_origins',
+        'phantom-wallet',
+        'solana-wallet',
+        'wallet-standard',
+        'standard:connect',
+        'wallet-adapter',
+        'sol-wallet-adapter'
+      ];
+      
+      localStorageKeys.forEach(key => {
+        const shouldClear = phantomStoragePatterns.some(pattern => 
+          key.toLowerCase().includes(pattern.toLowerCase())
+        );
+        if (shouldClear) {
+          try {
+            window.localStorage.removeItem(key);
+            logger.debug(`🗑️ Cleared localStorage: ${key}`);
+          } catch (e) {
+            // Ignore individual key errors
+          }
+        }
+      });
+
+      // 2. Clear sessionStorage with same patterns
+      const sessionStorageKeys = Object.keys(window.sessionStorage);
+      sessionStorageKeys.forEach(key => {
+        const shouldClear = phantomStoragePatterns.some(pattern => 
+          key.toLowerCase().includes(pattern.toLowerCase())
+        );
+        if (shouldClear) {
+          try {
+            window.sessionStorage.removeItem(key);
+            logger.debug(`🗑️ Cleared sessionStorage: ${key}`);
+          } catch (e) {
+            // Ignore individual key errors
+          }
+        }
+      });
+
+      // 3. Clear IndexedDB databases that might store wallet data
+      try {
+        if ('indexedDB' in window && typeof indexedDB.databases === 'function') {
+          const databases = await indexedDB.databases();
+          for (const db of databases) {
+            const dbName = db.name?.toLowerCase() || '';
+            if (dbName.includes('phantom') || 
+                dbName.includes('wallet') || 
+                dbName.includes('solana') ||
+                dbName.includes('standard')) {
+              try {
+                indexedDB.deleteDatabase(db.name!);
+                logger.debug(`🗑️ Cleared IndexedDB: ${db.name}`);
+              } catch (e) {
+                // Ignore individual DB errors
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // IndexedDB not supported or access denied
+        logger.debug('IndexedDB clearing not available:', e);
+      }
+
+      // 4. Force nullify window.solana provider reference
+      try {
+        if (window.solana) {
+          // @ts-ignore - Force clear the provider
+          delete window.solana;
+          // @ts-ignore - Ensure it's completely removed
+          window.solana = undefined;
+          logger.debug('🗑️ Cleared window.solana provider reference');
+        }
+      } catch (e) {
+        // Ignore provider clearing errors
+      }
+
+      logger.debug('✅ Comprehensive wallet cache clearing completed successfully');
+    } catch (error) {
+      logger.warn('⚠️ Error during comprehensive wallet cache clearing:', error);
+    }
+  };
+
+  // ===============================
   // EFFECTS AND INITIALIZATION
   // ===============================
 
@@ -700,6 +858,22 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
     logger.info('UnifiedWalletProvider mounting');
 
     try {
+      // SECURITY FIX: Clear connection state on initialization to prevent false positives
+      logger.info('Clearing any cached connection state on initialization');
+
+      batch(() => {
+        setConnectionStatus('disconnected');
+        setWallet(null);
+        setConnectedProviderId(null);
+        setConnectionError(null);
+        setSolBalance(null);
+        setSplitdoATA({ status: 'unknown' });
+        setQrData(null);
+      });
+
+      // ENHANCED PHANTOM CACHE CLEARING: Clear comprehensive wallet data from browser storage
+      await clearAllWalletData();
+
       // Get available wallets (service auto-initializes in constructor)
       setAvailableWallets(walletConnectService.getAvailableWallets());
 
@@ -715,7 +889,7 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
         }
       });
 
-      logger.info('UnifiedWalletProvider initialized successfully');
+      logger.info('UnifiedWalletProvider initialized successfully with clean state');
     } catch (error) {
       logger.error('Error initializing UnifiedWalletProvider:', error);
     }

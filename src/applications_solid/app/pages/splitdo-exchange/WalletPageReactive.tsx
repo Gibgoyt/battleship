@@ -1,15 +1,6 @@
 import type { Component } from 'solid-js';
 import { createSignal, createEffect, onMount, Show } from 'solid-js';
-import {
-  useSplitdoATA,
-  useWalletModal,
-  useWallet,
-  useWalletConnection,
-  useWalletBalances,
-  useExchangeModal,
-  useCreateAccountModal,
-  useExchange
-} from 'src/applications_solid/app/lib/wallet/wallet-context';
+import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
 import WalletModal from '../../components/WalletModal';
 import { ExchangeModal } from '../../components/ExchangeModal';
 import { CreateAccountModal } from '../../components/CreateAccountModal';
@@ -19,24 +10,19 @@ import TransactionHistory from './components/TransactionHistory';
 
 const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
   // SolidJS Reactive Store Hooks
-  const { splitdoATA, checkSplitdoBalance, createSplitdoATA: createSplitdoATAStore } = useSplitdoATA();
-  const { openModal, closeModal, isModalOpen } = useWalletModal();
-  const { isCreateAccountModalOpen } = useCreateAccountModal();
-  const { wallet, connectionStatus, connectionError } = useWallet();
-  const { connectWallet, disconnectWallet } = useWalletConnection();
-  const { solBalance, refreshBalances } = useWalletBalances();
+  const wallet = useUnifiedWallet();
 
   // Local state for ATA creation
   const [isCreatingATA, setIsCreatingATA] = createSignal(false);
 
 
-  // Create ATA function using real reactive store implementation
+  // Create ATA function using unified wallet implementation
   const createSplitdoATA = async (): Promise<{ success: boolean; signature?: string; error?: string }> => {
     setIsCreatingATA(true);
     console.log('[WalletPageReactive] Creating SPLITDO ATA...');
 
     try {
-      const result = await createSplitdoATAStore();
+      const result = await wallet.createSplitdoATA();
       return result;
     } catch (error) {
       return {
@@ -50,30 +36,31 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
 
   // Copy exact working pattern from Start Token Exchange button
   const handleConnectWalletClick = () => {
-    openModal();
+    wallet.openWalletModal();
   };
 
   // Debug modal state
   createEffect(() => {
-    console.log('[WalletPageReactive] Modal state changed:', isModalOpen());
+    console.log('[WalletPageReactive] Modal state changed:', wallet.isWalletModalOpen());
   });
 
   createEffect(() => {
-    console.log('[WalletPageReactive] Connection status changed:', connectionStatus());
+    console.log('[WalletPageReactive] Connection status changed:', wallet.connectionStatus());
   });
 
   // Check SPLITDO account status on page load (run once)
   onMount(() => {
     console.log('[WalletPageReactive] Checking SPLITDO balance on page load');
-    checkSplitdoBalance();
+    // The unified wallet automatically manages balance data, no need for explicit check
+    wallet.refreshBalances();
   });
 
 
   // Refresh balances when wallet is connected
   createEffect(() => {
-    if (connectionStatus() === 'connected' && wallet()) {
+    if (wallet.connectionStatus() === 'connected' && wallet.wallet()) {
       console.log('[WalletPageReactive] Wallet connected, refreshing balances');
-      refreshBalances();
+      wallet.refreshBalances();
     }
   });
 
@@ -104,7 +91,7 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
         </div>
 
         {/* Connection Status Banners */}
-        <Show when={connectionStatus() === 'connecting'}>
+        <Show when={wallet.connectionStatus() === 'connecting'}>
           <div class="text-center">
             <div class="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30">
               <div class="w-5 h-5 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
@@ -113,19 +100,19 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
           </div>
         </Show>
 
-        <Show when={connectionStatus() === 'error' && connectionError()}>
+        <Show when={wallet.connectionStatus() === 'error' && wallet.connectionError()}>
           <div class="error-state">
             <div class="font-semibold mb-1">Connection Error</div>
-            <div>{connectionError()}</div>
+            <div>{wallet.connectionError()}</div>
           </div>
         </Show>
 
-        <Show when={connectionStatus() === 'connected' && wallet()}>
+        <Show when={wallet.connectionStatus() === 'connected' && wallet.wallet()}>
           <div class="success-state">
             <div class="flex items-center justify-center gap-3">
               <div class="w-2 h-2 bg-crypto-accent-green rounded-full"></div>
               <span class="font-semibold">Wallet Connected:</span>
-              <span>{wallet()?.name} ({formatAddress(wallet()?.address || '')})</span>
+              <span>{wallet.wallet()?.name} ({formatAddress(wallet.wallet()?.address || '')})</span>
             </div>
           </div>
         </Show>
@@ -149,8 +136,8 @@ const WalletPageReactive: Component<{ isDark: boolean }> = (props) => {
 
         {/* Wallet Selection Modal */}
         <WalletModal
-          isOpen={isModalOpen}
-          onClose={() => closeModal()}
+          isOpen={wallet.isWalletModalOpen}
+          onClose={() => wallet.closeWalletModal()}
           isDark={props.isDark}
         />
 

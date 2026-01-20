@@ -29,6 +29,7 @@ export interface WalletConnectionResult {
     address: string;
     publicKey: PublicKey;
     provider: WalletProvider;
+    name: string;
   };
   error?: string;
 }
@@ -36,7 +37,7 @@ export interface WalletConnectionResult {
 // Phantom wallet provider interface (window.solana)
 export interface PhantomProvider {
   isPhantom?: boolean;
-  connect(): Promise<{ publicKey: { toString(): string } }>;
+  connect(options?: { onlyIfTrusted?: boolean }): Promise<{ publicKey: { toString(): string } }>;
   disconnect(): Promise<void>;
   signTransaction(transaction: Transaction): Promise<Transaction>;
   publicKey?: { toString(): string };
@@ -110,27 +111,103 @@ export class PhantomWalletProvider implements WalletProvider {
   private publicKey: PublicKey | null = null;
 
   constructor() {
-    if (typeof window !== 'undefined') {
-      this.provider = window.solana || null;
+    // 🚨 SECURITY FIX: Do NOT access provider in constructor
+    // Accessing provider properties might trigger auto-connect behavior for trusted sites
+    // We'll defer this to when user explicitly requests connection
+  }
+
+  /**
+   * Helper to get the Phantom provider from window
+   * Follows official docs: https://docs.phantom.app/solana/detecting-the-provider
+   */
+  private getProvider(): PhantomProvider | null {
+    if (typeof window === 'undefined') return null;
+
+    // 1. Check for window.phantom.solana (Recommended)
+    if ('phantom' in window) {
+      const provider = (window as any).phantom?.solana;
+      if (provider?.isPhantom) {
+        return provider;
+      }
     }
+
+    // 2. Fallback to window.solana (Legacy)
+    const legacyProvider = window.solana;
+    if (legacyProvider?.isPhantom) {
+      return legacyProvider;
+    }
+
+    return null;
   }
 
   isAvailable(): boolean {
-    return !!(this.provider?.isPhantom);
+    return !!this.getProvider();
+  }
+
+  isConnected(): boolean {
+    return !!this.provider?.isConnected && !!this.publicKey;
+  }
+
+  getPublicKey(): PublicKey | null {
+    return this.publicKey;
   }
 
   async connect(): Promise<{ publicKey: PublicKey }> {
-    if (!this.isAvailable()) {
+    const provider = this.getProvider();
+    
+    if (!provider) {
       throw new WalletNotFoundError('Phantom');
     }
 
-    try {
-      const response = await this.provider!.connect();
-      this.publicKey = new PublicKey(response.publicKey.toString());
+    this.provider = provider;
 
+    try {
+      console.log('[Phantom] Starting fresh connection...');
+
+      // Ensure clean state by disconnecting first
+      // This handles cases where the wallet thinks it's connected but the app doesn't
+      try {
+        await this.provider.disconnect();
+      } catch (e) {
+        // Ignore disconnect errors
+      }
+
+      // Clear local state
+      this.publicKey = null;
+
+      // Connect to Phantom
+      // NOTE: If the app is "Trusted" by Phantom, this will resolve immediately without a popup.
+      // This is standard Phantom behavior and cannot be bypassed programmatically.
+      // Passing { onlyIfTrusted: false } is the default behavior.
+      console.log('[Phantom] Requesting connection (popup will appear if not already trusted)...');
+      const response = await this.provider.connect();
+      
+      this.publicKey = new PublicKey(response.publicKey.toString());
+      console.log('[Phantom] ✅ Connection established');
+      
       return { publicKey: this.publicKey };
     } catch (error) {
-      throw new WalletConnectionError('Phantom', error);
+      // Clear state on error
+      this.publicKey = null;
+      console.log('[Phantom] Connection failed with error:', error);
+
+      // Enhanced error handling for better user feedback
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorCode = (error as any)?.code;
+
+      if (errorCode === 4001 || errorMessage.includes('rejected') || errorMessage.includes('cancelled')) {
+        console.log('[Phantom] User cancelled connection request');
+        throw new WalletError('User cancelled connection request', 'USER_REJECTED', 'Phantom');
+      } else if (errorCode === 4100 || errorMessage.includes('unauthorized')) {
+        console.log('[Phantom] App not authorized by user');
+        throw new WalletError('App not authorized. Please try connecting again.', 'UNAUTHORIZED', 'Phantom');
+      } else if (errorMessage.includes('popup') || errorMessage.includes('blocked')) {
+        console.log('[Phantom] Popup blocked or failed');
+        throw new WalletError('Popup blocked. Please allow popups for this site and try again.', 'POPUP_BLOCKED', 'Phantom');
+      } else {
+        console.error('[Phantom] Unexpected connection error:', error);
+        throw new WalletConnectionError('Phantom', error);
+      }
     }
   }
 
@@ -139,30 +216,39 @@ export class PhantomWalletProvider implements WalletProvider {
       throw new WalletError('Wallet not connected', 'NOT_CONNECTED', 'Phantom');
     }
 
+    if (!this.provider) {
+      // Try to re-acquire provider if missing but logically connected
+      this.provider = this.getProvider();
+    }
+
+    if (!this.provider) {
+      throw new WalletError('Phantom provider not available', 'PROVIDER_ERROR', 'Phantom');
+    }
+
     try {
-      return await this.provider!.signTransaction(transaction);
+      return await this.provider.signTransaction(transaction);
     } catch (error) {
       throw new WalletSigningError('Phantom', error);
     }
   }
 
   async disconnect(): Promise<void> {
+    console.log('[Phantom] 🔌 Disconnecting...');
+
     if (this.provider) {
       try {
         await this.provider.disconnect();
+        console.log('[Phantom] ✅ Provider disconnected');
       } catch (error) {
-        console.warn('Error disconnecting Phantom wallet:', error);
+        console.warn('[Phantom] Error disconnecting provider:', error);
       }
     }
+
+    // Clear local state
+    this.provider = null;
     this.publicKey = null;
-  }
 
-  isConnected(): boolean {
-    return !!(this.provider?.isConnected && this.publicKey);
-  }
-
-  getPublicKey(): PublicKey | null {
-    return this.publicKey;
+    console.log('[Phantom] ✅ Disconnect completed');
   }
 }
 
@@ -177,7 +263,7 @@ export class MetaMaskSolanaProvider implements WalletProvider {
 
   constructor() {
     if (typeof window !== 'undefined') {
-      this.provider = window.ethereum;
+      this.provider = window.ethereum || null;
     }
   }
 
@@ -238,7 +324,7 @@ export class WalletProviderFactory {
     ['phantom', () => new PhantomWalletProvider()],
     ['metamask', () => new MetaMaskSolanaProvider()],
     // ['walletconnect', () => new WalletConnectProvider()], // Commented out to fix circular dependency
-  ]);
+  ] as [string, () => WalletProvider][]);
 
   static createProvider(id: string): WalletProvider | null {
     const factory = this.providers.get(id);
@@ -305,7 +391,8 @@ export class MultiWalletService {
       const wallet = {
         address: publicKey.toString(),
         publicKey,
-        provider
+        provider,
+        name: provider.name
       };
 
       this.emitEvent({ type: 'connected', providerId, wallet });
@@ -395,7 +482,7 @@ export class MultiWalletService {
 // Wallet event types
 export type WalletEvent =
   | { type: 'connecting'; providerId: string }
-  | { type: 'connected'; providerId: string; wallet: { address: string; publicKey: PublicKey; provider: WalletProvider } }
+  | { type: 'connected'; providerId: string; wallet: { address: string; publicKey: PublicKey; provider: WalletProvider; name: string } }
   | { type: 'disconnected'; providerId: string }
   | { type: 'error'; error: string; providerId?: string };
 

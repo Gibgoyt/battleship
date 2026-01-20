@@ -1,16 +1,15 @@
 import { Component, Show, createSignal } from 'solid-js';
-import { useWallet, useModals } from '../../../lib/wallet/unified-wallet-context';
+import { useUnifiedWallet } from '../../../lib/wallet/unified-wallet-context';
 
 const CreateSplitdoAccount: Component = () => {
-  const { wallet, connectionStatus, splitdoATA, createSplitdoATA } = useWallet();
-  const { openWalletModal } = useModals();
+  const wallet = useUnifiedWallet();
 
   const [isCreating, setIsCreating] = createSignal(false);
   const [creationError, setCreationError] = createSignal<string | null>(null);
   const [creationSuccess, setCreationSuccess] = createSignal(false);
 
   const handleCreateAccount = async () => {
-    const currentWallet = wallet();
+    const currentWallet = wallet.wallet();
     if (!currentWallet) {
       setCreationError('Please connect your wallet first');
       return;
@@ -22,7 +21,7 @@ const CreateSplitdoAccount: Component = () => {
 
     try {
       console.log('[CreateSplitdoAccount] Creating SPLITDO token account...');
-      const result = await createSplitdoATA();
+      const result = await wallet.createSplitdoATA();
 
       if (result.success) {
         console.log('[CreateSplitdoAccount] Account created successfully:', result.signature);
@@ -44,7 +43,7 @@ const CreateSplitdoAccount: Component = () => {
   };
 
   const handleConnectWallet = () => {
-    openWalletModal(); // Open wallet selection modal
+    wallet.openWalletModal(); // Open wallet selection modal
   };
 
   return (
@@ -66,7 +65,7 @@ const CreateSplitdoAccount: Component = () => {
         </div>
 
         {/* Connection Status */}
-        <Show when={connectionStatus() !== 'connected'}>
+        <Show when={wallet.connectionStatus() !== 'connected'}>
           <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
             <p class="text-blue-700 dark:text-blue-300 mb-3">
               First, connect your Solana wallet:
@@ -74,9 +73,9 @@ const CreateSplitdoAccount: Component = () => {
             <button
               onClick={handleConnectWallet}
               class="btn-crypto-primary w-full py-3 text-lg"
-              disabled={connectionStatus() === 'connecting'}
+              disabled={wallet.connectionStatus() === 'connecting'}
             >
-              <Show when={connectionStatus() === 'connecting'} fallback="Connect Wallet">
+              <Show when={wallet.connectionStatus() === 'connecting'} fallback="Connect Wallet">
                 <div class="flex items-center justify-center gap-2">
                   <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   Connecting...
@@ -87,7 +86,7 @@ const CreateSplitdoAccount: Component = () => {
         </Show>
 
         {/* Account Creation */}
-        <Show when={connectionStatus() === 'connected'}>
+        <Show when={wallet.connectionStatus() === 'connected'}>
           <div class="mb-6">
             <div class="mb-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
               <div class="flex items-center justify-center gap-2 text-green-700 dark:text-green-300 mb-2">
@@ -97,16 +96,16 @@ const CreateSplitdoAccount: Component = () => {
                 Wallet Connected
               </div>
               <p class="text-sm text-green-600 dark:text-green-400">
-                {wallet()?.address.slice(0, 4)}...{wallet()?.address.slice(-4)}
+                {wallet.wallet()?.address.slice(0, 4)}...{wallet.wallet()?.address.slice(-4)}
               </p>
             </div>
 
             <button
               onClick={handleCreateAccount}
-              disabled={isCreating() || splitdoATA().status === 'creating'}
+              disabled={isCreating() || wallet.splitdoATA().status === 'creating'}
               class="btn-crypto-primary w-full py-4 text-lg mb-4"
             >
-              <Show when={isCreating() || splitdoATA().status === 'creating'} fallback="Create SPLITDO Account">
+              <Show when={isCreating() || wallet.splitdoATA().status === 'creating'} fallback="Create SPLITDO Account">
                 <div class="flex items-center justify-center gap-2">
                   <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   Creating Account...

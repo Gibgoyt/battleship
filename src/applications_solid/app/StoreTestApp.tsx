@@ -1,24 +1,24 @@
 import { createSignal } from 'solid-js'
 import type { Component } from 'solid-js'
-import { useWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context'
+import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context'
 
 const WalletStoreTest: Component = () => {
-  const { connectionStatus, connectWallet, disconnectWallet } = useWallet();
+  const wallet = useUnifiedWallet();
 
   return (
     <div class="p-4 border border-gray-300 rounded">
       <h3 class="text-lg font-bold mb-2">Wallet Store Test (No Context)</h3>
-      <p class="mb-2">Status: {connectionStatus()}</p>
+      <p class="mb-2">Status: {wallet.connectionStatus()}</p>
       <div class="space-x-2">
         <button
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm"
-          onClick={() => connectWallet()}
+          onClick={() => wallet.connectWallet('phantom')}
         >
           Connect
         </button>
         <button
           class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm"
-          onClick={() => disconnectWallet()}
+          onClick={() => wallet.disconnectWallet()}
         >
           Disconnect
         </button>

@@ -293,13 +293,12 @@ export class WalletConnectProvider implements WalletProvider {
         // Store global reference
         globalWalletConnectClient = this.signClient;
 
-        // Restore existing sessions
+        // SECURITY FIX: Disable automatic session restoration to prevent false positives
+        // Sessions should only be restored when user explicitly requests connection
         const activeSessions = this.signClient.session.getAll();
         if (activeSessions.length > 0) {
-          console.log(`[WalletConnect] Found ${activeSessions.length} existing session(s), attempting to restore most recent`);
-          // Use the most recent session
-          const session = activeSessions[activeSessions.length - 1];
-          await this.restoreSession(session);
+          console.log(`[WalletConnect] Found ${activeSessions.length} existing session(s), but auto-restore disabled for security`);
+          console.log('[WalletConnect] Sessions will only be restored on explicit user connection request');
         } else {
           console.log('[WalletConnect] No existing sessions found');
         }
@@ -454,6 +453,27 @@ export class WalletConnectProvider implements WalletProvider {
   }
 
   /**
+   * SECURITY FIX: Explicit session restoration only on user request
+   * Attempts to restore existing session only when user explicitly connects
+   */
+  private async tryRestoreExistingSession(): Promise<boolean> {
+    if (!this.signClient) return false;
+
+    const activeSessions = this.signClient.session.getAll();
+    if (activeSessions.length === 0) return false;
+
+    try {
+      console.log(`[WalletConnect] User requested connection - attempting to restore existing session`);
+      const session = activeSessions[activeSessions.length - 1];
+      await this.restoreSession(session);
+      return true;
+    } catch (error) {
+      console.warn('[WalletConnect] Failed to restore existing session, will create new one:', error);
+      return false;
+    }
+  }
+
+  /**
    * Generate QR code for connection
    */
   private async generateQRCode(uri: string): Promise<WalletConnectQRData> {
@@ -530,6 +550,12 @@ export class WalletConnectProvider implements WalletProvider {
     }
 
     return await this.handleErrorWithRetry(async () => {
+      // SECURITY FIX: Try to restore existing session first when user explicitly connects
+      const sessionRestored = await this.tryRestoreExistingSession();
+      if (sessionRestored && this.publicKey) {
+        console.log('[WalletConnect] ✅ Existing session restored successfully');
+        return { publicKey: this.publicKey };
+      }
       // Create session proposal
       const { uri, approval } = await this.signClient!.connect({
         requiredNamespaces: WALLETCONNECT_CONFIG.sessionConfig.requiredNamespaces,
@@ -650,14 +676,52 @@ export class WalletConnectProvider implements WalletProvider {
   }
 
   async disconnect(): Promise<void> {
-    if (this.signClient && this.currentSession) {
+    console.log('[WalletConnect] Starting comprehensive disconnect to prevent auto-restoration');
+
+    // SECURITY FIX: Enhanced disconnect handling to prevent auto-restoration
+    if (this.signClient) {
       try {
-        await this.signClient.disconnect({
-          topic: this.currentSession.topic,
-          reason: getSdkError('USER_DISCONNECTED'),
-        });
+        // Disconnect current session if exists
+        if (this.currentSession) {
+          await this.signClient.disconnect({
+            topic: this.currentSession.topic,
+            reason: getSdkError('USER_DISCONNECTED'),
+          });
+        }
+
+        // SECURITY FIX: Clean up ALL existing sessions to prevent future auto-restoration
+        const allSessions = this.signClient.session.getAll();
+        console.log(`[WalletConnect] Cleaning up ${allSessions.length} total session(s) to prevent auto-restoration`);
+
+        for (const session of allSessions) {
+          try {
+            await this.signClient.disconnect({
+              topic: session.topic,
+              reason: getSdkError('USER_DISCONNECTED'),
+            });
+            console.log(`[WalletConnect] Cleaned up session: ${session.topic}`);
+          } catch (sessionError) {
+            console.warn(`[WalletConnect] Failed to clean up session ${session.topic}:`, sessionError);
+          }
+        }
+
+        // Clear browser storage to prevent session persistence
+        if (typeof window !== 'undefined') {
+          try {
+            Object.keys(window.localStorage).forEach(key => {
+              if (key.includes('wc@2') || key.includes('walletconnect') || key.includes('WALLETCONNECT')) {
+                window.localStorage.removeItem(key);
+                console.log(`[WalletConnect] Cleared storage key: ${key}`);
+              }
+            });
+          } catch (storageError) {
+            console.warn('[WalletConnect] Failed to clear browser storage:', storageError);
+          }
+        }
+
+        console.log('[WalletConnect] ✅ Complete session cleanup finished');
       } catch (error) {
-        console.warn('Error disconnecting WalletConnect session:', error);
+        console.warn('Error during comprehensive WalletConnect disconnect:', error);
       }
     }
 
@@ -665,7 +729,55 @@ export class WalletConnectProvider implements WalletProvider {
   }
 
   isConnected(): boolean {
-    return !!(this.currentSession && this.publicKey && !this.connecting);
+    // SECURITY FIX: Enhanced connection state validation
+    // Ensure connection state matches actual user authorization
+    const hasSession = !!this.currentSession;
+    const hasPublicKey = !!this.publicKey;
+    const notConnecting = !this.connecting;
+    const hasSignClient = !!this.signClient;
+
+    // Basic validation first
+    if (!hasSession || !hasPublicKey || this.connecting || !hasSignClient) {
+      return false;
+    }
+
+    // Validate session is still active by checking if it exists in the client
+    try {
+      const sessionExists = this.signClient.session.get(this.currentSession.topic);
+      if (!sessionExists) {
+        console.warn('[WalletConnect] Session validation failed - session no longer exists');
+        this.onSessionDisconnected();
+        return false;
+      }
+
+      // Validate accounts consistency
+      const sessionAccounts = this.currentSession.namespaces.solana?.accounts || [];
+      if (sessionAccounts.length === 0) {
+        console.warn('[WalletConnect] Session validation failed - no accounts in session');
+        this.onSessionDisconnected();
+        return false;
+      }
+
+      // Extract and validate public key matches
+      const firstAccount = sessionAccounts[0];
+      const accountParts = firstAccount.split(':');
+      if (accountParts.length >= 3) {
+        const sessionPublicKey = accountParts[2];
+        const localPublicKey = this.publicKey.toString();
+
+        if (sessionPublicKey !== localPublicKey) {
+          console.warn('[WalletConnect] Session validation failed - public key mismatch');
+          this.onSessionDisconnected();
+          return false;
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.warn('[WalletConnect] Session validation error:', error);
+      this.onSessionDisconnected();
+      return false;
+    }
   }
 
   getPublicKey(): PublicKey | null {

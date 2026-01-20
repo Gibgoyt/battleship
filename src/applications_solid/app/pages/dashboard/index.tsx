@@ -1,32 +1,24 @@
 import type { Component } from 'solid-js';
 import { createSignal, onMount, createEffect, Show, createMemo } from 'solid-js';
-import {
-  useSplitdoATA,
-  useWallet,
-  useWalletBalances,
-  useWalletModal
-} from 'src/applications_solid/app/lib/wallet/wallet-context';
+import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
 
 const DashboardPage: Component<{ isDark: boolean }> = (props) => {
   const [userEmail, setUserEmail] = createSignal<string>('');
 
-  // Wallet hooks
-  const { splitdoATA } = useSplitdoATA();
-  const { wallet, connectionStatus } = useWallet();
-  const { solBalance, refreshBalances } = useWalletBalances();
-  const { openModal } = useWalletModal();
+  // Wallet context - using unified wallet
+  const wallet = useUnifiedWallet();
 
   // Check balances when wallet is connected
   createEffect(() => {
-    if (connectionStatus() === 'connected' && wallet()) {
+    if (wallet.connectionStatus() === 'connected' && wallet.wallet()) {
       console.log('[Dashboard] Wallet connected, refreshing balances');
-      refreshBalances();
+      wallet.refreshBalances();
     }
   });
 
   // Calculate portfolio value (SPLITDO value in SOL)
   const portfolioValueSOL = createMemo(() => {
-    const splitdoBalance = splitdoATA().balance?.uiAmount || 0;
+    const splitdoBalance = wallet.splitdoATA().balance?.uiAmount || 0;
     const exchangeRate = 0.11; // 1 SPLITDO = 0.11 SOL
     return splitdoBalance * exchangeRate;
   });
@@ -86,7 +78,7 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
             </h1>
 
             <Show
-              when={connectionStatus() === 'connected' && splitdoATA().status === 'exists'}
+              when={wallet.connectionStatus() === 'connected' && wallet.splitdoATA().status === 'exists'}
               fallback={
                 <div class="space-y-6">
                   <div class="text-7xl md:text-8xl font-bold text-zinc-700">
@@ -123,13 +115,13 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
                 </div>
               </div>
               <Show
-                when={connectionStatus() === 'connected' && splitdoATA().status === 'exists'}
+                when={wallet.connectionStatus() === 'connected' && wallet.splitdoATA().status === 'exists'}
                 fallback={
                   <div class="text-3xl font-bold text-zinc-700">--</div>
                 }
               >
                 <div class="text-3xl font-bold text-white">
-                  {formatCurrency(splitdoATA().balance?.uiAmount || 0)}
+                  {formatCurrency(wallet.splitdoATA().balance?.uiAmount || 0)}
                 </div>
               </Show>
             </div>
@@ -145,13 +137,13 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
                 </div>
               </div>
               <Show
-                when={connectionStatus() === 'connected' && solBalance()}
+                when={wallet.connectionStatus() === 'connected' && wallet.solBalance()}
                 fallback={
                   <div class="text-3xl font-bold text-zinc-700">--</div>
                 }
               >
                 <div class="text-3xl font-bold text-white">
-                  {formatCurrency(solBalance()?.sol || 0, 4)}
+                  {formatCurrency(wallet.solBalance()?.sol || 0, 4)}
                 </div>
               </Show>
             </div>
@@ -209,7 +201,7 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
       </div>
 
       {/* Getting Started */}
-      <Show when={connectionStatus() !== 'connected'}>
+      <Show when={wallet.connectionStatus() !== 'connected'}>
         <div class="px-4 md:px-8 pb-12">
           <div class="max-w-4xl mx-auto">
             <div class="bg-amber-500/5 border border-amber-500/20 rounded-3xl p-6 md:p-8">
