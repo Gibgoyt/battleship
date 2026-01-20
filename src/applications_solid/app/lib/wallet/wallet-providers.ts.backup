@@ -333,20 +333,14 @@ export class WalletProviderFactory {
    * Smart Phantom provider creation based on device capabilities
    */
   private static createPhantomProvider(): WalletProvider {
-    // DEBUG: Log routing decision
-    console.log("[WalletProviderFactory] 🐛 DEBUG - createPhantomProvider called");
-    console.log("[WalletProviderFactory] 🐛 DEBUG - Device info:", deviceInfo);
-    console.log("[WalletProviderFactory] 🐛 DEBUG - requiresDeepLinks:", deviceInfo.requiresDeepLinks);
     const deviceInfo = getDeviceInfo();
     
     // Route to mobile deep link provider for iOS/Android Phantom app
     if (deviceInfo.requiresDeepLinks) {
-      console.log("[WalletProviderFactory] 🐛 DEBUG - ✅ Using PhantomMobileProvider (deep links required)");
       return new PhantomMobileProvider();
     }
     
     // Use standard browser extension provider for desktop
-    console.log("[WalletProviderFactory] 🐛 DEBUG - ✅ Using PhantomWalletProvider (desktop/extension)");
     return new PhantomWalletProvider();
   }
 
@@ -356,9 +350,6 @@ export class WalletProviderFactory {
   }
 
   static getAvailableProviders(): WalletProvider[] {
-    // DEBUG: Log device info
-    console.log("[WalletProviderFactory] 🐛 DEBUG - getAvailableProviders called");
-    console.log("[WalletProviderFactory] 🐛 DEBUG - Device Info:", deviceInfo);
     const providers: WalletProvider[] = [];
     const deviceInfo = getDeviceInfo();
 

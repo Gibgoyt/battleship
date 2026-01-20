@@ -1,0 +1,83 @@
+--- src/applications_solid/app/lib/wallet/wallet-providers.ts.backup
++++ src/applications_solid/app/lib/wallet/wallet-providers.ts
+@@ -351,6 +351,14 @@
+ 
+   static getAvailableProviders(): WalletProvider[] {
+     const providers: WalletProvider[] = [];
+     const deviceInfo = getDeviceInfo();
++    
++    // DEBUG: Log device info
++    console.log('[WalletProviderFactory] 🐛 DEBUG - Device Info:', deviceInfo);
++    console.log('[WalletProviderFactory] 🐛 DEBUG - Provider map size:', this.providers.size);
++    console.log('[WalletProviderFactory] 🐛 DEBUG - Provider map keys:', Array.from(this.providers.keys()));
+ 
+     for (const [id, factory] of this.providers) {
++      console.log(`\n[WalletProviderFactory] 🐛 DEBUG - Processing provider ID: ${id}`);
+       try {
+         const provider = factory();
++        console.log('[WalletProviderFactory] 🐛 DEBUG - Created provider:', {
++          factoryId: id,
++          providerId: provider.id,
++          providerName: provider.name,
++          constructorName: provider.constructor.name
++        });
+         
+         // Special handling for mobile-only providers
+         if (provider.id === 'phantom-mobile' && !deviceInfo.requiresDeepLinks) {
++          console.log('[WalletProviderFactory] 🐛 DEBUG - SKIPPING: Mobile provider on desktop');
+           continue; // Skip mobile provider on desktop
+         }
+         
+         // Special handling for desktop-only providers  
+         if (provider.id === 'phantom' && provider.constructor.name === 'PhantomWalletProvider' && deviceInfo.requiresDeepLinks) {
++          console.log('[WalletProviderFactory] 🐛 DEBUG - SKIPPING: Desktop provider on mobile');
+           continue; // Skip desktop provider on mobile
+         }
+         
++        console.log('[WalletProviderFactory] 🐛 DEBUG - Provider passed filtering, checking availability...');
++        
+         if (provider.isAvailable()) {
++          console.log('[WalletProviderFactory] 🐛 DEBUG - ✅ Provider is available, adding to list');
+           providers.push(provider);
++        } else {
++          console.log('[WalletProviderFactory] 🐛 DEBUG - ❌ Provider is not available');
+         }
+       } catch (error) {
+         console.warn(`Failed to create provider ${id}:`, error);
++        console.log('[WalletProviderFactory] 🐛 DEBUG - ❌ Provider creation failed:', error);
+       }
+     }
++    
++    console.log('[WalletProviderFactory] 🐛 DEBUG - Final Results:');
++    console.log('[WalletProviderFactory] 🐛 DEBUG - Total providers found:', providers.length);
++    providers.forEach((p, index) => {
++      console.log(`[WalletProviderFactory] 🐛 DEBUG - Provider ${index + 1}:`, {
++        id: p.id,
++        name: p.name,
++        constructor: p.constructor.name
++      });
++    });
+ 
+     return providers;
+   }
+@@ -334,6 +334,12 @@
+    */
+   private static createPhantomProvider(): WalletProvider {
+     const deviceInfo = getDeviceInfo();
++    
++    // DEBUG: Log routing decision
++    console.log('[WalletProviderFactory] 🐛 DEBUG - createPhantomProvider called');
++    console.log('[WalletProviderFactory] 🐛 DEBUG - Device info:', deviceInfo);
++    console.log('[WalletProviderFactory] 🐛 DEBUG - requiresDeepLinks:', deviceInfo.requiresDeepLinks);
+     
+     // Route to mobile deep link provider for iOS/Android Phantom app
+     if (deviceInfo.requiresDeepLinks) {
++      console.log('[WalletProviderFactory] 🐛 DEBUG - ✅ Using PhantomMobileProvider (deep links required)');
+       return new PhantomMobileProvider();
+     }
+     
+     // Use standard browser extension provider for desktop
++    console.log('[WalletProviderFactory] 🐛 DEBUG - ✅ Using PhantomWalletProvider (desktop/extension)');
+     return new PhantomWalletProvider();
+   }
+ 
