@@ -19,7 +19,7 @@ const browserProcess = {
 
 // Immediately define global process if not available
 if (typeof globalThis !== 'undefined' && !globalThis.process) {
-  globalThis.process = browserProcess;
+  (globalThis as any).process = browserProcess;
 }
 
 /**
@@ -64,6 +64,14 @@ export function initializeBrowserPolyfills() {
     if (!window.clearImmediate) {
       window.clearImmediate = function(id: number) {
         clearTimeout(id);
+      };
+    }
+
+    // Polyfill require function (minimal implementation for browser)
+    if (!window.require) {
+      window.require = function(moduleName: string) {
+        console.warn(`[BrowserPolyfills] require('${moduleName}') called in browser - returning empty object`);
+        return {};
       };
     }
 
@@ -146,14 +154,9 @@ declare global {
   interface Window {
     Buffer: typeof Buffer;
     global: typeof globalThis;
-    process: {
-      env: Record<string, any>;
-      browser: boolean;
-      version: string;
-      versions: Record<string, any>;
-      nextTick: (fn: (...args: any[]) => void, ...args: any[]) => void;
-    };
-    setImmediate: typeof setTimeout;
-    clearImmediate: typeof clearTimeout;
+    process: any; // Use any to avoid complex Node.js Process type conflicts
+    setImmediate: any;
+    clearImmediate: any;
+    require: any;
   }
 }

@@ -9,6 +9,8 @@
 import './browser-polyfills';
 import { PublicKey, Transaction } from '@solana/web3.js';
 import { getDeviceInfo } from './exchange-utils';
+// Import PhantomMobileProvider statically to avoid require() issues
+import { PhantomMobileProvider } from './phantom-mobile-provider';
 
 // Core wallet provider interface
 export interface WalletProvider {
@@ -335,8 +337,6 @@ export class WalletProviderFactory {
     
     // Route to mobile deep link provider for iOS/Android Phantom app
     if (deviceInfo.requiresDeepLinks) {
-      // Import mobile provider dynamically to avoid circular dependencies
-      const { PhantomMobileProvider } = require('./phantom-mobile-provider');
       return new PhantomMobileProvider();
     }
     
