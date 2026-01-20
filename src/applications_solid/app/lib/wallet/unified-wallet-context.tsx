@@ -721,11 +721,13 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       // Step 5: Device-specific transaction flow
       let result: { success: boolean; signature?: string; error?: string };
 
-      if (deviceInfo.type === 'mobile') {
-        // Mobile flow: signTransaction + sendRawTransaction + submit to exchange endpoint
+      if (deviceInfo.requiresDeepLinks || deviceInfo.isPhantomMobile) {
+        // iOS/Mobile flow: signTransaction + submit signed tx to exchange endpoint
+        logger.info('🔄 Using mobile deep link exchange flow for iOS Phantom');
         result = await executeMobileExchange(provider, solanaService, walletAddress, solAmount);
       } else {
-        // Desktop flow: signAndSendTransaction + submit signature to exchange-new endpoint
+        // Desktop flow: signAndSendTransaction + submit signature to exchange-new endpoint  
+        logger.info('🔄 Using desktop extension exchange flow');
         result = await executeDesktopExchange(provider, solanaService, walletAddress, solAmount, calculation);
       }
 

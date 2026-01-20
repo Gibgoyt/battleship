@@ -8,6 +8,7 @@
 // Import browser polyfills FIRST to ensure Buffer is available
 import './browser-polyfills';
 import { PublicKey, Transaction } from '@solana/web3.js';
+import { getDeviceInfo } from './exchange-utils';
 
 // Core wallet provider interface
 export interface WalletProvider {
@@ -318,13 +319,30 @@ export class MetaMaskSolanaProvider implements WalletProvider {
   }
 }
 
-// Wallet provider factory
+// Wallet provider factory with smart device routing
 export class WalletProviderFactory {
   private static providers: Map<string, () => WalletProvider> = new Map([
-    ['phantom', () => new PhantomWalletProvider()],
+    ['phantom', () => WalletProviderFactory.createPhantomProvider()],
     ['metamask', () => new MetaMaskSolanaProvider()],
     // ['walletconnect', () => new WalletConnectProvider()], // Commented out to fix circular dependency
   ] as [string, () => WalletProvider][]);
+
+  /**
+   * Smart Phantom provider creation based on device capabilities
+   */
+  private static createPhantomProvider(): WalletProvider {
+    const deviceInfo = getDeviceInfo();
+    
+    // Route to mobile deep link provider for iOS/Android Phantom app
+    if (deviceInfo.requiresDeepLinks) {
+      // Import mobile provider dynamically to avoid circular dependencies
+      const { PhantomMobileProvider } = require('./phantom-mobile-provider');
+      return new PhantomMobileProvider();
+    }
+    
+    // Use standard browser extension provider for desktop
+    return new PhantomWalletProvider();
+  }
 
   static createProvider(id: string): WalletProvider | null {
     const factory = this.providers.get(id);
@@ -333,11 +351,27 @@ export class WalletProviderFactory {
 
   static getAvailableProviders(): WalletProvider[] {
     const providers: WalletProvider[] = [];
+    const deviceInfo = getDeviceInfo();
 
-    for (const [, factory] of this.providers) {
-      const provider = factory();
-      if (provider.isAvailable()) {
-        providers.push(provider);
+    for (const [id, factory] of this.providers) {
+      try {
+        const provider = factory();
+        
+        // Special handling for mobile-only providers
+        if (provider.id === 'phantom-mobile' && !deviceInfo.requiresDeepLinks) {
+          continue; // Skip mobile provider on desktop
+        }
+        
+        // Special handling for desktop-only providers  
+        if (provider.id === 'phantom' && provider.constructor.name === 'PhantomWalletProvider' && deviceInfo.requiresDeepLinks) {
+          continue; // Skip desktop provider on mobile
+        }
+        
+        if (provider.isAvailable()) {
+          providers.push(provider);
+        }
+      } catch (error) {
+        console.warn(`Failed to create provider ${id}:`, error);
       }
     }
 

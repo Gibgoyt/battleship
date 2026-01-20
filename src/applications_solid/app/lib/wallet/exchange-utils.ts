@@ -94,19 +94,59 @@ export function detectDeviceType(): DeviceType {
 
 /**
  * Get detailed device information for enhanced exchange handling
+ * Enhanced for iOS Phantom deep link detection
  */
 export function getDeviceInfo() {
   const deviceType = detectDeviceType();
-  const userAgent = navigator.userAgent;
+  const userAgent = navigator.userAgent.toLowerCase();
   
-  return {
+  // Enhanced iOS detection
+  const isIOS = /iphone|ipad|ipod/i.test(userAgent);
+  const isAndroid = /android/i.test(userAgent);
+  
+  // Phantom app detection (in-app browser)
+  const isPhantomApp = userAgent.includes('phantom');
+  const isPhantomMobile = isPhantomApp && (isIOS || isAndroid);
+  const isPhantomiOS = isPhantomApp && isIOS;
+  
+  // Browser detection
+  const isInAppBrowser = /instagram|facebook|whatsapp|line|wechat|tiktok/i.test(userAgent);
+  const isSafari = /safari/i.test(userAgent) && !/chrome/i.test(userAgent);
+  const isChrome = /chrome/i.test(userAgent);
+  
+  // Wallet capabilities based on environment
+  const supportsSignAndSend = deviceType === 'desktop' && !isPhantomMobile;
+  const requiresDeepLinks = isPhantomMobile;
+  const preferredFlow = requiresDeepLinks ? 'deepLink' : (deviceType === 'desktop' ? 'signAndSendTransaction' : 'signTransaction');
+  
+  const deviceInfo = {
     type: deviceType,
-    isPhantomMobile: userAgent.includes('phantom') && deviceType === 'mobile',
-    isInAppBrowser: /instagram|facebook|whatsapp|line|wechat|tiktok/i.test(userAgent),
-    isSafari: /safari/i.test(userAgent) && !/chrome/i.test(userAgent),
-    supportsSignAndSend: deviceType === 'desktop',
-    preferredFlow: deviceType === 'desktop' ? 'signAndSendTransaction' : 'signTransaction'
+    platform: isIOS ? 'iOS' : (isAndroid ? 'Android' : 'Desktop'),
+    
+    // Phantom detection
+    isPhantomMobile,
+    isPhantomiOS,
+    isPhantomApp,
+    
+    // Browser detection  
+    isInAppBrowser,
+    isSafari,
+    isChrome,
+    
+    // Wallet capabilities
+    supportsSignAndSend,
+    requiresDeepLinks,
+    preferredFlow,
+    
+    // Backend endpoint routing
+    backendEndpoint: requiresDeepLinks ? 
+      '/api/testing/usockets/exchange/solana/splitdo' : 
+      '/api/testing/usockets/exchange-new/solana/splitdo'
   };
+  
+  logger.debug('Enhanced device info:', deviceInfo);
+  
+  return deviceInfo;
 }
 
 // ================================
@@ -420,9 +460,33 @@ export function createExchangeError(
 }
 
 /**
- * Parse wallet error into standardized format
+ * Parse wallet error into standardized format with iOS support
  */
 export function parseWalletError(error: any): ExchangeError {
+  const deviceInfo = getDeviceInfo();
+  
+  // Use iOS-specific error handling for Phantom mobile
+  if (deviceInfo.isPhantomMobile || deviceInfo.requiresDeepLinks) {
+    try {
+      // Import iOS error handler dynamically
+      const { PhantomMobileErrorHandler } = require('./phantom-mobile-errors');
+      const iosError = PhantomMobileErrorHandler.parseError(error);
+      
+      return {
+        type: iosError.retryable ? 'network_error' : 'validation_error',
+        message: iosError.message,
+        details: {
+          ...error,
+          iosErrorInfo: iosError
+        },
+        retryable: iosError.retryable
+      };
+    } catch (importError) {
+      logger.warn('Failed to import iOS error handler, using fallback:', importError);
+    }
+  }
+
+  // Fallback to standard error parsing
   const errorMessage = error?.message || error?.toString() || 'Unknown error';
   
   // User rejected transaction
