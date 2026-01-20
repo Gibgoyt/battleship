@@ -262,11 +262,11 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Get SOL balance for a wallet address (via backend API)
+   * Get SOL balance for a wallet address (directly from Solana RPC)
    */
   async getSolBalance(walletAddress: string): Promise<SolanaBalance> {
     try {
-      await this.ensureBackendAvailable();
+      // No need to check backend availability - we're talking directly to Solana!
       const lamports = await this.getWalletBalance(walletAddress);
 
       return {
