@@ -407,59 +407,55 @@ export class MetaMaskSolanaProvider implements WalletProvider {
 
       // Method 2: Try multiple alternative connection methods
       if (this.provider?.request) {
-        console.log('[MetaMaskSolanaProvider] 🔄 Attempting alternative connection methods');
+        console.log('[MetaMaskSolanaProvider] 🔄 Attempting Drift Labs Snap connection');
         
-        // Method 2a: Try with your actual public key for testing
-        const testPublicKey = 'CzijMBR4hHdthzpdXNdZK1f4s79QsmEPQfANdGKd6Lfy';
+        // Method 2a: Try Snap-based connection (Primary)
         try {
-          console.log('[MetaMaskSolanaProvider] 🔄 Using provided Solana public key for testing:', testPublicKey);
+          const snapId = 'npm:@drift-labs/snap-solana';
+          const snapVersion = '0.3.0';
           
-          // Validate the public key format
-          const pubKey = new PublicKey(testPublicKey);
-          this.publicKey = pubKey;
-          
-          console.log('[MetaMaskSolanaProvider] ✅ Connected with test public key:', this.publicKey.toString());
-          
-          // Test MetaMask connectivity to ensure it's working
-          const accounts = await this.provider.request({
-            method: 'eth_requestAccounts'
-          });
-          console.log('[MetaMaskSolanaProvider] ✅ MetaMask is connected (ETH accounts):', accounts);
-          
-          return { publicKey: this.publicKey };
-          
-        } catch (testError) {
-          console.warn('[MetaMaskSolanaProvider] ⚠️ Test connection failed:', testError);
-        }
-        
-        // Method 2b: Try Snap-based connection
-        try {
-          const snapId = 'npm:@solana/wallet-standard-wallet-adapter';
-          
-          console.log('[MetaMaskSolanaProvider] 🔄 Requesting Snap installation:', snapId);
-          const snapParams: Record<string, any> = {};
-          snapParams[snapId] = {};
-          
-          await this.provider.request({
-            method: 'wallet_requestSnaps',
-            params: snapParams
-          });
+          // Check if Snap is already installed
+          console.log('[MetaMaskSolanaProvider] 🔄 Checking for existing Drift Labs Snap installation...');
+          let installedSnaps;
+          try {
+            installedSnaps = await this.provider.request({
+              method: 'wallet_getSnaps'
+            }) as Record<string, any>;
+          } catch (getSnapError) {
+            console.warn('[MetaMaskSolanaProvider] Could not check installed snaps:', getSnapError);
+            installedSnaps = {};
+          }
 
-          // Get Solana accounts via Snap
-          console.log('[MetaMaskSolanaProvider] 🔄 Requesting accounts via Snap');
-          const accounts = await this.provider.request({
+          // Install or update Snap if needed
+          if (!installedSnaps[snapId] || installedSnaps[snapId]?.version !== snapVersion) {
+            console.log('[MetaMaskSolanaProvider] 🔄 Installing/updating Drift Labs Snap to version', snapVersion);
+            const snapParams: Record<string, any> = {};
+            snapParams[snapId] = { version: snapVersion };
+            
+            await this.provider.request({
+              method: 'wallet_requestSnaps',
+              params: snapParams
+            });
+            console.log('[MetaMaskSolanaProvider] ✅ Drift Labs Snap installed/updated successfully');
+          } else {
+            console.log('[MetaMaskSolanaProvider] ✅ Drift Labs Snap already installed with correct version');
+          }
+
+          // Get public key via Drift Labs Snap
+          console.log('[MetaMaskSolanaProvider] 🔄 Getting public key via Drift Labs Snap');
+          const publicKeyString = await this.provider.request({
             method: 'wallet_invokeSnap',
             params: {
               snapId,
               request: {
-                method: 'solana_connect'
+                method: 'getPublicKey'
               }
             }
           });
 
-          if (accounts && accounts.length > 0) {
-            this.publicKey = new PublicKey(accounts[0]);
-            console.log('[MetaMaskSolanaProvider] ✅ Connected via Snap with public key:', this.publicKey.toString());
+          if (publicKeyString) {
+            this.publicKey = new PublicKey(publicKeyString);
+            console.log('[MetaMaskSolanaProvider] ✅ Connected via Drift Labs Snap with public key:', this.publicKey.toString());
             return { publicKey: this.publicKey };
           }
         } catch (snapError) {
@@ -486,7 +482,7 @@ export class MetaMaskSolanaProvider implements WalletProvider {
 
         // Final fallback - inform user about the status
         throw new WalletConnectionError('MetaMask', 
-          'MetaMask detected but Solana support setup needed. For testing, using provided public key: ' + testPublicKey);
+          'MetaMask detected but Drift Labs Snap connection failed. Please install the Drift Labs Snap.');
       }
 
       throw new WalletConnectionError('MetaMask', 'No supported connection method available');
@@ -520,9 +516,9 @@ export class MetaMaskSolanaProvider implements WalletProvider {
         
         // First, ensure we have the necessary permissions
         try {
-          console.log('[MetaMaskSolanaProvider] 🔄 Requesting Snap permissions for signing...');
+          console.log('[MetaMaskSolanaProvider] 🔄 Requesting Drift Labs Snap installation/permissions...');
           const snapParams: Record<string, any> = {};
-          snapParams[snapId] = {};
+          snapParams[snapId] = { version: '0.3.0' };
           
           await this.provider.request({
             method: 'wallet_requestSnaps',
@@ -546,17 +542,22 @@ export class MetaMaskSolanaProvider implements WalletProvider {
           params: {
             snapId,
             request: {
-              method: 'solana_signTransaction',
+              method: 'signTransaction',
               params: {
-                transaction: Buffer.from(serializedTx).toString('base64')
+                transaction: serializedTx,
+                isVersionedTransaction: false,
+                serializeConfig: {
+                  requireAllSignatures: false,
+                  verifySignatures: false
+                }
               }
             }
           }
         });
 
-        // Reconstruct signed transaction
+        // Reconstruct signed transaction (Drift Labs format)
         const signedTransaction = Transaction.from(
-          Buffer.from(signedTxData.transaction, 'base64')
+          Buffer.from(signedTxData.transaction.data)
         );
         
         console.log('[MetaMaskSolanaProvider] ✅ Transaction signed via Snap');
