@@ -512,7 +512,7 @@ export class MetaMaskSolanaProvider implements WalletProvider {
       if (this.provider?.request) {
         console.log('[MetaMaskSolanaProvider] 🔄 Attempting Snap-based signing');
         
-        const snapId = 'npm:@solana/wallet-standard-wallet-adapter';
+        const snapId = 'npm:@drift-labs/snap-solana';
         
         // First, ensure we have the necessary permissions
         try {
