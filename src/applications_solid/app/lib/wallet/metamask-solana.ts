@@ -44,14 +44,10 @@ export interface MetaMaskEthereum {
   solana?: MetaMaskSolanaProvider;
 
   // MetaMask-specific methods
-  request?(args: { method: string; params?: any[] }): Promise<any>;
+  request?(args: { method: string; params?: any }): Promise<any>;
 }
 
-declare global {
-  interface Window {
-    ethereum?: MetaMaskEthereum;
-  }
-}
+// Note: Window.ethereum interface is declared in wallet-providers.ts
 
 // MetaMask-specific error codes and messages
 export const METAMASK_ERROR_CODES = {
@@ -147,31 +143,78 @@ export class MetaMaskDetector {
 
     // Check if running in browser
     if (typeof window === 'undefined') {
+      console.log('[MetaMaskDetector] ❌ Not running in browser environment');
       return capabilities;
     }
 
+    console.log('[MetaMaskDetector] 🔍 Detecting MetaMask capabilities...');
+
     // Check for MetaMask
-    const ethereum = window.ethereum;
+    const ethereum = window.ethereum as MetaMaskEthereum | undefined;
+    console.log('[MetaMaskDetector] 🔍 Ethereum object:', {
+      exists: !!ethereum,
+      isMetaMask: ethereum?.isMetaMask,
+      version: ethereum?.version,
+      hasRequest: !!ethereum?.request,
+      hasSolana: !!ethereum?.solana
+    });
+
     if (!ethereum?.isMetaMask) {
+      console.log('[MetaMaskDetector] ❌ MetaMask not detected');
       return capabilities;
     }
 
     capabilities.hasMetaMask = true;
     capabilities.version = ethereum.version;
+    console.log('[MetaMaskDetector] ✅ MetaMask detected, version:', capabilities.version);
 
-    // Check for Solana support
+    // Check for direct Solana support
     if (ethereum.solana) {
+      console.log('[MetaMaskDetector] ✅ Direct Solana support detected');
       capabilities.hasSolanaSupport = true;
       capabilities.isAvailable = true;
 
       // Check supported features
       const solanaProvider = ethereum.solana;
-      if (solanaProvider.connect) capabilities.supportedFeatures.push('connect');
-      if (solanaProvider.signTransaction) capabilities.supportedFeatures.push('signTransaction');
-      if (solanaProvider.signAllTransactions) capabilities.supportedFeatures.push('signAllTransactions');
-      if (solanaProvider.disconnect) capabilities.supportedFeatures.push('disconnect');
+      if (typeof solanaProvider.connect === 'function') capabilities.supportedFeatures.push('connect');
+      if (typeof solanaProvider.signTransaction === 'function') capabilities.supportedFeatures.push('signTransaction');
+      if (typeof solanaProvider.signAllTransactions === 'function') capabilities.supportedFeatures.push('signAllTransactions');
+      if (typeof solanaProvider.disconnect === 'function') capabilities.supportedFeatures.push('disconnect');
     }
 
+    // Check for Snap support (even if direct Solana isn't available)
+    if (ethereum.request) {
+      console.log('[MetaMaskDetector] ✅ MetaMask request method available (Snap support)');
+      capabilities.supportedFeatures.push('snaps');
+      
+      // If we don't have direct Solana, we can still use Snaps
+      if (!capabilities.hasSolanaSupport) {
+        console.log('[MetaMaskDetector] ℹ️ No direct Solana, but Snaps available');
+        capabilities.hasSolanaSupport = true;
+        capabilities.isAvailable = true;
+      }
+    }
+
+    // Check Wallet Standard support
+    if (window.navigator && (window.navigator as any).wallets) {
+      try {
+        const wallets = (window.navigator as any).wallets.getWallets();
+        const metaMaskWallet = wallets.find((wallet: any) => 
+          wallet.name.toLowerCase().includes('metamask') && 
+          wallet.chains && wallet.chains.some((chain: any) => chain.includes('solana'))
+        );
+        if (metaMaskWallet) {
+          console.log('[MetaMaskDetector] ✅ MetaMask found via Wallet Standard');
+          capabilities.supportedFeatures.push('walletStandard');
+          capabilities.hasSolanaSupport = true;
+          capabilities.isAvailable = true;
+        }
+      } catch (error) {
+        console.log('[MetaMaskDetector] ℹ️ Wallet Standard not available:', error);
+      }
+    }
+
+    console.log('[MetaMaskDetector] 📋 Final capabilities:', capabilities);
     return capabilities;
   }
 
@@ -349,6 +392,106 @@ export class MetaMaskSolanaConnection {
     if (callbacks.onDisconnect) {
       this.provider.removeListener('disconnect', callbacks.onDisconnect);
     }
+  }
+}
+
+// Debug utility for MetaMask investigation
+export class MetaMaskDebugUtils {
+  /**
+   * Comprehensive debugging of MetaMask availability and capabilities
+   */
+  static debugMetaMaskEnvironment(): void {
+    console.log('🔍 === MetaMask Environment Debug ===');
+    
+    if (typeof window === 'undefined') {
+      console.log('❌ Not in browser environment');
+      return;
+    }
+
+    // Check window.ethereum
+    console.log('🔍 window.ethereum:', {
+      exists: !!window.ethereum,
+      isMetaMask: window.ethereum?.isMetaMask,
+      version: (window.ethereum as any)?.version,
+      hasRequest: !!(window.ethereum as any)?.request,
+      hasSolana: !!(window.ethereum as any)?.solana,
+      keys: window.ethereum ? Object.keys(window.ethereum) : []
+    });
+
+    // Check for multiple providers
+    if (window.ethereum && (window.ethereum as any).providers) {
+      console.log('🔍 Multiple providers detected:', (window.ethereum as any).providers);
+    }
+
+    // Check window.solana (Phantom)
+    console.log('🔍 window.solana:', {
+      exists: !!(window as any).solana,
+      isPhantom: (window as any).solana?.isPhantom,
+      keys: (window as any).solana ? Object.keys((window as any).solana) : []
+    });
+
+    // Check Wallet Standard
+    console.log('🔍 Wallet Standard:', {
+      exists: !!(window.navigator as any)?.wallets,
+      walletsCount: (window.navigator as any)?.wallets?.getWallets?.()?.length || 0
+    });
+
+    // Try to get all available objects
+    console.log('🔍 All window wallet objects:', {
+      ethereum: !!window.ethereum,
+      solana: !!(window as any).solana,
+      phantom: !!(window as any).phantom,
+      metamask: !!(window as any).metamask,
+      web3: !!(window as any).web3
+    });
+
+    console.log('🔍 === End Debug ===');
+  }
+
+  /**
+   * Test MetaMask connectivity
+   */
+  static async testMetaMaskConnectivity(): Promise<void> {
+    console.log('🧪 === Testing MetaMask Connectivity ===');
+    
+    const ethereum = window.ethereum as MetaMaskEthereum | undefined;
+    
+    if (!ethereum?.isMetaMask) {
+      console.log('❌ MetaMask not available');
+      return;
+    }
+
+    console.log('✅ MetaMask detected');
+
+    // Test basic connectivity
+    if (ethereum.request) {
+      try {
+        console.log('🧪 Testing eth_accounts...');
+        const accounts = await ethereum.request({ method: 'eth_accounts' });
+        console.log('✅ eth_accounts result:', accounts);
+      } catch (error) {
+        console.log('❌ eth_accounts failed:', error);
+      }
+
+      try {
+        console.log('🧪 Testing eth_chainId...');
+        const chainId = await ethereum.request({ method: 'eth_chainId' });
+        console.log('✅ eth_chainId result:', chainId);
+      } catch (error) {
+        console.log('❌ eth_chainId failed:', error);
+      }
+
+      // Test Snap capabilities
+      try {
+        console.log('🧪 Testing wallet_getSnaps...');
+        const snaps = await ethereum.request({ method: 'wallet_getSnaps' });
+        console.log('✅ wallet_getSnaps result:', snaps);
+      } catch (error) {
+        console.log('❌ wallet_getSnaps failed:', error);
+      }
+    }
+
+    console.log('🧪 === End Connectivity Test ===');
   }
 }
 

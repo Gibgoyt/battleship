@@ -330,6 +330,15 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
         });
 
         logger.info('✅ Wallet connected successfully:', result.wallet);
+        logger.info('🐛 DEBUG - Wallet state after connection:', {
+          providerId,
+          walletAddress: result.wallet.address,
+          walletName: result.wallet.name,
+          walletProvider: result.wallet.provider?.id,
+          isMetaMask: providerId === 'metamask',
+          stateWallet: wallet()?.address,
+          connectionStatus: connectionStatus()
+        });
 
         // 🚨 CRITICAL FIX: Wait for state to properly settle before refreshing balances
         await new Promise(resolve => setTimeout(resolve, 150));
@@ -408,6 +417,18 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       return;
     }
 
+    // 🐛 DEBUG: Log current wallet state for MetaMask debugging
+    const walletState = wallet();
+    const currentProvider = getCurrentProvider();
+    logger.info('🐛 DEBUG - refreshBalances called with wallet state:', {
+      walletAddress: walletState?.address,
+      walletName: walletState?.name,
+      providerId: connectedProviderId(),
+      providerName: currentProvider?.id,
+      isMetaMask: connectedProviderId() === 'metamask',
+      connectionStatus: connectionStatus()
+    });
+
     // Double-check provider is actually connected
     const provider = getCurrentProvider();
     const currentWallet = wallet();
@@ -479,29 +500,95 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       return { success: false, error: 'Wallet not connected' };
     }
 
+    const currentProvider = getCurrentProvider();
+    if (!currentProvider) {
+      return { success: false, error: 'No wallet provider available' };
+    }
+
     try {
       setIsCreatingATA(true);
       setSplitdoATA(prev => ({ ...prev, status: 'creating' }));
 
-      // TODO: The middleware POST endpoint requires wallet_address, token_account_address, and signed_transaction
-      // This needs coordination with backend team to either:
-      // 1. Add a simplified account creation endpoint that only requires wallet_address
-      // 2. Implement client-side transaction creation and signing
+      logger.info('🔄 Creating SPLITDO ATA with wallet:', {
+        walletAddress: wallet()!.address,
+        providerId: connectedProviderId(),
+        isMetaMask: connectedProviderId() === 'metamask'
+      });
 
-      // For now, return an error indicating this needs implementation
-      logger.error('createSplitdoATA: Middleware endpoint requires signed transaction - needs implementation');
+      // Import solanaService dynamically to avoid circular dependencies
+      const { solanaService } = await import('./solana-service');
 
-      setSplitdoATA(prev => ({ ...prev, status: 'error', error: 'Account creation not implemented with new middleware system' }));
-      return {
-        success: false,
-        error: 'Account creation requires coordination with backend team for proper transaction signing implementation'
-      };
+      // Step 1: Create and sign the ATA transaction using the current wallet provider
+      logger.info('🔄 Step 1: Creating and signing ATA transaction...');
+      const ataResult = await solanaService.createSplitdoATA(currentProvider);
 
-      // Future implementation would look like:
-      // const createResponse = await middlewareFetch.Endpoints.Devbackend._Api.SplitdoToken.Accounts.Create.POST({
-      //   wallet_address: wallet()!.address,
-      //   token_account_address: '...', // Generated client-side
-      //   signed_transaction: '...' // Signed client-side
+      if (!ataResult.success) {
+        setSplitdoATA(prev => ({ ...prev, status: 'error', error: ataResult.error }));
+        return {
+          success: false,
+          error: ataResult.error
+        };
+      }
+
+      // Step 2: Submit the signed transaction to the backend
+      if (ataResult.signature && ataResult.ataAddress) {
+        logger.info('🔄 Step 2: Submitting signed transaction to backend...', {
+          ataAddress: ataResult.ataAddress,
+          signedTransactionLength: ataResult.signature.length
+        });
+
+        const submitResult = await solanaService.submitSignedATATransaction(
+          '', // Firebase token - handled automatically by fetchMiddleware
+          wallet()!.address,
+          ataResult.ataAddress,
+          ataResult.signature
+        );
+
+        if (!submitResult.success) {
+          setSplitdoATA(prev => ({ ...prev, status: 'error', error: submitResult.error }));
+          return {
+            success: false,
+            error: submitResult.error
+          };
+        }
+
+        // Step 3: Success - update state
+        logger.info('✅ SPLITDO ATA created successfully!', {
+          walletAddress: wallet()!.address,
+          ataAddress: ataResult.ataAddress,
+          transactionSignature: submitResult.transactionSignature
+        });
+
+        setSplitdoATA({
+          address: ataResult.ataAddress,
+          balance: { splitdo: 0, lamports: 0 },
+          status: 'available'
+        });
+
+        // Refresh balances to pick up the new account
+        await refreshBalances();
+
+        return {
+          success: true,
+          signature: submitResult.transactionSignature
+        };
+      } else {
+        // ATA already exists case
+        logger.info('✅ SPLITDO ATA already exists', {
+          ataAddress: ataResult.ataAddress
+        });
+
+        setSplitdoATA({
+          address: ataResult.ataAddress!,
+          balance: { splitdo: 0, lamports: 0 },
+          status: 'available'
+        });
+
+        return {
+          success: true,
+          signature: undefined // No new transaction created
+        };
+      }
       // });
 
     } catch (error) {
@@ -566,10 +653,30 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
     try {
       setIsPersistentDataLoading(true);
 
+      // 🐛 DEBUG: Log what wallet we're fetching balances for
+      const walletState = wallet();
+      logger.info('🐛 DEBUG - fetchCachedBalances called:', {
+        walletAddress: walletState?.address,
+        providerId: connectedProviderId(),
+        isMetaMask: connectedProviderId() === 'metamask',
+        force: options.force
+      });
+
       const result = await smartFetch(
         async () => {
           // Use middleware system for balance API
+          logger.info('🐛 DEBUG - Calling balance API for wallet:', {
+            address: walletState?.address,
+            provider: connectedProviderId()
+          });
+          
           const balanceResponse = await middlewareFetch.Endpoints.Devbackend._Api.SplitdoToken.Balance.GET();
+
+          logger.info('🐛 DEBUG - Balance API response:', {
+            status: balanceResponse.status,
+            provider: connectedProviderId(),
+            address: walletState?.address
+          });
 
           if (balanceResponse.status !== 200) {
             throw new Error(`Balance API returned ${balanceResponse.status}: ${balanceResponse.data.message || 'Unknown error'}`);
