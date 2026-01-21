@@ -279,8 +279,6 @@ export class EnhancedSolanaService {
    */
   async getTokenBalance(tokenAccountAddress: string): Promise<TokenBalance> {
     try {
-      await this.ensureBackendAvailable();
-
       // For now, we'll use the SPLITDO balance endpoint which already exists
       // In a full implementation, we'd add a generic token balance endpoint
       throw new Error('Generic token balance not implemented - use checkSplitdoBalance instead');
@@ -360,7 +358,7 @@ export class EnhancedSolanaService {
     payer
   }: CreateATATransactionRequest): Promise<CreateATATransactionResult> {
     try {
-      await this.ensureBackendAvailable();
+      // Skip backend health check - frontend just builds transactions locally
       const wallet = new PublicKey(walletAddress);
       const mint = new PublicKey(tokenMint);
       const payerKey = payer ? new PublicKey(payer) : wallet;
