@@ -516,13 +516,31 @@ export class MetaMaskSolanaProvider implements WalletProvider {
       if (this.provider?.request) {
         console.log('[MetaMaskSolanaProvider] 🔄 Attempting Snap-based signing');
         
+        const snapId = 'npm:@solana/wallet-standard-wallet-adapter';
+        
+        // First, ensure we have the necessary permissions
+        try {
+          console.log('[MetaMaskSolanaProvider] 🔄 Requesting Snap permissions for signing...');
+          const snapParams: Record<string, any> = {};
+          snapParams[snapId] = {};
+          
+          await this.provider.request({
+            method: 'wallet_requestSnaps',
+            params: snapParams
+          });
+          
+          console.log('[MetaMaskSolanaProvider] ✅ Snap permissions granted');
+        } catch (permError) {
+          console.warn('[MetaMaskSolanaProvider] ⚠️ Permission request failed:', permError);
+          // Continue anyway - permissions might already be granted
+        }
+        
         // Serialize transaction for MetaMask Snap
         const serializedTx = transaction.serialize({
           requireAllSignatures: false,
           verifySignatures: false
         });
         
-        const snapId = 'npm:@solana/wallet-standard-wallet-adapter';
         const signedTxData = await this.provider.request({
           method: 'wallet_invokeSnap',
           params: {
