@@ -61,19 +61,6 @@ const Navigation: Component<NavigationProps> = (props) => {
             </div>
           </button>
           <button
-            onClick={() => props.onPageChange('profile')}
-            class={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
-              props.currentPage === 'profile' ? 'crypto-nav-active' : 'crypto-nav-inactive'
-            }`}
-          >
-            <div class="flex items-center gap-3">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-              </svg>
-              <span class="font-medium">Profile</span>
-            </div>
-          </button>
-          <button
             onClick={() => props.onPageChange('splitdo-exchange')}
             class={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
               props.currentPage === 'splitdo-exchange' ? 'crypto-nav-active' : 'crypto-nav-inactive'
@@ -84,6 +71,19 @@ const Navigation: Component<NavigationProps> = (props) => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
               </svg>
               <span class="font-medium">Exchange</span>
+            </div>
+          </button>
+          <button
+            onClick={() => props.onPageChange('profile')}
+            class={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
+              props.currentPage === 'profile' ? 'crypto-nav-active' : 'crypto-nav-inactive'
+            }`}
+          >
+            <div class="flex items-center gap-3">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+              <span class="font-medium">Profile</span>
             </div>
           </button>
         </div>
