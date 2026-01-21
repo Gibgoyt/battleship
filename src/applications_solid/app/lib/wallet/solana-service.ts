@@ -367,19 +367,26 @@ export class EnhancedSolanaService {
       // This follows the standard ATA derivation: findProgramAddress([wallet, TOKEN_PROGRAM_ID, mint], ASSOCIATED_TOKEN_PROGRAM_ID)
       const associatedTokenAddress = await this.deriveAssociatedTokenAddress(wallet, mint);
       
-      // Create minimal transaction - backend will handle the actual ATA creation logic
-      // We're just building a placeholder transaction that carries the necessary information
+      // Create proper ATA creation transaction for SPLITDO token
       const transaction = new Transaction();
+      const ataPublicKey = new PublicKey(associatedTokenAddress);
       
-      // Add a minimal instruction - the backend will replace this with the actual ATA creation
-      // This is just to create a valid transaction structure for signing
-      const memoInstruction = SystemProgram.transfer({
-        fromPubkey: payerKey,
-        toPubkey: payerKey,
-        lamports: 0, // No actual transfer, just a placeholder
+      // Create Associated Token Account instruction manually
+      // This instruction creates an ATA for the SPLITDO token mint
+      const createATAInstruction = new TransactionInstruction({
+        keys: [
+          { pubkey: payerKey, isSigner: true, isWritable: true }, // Funding account
+          { pubkey: ataPublicKey, isSigner: false, isWritable: true }, // New ATA
+          { pubkey: wallet, isSigner: false, isWritable: false }, // Owner
+          { pubkey: mint, isSigner: false, isWritable: false }, // Token Mint
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false }, // System Program
+          { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false }, // Token Program
+        ],
+        programId: ASSOCIATED_TOKEN_PROGRAM_ID,
+        data: Buffer.alloc(0), // ATA creation requires no additional data
       });
       
-      transaction.add(memoInstruction);
+      transaction.add(createATAInstruction);
 
       // Get recent blockhash from backend API (no rate limits)
       const blockhash = await this.getRecentBlockhash();
