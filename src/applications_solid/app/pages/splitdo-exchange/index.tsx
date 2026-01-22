@@ -226,6 +226,31 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
 
       {/* Main Content */}
       <div class="max-w-6xl mx-auto px-4 md:px-8 py-12">
+        {/* Primary Action - Exchange Tokens (shown when ready) */}
+        <Show when={wallet.connectionStatus() === 'connected' && wallet.splitdoATA().status === 'exists'}>
+          <div class="mb-8">
+            <button
+              onClick={wallet.openExchangeModal}
+              class="group w-full flex items-center justify-between p-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 border border-cyan-500/20 hover:border-cyan-500/40 transition-all"
+            >
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                  </svg>
+                </div>
+                <div class="text-left">
+                  <div class="text-lg font-semibold text-white mb-1">Exchange Tokens</div>
+                  <div class="text-sm text-zinc-400">Trade SOL for SPLITDO at $0.11 each</div>
+                </div>
+              </div>
+              <svg class="w-6 h-6 text-cyan-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </div>
+        </Show>
+
         {/* Connect Wallet or Create Account */}
         <Show when={wallet.connectionStatus() !== 'connected' || wallet.splitdoATA().status !== 'exists'}>
           <div class="mb-8 p-6 bg-zinc-800/50 border border-zinc-700">
@@ -270,7 +295,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
             <div class="flex items-center justify-between py-4 px-6 border-l-2 border-cyan-500 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
               <div class="flex items-center gap-4">
                 <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden">
-                  <img src="/splitdo/logo.webp" alt="SPLITDO" class="w-7 h-7 object-contain" />
+                  <img src="/splitdo/logo.png" alt="SPLITDO" class="w-7 h-7 object-contain" />
                 </div>
                 <div>
                   <div class="text-sm font-medium text-white">SPLITDO</div>
@@ -328,7 +353,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
             <div class="flex items-center justify-between py-4 px-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
               <div class="flex items-center gap-4">
                 <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden">
-                  <img src="/splitdo/logo.webp" alt="SPLITDO" class="w-7 h-7 object-contain" />
+                  <img src="/splitdo/logo.png" alt="SPLITDO" class="w-7 h-7 object-contain" />
                 </div>
                 <div>
                   <div class="text-sm font-medium text-white">SPLITDO / USD</div>
@@ -358,24 +383,6 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
             </div>
           </div>
         </div>
-
-        {/* Exchange Action */}
-        <Show when={wallet.connectionStatus() === 'connected' && wallet.splitdoATA().status === 'exists'}>
-          <div class="mb-8">
-            <button
-              onClick={wallet.openExchangeModal}
-              class="group w-full flex items-center justify-between p-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 border border-cyan-500/20 hover:border-cyan-500/30 transition-all"
-            >
-              <div>
-                <div class="text-base font-semibold text-white mb-1">Exchange Tokens</div>
-                <div class="text-sm text-zinc-400">Trade SOL for SPLITDO at $0.11 each</div>
-              </div>
-              <svg class="w-5 h-5 text-cyan-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </button>
-          </div>
-        </Show>
 
         {/* Quick Actions */}
         <Show when={wallet.connectionStatus() === 'connected'}>

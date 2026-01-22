@@ -94,13 +94,18 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
         {/* Professional Header */}
         <div class="bg-gradient-to-r from-crypto-primary-blue to-crypto-primary-cyan px-4 py-4 sm:px-8 sm:py-6">
           <div class="flex items-center justify-between">
-            <div>
-              <h2 class="text-xl sm:text-2xl font-bold text-white mb-1">
-                Exchange SOL for SPLITDO
-              </h2>
-              <p class="text-blue-100 opacity-90">
-                Secure token exchange powered by Solana
-              </p>
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center overflow-hidden">
+                <img src="/splitdo/logo.png" alt="SPLITDO" class="w-8 h-8 object-contain" />
+              </div>
+              <div>
+                <h2 class="text-xl sm:text-2xl font-bold text-white mb-1">
+                  Exchange SOL for SPLITDO
+                </h2>
+                <p class="text-blue-100 opacity-90">
+                  Secure token exchange powered by Solana
+                </p>
+              </div>
             </div>
             <button
               onClick={handleClose}

@@ -126,8 +126,32 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
         </div>
       </div>
 
-      {/* Balances Section */}
+      {/* Main Content */}
       <div class="max-w-6xl mx-auto px-4 md:px-8 py-12">
+        {/* Primary Action - Exchange Tokens */}
+        <div class="mb-8">
+          <a
+            href="/app/splitdo-exchange"
+            class="group flex items-center justify-between p-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 border border-cyan-500/20 hover:border-cyan-500/40 transition-all"
+          >
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                </svg>
+              </div>
+              <div>
+                <div class="text-lg font-semibold text-white mb-1">Exchange Tokens</div>
+                <div class="text-sm text-zinc-400">Trade SOL for SPLITDO at $0.11 each</div>
+              </div>
+            </div>
+            <svg class="w-6 h-6 text-cyan-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+
+        {/* Assets Section */}
         <div class="mb-8">
           <h2 class="text-lg font-semibold text-white mb-6">Assets</h2>
           <div class="space-y-3">
@@ -135,7 +159,7 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
             <div class="flex items-center justify-between py-4 px-6 border-l-2 border-cyan-500 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
               <div class="flex items-center gap-4">
                 <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden">
-                  <img src="/splitdo/logo.webp" alt="SPLITDO" class="w-7 h-7 object-contain" />
+                  <img src="/splitdo/logo.png" alt="SPLITDO" class="w-7 h-7 object-contain" />
                 </div>
                 <div>
                   <div class="text-sm font-medium text-white">SPLITDO</div>
@@ -185,36 +209,28 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
           </div>
         </div>
 
-        {/* Actions Section */}
+        {/* Quick Actions */}
         <div class="mb-8">
           <h2 class="text-lg font-semibold text-white mb-6">Quick Actions</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <a
-              href="/app/splitdo-exchange"
-              class="group flex items-center justify-between p-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 border border-cyan-500/20 hover:border-cyan-500/30 transition-all"
-            >
-              <div>
-                <div class="text-base font-semibold text-white mb-1">Exchange Tokens</div>
-                <div class="text-sm text-zinc-400">Trade SOL for SPLITDO</div>
+          <a
+            href="/app/profile"
+            class="group flex items-center justify-between p-6 bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700 hover:border-zinc-600 transition-all"
+          >
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 bg-zinc-700 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
               </div>
-              <svg class="w-5 h-5 text-cyan-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </a>
-
-            <a
-              href="/app/profile"
-              class="group flex items-center justify-between p-6 bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700 hover:border-zinc-600 transition-all"
-            >
               <div>
                 <div class="text-base font-semibold text-white mb-1">Profile Settings</div>
                 <div class="text-sm text-zinc-400">Manage your account</div>
               </div>
-              <svg class="w-5 h-5 text-zinc-500 group-hover:text-zinc-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </a>
-          </div>
+            </div>
+            <svg class="w-5 h-5 text-zinc-500 group-hover:text-zinc-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
         </div>
 
         {/* Getting Started */}
