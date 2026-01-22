@@ -1,0 +1,13 @@
+# SPLITDO Robots.txt
+# Allow search engines to crawl public pages
+
+User-agent: *
+Allow: /
+Disallow: /app/
+Disallow: /admin/
+Disallow: /admin-sign-in/
+Disallow: /auth/
+Disallow: /app-gibgo-auth/
+
+# Sitemap
+Sitemap: https://splitdo.app/sitemap.xml
