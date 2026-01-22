@@ -1117,47 +1117,94 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
     exchangeRate: number
   ): Promise<{ success: boolean; signature?: string; error?: string }> => {
     try {
+      const walletAddress = wallet()?.address;
+      if (!walletAddress) {
+        throw new Error('No wallet address available');
+      }
+
       logger.info('🦊 Starting MetaMask Solana exchange flow...', {
         solAmount,
         exchangeRate,
-        walletAddress: wallet()?.address
+        walletAddress
       });
 
-      // Import MetaMask Solana provider dynamically
-      const { MetaMaskSolanaProvider } = await import('./metamask/solana-provider');
+      // Use the current wallet provider instead of creating a new one
+      const currentProvider = getCurrentProvider();
+      if (!currentProvider || !currentProvider.isConnected()) {
+        throw new Error('MetaMask wallet not connected');
+      }
+
+      // Import exchange builder and endpoint
+      const { 
+        buildSolToSplitdoExchangeTransaction,
+        calculateExchangeAmounts,
+        serializeExchangeTransactionToBase64
+      } = await import('./metamask/solana-exchange-builder');
       
-      // Create MetaMask provider instance
-      const metaMaskProvider = new MetaMaskSolanaProvider(window.ethereum);
-      
-      // Connect to ensure we have the account
-      const account = await metaMaskProvider.connect();
-      logger.debug('🦊 MetaMask account connected for exchange', {
-        publicKey: account.publicKey
+      const { POST: exchangeSolToSplitdo } = await import('../middleware/endpoints/devbackend/_api/testing/usockets/exchange/solana/splitdo/POST');
+
+      // Step 1: Calculate exchange parameters
+      const exchangeParams = calculateExchangeAmounts(solAmount, exchangeRate);
+
+      logger.debug('🦊 Exchange parameters calculated', {
+        solAmount: exchangeParams.solAmount,
+        splitdoAmount: exchangeParams.splitdoAmount,
+        fees: exchangeParams.fees,
+        totalCost: exchangeParams.totalCost
       });
 
-      // Execute the exchange using MetaMask provider
-      const exchangeResult = await metaMaskProvider.exchangeSolToSplitdo(solAmount, exchangeRate);
+      // Step 2: Build the unsigned exchange transaction
+      const transactionResult = await buildSolToSplitdoExchangeTransaction(
+        walletAddress,
+        solAmount,
+        exchangeParams
+      );
 
-      if (exchangeResult.success) {
+      if (!transactionResult.success || !transactionResult.transaction) {
+        throw new Error(transactionResult.error || 'Failed to build exchange transaction');
+      }
+
+      logger.debug('🦊 Exchange transaction built successfully');
+
+      // Step 3: Sign the transaction with current MetaMask provider
+      const signedTransaction = await currentProvider.signTransaction(transactionResult.transaction);
+
+      logger.debug('🦊 Transaction signed with MetaMask');
+
+      // Step 4: Serialize the signed transaction for backend
+      const serializedTransaction = serializeExchangeTransactionToBase64(signedTransaction);
+
+      // Step 5: Submit to backend exchange endpoint
+      const lamportsAmount = Math.floor(solAmount * 1_000_000_000);
+
+      logger.info('🦊 Submitting to backend exchange endpoint', {
+        lamportsAmount,
+        serializedTransactionLength: serializedTransaction.length
+      });
+
+      const backendResult = await exchangeSolToSplitdo(
+        lamportsAmount,
+        serializedTransaction
+      );
+
+      if (backendResult.status === 200) {
+        // Success!
         logger.info('✅ MetaMask exchange completed successfully', {
-          signature: exchangeResult.transactionSignature,
-          solAmount: exchangeResult.solAmount,
-          splitdoAmount: exchangeResult.splitdoAmount
+          stage1Status: backendResult.data.stage1_sol_confirmation?.result ? 'success' : 'error',
+          stage2Status: backendResult.data.stage2_splitdo_exchange?.result ? 'success' : 'error',
+          solAmount,
+          splitdoAmount: exchangeParams.splitdoAmount
         });
 
         return {
           success: true,
-          signature: exchangeResult.transactionSignature
+          signature: serializedTransaction
         };
-      } else {
-        logger.error('❌ MetaMask exchange failed', {
-          error: exchangeResult.error
-        });
 
-        return {
-          success: false,
-          error: exchangeResult.error || 'MetaMask exchange failed'
-        };
+      } else {
+        // Error response from backend
+        const errorMessage = (backendResult.data as any).message || (backendResult.data as any).error || 'Unknown backend error';
+        throw new Error(`Exchange failed: ${errorMessage}`);
       }
 
     } catch (error) {
