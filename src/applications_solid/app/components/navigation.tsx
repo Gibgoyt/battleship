@@ -47,7 +47,10 @@ const Navigation: Component<NavigationProps> = (props) => {
         {/* Navigation Links */}
         <div class="flex-1 space-y-1 px-3 py-6">
           <button
-            onClick={() => props.onPageChange('dashboard')}
+            onClick={() => {
+              props.onPageChange('dashboard');
+              props.onClose();
+            }}
             class={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
               props.currentPage === 'dashboard' ? 'crypto-nav-active' : 'crypto-nav-inactive'
             }`}
@@ -61,7 +64,10 @@ const Navigation: Component<NavigationProps> = (props) => {
             </div>
           </button>
           <button
-            onClick={() => props.onPageChange('splitdo-exchange')}
+            onClick={() => {
+              props.onPageChange('splitdo-exchange');
+              props.onClose();
+            }}
             class={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
               props.currentPage === 'splitdo-exchange' ? 'crypto-nav-active' : 'crypto-nav-inactive'
             }`}
@@ -78,7 +84,10 @@ const Navigation: Component<NavigationProps> = (props) => {
         {/* Profile Button at Bottom */}
         <div class="px-3 pb-3">
           <button
-            onClick={() => props.onPageChange('profile')}
+            onClick={() => {
+              props.onPageChange('profile');
+              props.onClose();
+            }}
             class={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
               props.currentPage === 'profile' ? 'crypto-nav-active' : 'crypto-nav-inactive'
             }`}
