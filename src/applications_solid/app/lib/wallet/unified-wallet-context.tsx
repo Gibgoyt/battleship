@@ -1025,14 +1025,22 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
   // DESKTOP EXCHANGE FLOW
   // ===============================
   const executeDesktopExchange = async (
-    provider: IWalletProvider,
-    solanaService: typeof import('./solana-service').solanaService,
     walletAddress: string,
+    provider: IWalletProvider,
     solAmount: number,
     calculation: { splitdoAmount: number; exchangeRate: number }
   ): Promise<{ success: boolean; signature?: string; error?: string }> => {
     try {
       logger.info('🖥️ Starting desktop exchange flow...');
+
+      // Check if this is MetaMask and use MetaMask-specific flow
+      if (connectedProviderId() === 'metamask') {
+        logger.info('🦊 Detected MetaMask - using MetaMask Solana exchange flow');
+        return await executeMetaMaskExchange(solAmount, calculation.exchangeRate);
+      }
+
+      // Continue with Phantom flow for non-MetaMask wallets
+      logger.info('👻 Using Phantom exchange flow');
 
       // Create exchange transaction
       const exchangeTx = await solanaService.createExchangeTransaction(walletAddress, solAmount);
@@ -1096,6 +1104,67 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       return {
         success: false,
         error: parsedError.message
+      };
+    }
+  };
+
+  /**
+   * Execute exchange using MetaMask Solana Snap
+   * This builds the transaction client-side, signs with MetaMask, and sends to backend
+   */
+  const executeMetaMaskExchange = async (
+    solAmount: number,
+    exchangeRate: number
+  ): Promise<{ success: boolean; signature?: string; error?: string }> => {
+    try {
+      logger.info('🦊 Starting MetaMask Solana exchange flow...', {
+        solAmount,
+        exchangeRate,
+        walletAddress: wallet()?.address
+      });
+
+      // Import MetaMask Solana provider dynamically
+      const { MetaMaskSolanaProvider } = await import('./metamask/solana-provider');
+      
+      // Create MetaMask provider instance
+      const metaMaskProvider = new MetaMaskSolanaProvider(window.ethereum);
+      
+      // Connect to ensure we have the account
+      const account = await metaMaskProvider.connect();
+      logger.debug('🦊 MetaMask account connected for exchange', {
+        publicKey: account.publicKey
+      });
+
+      // Execute the exchange using MetaMask provider
+      const exchangeResult = await metaMaskProvider.exchangeSolToSplitdo(solAmount, exchangeRate);
+
+      if (exchangeResult.success) {
+        logger.info('✅ MetaMask exchange completed successfully', {
+          signature: exchangeResult.transactionSignature,
+          solAmount: exchangeResult.solAmount,
+          splitdoAmount: exchangeResult.splitdoAmount
+        });
+
+        return {
+          success: true,
+          signature: exchangeResult.transactionSignature
+        };
+      } else {
+        logger.error('❌ MetaMask exchange failed', {
+          error: exchangeResult.error
+        });
+
+        return {
+          success: false,
+          error: exchangeResult.error || 'MetaMask exchange failed'
+        };
+      }
+
+    } catch (error) {
+      logger.error('❌ MetaMask exchange error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'MetaMask exchange failed with unknown error'
       };
     }
   };

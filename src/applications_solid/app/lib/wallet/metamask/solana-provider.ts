@@ -19,7 +19,16 @@ import {
 	isValidSolanaPublicKey,
 	type SplitdoTransactionResult
 } from './solana-transaction-builder';
+import {
+	buildSolToSplitdoExchangeTransaction,
+	calculateExchangeAmounts,
+	serializeExchangeTransactionToBase64,
+	estimateExchangeFee,
+	type SplitdoExchangeTransactionResult,
+	type ExchangeCalculation
+} from './solana-exchange-builder';
 import { POST as createAccountWithSend } from '../../../middleware/endpoints/devbackend/_api/testing/usockets/token-account/create/withSend/POST';
+import { POST as exchangeSolToSplitdo } from '../../../middleware/endpoints/devbackend/_api/testing/usockets/exchange/solana/splitdo/POST';
 
 const logger = createLogger('[MetaMask Solana Provider]');
 
@@ -44,6 +53,15 @@ export interface SolanaTransactionSignResult {
 export interface CreateAccountResult {
 	success: boolean;
 	tokenAccount?: string;
+	transactionSignature?: string;
+	error?: string;
+}
+
+export interface ExchangeResult {
+	success: boolean;
+	signature?: string;
+	solAmount?: number;
+	splitdoAmount?: number;
 	transactionSignature?: string;
 	error?: string;
 }
@@ -327,6 +345,110 @@ export class MetaMaskSolanaProvider {
 			});
 			return null;
 		}
+	}
+
+	/**
+	 * Execute SOL to SPLITDO token exchange
+	 * 
+	 * This method builds the exchange transaction, signs it with MetaMask, and submits it
+	 * to the backend for broadcasting to Solana mainnet.
+	 */
+	async exchangeSolToSplitdo(solAmount: number, exchangeRate: number): Promise<ExchangeResult> {
+		try {
+			if (!this.currentAccount) {
+				throw new Error('No account connected. Please connect first.');
+			}
+
+			logger.info('Starting SOL to SPLITDO exchange with MetaMask', {
+				publicKey: this.currentAccount.publicKey,
+				solAmount,
+				exchangeRate
+			});
+
+			// Step 1: Calculate exchange parameters
+			const exchangeParams = calculateExchangeAmounts(solAmount, exchangeRate);
+
+			logger.debug('Exchange parameters calculated', {
+				solAmount: exchangeParams.solAmount,
+				splitdoAmount: exchangeParams.splitdoAmount,
+				fees: exchangeParams.fees,
+				totalCost: exchangeParams.totalCost
+			});
+
+			// Step 2: Build the unsigned exchange transaction
+			const transactionResult = await buildSolToSplitdoExchangeTransaction(
+				this.currentAccount.publicKey,
+				solAmount,
+				exchangeParams
+			);
+
+			if (!transactionResult.success || !transactionResult.transaction) {
+				throw new Error(transactionResult.error || 'Failed to build exchange transaction');
+			}
+
+			const { transaction } = transactionResult;
+
+			// Step 3: Sign the transaction with MetaMask Solana Snap
+			const signResult = await this.signTransaction(transaction);
+
+			if (!signResult.success || !signResult.signedTransaction) {
+				throw new Error(signResult.error || 'Failed to sign exchange transaction');
+			}
+
+			// Step 4: Serialize the signed transaction for backend
+			const serializedTransaction = serializeExchangeTransactionToBase64(signResult.signedTransaction);
+
+			// Step 5: Submit to backend exchange endpoint
+			const lamportsAmount = Math.floor(solAmount * 1_000_000_000);
+
+			const backendResult = await exchangeSolToSplitdo(
+				lamportsAmount,
+				serializedTransaction
+			);
+
+			if (backendResult.status === 200) {
+				// Success!
+				logger.info('SOL to SPLITDO exchange completed successfully', {
+					stage1Status: backendResult.data.stage1_sol_confirmation?.result ? 'success' : 'error',
+					stage2Status: backendResult.data.stage2_splitdo_exchange?.result ? 'success' : 'error',
+					solAmount,
+					splitdoAmount: exchangeParams.splitdoAmount
+				});
+
+				return {
+					success: true,
+					signature: serializedTransaction,
+					solAmount,
+					splitdoAmount: exchangeParams.splitdoAmount,
+					transactionSignature: serializedTransaction
+				};
+
+			} else {
+				// Error response from backend
+				const errorMessage = (backendResult.data as any).message || (backendResult.data as any).error || 'Unknown backend error';
+				throw new Error(`Exchange failed: ${errorMessage}`);
+			}
+
+		} catch (error) {
+			logger.error('Failed to execute SOL to SPLITDO exchange', {
+				error: error instanceof Error ? error.message : 'Unknown error',
+				account: this.currentAccount?.publicKey,
+				solAmount,
+				exchangeRate
+			});
+
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : 'Unknown error occurred during exchange'
+			};
+		}
+	}
+
+	/**
+	 * Get estimated fee for exchange transaction
+	 */
+	getEstimatedExchangeFee(solAmount: number): number {
+		return estimateExchangeFee(solAmount);
 	}
 
 	/**
