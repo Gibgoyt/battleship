@@ -223,30 +223,31 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
     <div class="min-h-screen bg-zinc-900">
       {/* Header */}
       <div class="border-b border-zinc-800">
-        <div class="max-w-6xl mx-auto px-4 md:px-8 py-8">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-              <div class="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+            <div class="flex items-center gap-3 sm:gap-4">
+              <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center text-white text-xl sm:text-2xl font-bold flex-shrink-0">
                 {getInitials()}
               </div>
-              <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-white mb-1">{getUsername()}</h1>
-                <p class="text-sm text-zinc-500">{userEmail() || 'Loading...'}</p>
+              <div class="min-w-0">
+                <h1 class="text-lg sm:text-2xl md:text-3xl font-bold text-white mb-0.5 sm:mb-1 truncate">{getUsername()}</h1>
+                <p class="text-xs sm:text-sm text-zinc-500 truncate">{userEmail() || 'Loading...'}</p>
               </div>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 ml-15 sm:ml-0">
               <Show
                 when={emailVerified()}
                 fallback={
-                  <span class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20">
+                  <span class="inline-flex items-center gap-1 px-2 sm:px-3 py-1 text-xs font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                     </svg>
-                    Not Verified
+                    <span class="hidden sm:inline">Not Verified</span>
+                    <span class="sm:hidden">Unverified</span>
                   </span>
                 }
               >
-                <span class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+                <span class="inline-flex items-center gap-1 px-2 sm:px-3 py-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded">
                   <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                   </svg>
@@ -259,7 +260,7 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
       </div>
 
       {/* Main Content */}
-      <div class="max-w-6xl mx-auto px-4 md:px-8 py-12">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-12">
         {/* Success Message */}
         <Show when={saveSuccess()}>
           <div class="mb-6 bg-emerald-500/10 border border-emerald-500/20 p-4 flex items-center gap-3">
@@ -282,23 +283,23 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
 
         {/* Edit Profile Button */}
         <Show when={!isEditing()}>
-          <div class="mb-8">
+          <div class="mb-6 sm:mb-8">
             <button
               onClick={() => setIsEditing(true)}
-              class="group w-full flex items-center justify-between p-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 border border-cyan-500/20 hover:border-cyan-500/40 transition-all"
+              class="group w-full flex items-center justify-between p-4 sm:p-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 border border-cyan-500/20 hover:border-cyan-500/40 transition-all rounded-lg sm:rounded-none"
             >
-              <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="flex items-center gap-3 sm:gap-4">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                   </svg>
                 </div>
-                <div class="text-left">
-                  <div class="text-lg font-semibold text-white mb-1">Edit Profile</div>
-                  <div class="text-sm text-zinc-400">Update your bio and preferences</div>
+                <div class="text-left min-w-0">
+                  <div class="text-base sm:text-lg font-semibold text-white mb-0.5 sm:mb-1">Edit Profile</div>
+                  <div class="text-xs sm:text-sm text-zinc-400">Update your bio and preferences</div>
                 </div>
               </div>
-              <svg class="w-6 h-6 text-cyan-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400 group-hover:translate-x-1 transition-transform flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>
             </button>
@@ -307,8 +308,8 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
 
         {/* Profile Edit Form */}
         <Show when={isEditing()}>
-          <div class="mb-8 p-6 bg-zinc-800/50 border border-zinc-700 space-y-4">
-            <h3 class="text-lg font-semibold text-white mb-4">Edit Profile Information</h3>
+          <div class="mb-6 sm:mb-8 p-4 sm:p-6 bg-zinc-800/50 border border-zinc-700 space-y-4 rounded-lg sm:rounded-none">
+            <h3 class="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Edit Profile Information</h3>
 
             {/* Bio */}
             <div>
@@ -357,11 +358,11 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
             </Show>
 
             {/* Action Buttons */}
-            <div class="flex gap-3 pt-4">
+            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
               <button
                 onClick={handleSave}
                 disabled={isSaving()}
-                class="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:from-zinc-700 disabled:to-zinc-700 text-white font-semibold py-3 px-6 transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                class="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:from-zinc-700 disabled:to-zinc-700 text-white font-semibold py-3 px-4 sm:px-6 transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2 rounded-lg sm:rounded-none text-sm sm:text-base"
               >
                 <Show
                   when={!isSaving()}
@@ -385,7 +386,7 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
               <button
                 onClick={handleCancel}
                 disabled={isSaving()}
-                class="flex-1 bg-zinc-800 hover:bg-zinc-700 disabled:bg-zinc-800 text-white font-semibold py-3 px-6 transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                class="flex-1 bg-zinc-800 hover:bg-zinc-700 disabled:bg-zinc-800 text-white font-semibold py-3 px-4 sm:px-6 transition-all disabled:cursor-not-allowed disabled:opacity-50 rounded-lg sm:rounded-none text-sm sm:text-base"
               >
                 Cancel
               </button>
@@ -394,9 +395,9 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
         </Show>
 
         {/* Account Information */}
-        <div class="mb-8">
-          <h2 class="text-lg font-semibold text-white mb-6">Account Information</h2>
-          <div class="space-y-3">
+        <div class="mb-6 sm:mb-8">
+          <h2 class="text-base sm:text-lg font-semibold text-white mb-4 sm:mb-6">Account Information</h2>
+          <div class="space-y-2 sm:space-y-3">
             {/* Bio */}
             <Show when={bio()}>
               <div class="flex items-center justify-between py-4 px-6 border-l-2 border-cyan-500 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">

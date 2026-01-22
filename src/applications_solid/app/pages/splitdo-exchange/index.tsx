@@ -201,21 +201,21 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
     <div class="min-h-screen bg-zinc-900">
       {/* Header */}
       <div class="border-b border-zinc-800">
-        <div class="max-w-6xl mx-auto px-4 md:px-8 py-8">
-          <div class="flex items-center justify-between">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
             <div>
-              <h1 class="text-2xl md:text-3xl font-bold text-white mb-1">Exchange</h1>
-              <p class="text-sm text-zinc-500">
+              <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-0.5 sm:mb-1">Exchange</h1>
+              <p class="text-xs sm:text-sm text-zinc-500">
                 {wallet.wallet()?.address ? formatAddress(wallet.wallet()!.address) : 'Trade SOL for SPLITDO'}
               </p>
             </div>
-            <div class="text-right">
-              <div class="text-xs text-zinc-500 uppercase tracking-wider mb-1">Total Value</div>
+            <div class="text-left sm:text-right">
+              <div class="text-xs text-zinc-500 uppercase tracking-wider mb-0.5 sm:mb-1">Total Value</div>
               <Show
                 when={wallet.connectionStatus() === 'connected'}
-                fallback={<div class="text-2xl font-bold text-zinc-700">--</div>}
+                fallback={<div class="text-xl sm:text-2xl font-bold text-zinc-700">--</div>}
               >
-                <div class="text-2xl md:text-3xl font-bold text-cyan-400">
+                <div class="text-xl sm:text-2xl md:text-3xl font-bold text-cyan-400">
                   ${formatCurrency(portfolioValueUSD())}
                 </div>
               </Show>
@@ -225,26 +225,26 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
       </div>
 
       {/* Main Content */}
-      <div class="max-w-6xl mx-auto px-4 md:px-8 py-12">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-12">
         {/* Primary Action - Exchange Tokens (shown when ready) */}
         <Show when={wallet.connectionStatus() === 'connected' && wallet.splitdoATA().status === 'exists'}>
-          <div class="mb-8">
+          <div class="mb-6 sm:mb-8">
             <button
               onClick={wallet.openExchangeModal}
-              class="group w-full flex items-center justify-between p-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 border border-cyan-500/20 hover:border-cyan-500/40 transition-all"
+              class="group w-full flex items-center justify-between p-4 sm:p-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 border border-cyan-500/20 hover:border-cyan-500/40 transition-all rounded-lg sm:rounded-none"
             >
-              <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="flex items-center gap-3 sm:gap-4">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                   </svg>
                 </div>
-                <div class="text-left">
-                  <div class="text-lg font-semibold text-white mb-1">Exchange Tokens</div>
-                  <div class="text-sm text-zinc-400">Trade SOL for SPLITDO at $0.11 each</div>
+                <div class="text-left min-w-0">
+                  <div class="text-base sm:text-lg font-semibold text-white mb-0.5 sm:mb-1">Exchange Tokens</div>
+                  <div class="text-xs sm:text-sm text-zinc-400 truncate">Trade SOL for SPLITDO at $0.11</div>
                 </div>
               </div>
-              <svg class="w-6 h-6 text-cyan-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400 group-hover:translate-x-1 transition-transform flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>
             </button>
@@ -253,32 +253,32 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
 
         {/* Connect Wallet or Create Account */}
         <Show when={wallet.connectionStatus() !== 'connected' || wallet.splitdoATA().status !== 'exists'}>
-          <div class="mb-8 p-6 bg-zinc-800/50 border border-zinc-700">
+          <div class="mb-6 sm:mb-8 p-4 sm:p-6 bg-zinc-800/50 border border-zinc-700 rounded-lg sm:rounded-none">
             <Show
               when={wallet.connectionStatus() === 'connected'}
               fallback={
-                <div class="flex items-center justify-between">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                   <div>
-                    <div class="text-base font-semibold text-white mb-1">Connect your wallet</div>
-                    <div class="text-sm text-zinc-400">Connect to start trading tokens</div>
+                    <div class="text-sm sm:text-base font-semibold text-white mb-0.5 sm:mb-1">Connect your wallet</div>
+                    <div class="text-xs sm:text-sm text-zinc-400">Connect to start trading tokens</div>
                   </div>
                   <button
                     onClick={wallet.openWalletModal}
-                    class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold transition-all"
+                    class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold transition-all rounded-lg sm:rounded-none text-sm sm:text-base"
                   >
                     Connect Wallet
                   </button>
                 </div>
               }
             >
-              <div class="flex items-center justify-between">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                 <div>
-                  <div class="text-base font-semibold text-white mb-1">Create SPLITDO Account</div>
-                  <div class="text-sm text-zinc-400">You need a token account to hold SPLITDO</div>
+                  <div class="text-sm sm:text-base font-semibold text-white mb-0.5 sm:mb-1">Create SPLITDO Account</div>
+                  <div class="text-xs sm:text-sm text-zinc-400">You need a token account to hold SPLITDO</div>
                 </div>
                 <button
                   onClick={wallet.openCreateAccountModal}
-                  class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold transition-all"
+                  class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold transition-all rounded-lg sm:rounded-none text-sm sm:text-base"
                 >
                   Create Account
                 </button>
@@ -288,26 +288,26 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
         </Show>
 
         {/* Assets Section */}
-        <div class="mb-8">
-          <h2 class="text-lg font-semibold text-white mb-6">Your Assets</h2>
-          <div class="space-y-3">
+        <div class="mb-6 sm:mb-8">
+          <h2 class="text-base sm:text-lg font-semibold text-white mb-4 sm:mb-6">Your Assets</h2>
+          <div class="space-y-2 sm:space-y-3">
             {/* SPLITDO Balance */}
-            <div class="flex items-center justify-between py-4 px-6 border-l-2 border-cyan-500 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
-              <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-zinc-800 rounded-lg flex items-center justify-center overflow-hidden p-1">
+            <div class="flex items-center justify-between py-3 sm:py-4 px-4 sm:px-6 border-l-2 border-cyan-500 bg-zinc-800/50 hover:bg-zinc-800 transition-colors rounded-r-lg sm:rounded-r-none">
+              <div class="flex items-center gap-3 sm:gap-4">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-zinc-800 rounded-lg flex items-center justify-center overflow-hidden p-1 flex-shrink-0">
                   <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
                 </div>
-                <div>
+                <div class="min-w-0">
                   <div class="text-sm font-medium text-white">SPLITDO</div>
-                  <div class="text-xs text-zinc-500">Custom Token</div>
+                  <div class="text-xs text-zinc-500 hidden sm:block">Custom Token</div>
                 </div>
               </div>
-              <div class="text-right">
+              <div class="text-right flex-shrink-0">
                 <Show
                   when={wallet.connectionStatus() === 'connected' && wallet.splitdoATA().status === 'exists'}
-                  fallback={<div class="text-xl font-bold text-zinc-700">--</div>}
+                  fallback={<div class="text-lg sm:text-xl font-bold text-zinc-700">--</div>}
                 >
-                  <div class="text-xl font-bold text-white">
+                  <div class="text-lg sm:text-xl font-bold text-white">
                     {formatCurrency(splitdoBalanceTokens(), 2)}
                   </div>
                   <div class="text-xs text-zinc-500">
@@ -318,22 +318,22 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
             </div>
 
             {/* SOL Balance */}
-            <div class="flex items-center justify-between py-4 px-6 border-l-2 border-purple-500 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
-              <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden p-2">
+            <div class="flex items-center justify-between py-3 sm:py-4 px-4 sm:px-6 border-l-2 border-purple-500 bg-zinc-800/50 hover:bg-zinc-800 transition-colors rounded-r-lg sm:rounded-r-none">
+              <div class="flex items-center gap-3 sm:gap-4">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden p-2 flex-shrink-0">
                   <img src="/solana-logo.svg" alt="Solana" class="w-full h-full object-contain" />
                 </div>
-                <div>
+                <div class="min-w-0">
                   <div class="text-sm font-medium text-white">Solana</div>
-                  <div class="text-xs text-zinc-500">Native Token</div>
+                  <div class="text-xs text-zinc-500 hidden sm:block">Native Token</div>
                 </div>
               </div>
-              <div class="text-right">
+              <div class="text-right flex-shrink-0">
                 <Show
                   when={wallet.connectionStatus() === 'connected' && wallet.solBalance()}
-                  fallback={<div class="text-xl font-bold text-zinc-700">--</div>}
+                  fallback={<div class="text-lg sm:text-xl font-bold text-zinc-700">--</div>}
                 >
-                  <div class="text-xl font-bold text-white">
+                  <div class="text-lg sm:text-xl font-bold text-white">
                     {formatCurrency(wallet.solBalance()?.sol || 0, 4)} SOL
                   </div>
                   <div class="text-xs text-zinc-500">
@@ -346,39 +346,39 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
         </div>
 
         {/* Exchange Rate Section */}
-        <div class="mb-8">
-          <h2 class="text-lg font-semibold text-white mb-6">Exchange Rates</h2>
-          <div class="space-y-3">
+        <div class="mb-6 sm:mb-8">
+          <h2 class="text-base sm:text-lg font-semibold text-white mb-4 sm:mb-6">Exchange Rates</h2>
+          <div class="space-y-2 sm:space-y-3">
             {/* SPLITDO Price */}
-            <div class="flex items-center justify-between py-4 px-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
-              <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-zinc-800 rounded-lg flex items-center justify-center overflow-hidden p-1">
+            <div class="flex items-center justify-between py-3 sm:py-4 px-4 sm:px-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors rounded-lg sm:rounded-none">
+              <div class="flex items-center gap-3 sm:gap-4">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-zinc-800 rounded-lg flex items-center justify-center overflow-hidden p-1 flex-shrink-0">
                   <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
                 </div>
-                <div>
+                <div class="min-w-0">
                   <div class="text-sm font-medium text-white">SPLITDO / USD</div>
-                  <div class="text-xs text-zinc-500">Fixed presale rate</div>
+                  <div class="text-xs text-zinc-500 hidden sm:block">Fixed presale rate</div>
                 </div>
               </div>
-              <div class="text-xl font-bold text-white">$0.11</div>
+              <div class="text-lg sm:text-xl font-bold text-white flex-shrink-0">$0.11</div>
             </div>
 
             {/* SOL Price */}
-            <div class="flex items-center justify-between py-4 px-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
-              <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden p-2">
+            <div class="flex items-center justify-between py-3 sm:py-4 px-4 sm:px-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors rounded-lg sm:rounded-none">
+              <div class="flex items-center gap-3 sm:gap-4">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden p-2 flex-shrink-0">
                   <img src="/solana-logo.svg" alt="Solana" class="w-full h-full object-contain" />
                 </div>
-                <div>
+                <div class="min-w-0">
                   <div class="text-sm font-medium text-white">SOL / USD</div>
-                  <div class="text-xs text-zinc-500">Live market price</div>
+                  <div class="text-xs text-zinc-500 hidden sm:block">Live market price</div>
                 </div>
               </div>
               <Show
                 when={wallet.solPrice()?.price}
-                fallback={<div class="text-xl font-bold text-zinc-700">--</div>}
+                fallback={<div class="text-lg sm:text-xl font-bold text-zinc-700">--</div>}
               >
-                <div class="text-xl font-bold text-white">${formatCurrency(wallet.solPrice()?.price || 0, 2)}</div>
+                <div class="text-lg sm:text-xl font-bold text-white flex-shrink-0">${formatCurrency(wallet.solPrice()?.price || 0, 2)}</div>
               </Show>
             </div>
           </div>
@@ -386,8 +386,8 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
 
         {/* Quick Actions */}
         <Show when={wallet.connectionStatus() === 'connected'}>
-          <div class="mb-8">
-            <h2 class="text-lg font-semibold text-white mb-6">Quick Actions</h2>
+          <div class="mb-6 sm:mb-8">
+            <h2 class="text-base sm:text-lg font-semibold text-white mb-4 sm:mb-6">Quick Actions</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button
                 onClick={wallet.disconnectWallet}
