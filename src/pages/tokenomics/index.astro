@@ -4,408 +4,374 @@ import Layout from 'src/layouts/Layout.astro';
 export const prerender = true;
 ---
 
-<Layout title="Tokenomics - SplitDo">
-	<main class="bg-white dark:bg-[#0a0f1e]">
+<Layout title="Tokenomics - SPLITDO">
+  <style>
+    .text-gradient {
+      background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 50%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  </style>
 
-		<!-- Hero Section -->
-		<section class="relative overflow-hidden bg-gradient-to-b from-gray-50 to-white dark:from-[#12171f] dark:to-[#0a0f1e] border-b border-gray-200 dark:border-[#00d9ff]/20">
-			<div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-				<div class="text-center max-w-4xl mx-auto">
-					<h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 text-gray-900 dark:text-white">
-						$SPLITDO Tokenomics
-					</h1>
-					<p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8">
-						A utility-first token designed for real-world settlement infrastructure
-					</p>
-					<div class="flex flex-wrap justify-center gap-4 text-sm">
-						<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/30 rounded-xl px-6 py-3">
-							<div class="text-gray-600 dark:text-gray-400 text-xs mb-1">Total Supply</div>
-							<div class="text-2xl font-bold text-[#00d9ff]">100M</div>
-						</div>
-						<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/30 rounded-xl px-6 py-3">
-							<div class="text-gray-600 dark:text-gray-400 text-xs mb-1">Token Type</div>
-							<div class="text-2xl font-bold text-[#00d9ff]">Utility</div>
-						</div>
-						<div class="bg-gray-100 dark:bg-[#12171f] border border-gray-200 dark:border-[#00d9ff]/30 rounded-xl px-6 py-3">
-							<div class="text-gray-600 dark:text-gray-400 text-xs mb-1">Blockchain</div>
-							<div class="text-2xl font-bold text-[#00d9ff]">Solana</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
+  <main class="bg-zinc-950 text-white min-h-screen">
 
-		<!-- Token Purpose -->
-		<section class="py-16 lg:py-20 bg-white dark:bg-[#0a0f1e]">
-			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="max-w-3xl mx-auto text-center mb-12">
-					<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
-						Token Purpose
-					</h2>
-					<p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-						The SplitDo token is not the product. It's a coordination tool. Its role is simple: reduce platform fees, reward genuine usage, enable limited governance, and support ecosystem growth.
-					</p>
-				</div>
+    <!-- Hero -->
+    <section class="py-24 sm:py-32 px-6 border-b border-zinc-800">
+      <div class="max-w-5xl mx-auto">
+        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black mb-6">
+          <span class="text-gradient">$SPLITDO</span><br/>
+          Tokenomics
+        </h1>
+        <p class="text-xl text-zinc-400 max-w-2xl mb-12">
+          A utility-first token designed for real-world settlement infrastructure. Not speculation.
+        </p>
 
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-					<div class="border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-[#00d9ff] transition-colors">
-						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Reduce Fees</h3>
-						<p class="text-gray-600 dark:text-gray-300 text-sm">Lower platform costs for token holders</p>
-					</div>
+        <!-- Key Stats -->
+        <div class="flex flex-wrap gap-8 sm:gap-16">
+          <div>
+            <div class="text-4xl sm:text-5xl font-black text-cyan-400">100M</div>
+            <div class="text-sm text-zinc-500 mt-1">Total Supply</div>
+          </div>
+          <div>
+            <div class="text-4xl sm:text-5xl font-black">Utility</div>
+            <div class="text-sm text-zinc-500 mt-1">Token Type</div>
+          </div>
+          <div>
+            <div class="text-4xl sm:text-5xl font-black">Solana</div>
+            <div class="text-sm text-zinc-500 mt-1">Blockchain</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-					<div class="border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-[#00d9ff] transition-colors">
-						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Reward Usage</h3>
-						<p class="text-gray-600 dark:text-gray-300 text-sm">Incentivize genuine platform activity</p>
-					</div>
+    <!-- Token Purpose -->
+    <section class="py-24 sm:py-32 px-6">
+      <div class="max-w-5xl mx-auto">
+        <div class="mb-16">
+          <h2 class="text-4xl sm:text-5xl font-black mb-4">Purpose</h2>
+          <p class="text-xl text-zinc-500 max-w-2xl">
+            The token is not the product. It's a coordination tool.
+          </p>
+        </div>
 
-					<div class="border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-[#00d9ff] transition-colors">
-						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Governance</h3>
-						<p class="text-gray-600 dark:text-gray-300 text-sm">Enable community-driven decisions</p>
-					</div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div>
+            <h3 class="text-xl font-bold mb-2">Reduce Fees</h3>
+            <p class="text-zinc-500">Lower platform costs for token holders.</p>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold mb-2">Reward Usage</h3>
+            <p class="text-zinc-500">Incentivize genuine platform activity.</p>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold mb-2">Governance</h3>
+            <p class="text-zinc-500">Enable community-driven decisions.</p>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold mb-2">Growth</h3>
+            <p class="text-zinc-500">Support ecosystem expansion.</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-					<div class="border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-[#00d9ff] transition-colors">
-						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Growth</h3>
-						<p class="text-gray-600 dark:text-gray-300 text-sm">Support ecosystem expansion</p>
-					</div>
-				</div>
-			</div>
-		</section>
+    <!-- Distribution -->
+    <section class="py-24 sm:py-32 px-6 bg-zinc-900/50">
+      <div class="max-w-5xl mx-auto">
+        <div class="mb-16">
+          <h2 class="text-4xl sm:text-5xl font-black mb-4">Distribution</h2>
+          <p class="text-xl text-zinc-500">Fixed supply. No inflation. No hidden minting.</p>
+        </div>
 
-		<!-- Token Allocation with Donut Chart -->
-		<section class="py-16 lg:py-20 bg-gray-50 dark:bg-[#12171f]">
-			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="text-center mb-12">
-					<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-						Token Distribution
-					</h2>
-					<p class="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
-						Fixed supply of 100,000,000 tokens with no inflation or hidden minting
-					</p>
-				</div>
+        <div class="grid lg:grid-cols-2 gap-16">
+          <!-- Chart Visual -->
+          <div class="flex justify-center items-center">
+            <div class="relative">
+              <svg viewBox="0 0 400 400" class="w-full max-w-sm">
+                <!-- Strategic/Institutional: 31.5% -->
+                <circle cx="200" cy="200" r="140" fill="none" stroke="#22d3ee" stroke-width="50"
+                  stroke-dasharray="277 880" transform="rotate(-90 200 200)" />
+                <!-- Liquidity: 20% -->
+                <circle cx="200" cy="200" r="140" fill="none" stroke="#3b82f6" stroke-width="50"
+                  stroke-dasharray="176 880" stroke-dashoffset="-277" transform="rotate(-90 200 200)" />
+                <!-- Treasury: 10% -->
+                <circle cx="200" cy="200" r="140" fill="none" stroke="#6366f1" stroke-width="50"
+                  stroke-dasharray="88 880" stroke-dashoffset="-453" transform="rotate(-90 200 200)" />
+                <!-- Strategic Partners: 10% -->
+                <circle cx="200" cy="200" r="140" fill="none" stroke="#8b5cf6" stroke-width="50"
+                  stroke-dasharray="88 880" stroke-dashoffset="-541" transform="rotate(-90 200 200)" />
+                <!-- Team: 10% -->
+                <circle cx="200" cy="200" r="140" fill="none" stroke="#a855f7" stroke-width="50"
+                  stroke-dasharray="88 880" stroke-dashoffset="-629" transform="rotate(-90 200 200)" />
+                <!-- Seed: 8.5% -->
+                <circle cx="200" cy="200" r="140" fill="none" stroke="#52525b" stroke-width="50"
+                  stroke-dasharray="75 880" stroke-dashoffset="-717" transform="rotate(-90 200 200)" />
+                <!-- Marketing: 5% -->
+                <circle cx="200" cy="200" r="140" fill="none" stroke="#71717a" stroke-width="50"
+                  stroke-dasharray="44 880" stroke-dashoffset="-792" transform="rotate(-90 200 200)" />
+                <!-- Legal: 5% -->
+                <circle cx="200" cy="200" r="140" fill="none" stroke="#a1a1aa" stroke-width="50"
+                  stroke-dasharray="44 880" stroke-dashoffset="-836" transform="rotate(-90 200 200)" />
+                <!-- Center -->
+                <text x="200" y="195" text-anchor="middle" class="fill-white text-3xl font-black">100M</text>
+                <text x="200" y="220" text-anchor="middle" class="fill-zinc-500 text-sm">Total Supply</text>
+              </svg>
+            </div>
+          </div>
 
-				<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-					<!-- Donut Chart -->
-					<div class="flex justify-center">
-						<div class="relative w-full max-w-md aspect-square">
-							<svg viewBox="0 0 400 400" class="w-full h-full">
-								<!-- Strategic/Institutional: 31.5% -->
-								<circle cx="200" cy="200" r="140" fill="none" stroke="#00d9ff" stroke-width="60"
-									stroke-dasharray="277 880" transform="rotate(-90 200 200)" class="hover:stroke-width-65 transition-all cursor-pointer" />
+          <!-- Allocation List -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between py-4 border-b border-zinc-800">
+              <div class="flex items-center gap-3">
+                <div class="w-3 h-3 bg-cyan-400"></div>
+                <div>
+                  <div class="font-semibold">Strategic / Institutional</div>
+                  <div class="text-sm text-zinc-600">31,500,000 tokens</div>
+                </div>
+              </div>
+              <div class="text-2xl font-black text-cyan-400">31.5%</div>
+            </div>
 
-								<!-- Liquidity: 20% -->
-								<circle cx="200" cy="200" r="140" fill="none" stroke="#00b8d4" stroke-width="60"
-									stroke-dasharray="176 880" stroke-dashoffset="-277" transform="rotate(-90 200 200)" class="hover:stroke-width-65 transition-all cursor-pointer" />
+            <div class="flex items-center justify-between py-4 border-b border-zinc-800">
+              <div class="flex items-center gap-3">
+                <div class="w-3 h-3 bg-blue-500"></div>
+                <div>
+                  <div class="font-semibold">Liquidity & Market Support</div>
+                  <div class="text-sm text-zinc-600">20,000,000 tokens</div>
+                </div>
+              </div>
+              <div class="text-2xl font-black">20%</div>
+            </div>
 
-								<!-- Treasury: 10% -->
-								<circle cx="200" cy="200" r="140" fill="none" stroke="#0095ad" stroke-width="60"
-									stroke-dasharray="88 880" stroke-dashoffset="-453" transform="rotate(-90 200 200)" class="hover:stroke-width-65 transition-all cursor-pointer" />
+            <div class="flex items-center justify-between py-4 border-b border-zinc-800">
+              <div class="flex items-center gap-3">
+                <div class="w-3 h-3 bg-indigo-500"></div>
+                <div>
+                  <div class="font-semibold">Treasury & Future Dev</div>
+                  <div class="text-sm text-zinc-600">10,000,000 tokens</div>
+                </div>
+              </div>
+              <div class="text-2xl font-black">10%</div>
+            </div>
 
-								<!-- Strategic Partners: 10% -->
-								<circle cx="200" cy="200" r="140" fill="none" stroke="#007a8c" stroke-width="60"
-									stroke-dasharray="88 880" stroke-dashoffset="-541" transform="rotate(-90 200 200)" class="hover:stroke-width-65 transition-all cursor-pointer" />
+            <div class="flex items-center justify-between py-4 border-b border-zinc-800">
+              <div class="flex items-center gap-3">
+                <div class="w-3 h-3 bg-violet-500"></div>
+                <div>
+                  <div class="font-semibold">Strategic Partners</div>
+                  <div class="text-sm text-zinc-600">10,000,000 tokens</div>
+                </div>
+              </div>
+              <div class="text-2xl font-black">10%</div>
+            </div>
 
-								<!-- Team: 10% -->
-								<circle cx="200" cy="200" r="140" fill="none" stroke="#005f6b" stroke-width="60"
-									stroke-dasharray="88 880" stroke-dashoffset="-629" transform="rotate(-90 200 200)" class="hover:stroke-width-65 transition-all cursor-pointer" />
+            <div class="flex items-center justify-between py-4 border-b border-zinc-800">
+              <div class="flex items-center gap-3">
+                <div class="w-3 h-3 bg-purple-500"></div>
+                <div>
+                  <div class="font-semibold">Team & Advisors</div>
+                  <div class="text-sm text-zinc-600">10,000,000 tokens</div>
+                </div>
+              </div>
+              <div class="text-2xl font-black">10%</div>
+            </div>
 
-								<!-- Seed: 8.5% -->
-								<circle cx="200" cy="200" r="140" fill="none" stroke="#cbd5e1" stroke-width="60"
-									stroke-dasharray="75 880" stroke-dashoffset="-717" transform="rotate(-90 200 200)" class="hover:stroke-width-65 transition-all cursor-pointer" />
+            <div class="flex items-center justify-between py-4 border-b border-zinc-800">
+              <div class="flex items-center gap-3">
+                <div class="w-3 h-3 bg-zinc-600"></div>
+                <div>
+                  <div class="font-semibold">Seed Contributors</div>
+                  <div class="text-sm text-zinc-600">8,500,000 tokens</div>
+                </div>
+              </div>
+              <div class="text-2xl font-black">8.5%</div>
+            </div>
 
-								<!-- Marketing: 5% -->
-								<circle cx="200" cy="200" r="140" fill="none" stroke="#94a3b8" stroke-width="60"
-									stroke-dasharray="44 880" stroke-dashoffset="-792" transform="rotate(-90 200 200)" class="hover:stroke-width-65 transition-all cursor-pointer" />
+            <div class="flex items-center justify-between py-4 border-b border-zinc-800">
+              <div class="flex items-center gap-3">
+                <div class="w-3 h-3 bg-zinc-500"></div>
+                <div>
+                  <div class="font-semibold">Marketing & Ecosystem</div>
+                  <div class="text-sm text-zinc-600">5,000,000 tokens</div>
+                </div>
+              </div>
+              <div class="text-2xl font-black">5%</div>
+            </div>
 
-								<!-- Legal: 5% -->
-								<circle cx="200" cy="200" r="140" fill="none" stroke="#64748b" stroke-width="60"
-									stroke-dasharray="44 880" stroke-dashoffset="-836" transform="rotate(-90 200 200)" class="hover:stroke-width-65 transition-all cursor-pointer" />
+            <div class="flex items-center justify-between py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-3 h-3 bg-zinc-400"></div>
+                <div>
+                  <div class="font-semibold">Legal & Compliance</div>
+                  <div class="text-sm text-zinc-600">5,000,000 tokens</div>
+                </div>
+              </div>
+              <div class="text-2xl font-black">5%</div>
+            </div>
+          </div>
+        </div>
 
-								<!-- Center text -->
-								<text x="200" y="190" text-anchor="middle" class="fill-gray-900 dark:fill-white text-2xl font-bold">100M</text>
-								<text x="200" y="215" text-anchor="middle" class="fill-gray-600 dark:fill-gray-300 text-sm">Total Supply</text>
-							</svg>
-						</div>
-					</div>
+        <!-- Priorities -->
+        <div class="grid sm:grid-cols-3 gap-8 mt-20">
+          <div class="text-center">
+            <div class="text-3xl font-black text-gradient mb-2">Liquidity</div>
+            <p class="text-zinc-500">Market stability first</p>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-black text-gradient mb-2">Execution</div>
+            <p class="text-zinc-500">Over speculation</p>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-black text-gradient mb-2">Long-term</div>
+            <p class="text-zinc-500">Alignment over exits</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-					<!-- Allocation Table -->
-					<div class="space-y-3">
-						<div class="flex items-center justify-between p-4 bg-white dark:bg-[#0a0f1e] border border-gray-200 dark:border-gray-700 rounded-lg hover:border-[#00d9ff] transition-colors">
-							<div class="flex items-center gap-3">
-								<div class="w-4 h-4 rounded-full" style="background-color: #00d9ff;"></div>
-								<div>
-									<div class="font-semibold text-gray-900 dark:text-white">Strategic / Institutional</div>
-									<div class="text-sm text-gray-600 dark:text-gray-400">31,500,000 tokens</div>
-								</div>
-							</div>
-							<div class="text-xl font-bold text-[#00d9ff]">31.5%</div>
-						</div>
+    <!-- Vesting -->
+    <section class="py-24 sm:py-32 px-6">
+      <div class="max-w-5xl mx-auto">
+        <div class="mb-16">
+          <h2 class="text-4xl sm:text-5xl font-black mb-4">Vesting</h2>
+          <p class="text-xl text-zinc-500">All major allocations are vested. No immediate insider liquidity.</p>
+        </div>
 
-						<div class="flex items-center justify-between p-4 bg-white dark:bg-[#0a0f1e] border border-gray-200 dark:border-gray-700 rounded-lg hover:border-[#00d9ff] transition-colors">
-							<div class="flex items-center gap-3">
-								<div class="w-4 h-4 rounded-full" style="background-color: #00b8d4;"></div>
-								<div>
-									<div class="font-semibold text-gray-900 dark:text-white">Liquidity & Market Support</div>
-									<div class="text-sm text-gray-600 dark:text-gray-400">20,000,000 tokens</div>
-								</div>
-							</div>
-							<div class="text-xl font-bold text-[#00d9ff]">20%</div>
-						</div>
+        <div class="grid sm:grid-cols-2 gap-8">
+          <div class="p-6 bg-zinc-900">
+            <h3 class="text-lg font-bold mb-2">Team & Advisors</h3>
+            <p class="text-zinc-400 mb-1">12-month cliff, 36-month linear vesting</p>
+            <p class="text-sm text-zinc-600">Long-term commitment to execution</p>
+          </div>
+          <div class="p-6 bg-zinc-900">
+            <h3 class="text-lg font-bold mb-2">Seed Contributors</h3>
+            <p class="text-zinc-400 mb-1">Partial TGE unlock, linear vesting</p>
+            <p class="text-sm text-zinc-600">Rewarding early risk-takers</p>
+          </div>
+          <div class="p-6 bg-zinc-900">
+            <h3 class="text-lg font-bold mb-2">Strategic Partners</h3>
+            <p class="text-zinc-400 mb-1">Milestone-aligned linear vesting</p>
+            <p class="text-sm text-zinc-600">Performance-based unlocks</p>
+          </div>
+          <div class="p-6 bg-zinc-900">
+            <h3 class="text-lg font-bold mb-2">Treasury</h3>
+            <p class="text-zinc-400 mb-1">Time-locked, governance-controlled</p>
+            <p class="text-sm text-zinc-600">Community-driven allocation</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-						<div class="flex items-center justify-between p-4 bg-white dark:bg-[#0a0f1e] border border-gray-200 dark:border-gray-700 rounded-lg hover:border-[#00d9ff] transition-colors">
-							<div class="flex items-center gap-3">
-								<div class="w-4 h-4 rounded-full" style="background-color: #0095ad;"></div>
-								<div>
-									<div class="font-semibold text-gray-900 dark:text-white">Treasury & Future Dev</div>
-									<div class="text-sm text-gray-600 dark:text-gray-400">10,000,000 tokens</div>
-								</div>
-							</div>
-							<div class="text-xl font-bold text-[#00d9ff]">10%</div>
-						</div>
+    <!-- Competitive Positioning -->
+    <section class="py-24 sm:py-32 px-6 bg-zinc-900/50">
+      <div class="max-w-5xl mx-auto">
+        <div class="mb-16">
+          <h2 class="text-4xl sm:text-5xl font-black mb-4">Competitive Edge</h2>
+          <p class="text-xl text-zinc-500">We replace the part that never worked well.</p>
+        </div>
 
-						<div class="flex items-center justify-between p-4 bg-white dark:bg-[#0a0f1e] border border-gray-200 dark:border-gray-700 rounded-lg hover:border-[#00d9ff] transition-colors">
-							<div class="flex items-center gap-3">
-								<div class="w-4 h-4 rounded-full" style="background-color: #007a8c;"></div>
-								<div>
-									<div class="font-semibold text-gray-900 dark:text-white">Strategic Partners</div>
-									<div class="text-sm text-gray-600 dark:text-gray-400">10,000,000 tokens</div>
-								</div>
-							</div>
-							<div class="text-xl font-bold text-[#00d9ff]">10%</div>
-						</div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[600px]">
+            <thead>
+              <tr class="border-b-2 border-cyan-500">
+                <th class="text-left py-4 px-4 font-bold">Platform</th>
+                <th class="text-center py-4 px-4 font-bold">Tracks</th>
+                <th class="text-center py-4 px-4 font-bold">Instant Settle</th>
+                <th class="text-center py-4 px-4 font-bold">Global</th>
+                <th class="text-center py-4 px-4 font-bold">On-Chain</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-zinc-800">
+                <td class="py-4 px-4 font-medium">Splitwise</td>
+                <td class="py-4 px-4 text-center"><span class="text-emerald-400">Yes</span></td>
+                <td class="py-4 px-4 text-center"><span class="text-red-400">No</span></td>
+                <td class="py-4 px-4 text-center"><span class="text-yellow-400">Limited</span></td>
+                <td class="py-4 px-4 text-center"><span class="text-red-400">No</span></td>
+              </tr>
+              <tr class="border-b border-zinc-800">
+                <td class="py-4 px-4 font-medium">Tricount</td>
+                <td class="py-4 px-4 text-center"><span class="text-emerald-400">Yes</span></td>
+                <td class="py-4 px-4 text-center"><span class="text-red-400">No</span></td>
+                <td class="py-4 px-4 text-center"><span class="text-yellow-400">Limited</span></td>
+                <td class="py-4 px-4 text-center"><span class="text-red-400">No</span></td>
+              </tr>
+              <tr class="border-b border-zinc-800">
+                <td class="py-4 px-4 font-medium">Group Payments</td>
+                <td class="py-4 px-4 text-center"><span class="text-yellow-400">Partial</span></td>
+                <td class="py-4 px-4 text-center"><span class="text-yellow-400">Partial</span></td>
+                <td class="py-4 px-4 text-center"><span class="text-red-400">No</span></td>
+                <td class="py-4 px-4 text-center"><span class="text-red-400">No</span></td>
+              </tr>
+              <tr class="bg-cyan-500/10">
+                <td class="py-4 px-4 font-bold text-cyan-400">SplitDo</td>
+                <td class="py-4 px-4 text-center"><span class="text-emerald-400 font-bold">Yes</span></td>
+                <td class="py-4 px-4 text-center"><span class="text-emerald-400 font-bold">Yes</span></td>
+                <td class="py-4 px-4 text-center"><span class="text-emerald-400 font-bold">Yes</span></td>
+                <td class="py-4 px-4 text-center"><span class="text-emerald-400 font-bold">Yes</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
-						<div class="flex items-center justify-between p-4 bg-white dark:bg-[#0a0f1e] border border-gray-200 dark:border-gray-700 rounded-lg hover:border-[#00d9ff] transition-colors">
-							<div class="flex items-center gap-3">
-								<div class="w-4 h-4 rounded-full" style="background-color: #005f6b;"></div>
-								<div>
-									<div class="font-semibold text-gray-900 dark:text-white">Team & Advisors</div>
-									<div class="text-sm text-gray-600 dark:text-gray-400">10,000,000 tokens</div>
-								</div>
-							</div>
-							<div class="text-xl font-bold text-[#00d9ff]">10%</div>
-						</div>
+    <!-- Value Flow -->
+    <section class="py-24 sm:py-32 px-6">
+      <div class="max-w-5xl mx-auto">
+        <div class="mb-16">
+          <h2 class="text-4xl sm:text-5xl font-black mb-4">Value Flow</h2>
+          <p class="text-xl text-zinc-500">No artificial demand. Usage creates value. Nothing else.</p>
+        </div>
 
-						<div class="flex items-center justify-between p-4 bg-white dark:bg-[#0a0f1e] border border-gray-200 dark:border-gray-700 rounded-lg hover:border-[#00d9ff] transition-colors">
-							<div class="flex items-center gap-3">
-								<div class="w-4 h-4 rounded-full" style="background-color: #cbd5e1;"></div>
-								<div>
-									<div class="font-semibold text-gray-900 dark:text-white">Seed Contributors</div>
-									<div class="text-sm text-gray-600 dark:text-gray-400">8,500,000 tokens</div>
-								</div>
-							</div>
-							<div class="text-xl font-bold text-[#00d9ff]">8.5%</div>
-						</div>
+        <div class="space-y-6 max-w-2xl">
+          <div class="flex gap-6 items-start">
+            <div class="w-12 h-12 bg-cyan-500 text-zinc-950 font-bold text-xl flex items-center justify-center flex-shrink-0">1</div>
+            <div>
+              <h3 class="text-xl font-bold mb-1">Users Pay Service Fee</h3>
+              <p class="text-zinc-500">Small fee on platform transactions for settlement services.</p>
+            </div>
+          </div>
+          <div class="flex gap-6 items-start">
+            <div class="w-12 h-12 bg-zinc-800 text-white font-bold text-xl flex items-center justify-center flex-shrink-0">2</div>
+            <div>
+              <h3 class="text-xl font-bold mb-1">Token Holders Get Discounts</h3>
+              <p class="text-zinc-500">Holding tokens provides fee reductions or rebates.</p>
+            </div>
+          </div>
+          <div class="flex gap-6 items-start">
+            <div class="w-12 h-12 bg-zinc-800 text-white font-bold text-xl flex items-center justify-center flex-shrink-0">3</div>
+            <div>
+              <h3 class="text-xl font-bold mb-1">Fees Support Ecosystem</h3>
+              <p class="text-zinc-500">Revenue funds incentives, liquidity, and treasury.</p>
+            </div>
+          </div>
+        </div>
 
-						<div class="flex items-center justify-between p-4 bg-white dark:bg-[#0a0f1e] border border-gray-200 dark:border-gray-700 rounded-lg hover:border-[#00d9ff] transition-colors">
-							<div class="flex items-center gap-3">
-								<div class="w-4 h-4 rounded-full" style="background-color: #94a3b8;"></div>
-								<div>
-									<div class="font-semibold text-gray-900 dark:text-white">Marketing & Ecosystem</div>
-									<div class="text-sm text-gray-600 dark:text-gray-400">5,000,000 tokens</div>
-								</div>
-							</div>
-							<div class="text-xl font-bold text-[#00d9ff]">5%</div>
-						</div>
+        <div class="mt-16 p-8 bg-zinc-900 text-center max-w-xl mx-auto">
+          <p class="text-2xl font-black text-gradient">Real usage = Real value</p>
+        </div>
+      </div>
+    </section>
 
-						<div class="flex items-center justify-between p-4 bg-white dark:bg-[#0a0f1e] border border-gray-200 dark:border-gray-700 rounded-lg hover:border-[#00d9ff] transition-colors">
-							<div class="flex items-center gap-3">
-								<div class="w-4 h-4 rounded-full" style="background-color: #64748b;"></div>
-								<div>
-									<div class="font-semibold text-gray-900 dark:text-white">Legal & Compliance</div>
-									<div class="text-sm text-gray-600 dark:text-gray-400">5,000,000 tokens</div>
-								</div>
-							</div>
-							<div class="text-xl font-bold text-[#00d9ff]">5%</div>
-						</div>
-					</div>
-				</div>
+    <!-- CTA -->
+    <section class="py-24 sm:py-32 px-6 border-t border-zinc-800">
+      <div class="max-w-3xl mx-auto text-center">
+        <h2 class="text-4xl sm:text-5xl font-black mb-6">Join the Presale</h2>
+        <p class="text-xl text-zinc-400 mb-10">
+          Shared money deserves clean settlement. SplitDo delivers it.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/app/splitdo-exchange" class="px-10 py-4 bg-white text-zinc-950 font-bold">
+            Get $SPLITDO
+          </a>
+          <a href="/about" class="px-10 py-4 text-zinc-300 hover:text-white font-semibold border-b-2 border-transparent hover:border-cyan-500 transition-all">
+            About Us
+          </a>
+        </div>
+      </div>
+    </section>
 
-				<!-- Key Priorities -->
-				<div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
-					<div class="text-center p-6 bg-white dark:bg-[#0a0f1e] border border-gray-200 dark:border-gray-700 rounded-lg">
-						<div class="text-3xl font-bold text-[#00d9ff] mb-2">Liquidity</div>
-						<p class="text-gray-600 dark:text-gray-300">Market stability first</p>
-					</div>
-					<div class="text-center p-6 bg-white dark:bg-[#0a0f1e] border border-gray-200 dark:border-gray-700 rounded-lg">
-						<div class="text-3xl font-bold text-[#00d9ff] mb-2">Execution</div>
-						<p class="text-gray-600 dark:text-gray-300">Over speculation</p>
-					</div>
-					<div class="text-center p-6 bg-white dark:bg-[#0a0f1e] border border-gray-200 dark:border-gray-700 rounded-lg">
-						<div class="text-3xl font-bold text-[#00d9ff] mb-2">Long-term</div>
-						<p class="text-gray-600 dark:text-gray-300">Alignment over exits</p>
-					</div>
-				</div>
-			</div>
-		</section>
-
-		<!-- Vesting Schedule -->
-		<section class="py-16 lg:py-20 bg-white dark:bg-[#0a0f1e]">
-			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="text-center mb-12">
-					<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-						Vesting Schedule
-					</h2>
-					<p class="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
-						All major allocations are subject to vesting. No immediate insider liquidity.
-					</p>
-				</div>
-
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-					<div class="border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-[#00d9ff] transition-colors">
-						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Team & Advisors</h3>
-						<p class="text-gray-600 dark:text-gray-300 mb-2">12-month cliff, 36-month linear vesting</p>
-						<div class="text-sm text-gray-500 dark:text-gray-400">Long-term commitment to execution</div>
-					</div>
-
-					<div class="border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-[#00d9ff] transition-colors">
-						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Seed Contributors</h3>
-						<p class="text-gray-600 dark:text-gray-300 mb-2">Partial TGE unlock, linear vesting</p>
-						<div class="text-sm text-gray-500 dark:text-gray-400">Rewarding early risk-takers</div>
-					</div>
-
-					<div class="border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-[#00d9ff] transition-colors">
-						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Strategic Partners</h3>
-						<p class="text-gray-600 dark:text-gray-300 mb-2">Milestone-aligned linear vesting</p>
-						<div class="text-sm text-gray-500 dark:text-gray-400">Performance-based unlocks</div>
-					</div>
-
-					<div class="border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-[#00d9ff] transition-colors">
-						<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Treasury</h3>
-						<p class="text-gray-600 dark:text-gray-300 mb-2">Time-locked, governance-controlled</p>
-						<div class="text-sm text-gray-500 dark:text-gray-400">Community-driven allocation</div>
-					</div>
-				</div>
-
-				<div class="mt-12 text-center">
-					<p class="text-lg text-gray-600 dark:text-gray-300 italic">
-						"Trust compounds over time."
-					</p>
-				</div>
-			</div>
-		</section>
-
-		<!-- Competitive Positioning -->
-		<section class="py-16 lg:py-20 bg-gray-50 dark:bg-[#12171f]">
-			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="text-center mb-12">
-					<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-						Competitive Positioning
-					</h2>
-					<p class="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
-						SplitDo isn't trying to replace everything. It replaces the part that never worked well.
-					</p>
-				</div>
-
-				<div class="overflow-x-auto">
-					<table class="w-full border-collapse">
-						<thead>
-							<tr class="border-b-2 border-[#00d9ff]">
-								<th class="text-left py-4 px-6 text-gray-900 dark:text-white font-bold">Platform</th>
-								<th class="text-center py-4 px-6 text-gray-900 dark:text-white font-bold">Tracks Expenses</th>
-								<th class="text-center py-4 px-6 text-gray-900 dark:text-white font-bold">Settles Instantly</th>
-								<th class="text-center py-4 px-6 text-gray-900 dark:text-white font-bold">Global</th>
-								<th class="text-center py-4 px-6 text-gray-900 dark:text-white font-bold">On-Chain</th>
-							</tr>
-						</thead>
-						<tbody class="bg-white dark:bg-[#0a0f1e]">
-							<tr class="border-b border-gray-200 dark:border-gray-700">
-								<td class="py-4 px-6 text-gray-900 dark:text-white font-medium">Splitwise</td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Yes</span></td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">No</span></td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">Limited</span></td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">No</span></td>
-							</tr>
-							<tr class="border-b border-gray-200 dark:border-gray-700">
-								<td class="py-4 px-6 text-gray-900 dark:text-white font-medium">Tricount</td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Yes</span></td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">No</span></td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">Limited</span></td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">No</span></td>
-							</tr>
-							<tr class="border-b border-gray-200 dark:border-gray-700">
-								<td class="py-4 px-6 text-gray-900 dark:text-white font-medium">Group Payments</td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">Partial</span></td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">Partial</span></td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">No</span></td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">No</span></td>
-							</tr>
-							<tr class="bg-[#00d9ff]/10 border-2 border-[#00d9ff]">
-								<td class="py-4 px-6 text-gray-900 dark:text-white font-bold">SplitDo</td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Yes</span></td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Yes</span></td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Yes</span></td>
-								<td class="py-4 px-6 text-center"><span class="inline-block w-20 py-1 rounded text-sm font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Yes</span></td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</section>
-
-		<!-- Value Flow -->
-		<section class="py-16 lg:py-20 bg-white dark:bg-[#0a0f1e]">
-			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="text-center mb-12">
-					<h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-						Value Flow
-					</h2>
-					<p class="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
-						No artificial demand. No forced mechanics. Usage creates value. Nothing else does.
-					</p>
-				</div>
-
-				<div class="max-w-3xl mx-auto space-y-4">
-					<div class="flex items-start gap-4 p-6 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-[#00d9ff] transition-colors">
-						<div class="w-10 h-10 bg-[#00d9ff] rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">1</div>
-						<div>
-							<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Users Pay Service Fee</h3>
-							<p class="text-gray-600 dark:text-gray-300">Small fee on platform transactions for settlement services</p>
-						</div>
-					</div>
-
-					<div class="flex items-start gap-4 p-6 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-[#00d9ff] transition-colors">
-						<div class="w-10 h-10 bg-[#00d9ff] rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">2</div>
-						<div>
-							<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Token Holders Get Discounts</h3>
-							<p class="text-gray-600 dark:text-gray-300">Holding tokens provides fee reductions or rebates</p>
-						</div>
-					</div>
-
-					<div class="flex items-start gap-4 p-6 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-[#00d9ff] transition-colors">
-						<div class="w-10 h-10 bg-[#00d9ff] rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">3</div>
-						<div>
-							<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Fees Support Ecosystem</h3>
-							<p class="text-gray-600 dark:text-gray-300">Revenue funds incentives, liquidity, and treasury operations</p>
-						</div>
-					</div>
-				</div>
-
-				<div class="mt-12 text-center p-8 border-2 border-[#00d9ff] rounded-2xl bg-[#00d9ff]/5 max-w-2xl mx-auto">
-					<p class="text-xl text-gray-900 dark:text-white font-semibold">
-						Real usage → Real value
-					</p>
-				</div>
-			</div>
-		</section>
-
-		<!-- CTA Section -->
-		<section class="py-16 lg:py-20 bg-gradient-to-br from-gray-100 to-gray-50 dark:from-[#12171f] dark:to-[#1a2030] border-t border-gray-200 dark:border-[#00d9ff]/20">
-			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-				<h2 class="text-3xl lg:text-4xl font-bold mb-4 text-gray-900 dark:text-white">
-					Ready to Join the Future?
-				</h2>
-				<p class="text-xl mb-8 text-gray-700 dark:text-gray-200">
-					Shared money deserves clean settlement. SplitDo delivers it.
-				</p>
-				<div class="flex flex-col sm:flex-row gap-4 justify-center">
-					<a href="/" class="px-8 py-4 bg-[#00d9ff] text-gray-900 dark:text-white text-lg font-bold rounded-lg hover:bg-[#00b8d4] transition-all transform hover:scale-105 shadow-lg hover:shadow-xl">
-						Join Presale
-					</a>
-					<a href="/about" class="px-8 py-4 bg-transparent text-gray-900 dark:text-white text-lg rounded-lg hover:bg-white/10 transition-colors border-2 border-gray-300 dark:border-white font-semibold">
-						Learn More
-					</a>
-				</div>
-			</div>
-		</section>
-
-	</main>
+  </main>
 </Layout>

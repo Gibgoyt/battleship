@@ -815,23 +815,53 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
   };
 
   const fetchSolPrice = async (options: { force?: boolean } = {}): Promise<SmartFetchResult<SolPriceData>> => {
+    // Fallback price in case API fails (approximate market price as of Jan 2026)
+    const FALLBACK_SOL_PRICE = 250;
+    
     try {
       setIsPersistentDataLoading(true);
+      logger.debug('[fetchSolPrice] Starting SOL price fetch', { force: options.force });
 
       const result = await smartFetch(
         async () => {
           // Use middleware system for CoinGecko API
+          logger.debug('[fetchSolPrice] Calling CoinGecko API...');
           const priceResponse = await middlewareFetch.Endpoints.CoinGecko._Api.V3.Simple.Price.GET({
             ids: 'solana',
             vs_currencies: 'usd'
           });
 
+          logger.debug('[fetchSolPrice] CoinGecko response:', { 
+            status: priceResponse.status,
+            data: priceResponse.data 
+          });
+
+          if (priceResponse.status === 429) {
+            // Rate limited - use fallback
+            logger.warn('[fetchSolPrice] Rate limited by CoinGecko, using fallback price');
+            return {
+              price: FALLBACK_SOL_PRICE,
+              currency: 'usd',
+              lastUpdated: new Date().toISOString()
+            };
+          }
+
           if (priceResponse.status !== 200) {
             throw new Error(`CoinGecko API returned ${priceResponse.status}: ${priceResponse.data.error || 'Unknown error'}`);
           }
 
+          const price = priceResponse.data.solana?.usd;
+          if (!price || price === 0) {
+            logger.warn('[fetchSolPrice] CoinGecko returned no price, using fallback');
+            return {
+              price: FALLBACK_SOL_PRICE,
+              currency: 'usd',
+              lastUpdated: new Date().toISOString()
+            };
+          }
+
           return {
-            price: priceResponse.data.solana?.usd || 0,
+            price,
             currency: 'usd',
             lastUpdated: new Date().toISOString()
           };
@@ -844,12 +874,27 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       );
 
       if (result.success && result.data) {
+        logger.info('[fetchSolPrice] SOL price updated:', result.data.price);
         setSolPrice(result.data);
+      } else {
+        // If fetch failed entirely, set fallback price
+        logger.warn('[fetchSolPrice] Fetch failed, setting fallback price');
+        setSolPrice({
+          price: FALLBACK_SOL_PRICE,
+          currency: 'usd',
+          lastUpdated: new Date().toISOString()
+        });
       }
 
       return result;
     } catch (error) {
-      logger.error('Error fetching SOL price:', error);
+      logger.error('[fetchSolPrice] Error fetching SOL price:', error);
+      // Set fallback price on error
+      setSolPrice({
+        price: FALLBACK_SOL_PRICE,
+        currency: 'usd',
+        lastUpdated: new Date().toISOString()
+      });
       return {
         success: false,
         data: null as any,

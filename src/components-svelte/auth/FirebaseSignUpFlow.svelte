@@ -49,13 +49,11 @@
 </script>
 
 {#if loading}
-	<!-- Show minimal loading state while detecting URL parameters (very fast) -->
-	<div class="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 px-4">
-		<div class="max-w-md w-full text-center">
-			<div class="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 p-8">
-				<h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Loading...</h2>
-				<div class="animate-spin h-8 w-8 border-4 border-[#00d9ff] border-t-transparent rounded-full mx-auto"></div>
-			</div>
+	<!-- Loading state -->
+	<div class="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
+		<div class="text-center">
+			<div class="animate-spin h-10 w-10 border-4 border-cyan-500 border-t-transparent rounded-full mx-auto mb-6"></div>
+			<p class="text-zinc-500">Loading...</p>
 		</div>
 	</div>
 {:else if currentStep === 1}
@@ -66,14 +64,14 @@
 	<FirebaseSignUpForm_Step2 />
 {:else}
 	<!-- Fallback error state -->
-	<div class="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 px-4">
-		<div class="max-w-md w-full text-center">
-			<div class="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 p-8">
-				<h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Sign Up Error</h2>
-				<p class="text-gray-600 dark:text-gray-300 mb-4">
+	<div class="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
+		<div class="w-full max-w-md text-center">
+			<div class="bg-zinc-900 border border-zinc-800 p-8">
+				<h2 class="text-2xl font-bold text-white mb-4">Sign Up Error</h2>
+				<p class="text-zinc-400 mb-6">
 					Something went wrong with the sign-up flow.
 				</p>
-				<a href="/auth/sign-up" class="inline-block px-6 py-2 bg-[#00d9ff] text-white hover:bg-[#00b8d4] transition-colors">
+				<a href="/auth/sign-up" class="inline-block px-6 py-3 bg-cyan-500 text-black font-semibold hover:bg-cyan-400 transition-colors">
 					Start Over
 				</a>
 			</div>

@@ -29,16 +29,43 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
   // Transaction history state
   const [transactions, setTransactions] = createSignal<TokenTransaction[]>([]);
   const [isLoadingTransactions, setIsLoadingTransactions] = createSignal(false);
+  
+  // Local SOL price state (fetched directly, bypassing cache issues)
+  const [liveSolPrice, setLiveSolPrice] = createSignal<number | null>(null);
+  const [isPriceLoading, setIsPriceLoading] = createSignal(true);
+
+  // Function to fetch SOL price directly from CoinGecko (like ExchangeModal does)
+  const fetchSolPriceDirectly = async () => {
+    try {
+      setIsPriceLoading(true);
+      const { middlewareFetch } = await import('src/applications_solid/app/middleware/endpoints');
+      const response = await middlewareFetch.Endpoints.CoinGecko._Api.V3.Simple.Price.GET({
+        ids: 'solana',
+        vs_currencies: 'usd'
+      });
+
+      if (response.status === 200 && response.data.solana?.usd) {
+        setLiveSolPrice(response.data.solana.usd);
+        console.log('[Exchange] SOL price fetched:', response.data.solana.usd);
+      } else {
+        console.warn('[Exchange] CoinGecko returned no price');
+      }
+    } catch (error) {
+      console.error('[Exchange] Error fetching SOL price:', error);
+    } finally {
+      setIsPriceLoading(false);
+    }
+  };
 
   // Fetch SOL price on mount and set up 5-minute refresh interval
   onMount(() => {
     console.log('[Exchange] Fetching initial SOL price');
-    wallet.fetchSolPrice({ force: true });
+    fetchSolPriceDirectly();
 
     // Set up interval to refresh SOL price every 5 minutes
     const priceInterval = setInterval(() => {
       console.log('[Exchange] Refreshing SOL price (5 min interval)');
-      wallet.fetchSolPrice({ force: true });
+      fetchSolPriceDirectly();
     }, SOL_PRICE_REFRESH_INTERVAL);
 
     // Cleanup interval on unmount
@@ -198,7 +225,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
     const splitdoPriceUSD = 0.11; // $0.11 per SPLITDO (can be from API later)
 
     const solBalance = wallet.solBalance()?.sol || 0;
-    const solPriceUSD = wallet.solPrice()?.price || 0;
+    const solPriceUSD = liveSolPrice() || 0;
 
     // Direct USD calculation
     const splitdoValueUSD = splitdoBalance * splitdoPriceUSD;
@@ -357,7 +384,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
                     {formatCurrency(wallet.solBalance()?.sol || 0, 4)} SOL
                   </div>
                   <div class="text-xs text-zinc-500">
-                    ${formatCurrency((wallet.solBalance()?.sol || 0) * (wallet.solPrice()?.price || 0), 2)}
+                    ${formatCurrency((wallet.solBalance()?.sol || 0) * (liveSolPrice() || 0), 2)}
                   </div>
                 </Show>
               </div>
@@ -369,7 +396,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
         <div class="mb-6 sm:mb-8">
           <div class="flex items-center justify-between mb-4 sm:mb-6">
             <h2 class="text-base sm:text-lg font-semibold text-white">Exchange Rates</h2>
-            <Show when={wallet.solPrice()?.price}>
+            <Show when={liveSolPrice()}>
               <div class="flex items-center gap-1.5">
                 <span class="relative flex h-2 w-2">
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -395,7 +422,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
                 </div>
               </div>
               <Show
-                when={wallet.solPrice()?.price}
+                when={!isPriceLoading() && liveSolPrice()}
                 fallback={
                   <div class="flex items-center gap-2">
                     <svg class="animate-spin w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24">
@@ -407,7 +434,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
                 }
               >
                 <div class="text-right flex-shrink-0">
-                  <div class="text-lg sm:text-xl font-bold text-white">${formatCurrency(wallet.solPrice()?.price || 0, 2)}</div>
+                  <div class="text-lg sm:text-xl font-bold text-white">${formatCurrency(liveSolPrice() || 0, 2)}</div>
                   <div class="text-[10px] text-zinc-500">Updated live</div>
                 </div>
               </Show>
