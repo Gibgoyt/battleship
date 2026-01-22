@@ -347,38 +347,97 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
 
         {/* Exchange Rate Section */}
         <div class="mb-6 sm:mb-8">
-          <h2 class="text-base sm:text-lg font-semibold text-white mb-4 sm:mb-6">Exchange Rates</h2>
-          <div class="space-y-2 sm:space-y-3">
-            {/* SPLITDO Price */}
-            <div class="flex items-center justify-between py-3 sm:py-4 px-4 sm:px-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors rounded-lg sm:rounded-none">
-              <div class="flex items-center gap-3 sm:gap-4">
-                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-zinc-800 rounded-lg flex items-center justify-center overflow-hidden p-1 flex-shrink-0">
-                  <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
-                </div>
-                <div class="min-w-0">
-                  <div class="text-sm font-medium text-white">SPLITDO / USD</div>
-                  <div class="text-xs text-zinc-500 hidden sm:block">Fixed presale rate</div>
-                </div>
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 class="text-base sm:text-lg font-semibold text-white">Exchange Rates</h2>
+            <Show when={wallet.solPrice()?.price}>
+              <div class="flex items-center gap-1.5">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span class="text-xs text-emerald-400 font-medium">Live</span>
               </div>
-              <div class="text-lg sm:text-xl font-bold text-white flex-shrink-0">$0.11</div>
-            </div>
-
-            {/* SOL Price */}
-            <div class="flex items-center justify-between py-3 sm:py-4 px-4 sm:px-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors rounded-lg sm:rounded-none">
+            </Show>
+          </div>
+          <div class="space-y-2 sm:space-y-3">
+            {/* SOL Price - Live */}
+            <div class="flex items-center justify-between py-3 sm:py-4 px-4 sm:px-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors rounded-lg sm:rounded-none border-l-2 border-purple-500">
               <div class="flex items-center gap-3 sm:gap-4">
                 <div class="w-9 h-9 sm:w-10 sm:h-10 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden p-2 flex-shrink-0">
                   <img src="/solana-logo.svg" alt="Solana" class="w-full h-full object-contain" />
                 </div>
                 <div class="min-w-0">
-                  <div class="text-sm font-medium text-white">SOL / USD</div>
-                  <div class="text-xs text-zinc-500 hidden sm:block">Live market price</div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium text-white">SOL / USD</span>
+                    <span class="text-[10px] px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded">LIVE</span>
+                  </div>
+                  <div class="text-xs text-zinc-500">Live market price from CoinGecko</div>
+                </div>
+              </div>
+              <Show
+                when={wallet.solPrice()?.price}
+                fallback={
+                  <div class="flex items-center gap-2">
+                    <svg class="animate-spin w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-lg sm:text-xl font-bold text-zinc-700">--</span>
+                  </div>
+                }
+              >
+                <div class="text-right flex-shrink-0">
+                  <div class="text-lg sm:text-xl font-bold text-white">${formatCurrency(wallet.solPrice()?.price || 0, 2)}</div>
+                  <div class="text-[10px] text-zinc-500">Updated live</div>
+                </div>
+              </Show>
+            </div>
+
+            {/* SPLITDO Price - Fixed */}
+            <div class="flex items-center justify-between py-3 sm:py-4 px-4 sm:px-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors rounded-lg sm:rounded-none border-l-2 border-cyan-500">
+              <div class="flex items-center gap-3 sm:gap-4">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-zinc-800 rounded-lg flex items-center justify-center overflow-hidden p-1 flex-shrink-0">
+                  <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium text-white">SPLITDO / USD</span>
+                    <span class="text-[10px] px-1.5 py-0.5 bg-cyan-500/20 text-cyan-400 rounded">PRESALE</span>
+                  </div>
+                  <div class="text-xs text-zinc-500">Fixed presale rate</div>
+                </div>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <div class="text-lg sm:text-xl font-bold text-cyan-400">$0.11</div>
+                <div class="text-[10px] text-zinc-500">Fixed price</div>
+              </div>
+            </div>
+
+            {/* Exchange Rate - SOL to SPLITDO */}
+            <div class="flex items-center justify-between py-3 sm:py-4 px-4 sm:px-6 bg-gradient-to-r from-purple-500/5 to-cyan-500/5 border border-zinc-700/50 rounded-lg sm:rounded-none">
+              <div class="flex items-center gap-3 sm:gap-4">
+                <div class="flex items-center -space-x-2">
+                  <div class="w-7 h-7 sm:w-8 sm:h-8 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden p-1.5 border-2 border-zinc-800 z-10">
+                    <img src="/solana-logo.svg" alt="Solana" class="w-full h-full object-contain" />
+                  </div>
+                  <div class="w-7 h-7 sm:w-8 sm:h-8 bg-zinc-800 rounded-lg flex items-center justify-center overflow-hidden p-1 border-2 border-zinc-800">
+                    <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
+                  </div>
+                </div>
+                <div class="min-w-0">
+                  <div class="text-sm font-medium text-white">1 SOL =</div>
+                  <div class="text-xs text-zinc-500">Current exchange rate</div>
                 </div>
               </div>
               <Show
                 when={wallet.solPrice()?.price}
                 fallback={<div class="text-lg sm:text-xl font-bold text-zinc-700">--</div>}
               >
-                <div class="text-lg sm:text-xl font-bold text-white flex-shrink-0">${formatCurrency(wallet.solPrice()?.price || 0, 2)}</div>
+                <div class="text-right flex-shrink-0">
+                  <div class="text-lg sm:text-xl font-bold text-white">
+                    {formatCurrency((wallet.solPrice()?.price || 0) / 0.11, 0)} <span class="text-cyan-400">SPLITDO</span>
+                  </div>
+                </div>
               </Show>
             </div>
           </div>
