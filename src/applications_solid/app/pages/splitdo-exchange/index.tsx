@@ -432,34 +432,6 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
                 <div class="text-[10px] text-zinc-500">Fixed price</div>
               </div>
             </div>
-
-            {/* Exchange Rate - SOL to SPLITDO */}
-            <div class="flex items-center justify-between py-3 sm:py-4 px-4 sm:px-6 bg-gradient-to-r from-purple-500/5 to-cyan-500/5 border border-zinc-700/50 rounded-lg sm:rounded-none">
-              <div class="flex items-center gap-3 sm:gap-4">
-                <div class="flex items-center -space-x-2">
-                  <div class="w-7 h-7 sm:w-8 sm:h-8 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden p-1.5 border-2 border-zinc-800 z-10">
-                    <img src="/solana-logo.svg" alt="Solana" class="w-full h-full object-contain" />
-                  </div>
-                  <div class="w-7 h-7 sm:w-8 sm:h-8 bg-zinc-800 rounded-lg flex items-center justify-center overflow-hidden p-1 border-2 border-zinc-800">
-                    <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
-                  </div>
-                </div>
-                <div class="min-w-0">
-                  <div class="text-sm font-medium text-white">1 SOL =</div>
-                  <div class="text-xs text-zinc-500">Current exchange rate</div>
-                </div>
-              </div>
-              <Show
-                when={wallet.solPrice()?.price}
-                fallback={<div class="text-lg sm:text-xl font-bold text-zinc-700">--</div>}
-              >
-                <div class="text-right flex-shrink-0">
-                  <div class="text-lg sm:text-xl font-bold text-white">
-                    {formatCurrency((wallet.solPrice()?.price || 0) / 0.11, 0)} <span class="text-cyan-400">SPLITDO</span>
-                  </div>
-                </div>
-              </Show>
-            </div>
           </div>
         </div>
 

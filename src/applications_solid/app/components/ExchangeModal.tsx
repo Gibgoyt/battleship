@@ -74,50 +74,42 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
   return (
     <Show when={wallet.isExchangeModalOpen()}>
     <div
-      class="fixed inset-0 z-50 flex items-center justify-center"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={handleBackdropClick}
     >
       {/* Backdrop */}
-      <div class={`absolute inset-0 transition-all duration-300 ${
-        props.isDark ? 'modal-backdrop-dark' : 'modal-backdrop-light'
-      }`} />
+      <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
       {/* Modal Content */}
       <div
-        class={`relative w-full max-w-2xl max-h-screen md:max-h-fit mx-2 sm:mx-4 p-0 rounded-xl shadow-2xl z-10 overflow-hidden transition-all duration-300 ${
-          props.isDark
-            ? 'bg-crypto-bg-primary border border-crypto-border'
-            : 'bg-white/95 border border-gray-200/50 shadow-xl backdrop-blur-sm'
-        }`}
+        class="relative w-full max-w-lg max-h-[90vh] bg-zinc-900 rounded-2xl shadow-2xl z-10 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Professional Header */}
-        <div class="bg-gradient-to-r from-crypto-primary-blue to-crypto-primary-cyan px-4 py-4 sm:px-8 sm:py-6">
+        {/* Header */}
+        <div class="px-6 py-5 border-b border-zinc-800">
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center overflow-hidden p-1">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-zinc-800 rounded-xl flex items-center justify-center overflow-hidden p-1.5">
                 <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
               </div>
               <div>
-                <h2 class="text-xl sm:text-2xl font-bold text-white mb-1">
-                  Exchange SOL for SPLITDO
-                </h2>
-                <p class="text-blue-100 opacity-90">
-                  Secure token exchange powered by Solana
-                </p>
+                <h2 class="text-lg font-bold text-white">Exchange Tokens</h2>
+                <p class="text-xs text-zinc-500">SOL to SPLITDO</p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              class="w-10 h-10 rounded-full flex items-center justify-center text-white hover:bg-white hover:bg-opacity-20 transition-colors text-xl font-light"
+              class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors text-zinc-400 hover:text-white"
             >
-              ×
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div class="p-4 sm:p-8 max-h-[calc(95vh-120px)] md:max-h-none overflow-y-auto">
+        <div class="p-6 max-h-[calc(90vh-80px)] overflow-y-auto">
           <Show
             when={step() === 'wallet'}
             fallback={
@@ -256,122 +248,109 @@ interface WalletSelectionProps {
 
 const WalletSelection: Component<WalletSelectionProps> = (props) => {
   return (
-    <div class="space-y-6">
-      <div class="text-center">
-        <h3 class={`text-2xl font-bold mb-2 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>Connect Your Wallet</h3>
-        <p class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-          Choose your preferred wallet to continue with the exchange
-        </p>
+    <div class="space-y-4">
+      <div class="text-center mb-6">
+        <h3 class="text-xl font-bold text-white mb-1">Connect Wallet</h3>
+        <p class="text-sm text-zinc-500">Select a wallet to continue</p>
       </div>
 
       {/* Phantom Wallet Option */}
       <button
         onClick={props.onSelectPhantom}
         disabled={props.isConnecting}
-        class={`w-full p-6 border-2 transition-all duration-200 flex items-center gap-4 rounded-xl ${
-          props.isConnecting
-            ? `opacity-50 cursor-not-allowed ${props.isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'}`
-            : `hover:border-blue-500 hover:shadow-lg cursor-pointer ${
-                props.isDark ? 'bg-gray-800 border-gray-700 hover:bg-gray-700' : 'bg-white border-gray-200 hover:bg-gray-50'
-              } ${
-                props.connectionStatus === 'connected'
-                  ? props.isDark
-                    ? 'border-green-500 bg-green-900 bg-opacity-30'
-                    : 'border-green-500 bg-green-50'
-                  : ''
-              }`
-        }`}
+        class={`w-full p-4 rounded-xl bg-zinc-800/50 hover:bg-zinc-800 transition-all text-left group ${
+          props.isConnecting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+        } ${props.connectionStatus === 'connected' ? 'ring-2 ring-emerald-500' : ''}`}
       >
-        <div class="w-10 h-10 flex items-center justify-center">
-          <img
-            src={props.isDark
-              ? "https://mintcdn.com/phantom-e50e2e68/fkWrmnMWhjoXSGZ9/logo/phantom-light.svg?fit=max&auto=format&n=fkWrmnMWhjoXSGZ9&q=85&s=c21a66db70347ca7a31053b98a0b5b0a"
-              : "https://mintcdn.com/phantom-e50e2e68/fkWrmnMWhjoXSGZ9/logo/phantom-dark.svg?fit=max&auto=format&n=fkWrmnMWhjoXSGZ9&q=85&s=af17fb78921412073a894ea97523898c"
-            }
-            alt="Phantom"
-            class="w-10 h-10"
-          />
-        </div>
-        <div class="flex-1 text-left">
-          <div class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-            Phantom Wallet
+        <div class="flex items-center gap-4">
+          <div class="w-11 h-11 flex items-center justify-center flex-shrink-0">
+            <img
+              src="https://mintcdn.com/phantom-e50e2e68/fkWrmnMWhjoXSGZ9/logo/phantom-light.svg?fit=max&auto=format&n=fkWrmnMWhjoXSGZ9&q=85&s=c21a66db70347ca7a31053b98a0b5b0a"
+              alt="Phantom"
+              class="w-11 h-11"
+            />
           </div>
-          <div class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            {props.isConnecting
-              ? 'Connecting...'
-              : props.connectionStatus === 'connected'
-              ? 'Connected - Ready to exchange'
-              : 'Most popular Solana wallet'
-            }
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-white">Phantom</span>
+              <span class="text-[10px] px-1.5 py-0.5 bg-cyan-500/20 text-cyan-400 rounded font-medium">POPULAR</span>
+            </div>
+            <p class="text-sm text-zinc-500 mt-0.5">
+              {props.isConnecting ? 'Connecting...' : props.connectionStatus === 'connected' ? 'Connected' : 'Best for Solana'}
+            </p>
           </div>
-        </div>
-        <Show when={props.isConnecting}>
-          <div class="w-5 h-5 border-2 border-crypto-primary-blue border-t-transparent rounded-full animate-spin"></div>
-        </Show>
-        <Show when={!props.isConnecting && props.connectionStatus === 'connected'}>
-          <div class="text-crypto-accent-green font-bold text-xl">✓</div>
-        </Show>
-      </button>
-
-      {/* MetaMask Option (Coming Soon) */}
-      <button
-        disabled
-        class={`w-full p-6 border-2 opacity-50 cursor-not-allowed flex items-center gap-4 rounded-xl ${
-          props.isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'
-        }`}
-      >
-        <div class="w-10 h-10 flex items-center justify-center font-bold text-orange-400 bg-orange-100 rounded-full">
-          MM
-        </div>
-        <div class="flex-1 text-left">
-          <div class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-            MetaMask
-          </div>
-          <div class={`text-sm ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-            Solana support coming soon
+          <div class="flex-shrink-0">
+            <Show when={props.isConnecting}>
+              <div class="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+            </Show>
+            <Show when={!props.isConnecting && props.connectionStatus === 'connected'}>
+              <div class="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </Show>
+            <Show when={!props.isConnecting && props.connectionStatus !== 'connected'}>
+              <svg class="w-5 h-5 text-zinc-600 group-hover:text-zinc-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </Show>
           </div>
         </div>
-        <span class={`text-xs px-3 py-1 rounded-full font-medium ${
-          props.isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'
-        }`}>
-          Coming Soon
-        </span>
       </button>
 
       {/* WalletConnect Option */}
       <button
         onClick={props.onSelectWalletConnect}
         disabled={props.isConnecting}
-        class={`w-full p-6 border-2 transition-all duration-200 flex items-center gap-4 rounded-xl ${
-          props.isConnecting
-            ? `opacity-50 cursor-not-allowed ${props.isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'}`
-            : `hover:border-blue-500 hover:shadow-lg cursor-pointer ${
-                props.isDark
-                  ? 'bg-gray-800 border-gray-700 hover:bg-gray-700'
-                  : 'bg-white border-gray-300 hover:bg-gray-50'
-              }`
+        class={`w-full p-4 rounded-xl bg-zinc-800/50 hover:bg-zinc-800 transition-all text-left group ${
+          props.isConnecting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
         }`}
       >
-        <div class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-white">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="flex-1 text-left">
-          <div class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-            WalletConnect
+        <div class="flex items-center gap-4">
+          <div class="w-11 h-11 flex items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex-shrink-0">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="text-white">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </div>
-          <div class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            {props.isConnecting
-              ? 'Connecting...'
-              : 'Scan QR code with mobile wallet'
-            }
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-white">WalletConnect</span>
+            </div>
+            <p class="text-sm text-zinc-500 mt-0.5">
+              {props.isConnecting ? 'Connecting...' : 'Scan QR with mobile'}
+            </p>
+          </div>
+          <div class="flex-shrink-0">
+            <Show when={props.isConnecting} fallback={
+              <svg class="w-5 h-5 text-zinc-600 group-hover:text-zinc-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            }>
+              <div class="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+            </Show>
           </div>
         </div>
-        <Show when={props.isConnecting}>
-          <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
-        </Show>
+      </button>
+
+      {/* MetaMask Option (Coming Soon) */}
+      <button
+        disabled
+        class="w-full p-4 rounded-xl bg-zinc-800/30 text-left opacity-50 cursor-not-allowed"
+      >
+        <div class="flex items-center gap-4">
+          <div class="w-11 h-11 flex items-center justify-center bg-orange-500/20 rounded-xl flex-shrink-0">
+            <span class="text-orange-400 font-bold text-sm">MM</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-zinc-400">MetaMask</span>
+              <span class="text-[10px] px-1.5 py-0.5 bg-zinc-700 text-zinc-500 rounded font-medium">SOON</span>
+            </div>
+            <p class="text-sm text-zinc-600 mt-0.5">Coming soon</p>
+          </div>
+        </div>
       </button>
 
       {/* Mobile Installation Prompt */}
@@ -402,7 +381,7 @@ interface ExchangeFormProps {
 
 const ExchangeForm: Component<ExchangeFormProps> = (props) => {
   const MIN_SOL_AMOUNT = 0.01;
-  const SPLITDO_PRICE_USD = 0.11; // Fixed presale price: $0.11 per SPLITDO
+  const SPLITDO_PRICE_USD = 0.11;
 
   const solAmountNum = createMemo(() => {
     const num = parseFloat(props.solAmount);
@@ -413,25 +392,16 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
     return solAmountNum() >= MIN_SOL_AMOUNT;
   });
 
-  // Calculate how much SOL is worth in USD
   const solValueUSD = createMemo(() => {
     return solAmountNum() * props.solPriceUSD;
   });
 
-  // Calculate SPLITDO amount: SOL_USD_VALUE / SPLITDO_PRICE_USD
-  // Example: 1 SOL @ $135.98 = $135.98 / $0.11 = ~1,236 SPLITDO
   const splitdoAmount = createMemo(() => {
-    return Math.floor((solValueUSD() / SPLITDO_PRICE_USD) * 100) / 100; // Round to 2 decimals
+    return Math.floor((solValueUSD() / SPLITDO_PRICE_USD) * 100) / 100;
   });
 
-  // Calculate how many SPLITDO per 1 SOL (dynamic based on SOL price)
   const splitdoPerSol = createMemo(() => {
     return Math.floor((props.solPriceUSD / SPLITDO_PRICE_USD) * 100) / 100;
-  });
-
-  // USD equivalent calculations
-  const splitdoPerUSD = createMemo(() => {
-    return Math.floor((1 / SPLITDO_PRICE_USD) * 100) / 100; // 1 USD = ~9.09 SPLITDO
   });
 
   const handleExchange = async () => {
@@ -440,134 +410,92 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
   };
 
   return (
-    <div class="space-y-8">
+    <div class="space-y-5">
       {/* Back Button */}
       <button
         onClick={props.onBack}
-        class={`text-sm flex items-center gap-2 transition-colors ${
-          props.isDark
-            ? 'text-gray-400 hover:text-white'
-            : 'text-gray-600 hover:text-gray-900'
-        }`}
+        class="text-sm flex items-center gap-1.5 text-zinc-500 hover:text-white transition-colors"
       >
-        ← Back to wallet selection
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back
       </button>
 
-      {/* Input Section - You Pay */}
-      <div class="space-y-4">
-        <div>
-          <h3 class={`text-lg font-semibold mb-4 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>You Pay</h3>
-          <div class={`p-4 rounded-xl border-2 transition-all ${
-            props.isDark
-              ? 'border-gray-600 bg-gray-800/50'
-              : 'border-gray-200 bg-gray-50'
-          }`}>
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-lg bg-zinc-700 flex items-center justify-center overflow-hidden p-1.5 flex-shrink-0">
-                <img src="/solana-logo.svg" alt="SOL" class="w-full h-full object-contain" />
+      {/* You Pay */}
+      <div>
+        <label class="text-sm text-zinc-500 mb-2 block">You Pay</label>
+        <div class="p-4 rounded-xl bg-zinc-800/50">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-zinc-700 flex items-center justify-center overflow-hidden p-2 flex-shrink-0">
+              <img src="/solana-logo.svg" alt="SOL" class="w-full h-full object-contain" />
+            </div>
+            <div class="flex-1">
+              <input
+                type="number"
+                value={props.solAmount}
+                onInput={(e) => props.setSolAmount(e.currentTarget.value)}
+                placeholder="0.00"
+                min={MIN_SOL_AMOUNT}
+                step="0.01"
+                class="w-full text-2xl font-bold bg-transparent border-none focus:outline-none text-white placeholder-zinc-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <div class="text-xs text-zinc-500 mt-0.5">
+                {solAmountNum() > 0 ? `~$${solValueUSD().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD` : 'Enter amount'}
               </div>
-              <div class="flex-1">
-                <input
-                  type="number"
-                  value={props.solAmount}
-                  onInput={(e) => props.setSolAmount(e.currentTarget.value)}
-                  placeholder="0.00"
-                  min={MIN_SOL_AMOUNT}
-                  step="0.01"
-                  class={`w-full text-2xl font-bold bg-transparent border-none focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                    props.isDark ? 'text-white placeholder-gray-500' : 'text-gray-900 placeholder-gray-400'
-                  }`}
-                />
-                <div class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  {solAmountNum() > 0 ? `~$${solValueUSD().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD` : 'Enter amount'}
-                </div>
-              </div>
-              <div class={`text-right flex-shrink-0`}>
-                <div class={`font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>SOL</div>
-                <div class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>Solana</div>
-              </div>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="font-semibold text-white">SOL</div>
             </div>
           </div>
-          <Show when={props.solAmount && !isValidAmount()}>
-            <div class="flex items-center gap-2 mt-3 text-red-400 text-sm">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="flex-shrink-0">
-                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM7 4h2v5H7V4zm0 6h2v2H7v-2z"/>
-              </svg>
-              Minimum amount is {MIN_SOL_AMOUNT} SOL
-            </div>
-          </Show>
         </div>
+        <Show when={props.solAmount && !isValidAmount()}>
+          <p class="text-xs text-red-400 mt-2">Minimum: {MIN_SOL_AMOUNT} SOL</p>
+        </Show>
       </div>
 
       {/* Swap Arrow */}
-      <div class="flex justify-center -my-2">
-        <div class={`w-10 h-10 rounded-full flex items-center justify-center ${
-          props.isDark ? 'bg-gray-700' : 'bg-gray-200'
-        }`}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class={props.isDark ? 'text-cyan-400' : 'text-blue-500'}>
-            <path d="M12 5v14M12 19l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <div class="flex justify-center -my-1">
+        <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center">
+          <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
         </div>
       </div>
 
-      {/* Output Section - You Receive */}
-      <div class="space-y-4">
-        <div>
-          <h3 class={`text-lg font-semibold mb-4 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>You Receive</h3>
-          <div class={`p-4 rounded-xl border-2 transition-all ${
-            isValidAmount()
-              ? 'border-cyan-500/50 bg-cyan-500/5'
-              : props.isDark
-                ? 'border-gray-600 bg-gray-800/50'
-                : 'border-gray-200 bg-gray-50'
-          }`}>
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-lg bg-zinc-700 flex items-center justify-center overflow-hidden p-1 flex-shrink-0">
-                <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
+      {/* You Receive */}
+      <div>
+        <label class="text-sm text-zinc-500 mb-2 block">You Receive</label>
+        <div class={`p-4 rounded-xl ${isValidAmount() ? 'bg-cyan-500/10' : 'bg-zinc-800/50'}`}>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-zinc-700 flex items-center justify-center overflow-hidden p-1.5 flex-shrink-0">
+              <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
+            </div>
+            <div class="flex-1">
+              <div class={`text-2xl font-bold ${isValidAmount() ? 'text-cyan-400' : 'text-zinc-600'}`}>
+                {isValidAmount() ? `~${splitdoAmount().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '0.00'}
               </div>
-              <div class="flex-1">
-                <div class={`text-2xl font-bold ${isValidAmount() ? 'text-cyan-400' : props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                  {isValidAmount() ? `~${splitdoAmount().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '0.00'}
-                </div>
-                <div class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  {isValidAmount() ? `~$${(splitdoAmount() * 0.11).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD` : 'Output amount'}
-                </div>
+              <div class="text-xs text-zinc-500 mt-0.5">
+                {isValidAmount() ? `~$${(splitdoAmount() * 0.11).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD` : 'Output amount'}
               </div>
-              <div class={`text-right flex-shrink-0`}>
-                <div class={`font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>SPLITDO</div>
-                <div class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>Token</div>
-              </div>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="font-semibold text-white">SPLITDO</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Exchange Details */}
+      {/* Rate Info */}
       <Show when={isValidAmount()}>
-        <div class={`rounded-xl p-4 border ${
-          props.isDark
-            ? 'bg-gray-800/50 border-gray-700'
-            : 'bg-gray-50 border-gray-200'
-        }`}>
-          <div class="space-y-3">
-            <div class="flex justify-between items-center">
-              <span class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>Exchange Rate</span>
-              <span class={`text-sm font-medium ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                1 SOL = {splitdoPerSol().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SPLITDO
-              </span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>SOL Price</span>
-              <span class={`text-sm font-medium ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                ${props.solPriceUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
-              </span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>SPLITDO Price</span>
-              <span class={`text-sm font-medium ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                $0.11 USD
-              </span>
-            </div>
+        <div class="p-3 rounded-xl bg-zinc-800/30 space-y-2">
+          <div class="flex justify-between text-sm">
+            <span class="text-zinc-500">Rate</span>
+            <span class="text-white">1 SOL = {splitdoPerSol().toLocaleString()} SPLITDO</span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-zinc-500">SOL Price</span>
+            <span class="text-white">${props.solPriceUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
           </div>
         </div>
       </Show>
@@ -576,51 +504,34 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
       <button
         onClick={handleExchange}
         disabled={!isValidAmount() || props.exchangeStatus === 'loading'}
-        class={`w-full py-4 px-6 font-bold text-lg rounded-xl transition-all duration-200 ${
+        class={`w-full py-4 font-bold text-base rounded-xl transition-all ${
           !isValidAmount() || props.exchangeStatus === 'loading'
-            ? `cursor-not-allowed border-2 ${
-                props.isDark
-                  ? 'bg-gray-800 text-gray-500 border-gray-700'
-                  : 'bg-gray-100 text-gray-400 border-gray-300'
-              }`
-            : 'bg-green-500 hover:bg-green-600 text-white hover:shadow-lg hover:shadow-green-500/20 focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-30'
+            ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
+            : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white'
         }`}
       >
-        <Show
-          when={props.exchangeStatus !== 'loading'}
-          fallback={
-            <span class="flex items-center justify-center gap-3">
-              <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              Processing Exchange...
-            </span>
-          }
-        >
-          <span class="flex items-center justify-center gap-3">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-white">
-              <path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Exchange Tokens
+        <Show when={props.exchangeStatus !== 'loading'} fallback={
+          <span class="flex items-center justify-center gap-2">
+            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            Processing...
           </span>
+        }>
+          Exchange Tokens
         </Show>
       </button>
 
-      {/* Success Message */}
+      {/* Success */}
       <Show when={props.exchangeStatus === 'success'}>
-        <div class={`p-4 border-2 border-crypto-accent-green rounded-xl ${
-          props.isDark
-            ? 'bg-green-900/20 text-green-100'
-            : 'bg-green-50 text-green-900'
-        }`}>
+        <div class="p-4 rounded-xl bg-emerald-500/10 text-emerald-400">
           <div class="flex items-center gap-3">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="text-crypto-accent-green flex-shrink-0">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
+            <div class="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
             <div>
-              <div class="font-semibold text-crypto-accent-green mb-1">Exchange Successful!</div>
-              <p class={`text-sm ${props.isDark ? 'text-green-200' : 'text-green-700'}`}>
-                Your SPLITDO tokens have been deposited to your wallet.
-              </p>
+              <div class="font-semibold text-emerald-300">Exchange Successful!</div>
+              <p class="text-sm text-emerald-400/80">SPLITDO tokens sent to your wallet</p>
             </div>
           </div>
         </div>
