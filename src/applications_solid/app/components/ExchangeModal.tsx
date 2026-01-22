@@ -210,6 +210,23 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
                 }
               }
             }}
+            onSelectMetaMask={async () => {
+              if (wallet.connectionStatus() === 'connected') {
+                // Already connected, go to exchange
+                setStep('exchange');
+              } else {
+                // Need to connect MetaMask first
+                setIsConnecting(true);
+                try {
+                  await wallet.connectWallet('metamask');
+                  setStep('exchange');
+                } catch (error) {
+                  console.error('Failed to connect MetaMask:', error);
+                } finally {
+                  setIsConnecting(false);
+                }
+              }
+            }}
             onSelectWalletConnect={async () => {
               if (wallet.connectionStatus() === 'connected') {
                 // Already connected, go to exchange
@@ -245,6 +262,7 @@ interface WalletSelectionProps {
   showMobileInstallation: boolean;
   mobileInstallationPlatform: 'ios' | 'android';
   onSelectPhantom: () => void;
+  onSelectMetaMask: () => void;
   onSelectWalletConnect: () => void;
   onCloseMobileInstallation: () => void;
 }
@@ -308,29 +326,37 @@ const WalletSelection: Component<WalletSelectionProps> = (props) => {
         </Show>
       </button>
 
-      {/* MetaMask Option (Coming Soon) */}
+      {/* MetaMask Option */}
       <button
-        disabled
-        class={`w-full p-6 border-2 opacity-50 cursor-not-allowed flex items-center gap-4 rounded-xl ${
-          props.isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'
+        onClick={props.onSelectMetaMask}
+        disabled={props.isConnecting}
+        class={`w-full p-6 border-2 transition-all duration-200 flex items-center gap-4 rounded-xl ${
+          props.isConnecting
+            ? `opacity-50 cursor-not-allowed ${props.isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'}`
+            : `hover:border-orange-500 hover:shadow-lg cursor-pointer ${
+                props.isDark
+                  ? 'bg-gray-800 border-gray-700 hover:bg-gray-700'
+                  : 'bg-white border-gray-300 hover:bg-gray-50'
+              }`
         }`}
       >
-        <div class="w-10 h-10 flex items-center justify-center font-bold text-orange-400 bg-orange-100 rounded-full">
-          MM
+        <div class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-orange-500 to-yellow-600 rounded-lg text-white text-xl font-bold">
+          M
         </div>
         <div class="flex-1 text-left">
           <div class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
             MetaMask
           </div>
-          <div class={`text-sm ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-            Solana support coming soon
+          <div class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            Secure Solana wallet
           </div>
         </div>
-        <span class={`text-xs px-3 py-1 rounded-full font-medium ${
-          props.isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'
-        }`}>
-          Coming Soon
-        </span>
+        <Show when={props.isConnecting && props.connectionStatus === 'connecting'}>
+          <div class="text-orange-500 font-bold text-xl">⟳</div>
+        </Show>
+        <Show when={!props.isConnecting && props.connectionStatus === 'connected'}>
+          <div class="text-green-500 font-bold text-xl">✓</div>
+        </Show>
       </button>
 
       {/* WalletConnect Option */}
