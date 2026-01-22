@@ -1,9 +1,12 @@
 import type { Component } from 'solid-js';
-import { createSignal, createEffect, Show, createMemo, For } from 'solid-js';
+import { createSignal, createEffect, Show, createMemo, For, onMount, onCleanup } from 'solid-js';
 import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
 import WalletModal from '../../components/WalletModal';
 import { CreateAccountModal } from '../../components/CreateAccountModal';
 import { ExchangeModal } from '../../components/ExchangeModal';
+
+// SOL price refresh interval (5 minutes)
+const SOL_PRICE_REFRESH_INTERVAL = 5 * 60 * 1000;
 
 interface TokenTransaction {
   transaction_id: string;
@@ -26,6 +29,23 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
   // Transaction history state
   const [transactions, setTransactions] = createSignal<TokenTransaction[]>([]);
   const [isLoadingTransactions, setIsLoadingTransactions] = createSignal(false);
+
+  // Fetch SOL price on mount and set up 5-minute refresh interval
+  onMount(() => {
+    console.log('[Exchange] Fetching initial SOL price');
+    wallet.fetchSolPrice({ force: true });
+
+    // Set up interval to refresh SOL price every 5 minutes
+    const priceInterval = setInterval(() => {
+      console.log('[Exchange] Refreshing SOL price (5 min interval)');
+      wallet.fetchSolPrice({ force: true });
+    }, SOL_PRICE_REFRESH_INTERVAL);
+
+    // Cleanup interval on unmount
+    onCleanup(() => {
+      clearInterval(priceInterval);
+    });
+  });
 
   // Fetch transactions
   const fetchTransactions = async () => {
