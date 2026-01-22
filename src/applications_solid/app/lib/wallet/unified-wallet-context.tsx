@@ -1141,7 +1141,7 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
         serializeExchangeTransactionToBase64
       } = await import('./metamask/solana-exchange-builder');
       
-      const { POST: exchangeSolToSplitdo } = await import('../middleware/endpoints/devbackend/_api/testing/usockets/exchange/solana/splitdo/POST');
+      const { POST: exchangeSolToSplitdo } = await import('../../middleware/endpoints/devbackend/_api/testing/usockets/exchange/solana/splitdo/POST');
 
       // Step 1: Calculate exchange parameters
       const exchangeParams = calculateExchangeAmounts(solAmount, exchangeRate);
