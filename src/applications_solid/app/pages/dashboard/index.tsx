@@ -134,8 +134,8 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
             {/* SPLITDO Balance */}
             <div class="flex items-center justify-between py-4 px-6 border-l-2 border-cyan-500 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
               <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-cyan-500/10 flex items-center justify-center">
-                  <div class="w-2 h-2 bg-cyan-400 rounded-full"></div>
+                <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden">
+                  <img src="/splitdo/logo.webp" alt="SPLITDO" class="w-7 h-7 object-contain" />
                 </div>
                 <div>
                   <div class="text-sm font-medium text-white">SPLITDO</div>
@@ -158,10 +158,10 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
             </div>
 
             {/* SOL Balance */}
-            <div class="flex items-center justify-between py-4 px-6 border-l-2 border-blue-500 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
+            <div class="flex items-center justify-between py-4 px-6 border-l-2 border-purple-500 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
               <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-blue-500/10 flex items-center justify-center">
-                  <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden p-2">
+                  <img src="/solana-logo.svg" alt="Solana" class="w-full h-full object-contain" />
                 </div>
                 <div>
                   <div class="text-sm font-medium text-white">Solana</div>

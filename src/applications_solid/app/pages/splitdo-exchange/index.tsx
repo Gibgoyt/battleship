@@ -199,271 +199,222 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
 
   return (
     <div class="min-h-screen bg-zinc-900">
-      {/* Hero Section */}
-      <div class="relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-blue-500/10"></div>
-        <div class="relative px-4 pt-12 pb-20 md:px-8 md:pt-20 md:pb-32">
-          <div class="max-w-4xl mx-auto text-center space-y-6">
-            <div class="inline-block px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 mb-4">
-              <span class="text-sm font-medium text-cyan-400">
-                {wallet.wallet()?.address ? formatAddress(wallet.wallet()!.address) : 'Exchange'}
-              </span>
+      {/* Header */}
+      <div class="border-b border-zinc-800">
+        <div class="max-w-6xl mx-auto px-4 md:px-8 py-8">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-2xl md:text-3xl font-bold text-white mb-1">Exchange</h1>
+              <p class="text-sm text-zinc-500">
+                {wallet.wallet()?.address ? formatAddress(wallet.wallet()!.address) : 'Trade SOL for SPLITDO'}
+              </p>
             </div>
+            <div class="text-right">
+              <div class="text-xs text-zinc-500 uppercase tracking-wider mb-1">Total Value</div>
+              <Show
+                when={wallet.connectionStatus() === 'connected'}
+                fallback={<div class="text-2xl font-bold text-zinc-700">--</div>}
+              >
+                <div class="text-2xl md:text-3xl font-bold text-cyan-400">
+                  ${formatCurrency(portfolioValueUSD())}
+                </div>
+              </Show>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            <h1 class="text-4xl md:text-6xl font-bold bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent">
-              Token Exchange
-            </h1>
-
+      {/* Main Content */}
+      <div class="max-w-6xl mx-auto px-4 md:px-8 py-12">
+        {/* Connect Wallet or Create Account */}
+        <Show when={wallet.connectionStatus() !== 'connected' || wallet.splitdoATA().status !== 'exists'}>
+          <div class="mb-8 p-6 bg-zinc-800/50 border border-zinc-700">
             <Show
-              when={wallet.connectionStatus() === 'connected' && wallet.splitdoATA().status === 'exists'}
+              when={wallet.connectionStatus() === 'connected'}
               fallback={
-                <div class="space-y-6">
-                  <div class="text-5xl md:text-6xl font-bold text-zinc-700">
-                    ${formatCurrency(0)}
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-base font-semibold text-white mb-1">Connect your wallet</div>
+                    <div class="text-sm text-zinc-400">Connect to start trading tokens</div>
                   </div>
-                  <Show
-                    when={wallet.connectionStatus() === 'connected'}
-                    fallback={
-                      <button
-                        onClick={wallet.openWalletModal}
-                        class="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 transition-all text-white font-semibold text-lg shadow-lg shadow-cyan-500/25"
-                      >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                        Connect Wallet
-                      </button>
-                    }
+                  <button
+                    onClick={wallet.openWalletModal}
+                    class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold transition-all"
                   >
-                    <button
-                      onClick={wallet.openCreateAccountModal}
-                      class="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 transition-all text-white font-semibold text-lg shadow-lg shadow-emerald-500/25"
-                    >
-                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                      </svg>
-                      Create SPLITDO Account
-                    </button>
-                  </Show>
+                    Connect Wallet
+                  </button>
                 </div>
               }
             >
-              <div class="space-y-4">
-                <div class="text-5xl md:text-7xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                  ${formatCurrency(portfolioValueUSD())}
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-base font-semibold text-white mb-1">Create SPLITDO Account</div>
+                  <div class="text-sm text-zinc-400">You need a token account to hold SPLITDO</div>
                 </div>
-                <div class="text-xl md:text-2xl text-zinc-400 font-medium">
-                  Total Value
-                </div>
+                <button
+                  onClick={wallet.openCreateAccountModal}
+                  class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold transition-all"
+                >
+                  Create Account
+                </button>
               </div>
             </Show>
           </div>
-        </div>
-      </div>
+        </Show>
 
-      {/* Balance Cards */}
-      <div class="px-4 md:px-8 pb-12 -mt-8">
-        <div class="max-w-4xl mx-auto">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Assets Section */}
+        <div class="mb-8">
+          <h2 class="text-lg font-semibold text-white mb-6">Your Assets</h2>
+          <div class="space-y-3">
             {/* SPLITDO Balance */}
-            <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800">
-              <div class="flex items-center justify-between mb-4">
-                <span class="text-sm font-medium text-zinc-500 uppercase tracking-wider">SPLITDO</span>
-                <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-                  <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
+            <div class="flex items-center justify-between py-4 px-6 border-l-2 border-cyan-500 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden">
+                  <img src="/splitdo/logo.webp" alt="SPLITDO" class="w-7 h-7 object-contain" />
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-white">SPLITDO</div>
+                  <div class="text-xs text-zinc-500">Custom Token</div>
                 </div>
               </div>
-              <Show
-                when={wallet.connectionStatus() === 'connected' && wallet.splitdoATA().status === 'exists'}
-                fallback={
-                  <div>
-                    <div class="text-3xl font-bold text-zinc-700 mb-2">--</div>
-                    <p class="text-xs text-zinc-500">
-                      {wallet.connectionStatus() === 'connected' ? 'Create account to trade' : 'Connect wallet to view'}
-                    </p>
+              <div class="text-right">
+                <Show
+                  when={wallet.connectionStatus() === 'connected' && wallet.splitdoATA().status === 'exists'}
+                  fallback={<div class="text-xl font-bold text-zinc-700">--</div>}
+                >
+                  <div class="text-xl font-bold text-white">
+                    {formatCurrency(splitdoBalanceTokens(), 2)}
                   </div>
-                }
-              >
-                <div class="text-3xl font-bold text-white mb-2">
-                  {formatCurrency(splitdoBalanceTokens(), 2)}
-                </div>
-                <p class="text-xs text-zinc-500 font-mono">
-                  {formatAddress(wallet.splitdoATA().address || '')}
-                </p>
-              </Show>
+                  <div class="text-xs text-zinc-500">
+                    ${formatCurrency(splitdoBalanceTokens() * 0.11, 2)}
+                  </div>
+                </Show>
+              </div>
             </div>
 
             {/* SOL Balance */}
-            <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800">
-              <div class="flex items-center justify-between mb-4">
-                <span class="text-sm font-medium text-zinc-500 uppercase tracking-wider">Solana</span>
-                <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                  <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                  </svg>
+            <div class="flex items-center justify-between py-4 px-6 border-l-2 border-purple-500 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden p-2">
+                  <img src="/solana-logo.svg" alt="Solana" class="w-full h-full object-contain" />
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-white">Solana</div>
+                  <div class="text-xs text-zinc-500">Native Token</div>
                 </div>
               </div>
-              <Show
-                when={wallet.connectionStatus() === 'connected' && wallet.solBalance()}
-                fallback={
-                  <div>
-                    <div class="text-3xl font-bold text-zinc-700 mb-2">--</div>
-                    <p class="text-xs text-zinc-500">Connect wallet to view</p>
+              <div class="text-right">
+                <Show
+                  when={wallet.connectionStatus() === 'connected' && wallet.solBalance()}
+                  fallback={<div class="text-xl font-bold text-zinc-700">--</div>}
+                >
+                  <div class="text-xl font-bold text-white">
+                    {formatCurrency(wallet.solBalance()?.sol || 0, 4)} SOL
                   </div>
-                }
-              >
-                <div class="text-3xl font-bold text-white mb-2">
-                  {formatCurrency(wallet.solBalance()?.sol || 0, 4)}
-                </div>
-                <p class="text-xs text-zinc-500">For transaction fees</p>
-              </Show>
+                  <div class="text-xs text-zinc-500">
+                    ${formatCurrency((wallet.solBalance()?.sol || 0) * (wallet.solPrice()?.price || 0), 2)}
+                  </div>
+                </Show>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Current Prices */}
-      <div class="px-4 md:px-8 pb-12">
-        <div class="max-w-4xl mx-auto space-y-4">
-          <h2 class="text-lg font-semibold text-white mb-4">Current Prices</h2>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Exchange Rate Section */}
+        <div class="mb-8">
+          <h2 class="text-lg font-semibold text-white mb-6">Exchange Rates</h2>
+          <div class="space-y-3">
             {/* SPLITDO Price */}
-            <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800">
-              <div class="flex items-center justify-between mb-4">
-                <span class="text-sm font-medium text-zinc-500 uppercase tracking-wider">SPLITDO/USD</span>
-                <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-                  <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
+            <div class="flex items-center justify-between py-4 px-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden">
+                  <img src="/splitdo/logo.webp" alt="SPLITDO" class="w-7 h-7 object-contain" />
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-white">SPLITDO / USD</div>
+                  <div class="text-xs text-zinc-500">Fixed presale rate</div>
                 </div>
               </div>
-              <div class="text-3xl font-bold text-white mb-1">
-                ${formatCurrency(0.11, 2)}
-              </div>
-              <p class="text-xs text-zinc-500">Fixed exchange rate</p>
+              <div class="text-xl font-bold text-white">$0.11</div>
             </div>
 
             {/* SOL Price */}
-            <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl p-6 border border-zinc-800">
-              <div class="flex items-center justify-between mb-4">
-                <span class="text-sm font-medium text-zinc-500 uppercase tracking-wider">SOL/USD</span>
-                <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                  <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                  </svg>
+            <div class="flex items-center justify-between py-4 px-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden p-2">
+                  <img src="/solana-logo.svg" alt="Solana" class="w-full h-full object-contain" />
+                </div>
+                <div>
+                  <div class="text-sm font-medium text-white">SOL / USD</div>
+                  <div class="text-xs text-zinc-500">Live market price</div>
                 </div>
               </div>
               <Show
                 when={wallet.solPrice()?.price}
-                fallback={
-                  <div>
-                    <div class="text-3xl font-bold text-zinc-700 mb-1">--</div>
-                    <p class="text-xs text-zinc-500">Loading price...</p>
-                  </div>
-                }
+                fallback={<div class="text-xl font-bold text-zinc-700">--</div>}
               >
-                <div class="text-3xl font-bold text-white mb-1">
-                  ${formatCurrency(wallet.solPrice()?.price || 0, 2)}
-                </div>
-                <p class="text-xs text-zinc-500">Live market price</p>
+                <div class="text-xl font-bold text-white">${formatCurrency(wallet.solPrice()?.price || 0, 2)}</div>
               </Show>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Exchange Action */}
-      <Show when={wallet.connectionStatus() === 'connected' && wallet.splitdoATA().status === 'exists'}>
-        <div class="px-4 md:px-8 pb-12">
-          <div class="max-w-4xl mx-auto">
+        {/* Exchange Action */}
+        <Show when={wallet.connectionStatus() === 'connected' && wallet.splitdoATA().status === 'exists'}>
+          <div class="mb-8">
             <button
               onClick={wallet.openExchangeModal}
-              class="group w-full bg-gradient-to-r from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 border border-cyan-500/20 rounded-3xl p-8 transition-all"
+              class="group w-full flex items-center justify-between p-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 border border-cyan-500/20 hover:border-cyan-500/30 transition-all"
             >
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-6">
-                  <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                    </svg>
-                  </div>
-                  <div class="text-left">
-                    <h3 class="text-2xl font-bold text-white mb-1">Exchange Tokens</h3>
-                    <p class="text-sm text-zinc-400">Trade SOL for SPLITDO at $0.11 each</p>
-                  </div>
-                </div>
-                <svg class="w-8 h-8 text-zinc-600 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
+              <div>
+                <div class="text-base font-semibold text-white mb-1">Exchange Tokens</div>
+                <div class="text-sm text-zinc-400">Trade SOL for SPLITDO at $0.11 each</div>
               </div>
+              <svg class="w-5 h-5 text-cyan-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
             </button>
           </div>
-        </div>
-      </Show>
+        </Show>
 
-      {/* Quick Actions */}
-      <Show when={wallet.connectionStatus() === 'connected'}>
-        <div class="px-4 md:px-8 pb-12">
-          <div class="max-w-4xl mx-auto space-y-4">
-            <h2 class="text-lg font-semibold text-white mb-4">Quick Actions</h2>
-
+        {/* Quick Actions */}
+        <Show when={wallet.connectionStatus() === 'connected'}>
+          <div class="mb-8">
+            <h2 class="text-lg font-semibold text-white mb-6">Quick Actions</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button
                 onClick={wallet.disconnectWallet}
-                class="group block bg-zinc-900/50 hover:bg-red-500/10 border border-zinc-800 hover:border-red-500/20 rounded-3xl p-6 transition-all text-left"
+                class="group flex items-center justify-between p-6 bg-zinc-800/50 hover:bg-red-500/10 border border-zinc-700 hover:border-red-500/20 transition-all text-left"
               >
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-zinc-800 group-hover:bg-red-500/20 flex items-center justify-center transition-colors">
-                      <svg class="w-6 h-6 text-zinc-400 group-hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 class="text-base font-bold text-white group-hover:text-red-400 transition-colors">Disconnect</h3>
-                      <p class="text-sm text-zinc-400">End wallet session</p>
-                    </div>
-                  </div>
-                  <svg class="w-6 h-6 text-zinc-600 group-hover:text-red-400 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                  </svg>
+                <div>
+                  <div class="text-base font-semibold text-white group-hover:text-red-400 mb-1">Disconnect</div>
+                  <div class="text-sm text-zinc-400">End wallet session</div>
                 </div>
+                <svg class="w-5 h-5 text-zinc-500 group-hover:text-red-400 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
               </button>
 
               <button
                 onClick={wallet.refreshBalances}
-                class="group block bg-zinc-900/50 hover:bg-zinc-900/80 border border-zinc-800 rounded-3xl p-6 transition-all text-left"
+                class="group flex items-center justify-between p-6 bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700 hover:border-zinc-600 transition-all text-left"
               >
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-zinc-800 flex items-center justify-center">
-                      <svg class="w-6 h-6 text-zinc-400 group-hover:text-cyan-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 class="text-base font-bold text-white">Refresh</h3>
-                      <p class="text-sm text-zinc-400">Update balances</p>
-                    </div>
-                  </div>
-                  <svg class="w-6 h-6 text-zinc-600 group-hover:text-zinc-400 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                  </svg>
+                <div>
+                  <div class="text-base font-semibold text-white mb-1">Refresh</div>
+                  <div class="text-sm text-zinc-400">Update balances</div>
                 </div>
+                <svg class="w-5 h-5 text-zinc-500 group-hover:text-zinc-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
               </button>
             </div>
           </div>
-        </div>
-      </Show>
+        </Show>
 
-      {/* Transaction History */}
-      <div class="px-4 md:px-8 pb-12">
-        <div class="max-w-4xl mx-auto">
-          <h2 class="text-lg font-semibold text-white mb-4">Recent Activity</h2>
-          <div class="bg-zinc-900/50 backdrop-blur-xl rounded-3xl border border-zinc-800 overflow-hidden">
+        {/* Transaction History */}
+        <div class="border-t border-zinc-800 pt-8">
+          <h2 class="text-lg font-semibold text-white mb-6">Recent Activity</h2>
+          <div class="bg-zinc-800/50 border border-zinc-700 overflow-hidden">
             <Show
               when={wallet.connectionStatus() === 'connected'}
               fallback={
@@ -503,63 +454,42 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
                   </div>
                 }
               >
-                <div class="divide-y divide-zinc-800">
+                <div class="divide-y divide-zinc-700">
                   <For each={transactions()}>
                     {(tx) => (
-                      <div class="p-6 hover:bg-zinc-800/50 transition-colors">
+                      <div class="p-4 hover:bg-zinc-800 transition-colors">
                         <div class="flex items-center justify-between">
                           <div class="flex items-center gap-4 flex-1">
-                            {/* Transaction Icon */}
-                            <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                            <div class="w-8 h-8 bg-zinc-900 flex items-center justify-center flex-shrink-0">
                               {getTransactionIcon(tx.type)}
                             </div>
-
-                            {/* Transaction Details */}
                             <div class="flex-1 min-w-0">
                               <div class="flex items-center gap-2 mb-1">
-                                <h3 class="text-sm font-semibold text-white capitalize">
-                                  {tx.type}
-                                </h3>
+                                <span class="text-sm font-medium text-white capitalize">{tx.type}</span>
                                 <Show when={tx.status === 'completed'}>
-                                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400">
-                                    Success
-                                  </span>
+                                  <span class="text-xs text-emerald-400">Success</span>
                                 </Show>
                                 <Show when={tx.status === 'pending'}>
-                                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400">
-                                    Pending
-                                  </span>
+                                  <span class="text-xs text-amber-400">Pending</span>
                                 </Show>
                                 <Show when={tx.status === 'failed'}>
-                                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400">
-                                    Failed
-                                  </span>
+                                  <span class="text-xs text-red-400">Failed</span>
                                 </Show>
                               </div>
-                              <p class="text-xs text-zinc-500 font-mono truncate">
-                                {formatAddress(tx.tx_signature)}
-                              </p>
+                              <p class="text-xs text-zinc-500 font-mono">{formatAddress(tx.tx_signature)}</p>
                             </div>
                           </div>
-
-                          {/* Amount and Time */}
                           <div class="text-right ml-4">
-                            <p class="text-sm font-bold text-white mb-1">
-                              {formatCurrency(tx.amount_tokens)} SPLITDO
-                            </p>
-                            <p class="text-xs text-zinc-500">
-                              {formatTimestamp(tx.completed_at || tx.created_at)}
-                            </p>
+                            <p class="text-sm font-bold text-white">{formatCurrency(tx.amount_tokens)} SPLITDO</p>
+                            <p class="text-xs text-zinc-500">{formatTimestamp(tx.completed_at || tx.created_at)}</p>
                           </div>
                         </div>
-
-                        {/* View on Explorer Link */}
                         <Show when={tx.tx_signature}>
                           <a
                             href={`https://solscan.io/tx/${tx.tx_signature}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="inline-flex items-center gap-1 mt-3 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                            class="inline-flex items-center gap-1 mt-2 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
                           >
                             View on Solscan
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
