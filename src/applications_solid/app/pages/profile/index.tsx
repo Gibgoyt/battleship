@@ -1,6 +1,7 @@
 import type { Component } from 'solid-js';
-import { createSignal, onMount, Show } from 'solid-js';
+import { createSignal, onMount, Show, createEffect } from 'solid-js';
 import { PUT as updateProfile, DELETE as deleteAccount, type UpdateProfileData } from '../../middleware/endpoints/_api/users/me';
+import { useCurrency } from '../../stores/currency-store';
 
 const ProfilePage: Component<{ isDark: boolean }> = (props) => {
   const [userEmail, setUserEmail] = createSignal<string>('');
@@ -22,12 +23,20 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
   const [isDeleting, setIsDeleting] = createSignal(false);
   const [deleteError, setDeleteError] = createSignal<string | null>(null);
 
+  // Get global currency store
+  const currencyStore = useCurrency();
+
   // Editable form fields
   const [bio, setBio] = createSignal<string>('');
-  const [currency, setCurrency] = createSignal<string>('');
-  const [language, setLanguage] = createSignal<string>('');
-  const [status, setStatus] = createSignal<string>('');
+  const [localCurrency, setLocalCurrency] = createSignal<string>('');
+
+  // Read-only fields
   const [walletAddress, setWalletAddress] = createSignal<string>('');
+
+  // Sync local currency with global store on mount
+  createEffect(() => {
+    setLocalCurrency(currencyStore.currency());
+  });
 
   // Extract user info from JWT
   const getFirebaseUserInfo = () => {
@@ -93,9 +102,9 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
 
       // Set editable profile fields
       setBio(payload.bio || '');
-      setCurrency(payload.currency || 'USD');
-      setLanguage(payload.language || 'en');
-      setStatus(payload.status || '');
+      setLocalCurrency(payload.currency || currencyStore.currency());
+
+      // Set read-only fields
       setWalletAddress(payload.wallet_address || '');
 
       return payload;
@@ -138,11 +147,7 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
     try {
       const updates: UpdateProfileData = {
         bio: bio(),
-        currency: currency(),
-        language: language(),
-        status: status(),
-        email: userEmail(),
-        wallet_address: walletAddress()
+        currency: localCurrency()
       };
 
       const response = await updateProfile(updates);
@@ -155,12 +160,13 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
         if (response.data.user) {
           const user = response.data.user;
           setBio(user.bio || '');
-          setCurrency(user.currency || 'USD');
-          setLanguage(user.language || 'en');
-          setStatus(user.status || '');
+          setLocalCurrency(user.currency || 'USD');
           setUserEmail(user.email || userEmail());
           setDisplayName(user.display_name || displayName());
           setUsername(user.username || username());
+
+          // Update global currency store
+          currencyStore.setCurrency(user.currency || 'USD');
         }
 
         // Clear success message after 3 seconds
@@ -232,6 +238,11 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
               <p class="text-lg md:text-xl text-zinc-400">
                 {userEmail() || 'Loading...'}
               </p>
+              <Show when={bio()}>
+                <p class="text-base md:text-lg text-zinc-500 max-w-2xl mx-auto">
+                  {bio()}
+                </p>
+              </Show>
             </div>
 
             {/* Verification Badge */}
@@ -366,8 +377,8 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
               <div>
                 <label class="block text-sm font-medium text-zinc-400 mb-2">Preferred Currency</label>
                 <select
-                  value={currency()}
-                  onChange={(e) => setCurrency(e.currentTarget.value)}
+                  value={localCurrency()}
+                  onChange={(e) => setLocalCurrency(e.currentTarget.value)}
                   class="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all"
                 >
                   <option value="USD">USD - US Dollar</option>
@@ -381,60 +392,20 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
                 </select>
               </div>
 
-              {/* Language */}
-              <div>
-                <label class="block text-sm font-medium text-zinc-400 mb-2">Language</label>
-                <select
-                  value={language()}
-                  onChange={(e) => setLanguage(e.currentTarget.value)}
-                  class="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all"
-                >
-                  <option value="en">English</option>
-                  <option value="es">Spanish</option>
-                  <option value="fr">French</option>
-                  <option value="de">German</option>
-                  <option value="it">Italian</option>
-                  <option value="pt">Portuguese</option>
-                  <option value="ja">Japanese</option>
-                  <option value="zh">Chinese</option>
-                </select>
-              </div>
-
-              {/* Status */}
-              <div>
-                <label class="block text-sm font-medium text-zinc-400 mb-2">Status</label>
-                <input
-                  type="text"
-                  value={status()}
-                  onInput={(e) => setStatus(e.currentTarget.value)}
-                  class="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all"
-                  placeholder="Your current status..."
-                />
-              </div>
-
-              {/* Wallet Address */}
-              <div>
-                <label class="block text-sm font-medium text-zinc-400 mb-2">Wallet Address</label>
-                <input
-                  type="text"
-                  value={walletAddress()}
-                  onInput={(e) => setWalletAddress(e.currentTarget.value)}
-                  class="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all"
-                  placeholder="0x..."
-                />
-              </div>
-
-              {/* Email (display only with note) */}
-              <div>
-                <label class="block text-sm font-medium text-zinc-400 mb-2">Email</label>
-                <input
-                  type="email"
-                  value={userEmail()}
-                  onInput={(e) => setUserEmail(e.currentTarget.value)}
-                  class="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all"
-                />
-                <p class="text-xs text-zinc-500 mt-1">Note: Username and display name cannot be changed</p>
-              </div>
+              {/* Wallet Address (Read-only) */}
+              <Show when={walletAddress()}>
+                <div>
+                  <label class="block text-sm font-medium text-zinc-400 mb-2">Wallet Address (From Phantom Wallet)</label>
+                  <input
+                    type="text"
+                    value={walletAddress()}
+                    disabled
+                    class="w-full bg-zinc-800/30 border border-zinc-700/50 rounded-xl px-4 py-3 text-zinc-500 font-mono text-sm cursor-not-allowed opacity-60"
+                    placeholder="No wallet connected"
+                  />
+                  <p class="text-xs text-zinc-500 mt-1">Wallet address is automatically pulled from your connected Phantom wallet</p>
+                </div>
+              </Show>
 
               {/* Action Buttons */}
               <div class="flex gap-3 pt-4">

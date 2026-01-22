@@ -73,6 +73,10 @@ const Navigation: Component<NavigationProps> = (props) => {
               <span class="font-medium">Exchange</span>
             </div>
           </button>
+        </div>
+
+        {/* Profile Button at Bottom */}
+        <div class="px-3 pb-3">
           <button
             onClick={() => props.onPageChange('profile')}
             class={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
@@ -89,7 +93,7 @@ const Navigation: Component<NavigationProps> = (props) => {
         </div>
 
         {/* App Info at Bottom */}
-        <div class="p-6 border-t" style="border-color: var(--crypto-border);">
+        <div class="p-6 pt-3 border-t" style="border-color: var(--crypto-border);">
           <p class="text-xs" style="color: var(--crypto-text-muted);">
             SPLITDO v1.0
           </p>

@@ -1,9 +1,17 @@
 import type { Component } from 'solid-js';
 import { createSignal, onMount, createEffect, Show, createMemo } from 'solid-js';
 import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
+import { useCurrency, getCurrencySymbol, formatCurrency as formatCurrencyWithSymbol } from '../../stores/currency-store';
+import { fetchCryptoPrices } from '../../services/coingecko';
 
 const DashboardPage: Component<{ isDark: boolean }> = (props) => {
   const [userEmail, setUserEmail] = createSignal<string>('');
+
+  // Currency store
+  const currencyStore = useCurrency();
+
+  // Live crypto prices in selected currency
+  const [cryptoPrices, setCryptoPrices] = createSignal<Record<string, number>>({});
 
   // Wallet context - using unified wallet
   const wallet = useUnifiedWallet();
@@ -16,6 +24,20 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
     }
   });
 
+  // Fetch crypto prices when currency changes
+  createEffect(async () => {
+    const currency = currencyStore.currency();
+    console.log('[Dashboard] Fetching prices for currency:', currency);
+
+    try {
+      const prices = await fetchCryptoPrices(['SOL', 'SPLITDO'], currency);
+      setCryptoPrices(prices);
+      console.log('[Dashboard] Fetched prices:', prices);
+    } catch (error) {
+      console.error('[Dashboard] Failed to fetch prices:', error);
+    }
+  });
+
   // Get SPLITDO balance - just use it as is, no conversion
   const splitdoBalanceTokens = createMemo(() => {
     const balance = wallet.splitdoATA().balance;
@@ -25,20 +47,21 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
     return balance.uiAmount || 0;
   });
 
-  // Calculate portfolio value in USD
+  // Calculate portfolio value in selected currency
   // Formula: (SOL balance × SOL price) + (SPLITDO balance × SPLITDO price)
-  const portfolioValueUSD = createMemo(() => {
+  const portfolioValue = createMemo(() => {
+    const prices = cryptoPrices();
     const splitdoBalance = splitdoBalanceTokens();
-    const splitdoPriceUSD = 0.11; // $0.11 per SPLITDO (can be from API later)
-
     const solBalance = wallet.solBalance()?.sol || 0;
-    const solPriceUSD = wallet.solPrice()?.price || 0;
 
-    // Direct USD calculation
-    const splitdoValueUSD = splitdoBalance * splitdoPriceUSD;
-    const solValueUSD = solBalance * solPriceUSD;
+    // Get prices from CoinGecko, fallback to defaults if not available
+    const solPrice = prices['SOL'] || 0;
+    const splitdoPrice = prices['SPLITDO'] || 0.11; // Fallback to presale price
 
-    return splitdoValueUSD + solValueUSD;
+    const splitdoValue = splitdoBalance * splitdoPrice;
+    const solValue = solBalance * solPrice;
+
+    return splitdoValue + solValue;
   });
 
   onMount(() => {
@@ -107,10 +130,10 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
             >
               <div class="space-y-4">
                 <div class="text-6xl md:text-8xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                  ${formatCurrency(portfolioValueUSD(), 2)}
+                  {formatCurrencyWithSymbol(portfolioValue(), currencyStore.currency())}
                 </div>
                 <div class="text-xl md:text-2xl text-zinc-400 font-medium">
-                  Total Value
+                  Total Value ({currencyStore.currency()})
                 </div>
               </div>
             </Show>
