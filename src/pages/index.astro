@@ -3,260 +3,316 @@ import Layout from 'src/layouts/Layout.astro';
 
 export const prerender = true
 
-// Fetch presale price at build time
-let formattedPrice = '$0.001';
+let formattedPrice = '$0.11';
+let rawPrice = 0.11;
 try {
   const response = await fetch('https://devbackend.splitdo.app:8443/api/splitdo-token/program/info', {
-    headers: {
-      'Origin': 'https://splitdo.app'
-    }
+    headers: { 'Origin': 'https://splitdo.app' }
   });
   if (response.ok) {
     const data = await response.json();
     if (data.success && data.data?.exchange_rate) {
-      const price = data.data.exchange_rate;
-      formattedPrice = price >= 1 ? `$${price.toFixed(2)}` : `$${price.toFixed(3)}`;
-      console.info(`Presale price fetched: ${formattedPrice}`);
+      rawPrice = data.data.exchange_rate;
+      formattedPrice = rawPrice >= 1 ? `$${rawPrice.toFixed(2)}` : `$${rawPrice.toFixed(3)}`;
     }
   }
-} catch (error) {
-  console.warn('Failed to fetch presale price, using fallback:', error);
-}
+} catch (e) {}
 ---
 
-<Layout title="SPLITDO - Decentralized Expense Splitting">
-  <main class="min-h-screen bg-zinc-900">
+<Layout title="SPLITDO">
+  <style>
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-float { animation: float 6s ease-in-out infinite; }
+    .animate-marquee { animation: marquee 30s linear infinite; }
+    .fade-up { animation: fade-up 0.8s ease-out forwards; }
+    .fade-up-delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .fade-up-delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .fade-up-delay-3 { animation-delay: 0.3s; opacity: 0; }
+    .fade-up-delay-4 { animation-delay: 0.4s; opacity: 0; }
+    .text-gradient {
+      background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 50%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .bg-grid {
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .hover-lift {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hover-lift:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px -20px rgba(34, 211, 238, 0.3);
+    }
+  </style>
 
-    <!-- Hero Section -->
-    <section class="relative min-h-screen flex items-center">
-      <!-- Subtle gradient background -->
-      <div class="absolute inset-0 bg-gradient-to-b from-zinc-900 via-zinc-900 to-zinc-800"></div>
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-cyan-500/5 rounded-full blur-3xl"></div>
-      
-      <div class="relative w-full max-w-6xl mx-auto px-4 sm:px-6 py-20 sm:py-32">
-        <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          <!-- Left Content -->
+  <main class="bg-zinc-950 text-white overflow-hidden">
+
+    <!-- Hero Section - Full Impact -->
+    <section class="relative min-h-screen flex flex-col justify-center bg-grid">
+      <!-- Gradient orbs -->
+      <div class="absolute top-20 left-10 w-[500px] h-[500px] bg-cyan-500/20 rounded-full blur-[120px] animate-pulse"></div>
+      <div class="absolute bottom-20 right-10 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse" style="animation-delay: 1s;"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[150px]"></div>
+
+      <div class="relative z-10 max-w-7xl mx-auto px-6 py-20">
+        <!-- Top bar -->
+        <div class="flex items-center justify-between mb-20 fade-up">
+          <div class="flex items-center gap-3">
+            <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-10 h-10" />
+            <span class="text-xl font-bold">SPLITDO</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span class="text-sm text-emerald-400 font-medium">Presale Live</span>
+          </div>
+        </div>
+
+        <!-- Main hero content -->
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
           <div>
-            <!-- Live Badge -->
-            <div class="inline-flex items-center gap-2 mb-8">
-              <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
-              </span>
-              <span class="text-cyan-400 text-sm font-medium tracking-wide uppercase">Presale Live</span>
-            </div>
-
-            <!-- Main Heading -->
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-              The Future of<br/>
-              <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Expense Splitting</span>
+            <!-- Massive headline -->
+            <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-[0.9] tracking-tight mb-8 fade-up fade-up-delay-1">
+              Split<br/>
+              <span class="text-gradient">Smarter.</span>
             </h1>
 
-            <!-- Subtitle -->
-            <p class="text-lg sm:text-xl text-zinc-400 mb-10 max-w-lg">
-              Join the decentralized revolution. Secure your $SPLITDO tokens at presale price before public launch.
+            <p class="text-xl sm:text-2xl text-zinc-400 max-w-md mb-10 fade-up fade-up-delay-2">
+              The decentralized future of expense sharing. Powered by Solana.
             </p>
 
-            <!-- CTA Buttons -->
-            <div class="flex flex-col sm:flex-row gap-4 mb-12">
+            <!-- Price + CTA -->
+            <div class="flex flex-wrap items-center gap-6 mb-12 fade-up fade-up-delay-3">
               <a 
-                href="/app/splitdo-exchange" 
-                class="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-center transition-all"
+                href="/app/splitdo-exchange"
+                class="group relative px-8 py-4 bg-white text-zinc-950 font-bold text-lg hover-lift"
               >
-                Join Presale
+                <span class="relative z-10">Get $SPLITDO</span>
               </a>
-              <a 
-                href="/tokenomics" 
-                class="px-8 py-4 text-zinc-300 hover:text-white font-semibold text-center border-b-2 border-transparent hover:border-cyan-500 transition-all"
-              >
-                View Tokenomics
-              </a>
+              <div>
+                <div class="text-xs text-zinc-500 uppercase tracking-wider">Current Price</div>
+                <div class="text-2xl font-bold text-cyan-400">{formattedPrice}</div>
+              </div>
             </div>
 
             <!-- Countdown -->
-            <div>
-              <p class="text-xs text-zinc-500 uppercase tracking-widest mb-4">Phase 1 Ends In</p>
-              <div id="countdown" class="flex gap-6 sm:gap-8">
-                <div>
-                  <div class="text-3xl sm:text-4xl font-bold text-white" id="days">00</div>
-                  <div class="text-xs text-zinc-500 uppercase mt-1">Days</div>
+            <div class="fade-up fade-up-delay-4">
+              <div class="text-xs text-zinc-500 uppercase tracking-wider mb-3">Phase 1 Ends</div>
+              <div class="flex gap-4" id="countdown">
+                <div class="text-center">
+                  <div class="text-3xl sm:text-4xl font-mono font-bold" id="days">00</div>
+                  <div class="text-[10px] text-zinc-600 uppercase">Days</div>
                 </div>
-                <div class="text-3xl sm:text-4xl font-bold text-zinc-700">:</div>
-                <div>
-                  <div class="text-3xl sm:text-4xl font-bold text-white" id="hours">00</div>
-                  <div class="text-xs text-zinc-500 uppercase mt-1">Hours</div>
+                <div class="text-3xl sm:text-4xl font-mono text-zinc-700">:</div>
+                <div class="text-center">
+                  <div class="text-3xl sm:text-4xl font-mono font-bold" id="hours">00</div>
+                  <div class="text-[10px] text-zinc-600 uppercase">Hrs</div>
                 </div>
-                <div class="text-3xl sm:text-4xl font-bold text-zinc-700">:</div>
-                <div>
-                  <div class="text-3xl sm:text-4xl font-bold text-white" id="minutes">00</div>
-                  <div class="text-xs text-zinc-500 uppercase mt-1">Min</div>
+                <div class="text-3xl sm:text-4xl font-mono text-zinc-700">:</div>
+                <div class="text-center">
+                  <div class="text-3xl sm:text-4xl font-mono font-bold" id="minutes">00</div>
+                  <div class="text-[10px] text-zinc-600 uppercase">Min</div>
                 </div>
-                <div class="text-3xl sm:text-4xl font-bold text-zinc-700">:</div>
-                <div>
-                  <div class="text-3xl sm:text-4xl font-bold text-cyan-400" id="seconds">00</div>
-                  <div class="text-xs text-zinc-500 uppercase mt-1">Sec</div>
+                <div class="text-3xl sm:text-4xl font-mono text-zinc-700">:</div>
+                <div class="text-center">
+                  <div class="text-3xl sm:text-4xl font-mono font-bold text-cyan-400" id="seconds">00</div>
+                  <div class="text-[10px] text-zinc-600 uppercase">Sec</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Right: Phone Mockup -->
-          <div class="flex justify-center lg:justify-end">
-            <div class="relative w-[280px] sm:w-[320px]">
-              <!-- Phone frame -->
-              <div class="relative bg-zinc-800 rounded-[3rem] p-2 shadow-2xl shadow-black/50">
-                <!-- Notch -->
-                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-zinc-800 rounded-b-2xl z-10 flex justify-center items-center">
-                  <div class="w-12 h-1.5 bg-zinc-900 rounded-full"></div>
-                </div>
-                <!-- Screen -->
-                <div class="relative overflow-hidden rounded-[2.5rem] bg-zinc-900">
+          <!-- Phone mockup -->
+          <div class="relative flex justify-center lg:justify-end">
+            <div class="relative animate-float">
+              <!-- Glow behind phone -->
+              <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/30 to-purple-500/30 blur-3xl scale-110"></div>
+              
+              <!-- Phone -->
+              <div class="relative w-[260px] sm:w-[300px]">
+                <div class="relative bg-zinc-900 rounded-[3rem] p-1.5 ring-1 ring-white/10">
+                  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-zinc-900 rounded-b-2xl z-10"></div>
                   <img
-                    id="dark-phone-img"
                     src="/phone_screens/WalletScreen_DARK.png?v=2"
                     alt="SplitDo App"
-                    class="w-full aspect-[9/19] object-cover"
+                    class="w-full rounded-[2.5rem]"
                   />
                 </div>
               </div>
-              <!-- Glow effect -->
-              <div class="absolute -inset-4 bg-cyan-500/10 rounded-[4rem] blur-2xl -z-10"></div>
             </div>
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- Stats Section -->
-    <section class="border-y border-zinc-800">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6">
-        <div class="grid grid-cols-2 lg:grid-cols-4">
-          <div class="py-8 sm:py-12 text-center border-r border-zinc-800 last:border-r-0">
-            <div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1">100M</div>
-            <div class="text-sm text-zinc-500">Total Supply</div>
-          </div>
-          <div class="py-8 sm:py-12 text-center border-r border-zinc-800 lg:border-r">
-            <div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1">31.5M</div>
-            <div class="text-sm text-zinc-500">Strategic Sale</div>
-          </div>
-          <div class="py-8 sm:py-12 text-center border-r border-zinc-800">
-            <div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1">50K+</div>
-            <div class="text-sm text-zinc-500">Early Users</div>
-          </div>
-          <div class="py-8 sm:py-12 text-center">
-            <div class="text-2xl sm:text-3xl lg:text-4xl font-bold text-cyan-400 mb-1">{formattedPrice}</div>
-            <div class="text-sm text-zinc-500">Presale Price</div>
-          </div>
-        </div>
+      <!-- Scroll indicator -->
+      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-zinc-600">
+        <span class="text-xs uppercase tracking-widest">Scroll</span>
+        <div class="w-px h-8 bg-gradient-to-b from-zinc-600 to-transparent"></div>
       </div>
     </section>
 
-    <!-- Why SPLITDO Section -->
-    <section class="py-20 sm:py-32">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6">
-        <div class="max-w-2xl mb-16">
-          <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Why $SPLITDO?
+    <!-- Marquee Stats -->
+    <section class="border-y border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm overflow-hidden">
+      <div class="animate-marquee whitespace-nowrap py-6">
+        <span class="inline-flex items-center gap-16 px-8">
+          <span class="text-2xl font-bold">100M <span class="text-sm font-normal text-zinc-500">Total Supply</span></span>
+          <span class="text-zinc-700">|</span>
+          <span class="text-2xl font-bold">31.5M <span class="text-sm font-normal text-zinc-500">Strategic Sale</span></span>
+          <span class="text-zinc-700">|</span>
+          <span class="text-2xl font-bold text-cyan-400">50K+ <span class="text-sm font-normal text-zinc-500">Early Users</span></span>
+          <span class="text-zinc-700">|</span>
+          <span class="text-2xl font-bold">{formattedPrice} <span class="text-sm font-normal text-zinc-500">Presale Price</span></span>
+          <span class="text-zinc-700">|</span>
+          <span class="text-2xl font-bold">100M <span class="text-sm font-normal text-zinc-500">Total Supply</span></span>
+          <span class="text-zinc-700">|</span>
+          <span class="text-2xl font-bold">31.5M <span class="text-sm font-normal text-zinc-500">Strategic Sale</span></span>
+          <span class="text-zinc-700">|</span>
+          <span class="text-2xl font-bold text-cyan-400">50K+ <span class="text-sm font-normal text-zinc-500">Early Users</span></span>
+          <span class="text-zinc-700">|</span>
+          <span class="text-2xl font-bold">{formattedPrice} <span class="text-sm font-normal text-zinc-500">Presale Price</span></span>
+          <span class="text-zinc-700">|</span>
+        </span>
+      </div>
+    </section>
+
+    <!-- Why Section - Bento Style -->
+    <section class="py-24 sm:py-32 px-6">
+      <div class="max-w-7xl mx-auto">
+        <div class="mb-16">
+          <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black mb-4">
+            Why <span class="text-gradient">$SPLITDO</span>?
           </h2>
-          <p class="text-lg text-zinc-400">
-            More than a token. Your key to a revolutionary expense management ecosystem.
+          <p class="text-xl text-zinc-500 max-w-xl">
+            Not just another token. Your gateway to a new financial ecosystem.
           </p>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-12 md:gap-16">
-          <!-- Feature 1 -->
-          <div>
-            <div class="w-12 h-12 bg-cyan-500/10 flex items-center justify-center mb-6">
-              <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
-              </svg>
+        <!-- Bento Grid -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Large feature -->
+          <div class="lg:col-span-2 lg:row-span-2 relative group overflow-hidden bg-zinc-900 p-8 sm:p-12 hover-lift">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl group-hover:bg-cyan-500/20 transition-colors"></div>
+            <div class="relative">
+              <div class="w-14 h-14 bg-cyan-500/10 flex items-center justify-center mb-8">
+                <svg class="w-7 h-7 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                </svg>
+              </div>
+              <h3 class="text-2xl sm:text-3xl font-bold mb-4">Near-Zero Fees</h3>
+              <p class="text-zinc-400 text-lg max-w-md leading-relaxed">
+                Powered by Solana's lightning-fast blockchain. Split expenses with friends for fractions of a cent.
+              </p>
+              <div class="mt-8 text-6xl sm:text-7xl font-black text-zinc-800">0.001$</div>
+              <div class="text-sm text-zinc-600">avg. transaction fee</div>
             </div>
-            <h3 class="text-xl font-semibold text-white mb-3">Reduced Fees</h3>
-            <p class="text-zinc-500 leading-relaxed">
-              Pay significantly lower transaction fees and unlock premium features with $SPLITDO tokens.
-            </p>
           </div>
 
-          <!-- Feature 2 -->
-          <div>
-            <div class="w-12 h-12 bg-cyan-500/10 flex items-center justify-center mb-6">
-              <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-              </svg>
+          <!-- Governance -->
+          <div class="relative group overflow-hidden bg-zinc-900 p-8 hover-lift">
+            <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="relative">
+              <div class="w-12 h-12 bg-purple-500/10 flex items-center justify-center mb-6">
+                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold mb-2">Governance</h3>
+              <p class="text-zinc-500">Vote on protocol changes and shape the future.</p>
             </div>
-            <h3 class="text-xl font-semibold text-white mb-3">Governance Power</h3>
-            <p class="text-zinc-500 leading-relaxed">
-              Vote on platform decisions, new features, and protocol updates. Shape the future of SplitDo.
-            </p>
           </div>
 
-          <!-- Feature 3 -->
-          <div>
-            <div class="w-12 h-12 bg-cyan-500/10 flex items-center justify-center mb-6">
-              <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-              </svg>
+          <!-- Staking -->
+          <div class="relative group overflow-hidden bg-zinc-900 p-8 hover-lift">
+            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="relative">
+              <div class="w-12 h-12 bg-emerald-500/10 flex items-center justify-center mb-6">
+                <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold mb-2">Staking Rewards</h3>
+              <p class="text-zinc-500">Earn passive income by staking your tokens.</p>
             </div>
-            <h3 class="text-xl font-semibold text-white mb-3">Staking Rewards</h3>
-            <p class="text-zinc-500 leading-relaxed">
-              Stake tokens to earn rewards while supporting network security and decentralization.
-            </p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Community Section -->
-    <section class="py-20 sm:py-32 bg-zinc-800/30">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6">
-        <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          <!-- Image -->
-          <div class="relative">
-            <img
-              src="/Humans.jpeg"
-              alt="SplitDo Community"
-              class="w-full aspect-[4/3] object-cover"
-              loading="lazy"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-zinc-900/80 via-transparent to-transparent"></div>
-            <div class="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-              <div class="text-2xl sm:text-3xl font-bold text-white mb-2">50,000+</div>
-              <div class="text-zinc-400">Community Members</div>
-            </div>
-          </div>
-
-          <!-- Content -->
+    <!-- How It Works -->
+    <section class="py-24 sm:py-32 px-6 bg-zinc-900/50">
+      <div class="max-w-7xl mx-auto">
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
           <div>
-            <h2 class="text-3xl sm:text-4xl font-bold text-white mb-6">
-              Built by the Community
+            <h2 class="text-4xl sm:text-5xl font-black mb-6">
+              Three Steps.<br/>
+              <span class="text-zinc-500">That's It.</span>
             </h2>
-            <p class="text-lg text-zinc-400 mb-10">
-              SplitDo is more than an app. Join thousands transforming how they handle group expenses.
+            <p class="text-xl text-zinc-400 mb-12 max-w-md">
+              Getting your $SPLITDO tokens takes less than 2 minutes.
             </p>
 
             <div class="space-y-8">
-              <div class="flex gap-4">
-                <div class="w-1 bg-cyan-500 flex-shrink-0"></div>
+              <div class="flex gap-6 items-start group">
+                <div class="w-12 h-12 bg-cyan-500 text-zinc-950 font-bold text-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                  1
+                </div>
                 <div>
-                  <h3 class="text-lg font-semibold text-white mb-1">Active Community</h3>
-                  <p class="text-zinc-500">Join discussions, share feedback, and help shape the future.</p>
+                  <h3 class="text-xl font-bold mb-1">Connect</h3>
+                  <p class="text-zinc-500">Link your Solana wallet. Phantom, Solflare, or any compatible wallet.</p>
                 </div>
               </div>
 
-              <div class="flex gap-4">
-                <div class="w-1 bg-cyan-500 flex-shrink-0"></div>
+              <div class="flex gap-6 items-start group">
+                <div class="w-12 h-12 bg-zinc-800 text-white font-bold text-xl flex items-center justify-center flex-shrink-0 group-hover:bg-cyan-500 group-hover:text-zinc-950 transition-colors">
+                  2
+                </div>
                 <div>
-                  <h3 class="text-lg font-semibold text-white mb-1">Early Adopter Benefits</h3>
-                  <p class="text-zinc-500">Exclusive access to features and special token rewards.</p>
+                  <h3 class="text-xl font-bold mb-1">Choose Amount</h3>
+                  <p class="text-zinc-500">Select how much SOL you want to exchange for $SPLITDO.</p>
                 </div>
               </div>
 
-              <div class="flex gap-4">
-                <div class="w-1 bg-cyan-500 flex-shrink-0"></div>
-                <div>
-                  <h3 class="text-lg font-semibold text-white mb-1">Governance Rights</h3>
-                  <p class="text-zinc-500">Decide the future direction through token governance.</p>
+              <div class="flex gap-6 items-start group">
+                <div class="w-12 h-12 bg-zinc-800 text-white font-bold text-xl flex items-center justify-center flex-shrink-0 group-hover:bg-cyan-500 group-hover:text-zinc-950 transition-colors">
+                  3
                 </div>
+                <div>
+                  <h3 class="text-xl font-bold mb-1">Receive Tokens</h3>
+                  <p class="text-zinc-500">Confirm the transaction. Tokens arrive instantly in your wallet.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Visual -->
+          <div class="relative">
+            <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 blur-3xl"></div>
+            <div class="relative aspect-square bg-zinc-900 p-12 flex items-center justify-center">
+              <div class="text-center">
+                <div class="text-8xl sm:text-9xl font-black text-gradient mb-4">2</div>
+                <div class="text-2xl text-zinc-400">minutes</div>
+                <div class="text-zinc-600">average completion time</div>
               </div>
             </div>
           </div>
@@ -264,110 +320,116 @@ try {
       </div>
     </section>
 
-    <!-- How to Join Section -->
-    <section class="py-20 sm:py-32">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6">
-        <div class="max-w-2xl mb-16">
-          <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">
-            How to Join
-          </h2>
-          <p class="text-lg text-zinc-400">
-            Three simple steps to secure your $SPLITDO tokens.
-          </p>
+    <!-- Tokenomics -->
+    <section class="py-24 sm:py-32 px-6">
+      <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16">
+          <div>
+            <h2 class="text-4xl sm:text-5xl font-black mb-4">Token Distribution</h2>
+            <p class="text-xl text-zinc-500">Transparent. Fair. Community-first.</p>
+          </div>
+          <a href="/tokenomics" class="text-cyan-400 hover:text-cyan-300 font-medium flex items-center gap-2 transition-colors">
+            Full breakdown
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </a>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-8 md:gap-12">
-          <!-- Step 1 -->
-          <div class="relative">
-            <div class="text-6xl sm:text-7xl font-bold text-zinc-800 mb-4">01</div>
-            <h3 class="text-xl font-semibold text-white mb-3">Connect Wallet</h3>
-            <p class="text-zinc-500">
-              Connect your Solana wallet. We support Phantom, Solflare, and all major wallets.
-            </p>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+          <div class="group">
+            <div class="text-5xl sm:text-6xl lg:text-7xl font-black text-cyan-400 mb-2 group-hover:scale-105 transition-transform origin-left">31.5%</div>
+            <div class="text-lg font-bold mb-1">Strategic Sale</div>
+            <div class="text-sm text-zinc-600">Early investors</div>
           </div>
-
-          <!-- Step 2 -->
-          <div class="relative">
-            <div class="text-6xl sm:text-7xl font-bold text-zinc-800 mb-4">02</div>
-            <h3 class="text-xl font-semibold text-white mb-3">Choose Amount</h3>
-            <p class="text-zinc-500">
-              Select how many $SPLITDO tokens you want to purchase at presale price.
-            </p>
+          <div class="group">
+            <div class="text-5xl sm:text-6xl lg:text-7xl font-black text-zinc-700 group-hover:text-white mb-2 transition-colors">25%</div>
+            <div class="text-lg font-bold mb-1">Liquidity</div>
+            <div class="text-sm text-zinc-600">DEX pools</div>
           </div>
-
-          <!-- Step 3 -->
-          <div class="relative">
-            <div class="text-6xl sm:text-7xl font-bold text-zinc-800 mb-4">03</div>
-            <h3 class="text-xl font-semibold text-white mb-3">Complete Purchase</h3>
-            <p class="text-zinc-500">
-              Confirm transaction and receive tokens directly in your wallet.
-            </p>
+          <div class="group">
+            <div class="text-5xl sm:text-6xl lg:text-7xl font-black text-zinc-700 group-hover:text-white mb-2 transition-colors">23.5%</div>
+            <div class="text-lg font-bold mb-1">Development</div>
+            <div class="text-sm text-zinc-600">Team & building</div>
+          </div>
+          <div class="group">
+            <div class="text-5xl sm:text-6xl lg:text-7xl font-black text-zinc-700 group-hover:text-white mb-2 transition-colors">20%</div>
+            <div class="text-lg font-bold mb-1">Ecosystem</div>
+            <div class="text-sm text-zinc-600">Rewards & growth</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Token Distribution Section -->
-    <section class="py-20 sm:py-32 bg-zinc-800/30">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6">
-        <div class="max-w-2xl mb-16">
-          <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Token Distribution
-          </h2>
-          <p class="text-lg text-zinc-400">
-            Fair and transparent allocation designed for long-term growth.
-          </p>
-        </div>
+    <!-- Community -->
+    <section class="py-24 sm:py-32 px-6 bg-zinc-900/50">
+      <div class="max-w-7xl mx-auto">
+        <div class="grid lg:grid-cols-2 gap-8 items-stretch">
+          <!-- Image side -->
+          <div class="relative h-[400px] lg:h-auto overflow-hidden">
+            <img
+              src="/Humans.jpeg"
+              alt="Community"
+              class="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/50 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-8">
+              <div class="text-5xl font-black text-white mb-2">50K+</div>
+              <div class="text-zinc-400">community members and growing</div>
+            </div>
+          </div>
 
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-12">
-          <div>
-            <div class="text-4xl sm:text-5xl font-bold text-cyan-400 mb-2">31.5%</div>
-            <div class="text-lg font-semibold text-white mb-1">Strategic Sale</div>
-            <div class="text-sm text-zinc-500">Early investors & partnerships</div>
-          </div>
-          <div>
-            <div class="text-4xl sm:text-5xl font-bold text-white mb-2">25%</div>
-            <div class="text-lg font-semibold text-white mb-1">Liquidity</div>
-            <div class="text-sm text-zinc-500">DEX pools & market making</div>
-          </div>
-          <div>
-            <div class="text-4xl sm:text-5xl font-bold text-white mb-2">23.5%</div>
-            <div class="text-lg font-semibold text-white mb-1">Development</div>
-            <div class="text-sm text-zinc-500">Team & ongoing development</div>
-          </div>
-          <div>
-            <div class="text-4xl sm:text-5xl font-bold text-white mb-2">20%</div>
-            <div class="text-lg font-semibold text-white mb-1">Ecosystem</div>
-            <div class="text-sm text-zinc-500">Rewards & marketing</div>
+          <!-- Content side -->
+          <div class="bg-zinc-900 p-8 sm:p-12 flex flex-col justify-center">
+            <h2 class="text-3xl sm:text-4xl font-black mb-6">
+              Join the Movement
+            </h2>
+            <p class="text-lg text-zinc-400 mb-10">
+              SplitDo is built by the community, for the community. Early adopters get exclusive benefits and shape the platform's future.
+            </p>
+
+            <div class="space-y-6">
+              <div class="flex items-center gap-4">
+                <div class="w-2 h-2 bg-cyan-500"></div>
+                <span class="text-zinc-300">Early access to new features</span>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="w-2 h-2 bg-cyan-500"></div>
+                <span class="text-zinc-300">Token holder governance rights</span>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="w-2 h-2 bg-cyan-500"></div>
+                <span class="text-zinc-300">Exclusive staking rewards</span>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="w-2 h-2 bg-cyan-500"></div>
+                <span class="text-zinc-300">Priority customer support</span>
+              </div>
+            </div>
           </div>
         </div>
-
-        <a 
-          href="/tokenomics" 
-          class="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
-        >
-          View Full Tokenomics
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
-        </a>
       </div>
     </section>
 
-    <!-- Final CTA Section -->
-    <section class="py-20 sm:py-32">
-      <div class="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-          Ready to Join the Future?
+    <!-- Final CTA -->
+    <section class="py-32 sm:py-40 px-6 relative overflow-hidden">
+      <!-- Background effects -->
+      <div class="absolute inset-0 bg-grid opacity-50"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-cyan-500/10 rounded-full blur-[150px]"></div>
+
+      <div class="relative max-w-4xl mx-auto text-center">
+        <h2 class="text-5xl sm:text-6xl lg:text-7xl font-black mb-6">
+          Ready?
         </h2>
-        <p class="text-lg text-zinc-400 mb-10">
-          Secure your $SPLITDO tokens at presale price. This opportunity won't last.
+        <p class="text-xl sm:text-2xl text-zinc-400 mb-12 max-w-xl mx-auto">
+          Secure your position in the future of expense sharing. Presale prices won't last.
         </p>
         <a 
-          href="/app/splitdo-exchange" 
-          class="inline-block px-10 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-lg font-semibold transition-all"
+          href="/app/splitdo-exchange"
+          class="inline-block px-12 py-5 bg-white text-zinc-950 text-xl font-bold hover-lift"
         >
-          Join Presale Now
+          Get $SPLITDO Now
         </a>
       </div>
     </section>
@@ -375,43 +437,49 @@ try {
   </main>
 
   <!-- Sticky Bottom Bar -->
-  <div class="fixed bottom-0 left-0 right-0 z-40 bg-zinc-900/95 backdrop-blur-sm border-t border-zinc-800">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-      <div>
-        <div class="text-xs text-zinc-500 uppercase tracking-wider">Presale Price</div>
-        <div class="text-lg sm:text-xl font-bold text-cyan-400">{formattedPrice}</div>
+  <div class="fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/90 backdrop-blur-md border-t border-zinc-800">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <div>
+          <div class="text-[10px] text-zinc-500 uppercase tracking-wider">Price</div>
+          <div class="text-xl font-bold text-cyan-400">{formattedPrice}</div>
+        </div>
+        <div class="hidden sm:block w-px h-8 bg-zinc-800"></div>
+        <div class="hidden sm:block">
+          <div class="text-[10px] text-zinc-500 uppercase tracking-wider">Phase</div>
+          <div class="text-sm font-medium">1 of 3</div>
+        </div>
       </div>
       <a 
-        href="/app/splitdo-exchange" 
-        class="px-6 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold transition-colors"
+        href="/app/splitdo-exchange"
+        class="px-6 py-2.5 bg-white text-zinc-950 font-bold hover:bg-zinc-200 transition-colors"
       >
-        Join Now
+        Join Presale
       </a>
     </div>
   </div>
 
   <script>
-    // Countdown Timer
     function updateCountdown() {
-      const targetDate = new Date('2025-12-31T23:59:59').getTime();
-      const now = new Date().getTime();
-      const distance = targetDate - now;
+      const target = new Date('2025-12-31T23:59:59').getTime();
+      const now = Date.now();
+      const diff = target - now;
 
-      if (distance > 0) {
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      if (diff > 0) {
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
 
-        const daysEl = document.getElementById('days');
-        const hoursEl = document.getElementById('hours');
-        const minutesEl = document.getElementById('minutes');
-        const secondsEl = document.getElementById('seconds');
+        const de = document.getElementById('days');
+        const he = document.getElementById('hours');
+        const me = document.getElementById('minutes');
+        const se = document.getElementById('seconds');
 
-        if (daysEl) daysEl.textContent = days.toString().padStart(2, '0');
-        if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
-        if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
-        if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
+        if (de) de.textContent = d.toString().padStart(2, '0');
+        if (he) he.textContent = h.toString().padStart(2, '0');
+        if (me) me.textContent = m.toString().padStart(2, '0');
+        if (se) se.textContent = s.toString().padStart(2, '0');
       }
     }
 
