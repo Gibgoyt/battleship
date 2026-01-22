@@ -143,124 +143,111 @@
 	}
 </script>
 
-<main>
-	<!-- Background -->
-	<div class="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16">
-		<div class="mb-8">
-			<div class="max-w-md w-full space-y-8">
-				<!-- Header -->
-				<div class="text-center">
-					<h2 class="text-3xl font-bold text-gray-900 dark:text-white">
-						Sign in to SplitDo
-					</h2>
-					<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-						Welcome back! Split expenses seamlessly on Solana.
-					</p>
+<main class="min-h-screen bg-zinc-950 flex items-center justify-center px-4 py-20">
+	<div class="w-full max-w-md">
+		<!-- Header -->
+		<div class="text-center mb-10">
+			<h1 class="text-4xl sm:text-5xl font-black text-white mb-4">
+				Welcome back
+			</h1>
+			<p class="text-zinc-500">
+				Sign in to continue to SPLITDO
+			</p>
+		</div>
+
+		<!-- Form Card -->
+		<div class="bg-zinc-900 border border-zinc-800 p-8">
+			<!-- Error Message -->
+			{#if errorMessage}
+				<div class="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+					{errorMessage}
+				</div>
+			{/if}
+
+			<!-- Success Message -->
+			{#if successMessage}
+				<div class="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">
+					{successMessage}
+				</div>
+			{/if}
+
+			<form on:submit={handleSubmit} class="space-y-6">
+				<div>
+					<label for="email" class="block text-sm font-medium text-zinc-400 mb-2">
+						Email
+					</label>
+					<input
+						id="email"
+						name="email"
+						type="email"
+						autocomplete="email"
+						required
+						bind:value={email}
+						disabled={loading}
+						class="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+						placeholder="you@example.com"
+					/>
 				</div>
 
-				<!-- Form -->
-				<div class="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 p-8 space-y-6">
-					<!-- Error Message -->
-					{#if errorMessage}
-						<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3">
-							{errorMessage}
-						</div>
+				<div>
+					<label for="password" class="block text-sm font-medium text-zinc-400 mb-2">
+						Password
+					</label>
+					<input
+						id="password"
+						name="password"
+						type="password"
+						autocomplete="current-password"
+						required
+						bind:value={password}
+						disabled={loading}
+						class="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+						placeholder="Enter your password"
+					/>
+				</div>
+
+				<div class="flex items-center justify-between">
+					<label class="flex items-center gap-2 cursor-pointer">
+						<input
+							type="checkbox"
+							bind:checked={rememberMe}
+							disabled={loading}
+							class="w-4 h-4 bg-zinc-800 border-zinc-700 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-zinc-900"
+						/>
+						<span class="text-sm text-zinc-400">Remember me</span>
+					</label>
+
+					<a href="/auth/forgot-password" class="text-sm text-cyan-400 hover:text-cyan-300 transition-colors">
+						Forgot password?
+					</a>
+				</div>
+
+				<button
+					type="submit"
+					disabled={loading}
+					class="w-full py-3 px-4 bg-cyan-500 text-black font-semibold hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+				>
+					{#if loading}
+						<svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+						</svg>
+						Signing in...
+					{:else}
+						Sign In
 					{/if}
+				</button>
+			</form>
+		</div>
 
-					<!-- Success Message -->
-					{#if successMessage}
-						<div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3">
-							{successMessage}
-						</div>
-					{/if}
-
-					<form on:submit={handleSubmit} class="space-y-6">
-						<div>
-							<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-								Email address
-							</label>
-							<input
-								id="email"
-								name="email"
-								type="email"
-								autocomplete="email"
-								required
-								bind:value={email}
-								disabled={loading}
-								class="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00d9ff] focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-								placeholder="Enter your email"
-							/>
-						</div>
-
-						<div>
-							<label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-								Password
-							</label>
-							<input
-								id="password"
-								name="password"
-								type="password"
-								autocomplete="current-password"
-								required
-								bind:value={password}
-								disabled={loading}
-								class="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00d9ff] focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-								placeholder="Enter your password"
-							/>
-						</div>
-
-						<div class="flex items-center justify-between">
-							<div class="flex items-center">
-								<input
-									id="remember-me"
-									name="remember-me"
-									type="checkbox"
-									bind:checked={rememberMe}
-									disabled={loading}
-									class="h-4 w-4 text-[#00d9ff] focus:ring-[#00d9ff] border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700"
-								/>
-								<label for="remember-me" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-									Remember me
-								</label>
-							</div>
-
-							<div class="text-sm">
-								<a href="/auth/forgot-password" class="font-medium text-[#00d9ff] hover:text-[#00b8d4] transition-colors">
-									Forgot your password?
-								</a>
-							</div>
-						</div>
-
-						<div>
-							<button
-								type="submit"
-								disabled={loading}
-								class="w-full flex justify-center items-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium text-white bg-[#00d9ff] hover:bg-[#00b8d4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00d9ff] dark:focus:ring-offset-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								{#if loading}
-									<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-									</svg>
-									Signing in...
-								{:else}
-									Sign In
-								{/if}
-							</button>
-						</div>
-					</form>
-				</div>
-
-				<!-- Sign Up Link -->
-				<div class="text-center">
-					<p class="text-sm text-gray-600 dark:text-gray-400">
-						Don't have an account?
-						<a href="/auth/sign-up" class="font-medium text-[#00d9ff] hover:text-[#00b8d4] transition-colors">
-							Sign up
-						</a>
-					</p>
-				</div>
-			</div>
+		<!-- Sign Up Link -->
+		<div class="text-center mt-8">
+			<p class="text-zinc-500">
+				Don't have an account?
+				<a href="/auth/sign-up" class="text-cyan-400 hover:text-cyan-300 font-medium transition-colors">
+					Sign up
+				</a>
+			</p>
 		</div>
 	</div>
 </main>

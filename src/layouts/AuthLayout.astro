@@ -1,5 +1,4 @@
 ---
-import DarkModeToggle from 'src/components-qwik/DarkModeToggle';
 import 'src/styles/global.css';
 
 // export static HTML
@@ -13,42 +12,27 @@ const { title } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width" />
 	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 	<meta name="generator" content={Astro.generator} />
 	<title>{title}</title>
-	<script is:inline>
-		// Prevent flash of light mode
-		const isDarkMode = localStorage.getItem('darkMode') === 'true' ||
-			(!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-		if (isDarkMode) {
-			document.documentElement.classList.add('dark');
-		}
-	</script>
 </head>
-<body>
+<body class="bg-zinc-950 text-white min-h-screen">
 	<!-- Auth Header with Logo -->
 	<header class="absolute top-0 left-0 w-full z-40 p-6">
-		<div class="flex justify-between items-center">
-			<a href="/" class="flex items-center gap-2">
-				<img src="/splitdo/logo_light.svg" alt="SplitDo Logo" class="h-8 w-auto dark:hidden">
-				<img src="/splitdo/logo_dark.svg" alt="SplitDo Logo" class="h-8 w-auto hidden dark:block">
-				<span class="text-2xl font-bold text-[#f07d40] dark:text-[#c8632f]">SplitDo</span>
+		<div class="flex justify-between items-center max-w-7xl mx-auto">
+			<a href="/" class="flex items-center gap-3">
+				<img src="/splitdo/logo.svg" alt="SplitDo Logo" class="h-8 w-auto">
 			</a>
-			<!-- Optional: Add a back to home link -->
-			<a href="/" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors text-sm">
-				← Back to Home
+			<a href="/" class="text-zinc-500 hover:text-white transition-colors text-sm">
+				Back to Home
 			</a>
 		</div>
 	</header>
 
 	<slot />
-
-	<!-- Dark Mode Toggle - Fixed Position at Bottom -->
-	<DarkModeToggle client:load />
 </body>
 </html>
