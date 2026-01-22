@@ -490,21 +490,27 @@ export class EnhancedSolanaService {
     error?: string;
   }> {
     try {
-      // Import middleware endpoint dynamically to avoid circular dependencies
-      const { POST: createAccountEndpoint } = await import('../../middleware/endpoints/devbackend/_api/splitdo-token/accounts/create');
+      // Import new withSend middleware endpoint dynamically to avoid circular dependencies
+      const { POST: createAccountWithSendEndpoint } = await import('../../middleware/endpoints/devbackend/_api/testing/usockets/token-account/create/withSend/POST');
 
-      const result = await createAccountEndpoint({
-        wallet_address: walletAddress,
-        token_account_address: ataAddress,
-        signed_transaction: signedTransaction
+      const result = await createAccountWithSendEndpoint({
+        signed_transaction: signedTransaction,
+        user_wallet: walletAddress,
+        token_account_pubkey: ataAddress
       });
 
-      // Handle discriminated union responses from middleware
+      // Handle discriminated union responses from withSend middleware
       switch (result.status) {
-        case 200:
+        case 201:
           return {
             success: true,
-            transactionSignature: result.data.data?.token_account_pubkey // Use token account as success indicator since no transaction signature is returned
+            transactionSignature: result.data.tx_signature // Return actual transaction signature
+          };
+        case 409:
+          // Account already exists - still success
+          return {
+            success: true,
+            transactionSignature: result.data.transaction_hash || 'Account already exists'
           };
         case 400:
           return {

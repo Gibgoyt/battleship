@@ -173,6 +173,24 @@ export const CreateAccountModal: Component<CreateAccountModalProps> = (props) =>
                   }
                 }
               }}
+              onSelectMetaMask={async () => {
+                if (wallet.connectionStatus() === 'connected') {
+                  // Already connected, go to create
+                  setStep('create');
+                } else {
+                  // Need to connect wallet first
+                  setIsConnecting(true);
+                  try {
+                    await wallet.connectWallet('metamask');
+                    setStep('create');
+                  } catch (error: any) {
+                    console.error('[CreateAccountModal] MetaMask connection failed:', error);
+                    setCreationError('Failed to connect MetaMask. Please try again.');
+                  } finally {
+                    setIsConnecting(false);
+                  }
+                }
+              }}
               onCloseMobileInstallation={() => setShowMobileInstallation(false)}
             />
           </Show>
@@ -191,6 +209,7 @@ const WalletSelection: Component<{
   showMobileInstallation: () => boolean;
   mobileInstallationPlatform: () => 'ios' | 'android';
   onSelectPhantom: () => Promise<void>;
+  onSelectMetaMask: () => Promise<void>;
   onCloseMobileInstallation: () => void;
 }> = (props) => {
   return (
@@ -241,22 +260,26 @@ const WalletSelection: Component<{
             </Show>
           </button>
 
-          {/* MetaMask (Disabled - Following ExchangeModal pattern) */}
+          {/* MetaMask Wallet Option */}
           <button
-            disabled={true}
-            class={`w-full p-4 rounded-xl border-2 border-dashed opacity-50 cursor-not-allowed flex items-center space-x-4 ${
+            onClick={props.onSelectMetaMask}
+            disabled={props.isConnecting()}
+            class={`w-full p-4 rounded-xl border-2 transition-all duration-200 flex items-center space-x-4 ${
               props.isDark
-                ? 'border-crypto-border bg-crypto-bg-secondary text-crypto-text-secondary'
-                : 'border-gray-300 bg-gray-50 text-gray-500'
-            }`}
+                ? 'border-crypto-border bg-crypto-bg-secondary hover:bg-crypto-bg-tertiary text-crypto-text-primary'
+                : 'border-gray-300 bg-white hover:bg-gray-50 text-gray-900'
+            } ${props.isConnecting() ? 'opacity-50 cursor-not-allowed' : 'hover:border-orange-500 cursor-pointer'}`}
           >
             <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-600 rounded-xl flex items-center justify-center">
               <span class="text-white font-bold text-lg">M</span>
             </div>
             <div class="flex-1 text-left">
               <h4 class="font-semibold">MetaMask</h4>
-              <p class="text-sm opacity-70">Coming Soon</p>
+              <p class="text-sm opacity-70">Solana Snaps wallet</p>
             </div>
+            <Show when={props.isConnecting()}>
+              <div class="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+            </Show>
           </button>
         </div>
       </Show>
