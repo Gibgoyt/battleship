@@ -453,110 +453,120 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
         ← Back to wallet selection
       </button>
 
-      {/* Input Section */}
+      {/* Input Section - You Pay */}
       <div class="space-y-4">
         <div>
-          <h3 class={`text-2xl font-bold mb-4 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>Enter Exchange Amount</h3>
-          <div class="relative">
-            <label class={`block text-sm mb-3 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              SOL Amount (minimum {MIN_SOL_AMOUNT})
-            </label>
-            <div class="relative">
-              <input
-                type="number"
-                value={props.solAmount}
-                onInput={(e) => props.setSolAmount(e.currentTarget.value)}
-                placeholder="0.00"
-                min={MIN_SOL_AMOUNT}
-                step="0.01"
-                class={`w-full px-6 py-4 text-xl font-semibold rounded-xl border-2 transition-all focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                  props.isDark
-                    ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-500 focus:border-blue-500'
-                    : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:border-blue-500'
-                }`}
-              />
-              <div class={`absolute right-4 top-1/2 -translate-y-1/2 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                SOL
+          <h3 class={`text-lg font-semibold mb-4 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>You Pay</h3>
+          <div class={`p-4 rounded-xl border-2 transition-all ${
+            props.isDark
+              ? 'border-gray-600 bg-gray-800/50'
+              : 'border-gray-200 bg-gray-50'
+          }`}>
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-lg bg-zinc-700 flex items-center justify-center overflow-hidden p-1.5 flex-shrink-0">
+                <img src="/solana-logo.svg" alt="SOL" class="w-full h-full object-contain" />
+              </div>
+              <div class="flex-1">
+                <input
+                  type="number"
+                  value={props.solAmount}
+                  onInput={(e) => props.setSolAmount(e.currentTarget.value)}
+                  placeholder="0.00"
+                  min={MIN_SOL_AMOUNT}
+                  step="0.01"
+                  class={`w-full text-2xl font-bold bg-transparent border-none focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    props.isDark ? 'text-white placeholder-gray-500' : 'text-gray-900 placeholder-gray-400'
+                  }`}
+                />
+                <div class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {solAmountNum() > 0 ? `~$${solValueUSD().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD` : 'Enter amount'}
+                </div>
+              </div>
+              <div class={`text-right flex-shrink-0`}>
+                <div class={`font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>SOL</div>
+                <div class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>Solana</div>
               </div>
             </div>
-            <Show when={props.solAmount && !isValidAmount()}>
-              <div class="flex items-center gap-2 mt-3 text-crypto-accent-red text-sm">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="flex-shrink-0">
-                  <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM7 4h2v5H7V4zm0 6h2v2H7v-2z"/>
-                </svg>
-                Minimum amount is {MIN_SOL_AMOUNT} SOL
+          </div>
+          <Show when={props.solAmount && !isValidAmount()}>
+            <div class="flex items-center gap-2 mt-3 text-red-400 text-sm">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="flex-shrink-0">
+                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM7 4h2v5H7V4zm0 6h2v2H7v-2z"/>
+              </svg>
+              Minimum amount is {MIN_SOL_AMOUNT} SOL
+            </div>
+          </Show>
+        </div>
+      </div>
+
+      {/* Swap Arrow */}
+      <div class="flex justify-center -my-2">
+        <div class={`w-10 h-10 rounded-full flex items-center justify-center ${
+          props.isDark ? 'bg-gray-700' : 'bg-gray-200'
+        }`}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class={props.isDark ? 'text-cyan-400' : 'text-blue-500'}>
+            <path d="M12 5v14M12 19l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      {/* Output Section - You Receive */}
+      <div class="space-y-4">
+        <div>
+          <h3 class={`text-lg font-semibold mb-4 ${props.isDark ? 'text-white' : 'text-gray-900'}`}>You Receive</h3>
+          <div class={`p-4 rounded-xl border-2 transition-all ${
+            isValidAmount()
+              ? 'border-cyan-500/50 bg-cyan-500/5'
+              : props.isDark
+                ? 'border-gray-600 bg-gray-800/50'
+                : 'border-gray-200 bg-gray-50'
+          }`}>
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-lg bg-zinc-700 flex items-center justify-center overflow-hidden p-1 flex-shrink-0">
+                <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
               </div>
-            </Show>
+              <div class="flex-1">
+                <div class={`text-2xl font-bold ${isValidAmount() ? 'text-cyan-400' : props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  {isValidAmount() ? `~${splitdoAmount().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '0.00'}
+                </div>
+                <div class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {isValidAmount() ? `~$${(splitdoAmount() * 0.11).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD` : 'Output amount'}
+                </div>
+              </div>
+              <div class={`text-right flex-shrink-0`}>
+                <div class={`font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>SPLITDO</div>
+                <div class={`text-xs ${props.isDark ? 'text-gray-500' : 'text-gray-400'}`}>Token</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Exchange Preview */}
+      {/* Exchange Details */}
       <Show when={isValidAmount()}>
-        <div class={`rounded-xl p-6 border ${
+        <div class={`rounded-xl p-4 border ${
           props.isDark
-            ? 'bg-gray-800 border-gray-600'
+            ? 'bg-gray-800/50 border-gray-700'
             : 'bg-gray-50 border-gray-200'
         }`}>
-          <h4 class={`text-xl font-bold mb-4 flex items-center gap-2 ${
-            props.isDark ? 'text-white' : 'text-gray-900'
-          }`}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-blue-500">
-              <rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
-              <rect x="14" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
-              <rect x="14" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/>
-              <rect x="3" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/>
-            </svg>
-            Exchange Preview
-          </h4>
-          <div class="space-y-4">
-            <div class="flex justify-between items-center py-3">
-              <span class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>You pay:</span>
-              <div class="text-right">
-                <div class={`text-lg font-semibold ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
-                  {props.solAmount || '0'} SOL
-                </div>
-              </div>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>Exchange Rate</span>
+              <span class={`text-sm font-medium ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+                1 SOL = {splitdoPerSol().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SPLITDO
+              </span>
             </div>
-
-            <div class="flex justify-center">
-              <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 16 16" class="fill-white rotate-90">
-                  <path d="M8 1l-4 4h3v6h2V5h3L8 1z"/>
-                </svg>
-              </div>
+            <div class="flex justify-between items-center">
+              <span class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>SOL Price</span>
+              <span class={`text-sm font-medium ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+                ${props.solPriceUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+              </span>
             </div>
-
-            <div class="flex justify-between items-center py-3">
-              <span class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>You receive:</span>
-              <div class="text-right">
-                <div class="text-lg font-semibold text-green-500">
-                  ~{splitdoAmount().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SPLITDO
-                </div>
-              </div>
-            </div>
-
-            <div class={`border-t pt-4 ${props.isDark ? 'border-gray-600' : 'border-gray-200'}`}>
-              <div class="space-y-2">
-                <div class="flex justify-between items-center">
-                  <span class={`text-sm ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>Current SOL Price:</span>
-                  <span class={`text-sm font-semibold ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    ${props.solPriceUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
-                  </span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class={`text-sm ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>Exchange Rate:</span>
-                  <span class={`text-sm font-semibold ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    1 SOL = {splitdoPerSol().toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SPLITDO
-                  </span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class={`text-sm ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>SPLITDO Price:</span>
-                  <span class={`text-sm font-semibold ${props.isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    $0.11 USD = 1 SPLITDO (${splitdoPerUSD()} SPLITDO per $1)
-                  </span>
-                </div>
-              </div>
+            <div class="flex justify-between items-center">
+              <span class={`text-sm ${props.isDark ? 'text-gray-400' : 'text-gray-500'}`}>SPLITDO Price</span>
+              <span class={`text-sm font-medium ${props.isDark ? 'text-white' : 'text-gray-900'}`}>
+                $0.11 USD
+              </span>
             </div>
           </div>
         </div>
