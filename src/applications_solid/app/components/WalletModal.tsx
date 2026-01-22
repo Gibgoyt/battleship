@@ -135,204 +135,124 @@ const WalletModal: Component<WalletModalProps> = (props) => {
 
   return (
     <Show when={props.isOpen()}>
-      <div class="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div
-        class="absolute inset-0 bg-black bg-opacity-50"
-        onClick={() => props.onClose?.()}
-      />
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* Backdrop */}
+        <div
+          class="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          onClick={() => props.onClose?.()}
+        />
 
-      {/* Modal */}
-      <div class={`relative w-full max-w-md mx-4 p-6 rounded-lg shadow-xl z-10 ${
-        props.isDark ? 'bg-zinc-800 text-white' : 'bg-white text-gray-900'
-      }`}>
-        {/* Header */}
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-bold">Connect Wallet</h2>
-          <button
-            onClick={() => props.onClose?.()}
-            class={`p-2 rounded-lg hover:bg-opacity-10 transition-colors ${
-              props.isDark ? 'hover:bg-white' : 'hover:bg-gray-500'
-            }`}
-            aria-label="Close modal"
-          >
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Connection Error */}
-        <Show when={connectionError()}>
-          <div class={`p-3 mb-4 rounded-lg border ${
-            props.isDark ? 'bg-red-900 border-red-700 text-red-200' : 'bg-red-50 border-red-200 text-red-800'
-          }`}>
-            <div class="flex items-start space-x-2">
-              <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-              </svg>
-              <div class="flex-1">
-                <p class="text-sm font-medium">Connection Failed</p>
-                <p class="text-sm mt-1">{connectionError()}</p>
-                
-                {/* iOS-specific recovery hints */}
-                <Show when={connectionError()?.includes('Authorization required') || connectionError()?.includes('Phantom app')}>
-                  <div class="mt-2 text-xs opacity-90 space-y-1">
-                    <p class="font-medium">💡 Try these steps:</p>
-                    <ul class="space-y-1 ml-4">
-                      <li>• Pull down to refresh the Phantom app</li>
-                      <li>• Clear the app's cache in iOS Settings</li>
-                      <li>• Force close and reopen the app</li>
-                    </ul>
-                  </div>
-                </Show>
-                
-                {/* Timeout recovery hints */}
-                <Show when={connectionError()?.includes('timeout')}>
-                  <div class="mt-2 text-xs opacity-90 space-y-1">
-                    <p class="font-medium">💡 Connection tips:</p>
-                    <ul class="space-y-1 ml-4">
-                      <li>• Check your internet connection</li>
-                      <li>• Ensure Phantom app is running</li>
-                      <li>• Try again in a few seconds</li>
-                    </ul>
-                  </div>
-                </Show>
-                
-                {/* General authorization recovery hints */}
-                <Show when={connectionError()?.includes('not authorized') && !connectionError()?.includes('Phantom app')}>
-                  <div class="mt-2 text-xs opacity-90 space-y-1">
-                    <p class="font-medium">💡 Authorization help:</p>
-                    <ul class="space-y-1 ml-4">
-                      <li>• Make sure to approve the connection</li>
-                      <li>• Check if Phantom shows a permission popup</li>
-                      <li>• Try refreshing and connecting again</li>
-                    </ul>
-                  </div>
-                </Show>
-              </div>
+        {/* Modal */}
+        <div class="relative w-full max-w-md bg-zinc-900 rounded-2xl shadow-2xl z-10 overflow-hidden">
+          {/* Header */}
+          <div class="px-6 py-5 border-b border-zinc-800">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xl font-bold text-white">Connect Wallet</h2>
+              <button
+                onClick={() => props.onClose?.()}
+                class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors text-zinc-400 hover:text-white"
+                aria-label="Close modal"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
           </div>
-        </Show>
 
-        {/* Dynamic Wallet List */}
-        <div class="space-y-3">
-          <For each={wallet.availableWallets()}>
-            {(wallet) => (
-              <button
-                onClick={() => handleConnect(wallet.id)}
-                disabled={!!isConnecting()}
-                class={`w-full p-4 rounded-lg border transition-all duration-200 text-left ${
-                  props.isDark
-                    ? 'border-zinc-600 bg-zinc-700 hover:bg-zinc-600'
-                    : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
-                } ${isConnecting() ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${
-                  isConnecting() === wallet.id ? 'animate-pulse' : ''
-                } ${!wallet.isAvailable ? 'border-dashed' : ''}`}
-              >
-                <div class="flex items-center space-x-4">
-                  <Show
-                    when={wallet.id === 'phantom'}
-                    fallback={
-                      <div class={`w-12 h-12 rounded-xl flex items-center justify-center text-white text-2xl ${
-                        wallet.id === 'phantom'
-                          ? 'bg-gradient-to-br from-purple-500 to-pink-500'
-                          : 'bg-gradient-to-br from-orange-500 to-yellow-500'
-                      }`}>
-                        {wallet.icon}
-                      </div>
-                    }
-                  >
-                    <div class="w-12 h-12 flex items-center justify-center">
-                      <img
-                        src={props.isDark
-                          ? "https://mintcdn.com/phantom-e50e2e68/fkWrmnMWhjoXSGZ9/logo/phantom-light.svg?fit=max&auto=format&n=fkWrmnMWhjoXSGZ9&q=85&s=c21a66db70347ca7a31053b98a0b5b0a"
-                          : "https://mintcdn.com/phantom-e50e2e68/fkWrmnMWhjoXSGZ9/logo/phantom-dark.svg?fit=max&auto=format&n=fkWrmnMWhjoXSGZ9&q=85&s=af17fb78921412073a894ea97523898c"
-                        }
-                        alt="Phantom"
-                        class="w-12 h-12"
-                      />
-                    </div>
-                  </Show>
+          {/* Content */}
+          <div class="p-6">
+            {/* Connection Error */}
+            <Show when={connectionError()}>
+              <div class="mb-4 p-4 rounded-xl bg-red-500/10 text-red-400">
+                <div class="flex items-start gap-3">
+                  <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                  </svg>
                   <div class="flex-1">
-                    <div class="flex items-center space-x-2">
-                      <h3 class="font-semibold text-lg">{wallet.name}</h3>
-                      <Show when={wallet.isAvailable} fallback={
-                        <span class={`px-2 py-1 rounded-full text-xs font-medium ${
-                          props.isDark ? 'bg-red-900 text-red-200' : 'bg-red-100 text-red-800'
-                        }`}>
-                          Not Installed
-                        </span>
-                      }>
-                        <span class={`px-2 py-1 rounded-full text-xs font-medium ${
-                          wallet.id === 'phantom'
-                            ? (props.isDark ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800')
-                            : (props.isDark ? 'bg-orange-900 text-orange-200' : 'bg-orange-100 text-orange-800')
-                        }`}>
-                          {wallet.id === 'phantom' ? 'Popular' : 'Widely Used'}
-                        </span>
-                      </Show>
-                    </div>
-                    <p class={`text-sm mt-1 ${props.isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      <Show when={isConnecting() === wallet.id} fallback={wallet.description}>
-                        <Show when={wallet.isAvailable} fallback={`Connecting to ${wallet.name}...`}>
-                          <span class="inline-flex items-center space-x-2">
-                            <div class="animate-pulse w-2 h-2 bg-blue-500 rounded-full"></div>
-                            <span>
-                              {getConnectionStatusMessage(wallet.id)}
-                            </span>
-                          </span>
-                        </Show>
-                      </Show>
-                    </p>
-                    <Show when={!wallet.isAvailable}>
-                      <p class={`text-xs mt-1 ${props.isDark ? 'text-yellow-400' : 'text-yellow-600'}`}>
-                        Click to install • Opens {wallet.name} website
-                      </p>
-                    </Show>
-                    <Show when={wallet.isAvailable}>
-                      <p class={`text-xs mt-1 ${props.isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                        {wallet.id === 'phantom' ? 'Best for Solana and SPLITDO tokens' : 'For Ethereum and cross-chain tokens'}
-                      </p>
-                    </Show>
-                  </div>
-                  <div class="text-right">
-                    <Show when={isConnecting() === wallet.id} fallback={
-                      <Show when={wallet.isAvailable} fallback={
-                        <svg class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                        </svg>
-                      }>
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                        </svg>
-                      </Show>
-                    }>
-                      <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-current"></div>
-                    </Show>
+                    <p class="text-sm font-medium text-red-300">Connection Failed</p>
+                    <p class="text-sm mt-1 text-red-400/80">{connectionError()}</p>
                   </div>
                 </div>
-              </button>
-            )}
-          </For>
-        </div>
+              </div>
+            </Show>
 
-        {/* Footer */}
-        <div class={`mt-6 pt-4 border-t text-center ${
-          props.isDark ? 'border-zinc-600 text-gray-400' : 'border-gray-200 text-gray-600'
-        }`}>
-          <p class="text-sm mb-2">
-            Connect your wallet to create a SPLITDO token account
-          </p>
-          <p class="text-xs mb-1">
-            Don't have a wallet? Click any "Not Installed" option to install
-          </p>
-          <p class="text-xs">
-            Your wallet will be used to sign transactions on the Solana blockchain
-          </p>
+            {/* Wallet List */}
+            <div class="space-y-3">
+              <For each={wallet.availableWallets()}>
+                {(walletOption) => (
+                  <button
+                    onClick={() => handleConnect(walletOption.id)}
+                    disabled={!!isConnecting()}
+                    class={`w-full p-4 rounded-xl bg-zinc-800/50 hover:bg-zinc-800 transition-all text-left group ${
+                      isConnecting() ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                    } ${isConnecting() === walletOption.id ? 'ring-2 ring-cyan-500' : ''}`}
+                  >
+                    <div class="flex items-center gap-4">
+                      <Show
+                        when={walletOption.id === 'phantom'}
+                        fallback={
+                          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-yellow-500 flex items-center justify-center text-white text-xl flex-shrink-0">
+                            {walletOption.icon}
+                          </div>
+                        }
+                      >
+                        <div class="w-11 h-11 flex items-center justify-center flex-shrink-0">
+                          <img
+                            src="https://mintcdn.com/phantom-e50e2e68/fkWrmnMWhjoXSGZ9/logo/phantom-light.svg?fit=max&auto=format&n=fkWrmnMWhjoXSGZ9&q=85&s=c21a66db70347ca7a31053b98a0b5b0a"
+                            alt="Phantom"
+                            class="w-11 h-11"
+                          />
+                        </div>
+                      </Show>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                          <span class="font-semibold text-white">{walletOption.name}</span>
+                          <Show when={walletOption.isAvailable && walletOption.id === 'phantom'}>
+                            <span class="text-[10px] px-1.5 py-0.5 bg-cyan-500/20 text-cyan-400 rounded font-medium">
+                              POPULAR
+                            </span>
+                          </Show>
+                          <Show when={!walletOption.isAvailable}>
+                            <span class="text-[10px] px-1.5 py-0.5 bg-zinc-700 text-zinc-400 rounded font-medium">
+                              NOT INSTALLED
+                            </span>
+                          </Show>
+                        </div>
+                        <p class="text-sm text-zinc-500 mt-0.5">
+                          <Show when={isConnecting() === walletOption.id} fallback={
+                            walletOption.isAvailable 
+                              ? (walletOption.id === 'phantom' ? 'Best for Solana & SPLITDO' : 'Multi-chain wallet')
+                              : 'Click to install'
+                          }>
+                            <span class="text-cyan-400">Connecting...</span>
+                          </Show>
+                        </p>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <Show when={isConnecting() === walletOption.id} fallback={
+                          <svg class="w-5 h-5 text-zinc-600 group-hover:text-zinc-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                          </svg>
+                        }>
+                          <div class="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+                        </Show>
+                      </div>
+                    </div>
+                  </button>
+                )}
+              </For>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div class="px-6 py-4 bg-zinc-800/30 text-center">
+            <p class="text-xs text-zinc-500">
+              By connecting, you agree to our Terms of Service
+            </p>
+          </div>
         </div>
       </div>
-    </div>
     </Show>
   );
 };

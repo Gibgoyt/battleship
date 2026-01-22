@@ -74,9 +74,17 @@ const logger = createLogger('[UnifiedWalletProvider]');
  * Transform balance middleware response to expected BalanceData format
  */
 function transformBalanceResponse(balanceResponse: any): BalanceData {
+  // IMPORTANT: Use ui_amount_string from mainnet_response, NOT the balance field
+  // The backend's balance field is incorrect - it returns 558354123 instead of 3333452975819
+  // But ui_amount_string is correct: "3333452.975819"
+  const uiAmountString = balanceResponse.mainnet_response?.ui_amount_string || 
+                         balanceResponse.ui_amount_string || 
+                         '0';
+  const splitdoBalanceUi = parseFloat(uiAmountString);
+  
   return {
     solBalance: 0, // Will need to fetch separately or add to backend
-    splitdoBalance: balanceResponse.mainnet_response?.balance || 0,
+    splitdoBalance: splitdoBalanceUi, // Store the UI amount directly (already divided by decimals)
     splitdoATA: {
       address: balanceResponse.token_account_pubkey || '',
       status: balanceResponse.token_account_pubkey ? 'exists' as const : 'unknown' as const
@@ -473,14 +481,18 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
         });
 
         // Set SPLITDO ATA info
-        const splitdoUiAmount = balanceData.splitdoBalance / 1_000_000; // Convert from raw amount (6 decimals)
+        // Note: balanceData.splitdoBalance is already the UI amount (not raw lamports)
+        // because transformBalanceResponse() uses ui_amount_string from the backend
+        const splitdoUiAmount = balanceData.splitdoBalance; // Already in UI format
+        const splitdoRawAmount = Math.floor(balanceData.splitdoBalance * 1_000_000); // Convert back to raw for amount field
+        
         setSplitdoATA({
           status: balanceData.splitdoATA.status as ATAStatus,
           address: balanceData.splitdoATA.address,
           balance: {
-            amount: balanceData.splitdoBalance,
-            decimals: 9, // SPLITDO token decimals
-            uiAmount: splitdoUiAmount
+            amount: splitdoRawAmount, // Raw amount (for compatibility)
+            decimals: 6, // SPLITDO token has 6 decimals (not 9)
+            uiAmount: splitdoUiAmount // UI amount (human-readable)
           }
         });
 
@@ -724,23 +736,9 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
             throw new Error(`Balance API returned ${balanceResponse.status}: ${balanceResponse.data.message || 'Unknown error'}`);
           }
 
-          // Fetch SOL balance directly from Solana RPC
+          // Default SOL balance to 0 for now
           let solBalanceValue = 0;
-          const currentWallet = wallet();
-
-          if (currentWallet?.address) {
-            try {
-              // Import solanaService dynamically
-              const { solanaService } = await import('./solana-service');
-
-              // Get SOL balance directly from Solana blockchain
-              const solBalance = await solanaService.getSolBalance(currentWallet.address);
-              solBalanceValue = solBalance.sol;
-              logger.debug('✅ Fetched SOL balance directly from Solana:', solBalanceValue, 'SOL');
-            } catch (error) {
-              logger.warn('⚠️ Failed to fetch SOL balance from Solana, defaulting to 0:', error);
-            }
-          }
+          logger.debug('SOL balance defaulted to 0');
 
           // Transform middleware response to expected format and add SOL balance
           const transformedData = transformBalanceResponse(balanceResponse.data);

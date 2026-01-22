@@ -49,7 +49,9 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
   const [currentPage, setCurrentPage] = createSignal<Page>('dashboard')
   const [isNavOpen, setIsNavOpen] = createSignal(false)
   const [authStore, setAuthStore] = createSignal<ReturnType<typeof import('./middleware/firebase/auth-store').getGlobalAuthStore> | null>(null)
+  const [showHamburger, setShowHamburger] = createSignal(true)
   const middleware = useMiddleware()
+  let mainContentRef: HTMLElement | undefined
 
   // QR Modal state from wallet context
   const qrModal = useWalletConnectQRModal()
@@ -61,6 +63,28 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
     // Always enable dark mode
     document.documentElement.classList.add('dark')
     localStorage.setItem('darkMode', 'true')
+    
+    // Setup scroll listener to show/hide hamburger menu on mobile
+    const handleScroll = () => {
+      if (mainContentRef) {
+        // Show hamburger only when near top (within 50px)
+        setShowHamburger(mainContentRef.scrollTop < 50)
+      }
+    }
+    
+    // Attach listener after a brief delay to ensure ref is set
+    setTimeout(() => {
+      if (mainContentRef) {
+        mainContentRef.addEventListener('scroll', handleScroll)
+      }
+    }, 100)
+    
+    // Cleanup scroll listener
+    onCleanup(() => {
+      if (mainContentRef) {
+        mainContentRef.removeEventListener('scroll', handleScroll)
+      }
+    })
     
     // Initialize page from URL pathname
     const pathname = window.location.pathname
@@ -238,10 +262,10 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
         onClose={() => setIsNavOpen(false)}
       />
 
-      {/* Hamburger Menu Button (Mobile Only) */}
+      {/* Hamburger Menu Button (Mobile Only) - hides on scroll */}
       <button
         onClick={() => setIsNavOpen(true)}
-        class="fixed top-4 left-4 z-40 lg:hidden w-10 h-10 rounded-lg bg-crypto-bg-secondary border border-crypto-border flex items-center justify-center"
+        class={`fixed top-4 left-4 z-40 lg:hidden w-10 h-10 rounded-lg bg-crypto-bg-secondary border border-crypto-border flex items-center justify-center transition-all duration-300 ${showHamburger() ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}
       >
         <svg class="w-6 h-6 crypto-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -249,7 +273,7 @@ const AppContent: Component<{ firebaseToken?: string }> = (props) => {
       </button>
 
       {/* Main Content */}
-      <main class="flex-1 overflow-auto lg:ml-64 pt-16 lg:pt-0 transition-all duration-300">
+      <main ref={mainContentRef} class="flex-1 overflow-auto lg:ml-64 pt-16 lg:pt-0 transition-all duration-300">
         {renderPage()}
       </main>
 

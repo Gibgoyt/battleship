@@ -25,7 +25,7 @@ import {
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
-import { SPLITDO_CONFIG, ERROR_MESSAGES, BACKEND_SOLANA_API, SOLANA_NETWORKS, CURRENT_NETWORK } from './walletconnect-config';
+import { SPLITDO_CONFIG, ERROR_MESSAGES, BACKEND_SOLANA_API } from './walletconnect-config';
 import { SolanaBrowserError } from './solana-browser-safe';
 import type { WalletProvider } from './wallet-providers';
 import { type SplitdoRawAmount } from './token-utils';
@@ -204,19 +204,22 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Get wallet balance directly from Solana RPC
+   * Get wallet balance via backend API using middlewareFetch
    */
   async getWalletBalance(walletAddress: string): Promise<number> {
     try {
-      // Create a connection to Solana mainnet
-      const connection = new Connection(SOLANA_NETWORKS[CURRENT_NETWORK], 'confirmed');
+      // Use middlewareFetch instead of direct fetch
+      const response = await middlewareFetch.Endpoints.DevbackendNoAuth._Api.Solana.Wallet[walletAddress].Balance.GET(walletAddress);
 
-      // Query balance directly from Solana
-      const publicKey = new PublicKey(walletAddress);
-      const balance = await connection.getBalance(publicKey);
+      if (response.status !== 200) {
+        throw new Error(`Backend API error: ${response.status}`);
+      }
 
-      console.debug('[SolanaService] ✅ Fetched SOL balance directly from Solana:', balance / LAMPORTS_PER_SOL, 'SOL');
-      return balance;
+      if (!response.data.success) {
+        throw new Error('Failed to get wallet balance from backend API');
+      }
+
+      return response.data.balance || 0;
     } catch (error) {
       console.error('[SolanaService] Failed to get wallet balance:', error);
       throw new Error('Failed to get wallet balance');
@@ -257,11 +260,11 @@ export class EnhancedSolanaService {
   }
 
   /**
-   * Get SOL balance for a wallet address (directly from Solana RPC)
+   * Get SOL balance for a wallet address (via backend API)
    */
   async getSolBalance(walletAddress: string): Promise<SolanaBalance> {
     try {
-      // No need to check backend availability - we're talking directly to Solana!
+      await this.ensureBackendAvailable();
       const lamports = await this.getWalletBalance(walletAddress);
 
       return {
