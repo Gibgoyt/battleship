@@ -1025,8 +1025,9 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
   // DESKTOP EXCHANGE FLOW
   // ===============================
   const executeDesktopExchange = async (
-    walletAddress: string,
     provider: IWalletProvider,
+    solanaService: any,
+    walletAddress: string,
     solAmount: number,
     calculation: { splitdoAmount: number; exchangeRate: number }
   ): Promise<{ success: boolean; signature?: string; error?: string }> => {
