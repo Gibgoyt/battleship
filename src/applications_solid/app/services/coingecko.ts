@@ -1,9 +1,10 @@
 /**
  * CoinGecko API Service
  * Fetches live cryptocurrency prices in different fiat currencies
+ * Uses the proper endpoint from middleware/endpoints/coingecko
  */
 
-const COINGECKO_API_BASE = 'https://api.coingecko.com/api/v3';
+import { GET } from '../middleware/endpoints/coingecko/_api/v3/simple/price';
 
 export interface CryptoPrices {
   [crypto: string]: {
@@ -47,15 +48,19 @@ export async function fetchCryptoPrices(
     }
 
     const currency = normalizeCurrency(fiatCurrency);
-    const url = `${COINGECKO_API_BASE}/simple/price?ids=${ids}&vs_currencies=${currency}`;
+    
+    // Use the proper endpoint
+    const response = await GET({
+      ids,
+      vs_currencies: currency
+    });
 
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`CoinGecko API error: ${response.status} ${response.statusText}`);
+    if (response.status !== 200) {
+      console.error('[CoinGecko Service] API error:', response);
+      return {};
     }
 
-    const data = await response.json();
+    const data = response.data as Record<string, Record<string, number>>;
 
     // Convert CoinGecko IDs back to crypto symbols
     const prices: Record<string, number> = {};

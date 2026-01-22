@@ -8,6 +8,7 @@ import type { Component } from 'solid-js';
 import { smartFetch, invalidateCache, clearUserCache, getCacheStats, type SmartFetchResult } from './smart-fetch';
 import { CACHE_POLICIES, type CachePolicy } from './cache-engine';
 import { type ProcessedTransaction } from '../../lib/solana_mainnet/rpc-service';
+import { GET as getCoinGeckoPrice } from '../middleware/endpoints/coingecko/_api/v3/simple/price';
 
 // Types for cached data
 export interface BalanceData {
@@ -322,14 +323,17 @@ export const PersistentDataProvider: Component<{ children: any }> = (props) => {
     try {
       const result = await smartFetch(
         async () => {
-          // Call CoinGecko API for SOL price
-          const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+          // Use the proper CoinGecko endpoint
+          const response = await getCoinGeckoPrice({
+            ids: 'solana',
+            vs_currencies: 'usd'
+          });
 
-          if (!response.ok) {
+          if (response.status !== 200) {
             throw new Error(`SOL price API error: ${response.status}`);
           }
 
-          const data = await response.json();
+          const data = response.data as Record<string, { usd?: number }>;
           const solanaPrice = data.solana?.usd;
 
           if (typeof solanaPrice !== 'number') {
