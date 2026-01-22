@@ -26,8 +26,8 @@ const logger = createLogger('[MetaMask Solana Exchange Builder]');
 // SPLITDO Token Mint Address (Solana Mainnet)
 export const SPLITDO_TOKEN_MINT = 'CKfatsPMUf8SkiURsDXs7eK6GWb4Jsd6UDbs7twMCWxo';
 
-// SPLITDO Exchange Program ID (replace with actual program ID)
-export const SPLITDO_EXCHANGE_PROGRAM_ID = '6vdfHTgLiEXvoGVp8Ga2HaKQsPKj6DrUTee7526SCXoM';
+// SPLITDO SOL Vault Address - This is where we send SOL for exchange
+export const SPLITDO_SOL_VAULT_ADDRESS = 'F5bUwq7ttSzqgqVJEA1toXbc31BjPReCoSh9fqkLH62B';
 
 /**
  * Exchange transaction building result interface
@@ -82,7 +82,7 @@ export async function buildSolToSplitdoExchangeTransaction(
 			: ownerPublicKey;
 
 		const splitdoMintPubkey = new PublicKey(SPLITDO_TOKEN_MINT);
-		const exchangeProgramPubkey = new PublicKey(SPLITDO_EXCHANGE_PROGRAM_ID);
+		const exchangeProgramPubkey = new PublicKey(SPLITDO_SOL_VAULT_ADDRESS);
 
 		// Get recent blockhash from our backend
 		const blockhashResult = await getRecentBlockhash();
@@ -122,12 +122,11 @@ export async function buildSolToSplitdoExchangeTransaction(
 			feeLamports
 		});
 
-		// Create a simple transfer instruction to the exchange program
-		// This is a simplified version - in reality, you'd need the actual program instruction
-		// For now, we'll create a transfer that the backend can process
+		// Create a simple transfer instruction to the SOL vault
+		// The backend handles the SPLITDO token exchange after receiving SOL
 		const transferInstruction = SystemProgram.transfer({
 			fromPubkey: ownerPubkey,
-			toPubkey: exchangeProgramPubkey, // Exchange program receives the SOL
+			toPubkey: exchangeProgramPubkey, // SOL vault receives the SOL
 			lamports: lamportsAmount + feeLamports // SOL amount + fees
 		});
 
