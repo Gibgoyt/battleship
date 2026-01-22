@@ -1,2 +1,3 @@
 import { POST } from './POST.ts'
-export { POST }
+import * as withSend from './withSend'
+export { POST, withSend }
