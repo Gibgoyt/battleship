@@ -213,22 +213,44 @@ window.openWhatsApp = function() {
     }
 };
 
-document.addEventListener('DOMContentLoaded', function () {
-    // Mobile menu toggle
+// Mobile menu toggle - run immediately and also on DOMContentLoaded for iOS Safari
+function initMobileMenu() {
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
     const menuIcon = document.getElementById('menu-icon');
     const closeIcon = document.getElementById('close-icon');
 
-    mobileMenuButton?.addEventListener('click', function () {
-        const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+    if (!mobileMenuButton) return;
+    
+    // Remove any existing listeners to avoid duplicates
+    const newButton = mobileMenuButton.cloneNode(true);
+    mobileMenuButton.parentNode?.replaceChild(newButton, mobileMenuButton);
+    
+    newButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const menu = document.getElementById('mobile-menu');
+        const menuIcn = document.getElementById('menu-icon');
+        const closeIcn = document.getElementById('close-icon');
+        const isExpanded = newButton.getAttribute('aria-expanded') === 'true';
 
-        mobileMenuButton.setAttribute('aria-expanded', String(!isExpanded));
-        mobileMenu?.classList.toggle('hidden');
-        menuIcon?.classList.toggle('hidden');
-        closeIcon?.classList.toggle('hidden');
+        newButton.setAttribute('aria-expanded', String(!isExpanded));
+        menu?.classList.toggle('hidden');
+        menuIcn?.classList.toggle('hidden');
+        closeIcn?.classList.toggle('hidden');
     });
-});
+}
+
+// Try to init immediately
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMobileMenu);
+} else {
+    initMobileMenu();
+}
+
+// Also try on load as fallback for iOS Safari
+window.addEventListener('load', initMobileMenu);
 </script>
 </body>
 </html>
