@@ -158,8 +158,8 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
             {/* SPLITDO Balance */}
             <div class="flex items-center justify-between py-4 px-6 border-l-2 border-cyan-500 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
               <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-zinc-900 rounded-full flex items-center justify-center overflow-hidden">
-                  <img src="/splitdo/logo.png" alt="SPLITDO" class="w-7 h-7 object-contain" />
+                <div class="w-10 h-10 bg-zinc-800 rounded-lg flex items-center justify-center overflow-hidden p-1">
+                  <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
                 </div>
                 <div>
                   <div class="text-sm font-medium text-white">SPLITDO</div>

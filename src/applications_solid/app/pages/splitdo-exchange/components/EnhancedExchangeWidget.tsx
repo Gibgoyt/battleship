@@ -107,8 +107,8 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
       <div class="balance-display mb-6">
         <div class="flex items-center justify-between p-4 rounded-xl bg-crypto-bg-tertiary border border-crypto-border">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-purple-600 flex items-center justify-center">
-              <span class="text-white font-bold text-xs">SOL</span>
+            <div class="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center overflow-hidden p-1">
+              <img src="/solana-logo.svg" alt="Solana" class="w-full h-full object-contain" />
             </div>
             <div>
               <span class={`font-semibold crypto-text-primary`}>SOL Balance</span>
@@ -132,8 +132,8 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
       <div class="balance-display mb-6">
         <div class="flex items-center justify-between p-4 rounded-xl bg-crypto-bg-tertiary border border-crypto-border">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-gradient-button-primary flex items-center justify-center">
-              <span class="text-white font-bold text-xs">SD</span>
+            <div class="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center overflow-hidden p-0.5">
+              <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
             </div>
             <div>
               <span class={`font-semibold crypto-text-primary`}>SPLITDO Balance</span>

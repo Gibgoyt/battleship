@@ -70,19 +70,19 @@ const AssetCard: Component<AssetCardProps> = (props) => {
     switch (props.asset.symbol) {
       case 'SOL':
         return (
-          <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-purple-600 flex items-center justify-center">
-            <span class="text-white font-bold text-lg">SOL</span>
+          <div class="w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center overflow-hidden p-1.5">
+            <img src="/solana-logo.svg" alt="Solana" class="w-full h-full object-contain" />
           </div>
         );
       case 'SPLITDO':
         return (
-          <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background: var(--gradient-button-primary);">
-            <span class="text-white font-bold text-lg">SD</span>
+          <div class="w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center overflow-hidden p-1">
+            <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
           </div>
         );
       default:
         return (
-          <div class="w-12 h-12 rounded-full bg-crypto-border flex items-center justify-center">
+          <div class="w-12 h-12 rounded-lg bg-crypto-border flex items-center justify-center">
             <span class={`font-bold text-lg ${props.isDark ? 'text-crypto-text-muted' : 'text-crypto-text-muted'}`}>
               {props.asset.symbol.slice(0, 2)}
             </span>

@@ -85,15 +85,20 @@ export const CreateAccountModal: Component<CreateAccountModalProps> = (props) =>
         onClick={(e) => e.stopPropagation()}
       >
         {/* Professional Header */}
-        <div class="bg-gradient-to-r from-crypto-primary-blue to-crypto-primary-cyan px-8 py-6">
+        <div class="bg-gradient-to-r from-crypto-primary-blue to-crypto-primary-cyan px-4 py-4 sm:px-8 sm:py-6">
           <div class="flex items-center justify-between">
-            <div>
-              <h2 class="text-2xl font-bold text-white mb-1">
-                Create SPLITDO Account
-              </h2>
-              <p class="text-blue-100 opacity-90">
-                Set up your SPLITDO token account to start trading
-              </p>
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center overflow-hidden p-1">
+                <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
+              </div>
+              <div>
+                <h2 class="text-xl sm:text-2xl font-bold text-white mb-1">
+                  Create SPLITDO Account
+                </h2>
+                <p class="text-blue-100 opacity-90">
+                  Set up your token account to start trading
+                </p>
+              </div>
             </div>
             <button
               onClick={handleClose}
@@ -344,10 +349,10 @@ const CreateAccountForm: Component<{
       }>
         <div class="space-y-6">
           <div class="text-center mb-6">
-            <div class={`w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-crypto-primary-blue to-crypto-primary-cyan flex items-center justify-center mb-4 ${
+            <div class={`w-16 h-16 mx-auto rounded-xl bg-zinc-800 flex items-center justify-center mb-4 overflow-hidden p-2 ${
               props.isDark ? 'shadow-lg shadow-crypto-primary-blue/20' : ''
             }`}>
-              <span class="text-white font-bold text-xl">S</span>
+              <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
             </div>
             <h3 class={`text-xl font-semibold mb-2 ${
               props.isDark ? 'text-crypto-text-primary' : 'text-gray-900'

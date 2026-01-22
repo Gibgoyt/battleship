@@ -51,10 +51,8 @@ const CreateSplitdoAccount: Component = () => {
       <div class="p-8 text-center">
         {/* Header */}
         <div class="mb-6">
-          <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-            </svg>
+          <div class="w-16 h-16 mx-auto mb-4 bg-zinc-800 rounded-xl flex items-center justify-center overflow-hidden p-2">
+            <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
           </div>
           <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Create SPLITDO Account
