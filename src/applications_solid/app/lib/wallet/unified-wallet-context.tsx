@@ -124,9 +124,12 @@ export interface BalanceData {
   splitdoBalance: number;
   splitdoATA: {
     address: string;
-    status: 'exists' | 'unknown' | 'checking';
+    status: ATAStatus;
   };
   lastUpdated: string;
+  // Optional fields for 422 response handling
+  accountExists?: boolean;
+  actionRequired?: string;
 }
 
 export interface ExchangeRateData {
@@ -678,6 +681,45 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
             address: walletState?.address
           });
 
+          // Handle 422: token account not created yet - this is expected for new users
+          if (balanceResponse.status === 422) {
+            logger.info('🟡 Token account not created yet - user needs to create account first', {
+              tokenAccount: balanceResponse.data.token_account_pubkey,
+              actionRequired: balanceResponse.data.action_required
+            });
+
+            // Fetch SOL balance even if SPLITDO account doesn't exist
+            let solBalanceValue = 0;
+            const currentWallet = wallet();
+
+            if (currentWallet?.address) {
+              try {
+                // Import solanaService dynamically
+                const { solanaService } = await import('./solana-service');
+                const solBalance = await solanaService.getSolBalance(currentWallet.address);
+                solBalanceValue = solBalance.sol;
+                logger.debug('✅ Fetched SOL balance for user without SPLITDO account:', solBalanceValue, 'SOL');
+              } catch (error) {
+                logger.warn('⚠️ Failed to fetch SOL balance, defaulting to 0:', error);
+              }
+            }
+
+            // Return balance data indicating account needs to be created
+            return {
+              solBalance: solBalanceValue,
+              splitdoBalance: 0,
+              splitdoATA: {
+                address: balanceResponse.data.token_account_pubkey || '',
+                status: 'not_found' as const
+              },
+              lastUpdated: (balanceResponse.data as any).last_updated || new Date().toISOString(),
+              // Add 422-specific fields to help UI know account needs creation
+              accountExists: balanceResponse.data.account_exists || false,
+              actionRequired: balanceResponse.data.action_required || 'create_token_account'
+            };
+          }
+
+          // Handle other non-200 responses as errors
           if (balanceResponse.status !== 200) {
             throw new Error(`Balance API returned ${balanceResponse.status}: ${balanceResponse.data.message || 'Unknown error'}`);
           }

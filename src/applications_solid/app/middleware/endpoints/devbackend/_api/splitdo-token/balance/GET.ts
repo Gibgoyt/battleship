@@ -51,6 +51,20 @@ interface Response404 {
 	}
 }
 
+interface Response422 {
+	status: 422
+	data: {
+		success: false
+		error: "token_account_not_created"
+		message: "Token account has not been created yet"
+		account_exists: false
+		user_id: string
+		token_account_pubkey: string
+		splitdo_token_mint: string
+		action_required: "create_token_account"
+	}
+}
+
 interface Response429 {
 	status: 429
 	data: {
@@ -60,7 +74,7 @@ interface Response429 {
 	}
 }
 
-export type GetResponse = Response200 | Response401 | Response403 | Response404 | Response429
+export type GetResponse = Response200 | Response401 | Response403 | Response404 | Response422 | Response429
 
 /*
  * Get user's token balance with automatic Firebase JWT auth handling
@@ -130,26 +144,27 @@ export async function GET(): Promise<GetResponse> {
 		// Return structured response based on status
 		switch (response.status) {
 			case 200:
+				const balanceData = responseData as BalanceInfo
 				logger.info('Successfully retrieved balance data', {
-					userId: responseData.user_id,
-					tokenAccount: responseData.token_account_pubkey,
-					balance: responseData.mainnet_response?.balance
+					userId: balanceData.user_id,
+					tokenAccount: balanceData.token_account_pubkey,
+					balance: balanceData.mainnet_response?.balance
 				})
 				return {
 					status: 200,
-					data: responseData
+					data: balanceData
 				}
 			case 401:
 				logger.warn('Unauthorized access - this should not happen with fetchMiddleware')
 				return {
 					status: 401,
-					data: responseData
+					data: responseData as Response401['data']
 				}
 			case 403:
 				logger.warn('Forbidden access - this should not happen with fetchMiddleware')
 				return {
 					status: 403,
-					data: responseData
+					data: responseData as Response403['data']
 				}
 			case 404:
 				logger.info('Balance data not found (user may not have token account)', {
@@ -157,7 +172,18 @@ export async function GET(): Promise<GetResponse> {
 				})
 				return {
 					status: 404,
-					data: responseData
+					data: responseData as Response404['data']
+				}
+			case 422:
+				const accountNotCreatedData = responseData as Response422['data']
+				logger.info('Token account not created yet - user needs to create account', {
+					userId: accountNotCreatedData.user_id,
+					tokenAccount: accountNotCreatedData.token_account_pubkey,
+					action: accountNotCreatedData.action_required
+				})
+				return {
+					status: 422,
+					data: accountNotCreatedData
 				}
 			case 429:
 				// This is handled by fetchMiddleware for Cloudflare 1015, but might be other rate limiting
@@ -170,7 +196,7 @@ export async function GET(): Promise<GetResponse> {
 					status: 429,
 					data: {
 						error: 'rate_limit_exceeded',
-						message: responseData || 'Rate limit exceeded. Please try again later.',
+						message: typeof responseData === 'string' ? responseData : 'Rate limit exceeded. Please try again later.',
 						retry_after: retryAfter ? parseInt(retryAfter) : undefined
 					}
 				}
