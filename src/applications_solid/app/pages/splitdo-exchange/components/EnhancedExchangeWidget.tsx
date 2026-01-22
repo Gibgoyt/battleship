@@ -50,144 +50,142 @@ const EnhancedExchangeWidget: Component<EnhancedExchangeWidgetProps> = (props) =
   };
 
   return (
-    <div class="exchange-widget slide-in-up">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
       {/* Widget Header */}
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h3 class="crypto-heading-3 mb-1">
-            Exchange
-          </h3>
-          <p class="crypto-text-small">
-            Convert SOL to SPLITDO tokens instantly
-          </p>
-        </div>
-        <div class="flex items-center gap-2">
-          <div class="w-2 h-2 bg-crypto-accent-green rounded-full"></div>
-          <span class="text-xs font-medium" style="color: var(--crypto-accent-green);">
-            Live Rate
-          </span>
-        </div>
-      </div>
-
-      {/* Exchange Rate Display */}
-      <div class="exchange-preview mb-6">
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <span class={`crypto-text-small crypto-text-secondary`}>
-              Exchange Rate
-            </span>
-            <div class="text-right">
-              <div class="exchange-rate">
-                1 SOL = {formatCurrency((wallet.solPrice()?.price || 135.98) / 0.11, 2)} SPLITDO
-              </div>
-              <Show when={wallet.solPrice()?.price && wallet.solPrice()!.price > 0}>
-                <div class={`text-xs crypto-text-muted`}>
-                  SOL: ${formatCurrency(wallet.solPrice()!.price)} USD
-                </div>
-              </Show>
-            </div>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class={`text-xs crypto-text-secondary`}>
-              SPLITDO Token Price
-            </span>
-            <div class="text-right">
-              <div class={`text-sm font-semibold crypto-text-primary`}>
-                $0.11 USD
-              </div>
-              <div class={`text-xs crypto-text-muted`}>
-                Fixed presale price
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Wallet Balance Display */}
-      <div class="balance-display mb-6">
-        <div class="flex items-center justify-between p-4 rounded-xl bg-crypto-bg-tertiary border border-crypto-border">
+      <div class="p-4 border-b border-zinc-800">
+        <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center overflow-hidden p-1">
-              <img src="/solana-logo.svg" alt="Solana" class="w-full h-full object-contain" />
-            </div>
-            <div>
-              <span class={`font-semibold crypto-text-primary`}>SOL Balance</span>
-              <div class={`text-xs crypto-text-secondary`}>Solana</div>
-            </div>
-          </div>
-          <div class="text-right">
-            <div class={`text-lg font-bold crypto-text-primary`}>
-              {formatCurrency(wallet.solBalance()?.sol || 0, 4)}
-            </div>
-            <Show when={wallet.solPrice()?.price && wallet.solPrice()!.price > 0 && wallet.solBalance()?.sol}>
-              <div class={`text-xs crypto-text-muted`}>
-                ≈ ${formatCurrency((wallet.solBalance()?.sol || 0) * wallet.solPrice()!.price)}
-              </div>
-            </Show>
-          </div>
-        </div>
-      </div>
-
-      {/* SPLITDO Balance Display */}
-      <div class="balance-display mb-6">
-        <div class="flex items-center justify-between p-4 rounded-xl bg-crypto-bg-tertiary border border-crypto-border">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center overflow-hidden p-0.5">
+            <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center overflow-hidden p-1">
               <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
             </div>
             <div>
-              <span class={`font-semibold crypto-text-primary`}>SPLITDO Balance</span>
-              <div class={`text-xs crypto-text-secondary`}>Token Account</div>
+              <h3 class="text-lg font-bold text-white">Swap</h3>
+              <p class="text-xs text-zinc-500">SOL to SPLITDO</p>
             </div>
           </div>
-          <div class="text-right">
-            <div class={`text-lg font-bold crypto-text-primary`}>
-              {formatCurrency(wallet.splitdoATA().balance?.amount || 0)}
-            </div>
-            <Show when={wallet.splitdoATA().balance?.amount}>
-              <div class={`text-xs crypto-text-muted`}>
-                ≈ ${formatCurrency((wallet.splitdoATA().balance?.amount || 0) * 0.11)}
-              </div>
-            </Show>
+          <div class="flex items-center gap-2 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+            <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+            <span class="text-xs font-medium text-emerald-400">Live</span>
           </div>
         </div>
       </div>
 
-      {/* Action Button */}
-      <div class="mt-6">
-        <Show when={wallet.connectionStatus() !== 'connected'} fallback={
-          <Show when={wallet.splitdoATA().status !== 'exists'} fallback={
-            <button
-              onClick={handleExchange}
-              class="btn-crypto-success w-full py-4 px-6 rounded-xl font-bold text-lg transition-all hover:shadow-lg hover:shadow-crypto-accent-green/20"
-            >
-              Start Token Exchange
-            </button>
-          }>
-            <div class="space-y-3">
-              <div class="text-center">
-                <div class={`text-sm crypto-text-muted`}>
-                  Create a SPLITDO account to start trading
-                </div>
+      <div class="p-4 space-y-3">
+        {/* You Have - SOL */}
+        <div class="p-4 rounded-xl bg-zinc-800/50 border border-zinc-700">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-zinc-500 uppercase tracking-wide">You Have</span>
+            <Show when={wallet.solPrice()?.price && wallet.solPrice()!.price > 0 && wallet.solBalance()?.sol}>
+              <span class="text-xs text-zinc-500">
+                ≈ ${formatCurrency((wallet.solBalance()?.sol || 0) * wallet.solPrice()!.price)}
+              </span>
+            </Show>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-zinc-700 flex items-center justify-center overflow-hidden p-1.5">
+                <img src="/solana-logo.svg" alt="SOL" class="w-full h-full object-contain" />
               </div>
-              <button
-                onClick={handleCreateAccount}
-                class="btn-crypto-primary w-full py-4 text-lg"
-              >
-                Create SPLITDO Account
-              </button>
+              <div>
+                <div class="font-semibold text-white">SOL</div>
+                <div class="text-xs text-zinc-500">Solana</div>
+              </div>
             </div>
-          </Show>
-        }>
-          <button
-            onClick={wallet.openWalletModal}
-            class="btn-crypto-primary w-full py-4 text-lg"
-          >
-            Connect Wallet to Exchange
-          </button>
-        </Show>
-      </div>
+            <div class="text-right">
+              <div class="text-2xl font-bold text-white">
+                {formatCurrency(wallet.solBalance()?.sol || 0, 4)}
+              </div>
+            </div>
+          </div>
+        </div>
 
+        {/* Swap Arrow */}
+        <div class="flex justify-center -my-1">
+          <div class="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="text-cyan-400">
+              <path d="M12 5v14M12 19l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+        {/* You Get - SPLITDO */}
+        <div class="p-4 rounded-xl bg-cyan-500/5 border border-cyan-500/20">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-zinc-500 uppercase tracking-wide">You Have</span>
+            <Show when={wallet.splitdoATA().balance?.amount}>
+              <span class="text-xs text-zinc-500">
+                ≈ ${formatCurrency(Number(wallet.splitdoATA().balance?.amount || 0) * 0.11)}
+              </span>
+            </Show>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-zinc-700 flex items-center justify-center overflow-hidden p-1">
+                <img src="/splitdo/logo.svg" alt="SPLITDO" class="w-full h-full object-contain" />
+              </div>
+              <div>
+                <div class="font-semibold text-white">SPLITDO</div>
+                <div class="text-xs text-zinc-500">Token</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-bold text-cyan-400">
+                {formatCurrency(Number(wallet.splitdoATA().balance?.amount || 0))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Exchange Rate Info */}
+        <div class="p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-zinc-500">Rate</span>
+            <span class="text-white font-medium">
+              1 SOL = {formatCurrency((wallet.solPrice()?.price || 135.98) / 0.11, 0)} SPLITDO
+            </span>
+          </div>
+          <div class="flex items-center justify-between text-sm mt-1">
+            <span class="text-zinc-500">SPLITDO Price</span>
+            <span class="text-cyan-400 font-medium">$0.11 USD</span>
+          </div>
+        </div>
+
+        {/* Action Button */}
+        <div class="pt-2">
+          <Show when={wallet.connectionStatus() !== 'connected'} fallback={
+            <Show when={wallet.splitdoATA().status !== 'exists'} fallback={
+              <button
+                onClick={handleExchange}
+                class="w-full py-4 px-6 rounded-xl font-bold text-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white transition-all hover:shadow-lg hover:shadow-cyan-500/20"
+              >
+                <span class="flex items-center justify-center gap-2">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-white">
+                    <path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Swap Tokens
+                </span>
+              </button>
+            }>
+              <div class="space-y-3">
+                <p class="text-sm text-zinc-500 text-center">Create a SPLITDO account to start swapping</p>
+                <button
+                  onClick={handleCreateAccount}
+                  class="w-full py-4 px-6 rounded-xl font-bold text-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white transition-all"
+                >
+                  Create SPLITDO Account
+                </button>
+              </div>
+            </Show>
+          }>
+            <button
+              onClick={wallet.openWalletModal}
+              class="w-full py-4 px-6 rounded-xl font-bold text-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white transition-all"
+            >
+              Connect Wallet
+            </button>
+          </Show>
+        </div>
+      </div>
     </div>
   );
 };
