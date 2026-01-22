@@ -815,8 +815,8 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
   };
 
   const fetchSolPrice = async (options: { force?: boolean } = {}): Promise<SmartFetchResult<SolPriceData>> => {
-    // Fallback price in case API fails (approximate market price)
-    const FALLBACK_SOL_PRICE = 180;
+    // Fallback price in case API fails (approximate market price as of Jan 2026)
+    const FALLBACK_SOL_PRICE = 250;
     
     try {
       setIsPersistentDataLoading(true);

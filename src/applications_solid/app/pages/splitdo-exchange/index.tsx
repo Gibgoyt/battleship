@@ -33,6 +33,8 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
   // Fetch SOL price on mount and set up 5-minute refresh interval
   onMount(() => {
     console.log('[Exchange] Fetching initial SOL price');
+    // Invalidate cache first to ensure fresh data
+    wallet.invalidateSolPrice();
     wallet.fetchSolPrice({ force: true });
 
     // Set up interval to refresh SOL price every 5 minutes
