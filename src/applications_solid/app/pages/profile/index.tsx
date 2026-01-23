@@ -2,6 +2,7 @@ import type { Component } from 'solid-js';
 import { createSignal, onMount, Show, createEffect } from 'solid-js';
 import { PUT as updateProfile, DELETE as deleteAccount, type UpdateProfileData } from '../../middleware/endpoints/_api/users/me';
 import { useCurrency } from '../../stores/currency-store';
+import { useMiddleware } from '../../middleware';
 
 const ProfilePage: Component<{ isDark: boolean }> = (props) => {
   const [userEmail, setUserEmail] = createSignal<string>('');
@@ -25,6 +26,9 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
 
   // Get global currency store
   const currencyStore = useCurrency();
+
+  // Get middleware for SolidJS client-side navigation
+  const middleware = useMiddleware();
 
   // Editable form fields
   const [bio, setBio] = createSignal<string>('');
@@ -466,9 +470,9 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
         <div class="mb-8">
           <h2 class="text-lg font-semibold text-white mb-6">Quick Actions</h2>
           <div class="space-y-3">
-            <a
-              href="/app/dashboard"
-              class="group flex items-center justify-between py-4 px-6 bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700 hover:border-zinc-600 transition-all"
+            <button
+              onClick={() => middleware.navigate('/app/dashboard')}
+              class="group w-full flex items-center justify-between py-4 px-6 bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700 hover:border-zinc-600 transition-all text-left"
             >
               <div class="flex items-center gap-4">
                 <div class="w-10 h-10 bg-zinc-700 rounded-lg flex items-center justify-center">
@@ -484,7 +488,7 @@ const ProfilePage: Component<{ isDark: boolean }> = (props) => {
               <svg class="w-5 h-5 text-zinc-500 group-hover:text-zinc-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
               </svg>
-            </a>
+            </button>
 
             <button
               onClick={() => {
