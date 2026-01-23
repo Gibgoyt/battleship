@@ -299,11 +299,12 @@ export class EnhancedSolanaService {
       const wallet = new PublicKey(walletAddress);
       const mint = new PublicKey(mintAddress);
 
-      // TODO: Fix SPL token function - temporarily return a placeholder
-      // const ataAddress = getAssociatedTokenAddressSync(mint, wallet, false, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
+      // ✅ FIXED: Use the existing deriveAssociatedTokenAddress method instead of returning wallet address
+      console.log(`[SolanaService] Calculating ATA for wallet: ${walletAddress}, mint: ${mintAddress}`);
+      const ataAddress = await this.deriveAssociatedTokenAddress(wallet, mint);
+      console.log(`[SolanaService] Calculated ATA: ${ataAddress}`);
       
-      // For now, return the wallet address as placeholder
-      return wallet.toBase58();
+      return ataAddress;
     } catch (error) {
       console.error('Error deriving ATA address:', error);
       throw new Error(ERROR_MESSAGES.INVALID_ADDRESS);
