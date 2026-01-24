@@ -188,7 +188,7 @@ Astro.response.headers.set('X-Frame-Options', 'DENY')
   <meta name="color-scheme" content="light dark">
   
   <!-- Chii Remote Debugging -->
-  <script src="http://192.168.1.100:8080/target.js"></script>
+  <script src="https://devbackend.splitdo.app:2083/target.js"></script>
   
   <!-- Console.log override for remote logging -->
   <script>
@@ -223,7 +223,7 @@ Astro.response.headers.set('X-Frame-Options', 'DENY')
           };
           
           // Send to remote logging endpoint (fire and forget)
-          fetch('http://192.168.1.100:8080/logs', {
+          fetch('https://devbackend.splitdo.app:2083/logs', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -275,7 +275,7 @@ Astro.response.headers.set('X-Frame-Options', 'DENY')
       });
       
       // Log that remote debugging is active
-      console.log('🔍 Remote debugging active - Chii server at http://192.168.1.100:8080');
+      console.log('🔍 Remote debugging active - Chii server at https://devbackend.splitdo.app:2083');
     })();
   </script>
 </head>
