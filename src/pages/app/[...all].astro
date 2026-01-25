@@ -189,10 +189,43 @@ Astro.response.headers.set('X-Frame-Options', 'DENY')
   
   <!-- Chii Remote Debugging -->
   <script>
+    // Store original origin
+    window._originalOrigin = window.location.origin;
+    
     // Override the WebSocket endpoint before loading target.js
+    // Try multiple variable names that Chii might use
     window.ChiiServerUrl = 'https://devbackend.splitdo.app:2083/';
+    window.CHII_SERVER_URL = 'https://devbackend.splitdo.app:2083/';
+    window.chiiServerUrl = 'https://devbackend.splitdo.app:2083/';
+    
+    // Also try to override location.origin temporarily
+    Object.defineProperty(window.location, 'origin', {
+      get: function() {
+        return 'https://devbackend.splitdo.app:2083';
+      },
+      configurable: true
+    });
+    
+    // Debug: Log what we're setting
+    console.log('🔧 Chii server URL override set:', {
+      ChiiServerUrl: window.ChiiServerUrl,
+      CHII_SERVER_URL: window.CHII_SERVER_URL,
+      chiiServerUrl: window.chiiServerUrl,
+      locationOrigin: window.location.origin
+    });
   </script>
   <script src="https://devbackend.splitdo.app:2083/target.js"></script>
+  <script>
+    // Restore original location.origin after target.js loads
+    setTimeout(() => {
+      Object.defineProperty(window.location, 'origin', {
+        get: function() {
+          return window._originalOrigin;
+        },
+        configurable: true
+      });
+    }, 1000);
+  </script>
 </head>
 <body class="h-full overflow-x-hidden" style="background: var(--crypto-bg-primary); color: var(--crypto-text-primary);">
 <!-- Render SolidJS App with Astro's integration -->
