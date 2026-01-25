@@ -8,7 +8,7 @@
 // Import browser polyfills FIRST to ensure Buffer is available
 import './browser-polyfills';
 import { PublicKey, Transaction } from '@solana/web3.js';
-import { getDeviceInfo } from './exchange-utils';
+import { getDeviceInfo, getMetaMaskEnvironment, logMetaMaskDetectionDebug } from './exchange-utils';
 // Import PhantomMobileProvider statically to avoid require() issues
 import { PhantomMobileProvider } from './phantom-mobile-provider';
 import { iOSPhantomAuthManager } from './ios-phantom-auth-manager';
@@ -355,141 +355,232 @@ export class MetaMaskSolanaProvider implements WalletProvider {
       return false;
     }
 
-    // Method 1: Check for MetaMask with direct Solana support (legacy/future)
-    if (this.provider?.isMetaMask && this.provider?.solana) {
-      console.log('[MetaMaskSolanaProvider] 🟢 Detected direct Solana support');
-      return true;
+    const env = getMetaMaskEnvironment();
+    
+    // Only show as available if we're in a supported environment
+    if (env.connectionStrategy === 'NO_METAMASK') {
+      console.log('[MetaMaskSolanaProvider] 🔴 MetaMask not detected');
+      return false;
     }
 
-    // Method 2: Check for MetaMask with request capability (for Snaps)
-    if (this.provider?.isMetaMask && this.provider?.request) {
-      console.log('[MetaMaskSolanaProvider] 🟢 Detected MetaMask with Snaps capability');
-      return true;
+    if (env.connectionStrategy === 'MOBILE_EXTERNAL') {
+      console.log('[MetaMaskSolanaProvider] 🔗 MetaMask available but requires redirect to app');
+      return true; // Show as available so user can trigger redirect
     }
 
-    // Method 3: Check Wallet Standard registry for MetaMask
-    if (window.navigator && (window.navigator as any).wallets) {
-      try {
-        const wallets = (window.navigator as any).wallets.getWallets();
-        const metaMaskWallet = wallets.find((wallet: any) => 
-          wallet.name.toLowerCase().includes('metamask') && 
-          wallet.chains.some((chain: any) => chain.includes('solana'))
-        );
-        if (metaMaskWallet) {
-          console.log('[MetaMaskSolanaProvider] 🟢 Detected via Wallet Standard');
-          return true;
-        }
-      } catch (error) {
-        // Wallet Standard not available, continue
+    // For desktop extension and MetaMask browser, check actual capabilities
+    if (env.connectionStrategy === 'DESKTOP_EXTENSION') {
+      const hasSnapsCapability = this.provider?.isMetaMask && this.provider?.request;
+      const hasDirectSolana = this.provider?.isMetaMask && this.provider?.solana;
+      
+      if (hasDirectSolana || hasSnapsCapability) {
+        console.log('[MetaMaskSolanaProvider] 🟢 Desktop MetaMask with Solana support detected');
+        return true;
       }
     }
 
-    console.log('[MetaMaskSolanaProvider] 🔴 No MetaMask Solana support detected');
+    if (env.connectionStrategy === 'METAMASK_BROWSER') {
+      const hasProvider = this.provider?.isMetaMask;
+      const hasWalletStandard = window.navigator && (window.navigator as any).wallets;
+      
+      if (hasProvider || hasWalletStandard) {
+        console.log('[MetaMaskSolanaProvider] 🟢 MetaMask mobile browser detected');
+        return true;
+      }
+    }
+
+    console.log('[MetaMaskSolanaProvider] 🔴 MetaMask detected but no Solana support available');
     return false;
   }
 
   async connect(): Promise<{ publicKey: PublicKey }> {
+    // ENTERPRISE-GRADE BROWSER DETECTION - This is the critical fix!
+    const env = getMetaMaskEnvironment();
+    
+    console.log('[MetaMaskSolanaProvider] 🦊 MetaMask Connection Strategy:', env.connectionStrategy, {
+      platform: env.platform,
+      isMetaMaskBrowser: env.isMetaMaskBrowser,
+      supportsSnaps: env.supportsSnaps,
+      requiresWalletStandard: env.requiresWalletStandard
+    });
+
+    // Debug logging in development
+    if (import.meta.env.DEV) {
+      logMetaMaskDetectionDebug();
+    }
+
     if (!this.isAvailable()) {
       throw new WalletNotFoundError('MetaMask');
     }
 
-    console.log('[MetaMaskSolanaProvider] 🔄 Attempting to connect...');
-
     try {
-      // Method 1: Try direct Solana connection (if available)
-      if (this.provider?.solana) {
-        console.log('[MetaMaskSolanaProvider] 🟢 Using direct Solana connection');
-        const response = await this.provider.solana.connect();
-        this.publicKey = new PublicKey(response.publicKey.toString());
-        console.log('[MetaMaskSolanaProvider] ✅ Connected with public key:', this.publicKey.toString());
-        return { publicKey: this.publicKey };
-      }
-
-      // Method 2: Try multiple alternative connection methods
-      if (this.provider?.request) {
-        console.log('[MetaMaskSolanaProvider] 🔄 Attempting Drift Labs Snap connection');
-        
-        // Method 2a: Try Snap-based connection (Primary)
-        try {
-          const snapId = 'npm:@drift-labs/snap-solana';
-          const snapVersion = '0.3.0';
+      // Route connection based on enterprise detection
+      switch (env.connectionStrategy) {
+        case 'DESKTOP_EXTENSION':
+          return await this.connectWithSnaps();
           
-          // Check if Snap is already installed
-          console.log('[MetaMaskSolanaProvider] 🔄 Checking for existing Drift Labs Snap installation...');
-          let installedSnaps;
-          try {
-            installedSnaps = await this.provider.request({
-              method: 'wallet_getSnaps'
-            }) as Record<string, any>;
-          } catch (getSnapError) {
-            console.warn('[MetaMaskSolanaProvider] Could not check installed snaps:', getSnapError);
-            installedSnaps = {};
-          }
-
-          // Install or update Snap if needed
-          if (!installedSnaps[snapId] || installedSnaps[snapId]?.version !== snapVersion) {
-            console.log('[MetaMaskSolanaProvider] 🔄 Installing/updating Drift Labs Snap to version', snapVersion);
-            const snapParams: Record<string, any> = {};
-            snapParams[snapId] = { version: snapVersion };
-            
-            await this.provider.request({
-              method: 'wallet_requestSnaps',
-              params: snapParams
-            });
-            console.log('[MetaMaskSolanaProvider] ✅ Drift Labs Snap installed/updated successfully');
-          } else {
-            console.log('[MetaMaskSolanaProvider] ✅ Drift Labs Snap already installed with correct version');
-          }
-
-          // Get public key via Drift Labs Snap
-          console.log('[MetaMaskSolanaProvider] 🔄 Getting public key via Drift Labs Snap');
-          const publicKeyString = await this.provider.request({
-            method: 'wallet_invokeSnap',
-            params: {
-              snapId,
-              request: {
-                method: 'getPublicKey'
-              }
-            }
-          });
-
-          if (publicKeyString) {
-            this.publicKey = new PublicKey(publicKeyString);
-            console.log('[MetaMaskSolanaProvider] ✅ Connected via Drift Labs Snap with public key:', this.publicKey.toString());
-            return { publicKey: this.publicKey };
-          }
-        } catch (snapError) {
-          console.warn('[MetaMaskSolanaProvider] ⚠️ Snap connection failed:', snapError);
-        }
-
-        // Method 2c: Try Wallet Standard
-        try {
-          if (window.navigator && (window.navigator as any).wallets) {
-            console.log('[MetaMaskSolanaProvider] 🔄 Attempting Wallet Standard connection');
-            const wallets = (window.navigator as any).wallets.getWallets();
-            const metaMaskWallet = wallets.find((wallet: any) => 
-              wallet.name.toLowerCase().includes('metamask')
-            );
-            
-            if (metaMaskWallet) {
-              console.log('[MetaMaskSolanaProvider] ✅ Found MetaMask via Wallet Standard:', metaMaskWallet);
-              // Additional implementation would go here for Wallet Standard connection
-            }
-          }
-        } catch (walletStandardError) {
-          console.warn('[MetaMaskSolanaProvider] ⚠️ Wallet Standard failed:', walletStandardError);
-        }
-
-        // Final fallback - inform user about the status
-        throw new WalletConnectionError('MetaMask', 
-          'MetaMask detected but Drift Labs Snap connection failed. Please install the Drift Labs Snap.');
+        case 'METAMASK_BROWSER':
+          return await this.connectWithWalletStandard();
+          
+        case 'MOBILE_EXTERNAL':
+          throw new WalletConnectionError('MetaMask', 
+            'Please open this page in MetaMask app. Use the "Open in MetaMask" button.');
+          
+        default:
+          throw new WalletNotFoundError('MetaMask');
       }
-
-      throw new WalletConnectionError('MetaMask', 'No supported connection method available');
     } catch (error) {
       console.error('[MetaMaskSolanaProvider] ❌ Connection failed:', error);
-      throw new WalletConnectionError('MetaMask', error);
+      throw error instanceof WalletError ? error : new WalletConnectionError('MetaMask', error);
     }
+  }
+
+  /**
+   * Desktop Extension Connection - Uses Snaps for Solana support
+   * This method is for desktop browsers with MetaMask extension installed
+   */
+  private async connectWithSnaps(): Promise<{ publicKey: PublicKey }> {
+    console.log('[MetaMaskSolanaProvider] 🖥️ Using Desktop Extension connection (Snaps)');
+
+    if (!this.provider?.request) {
+      throw new WalletConnectionError('MetaMask', 'MetaMask request method not available');
+    }
+
+    // Method 1: Try direct Solana connection first (if available)
+    if (this.provider?.solana) {
+      console.log('[MetaMaskSolanaProvider] 🟢 Using direct Solana connection');
+      try {
+        const response = await this.provider.solana.connect();
+        this.publicKey = new PublicKey(response.publicKey.toString());
+        console.log('[MetaMaskSolanaProvider] ✅ Connected with direct Solana support');
+        return { publicKey: this.publicKey };
+      } catch (directError) {
+        console.warn('[MetaMaskSolanaProvider] Direct Solana failed, trying Snaps:', directError);
+      }
+    }
+
+    // Method 2: Use Drift Labs Snap for Solana support
+    try {
+      const snapId = 'npm:@drift-labs/snap-solana';
+      const snapVersion = '0.3.0';
+      
+      // Check if Snap is already installed
+      console.log('[MetaMaskSolanaProvider] 🔄 Checking for Drift Labs Snap...');
+      let installedSnaps: Record<string, any> = {};
+      try {
+        installedSnaps = await this.provider.request({
+          method: 'wallet_getSnaps'
+        }) as Record<string, any>;
+      } catch (getSnapError) {
+        console.warn('[MetaMaskSolanaProvider] Could not check installed snaps:', getSnapError);
+      }
+
+      // Install or update Snap if needed
+      if (!installedSnaps[snapId] || installedSnaps[snapId]?.version !== snapVersion) {
+        console.log('[MetaMaskSolanaProvider] 🔄 Installing Drift Labs Snap version', snapVersion);
+        const snapParams: Record<string, any> = {};
+        snapParams[snapId] = { version: snapVersion };
+        
+        await this.provider.request({
+          method: 'wallet_requestSnaps',
+          params: snapParams
+        });
+        console.log('[MetaMaskSolanaProvider] ✅ Drift Labs Snap installed successfully');
+      } else {
+        console.log('[MetaMaskSolanaProvider] ✅ Drift Labs Snap already installed');
+      }
+
+      // Get public key via Snap
+      console.log('[MetaMaskSolanaProvider] 🔄 Getting public key via Drift Labs Snap');
+      const publicKeyString = await this.provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'getPublicKey'
+          }
+        }
+      });
+
+      if (publicKeyString) {
+        this.publicKey = new PublicKey(publicKeyString);
+        console.log('[MetaMaskSolanaProvider] ✅ Connected via Drift Labs Snap');
+        return { publicKey: this.publicKey };
+      } else {
+        throw new Error('Failed to get public key from Snap');
+      }
+    } catch (snapError) {
+      console.error('[MetaMaskSolanaProvider] ❌ Snap connection failed:', snapError);
+      throw new WalletConnectionError('MetaMask', 
+        'Failed to connect via Drift Labs Snap. Please ensure MetaMask is updated and try again.');
+    }
+  }
+
+  /**
+   * MetaMask Mobile Browser Connection - Uses Wallet Standard API
+   * This method is for when user is inside MetaMask mobile browser
+   * CRITICAL: NO Snaps support in mobile browser!
+   */
+  private async connectWithWalletStandard(): Promise<{ publicKey: PublicKey }> {
+    console.log('[MetaMaskSolanaProvider] 📱 Using MetaMask Mobile Browser connection (Wallet Standard)');
+
+    // Method 1: Try Wallet Standard API
+    if (window.navigator && (window.navigator as any).wallets) {
+      try {
+        console.log('[MetaMaskSolanaProvider] 🔄 Attempting Wallet Standard connection');
+        const wallets = (window.navigator as any).wallets.getWallets();
+        const metaMaskWallet = wallets.find((wallet: any) => 
+          wallet.name.toLowerCase().includes('metamask') && 
+          wallet.chains && wallet.chains.some((chain: any) => chain.includes('solana'))
+        );
+        
+        if (metaMaskWallet) {
+          console.log('[MetaMaskSolanaProvider] ✅ Found MetaMask via Wallet Standard');
+          
+          // Connect using Wallet Standard
+          const account = await metaMaskWallet.connect({ onlyIfTrusted: false });
+          if (account && account.publicKey) {
+            this.publicKey = new PublicKey(account.publicKey.toString());
+            console.log('[MetaMaskSolanaProvider] ✅ Connected via Wallet Standard');
+            return { publicKey: this.publicKey };
+          }
+        }
+      } catch (walletStandardError) {
+        console.warn('[MetaMaskSolanaProvider] Wallet Standard failed:', walletStandardError);
+      }
+    }
+
+    // Method 2: Try direct provider connection (basic fallback)
+    if (this.provider?.solana) {
+      try {
+        console.log('[MetaMaskSolanaProvider] 🔄 Trying direct provider connection');
+        const response = await this.provider.solana.connect();
+        this.publicKey = new PublicKey(response.publicKey.toString());
+        console.log('[MetaMaskSolanaProvider] ✅ Connected with direct provider');
+        return { publicKey: this.publicKey };
+      } catch (directError) {
+        console.warn('[MetaMaskSolanaProvider] Direct provider failed:', directError);
+      }
+    }
+
+    // Method 3: Basic Ethereum connection as last resort (limited functionality)
+    if (this.provider?.request) {
+      try {
+        console.log('[MetaMaskSolanaProvider] ⚠️ Using Ethereum connection as fallback (limited functionality)');
+        const accounts = await this.provider.request({ method: 'eth_requestAccounts' });
+        if (accounts && accounts.length > 0) {
+          // This won't work for Solana transactions but at least establishes connection
+          console.warn('[MetaMaskSolanaProvider] ⚠️ Connected with Ethereum account (Solana functionality limited)');
+          throw new WalletConnectionError('MetaMask', 
+            'MetaMask mobile browser detected but Solana support is limited. Please use the MetaMask app instead.');
+        }
+      } catch (ethError) {
+        console.error('[MetaMaskSolanaProvider] Ethereum fallback failed:', ethError);
+      }
+    }
+
+    throw new WalletConnectionError('MetaMask', 
+      'MetaMask mobile browser detected but Wallet Standard API is not available. Please update MetaMask app to the latest version.');
   }
 
   async signTransaction(transaction: Transaction): Promise<Transaction> {
@@ -497,78 +588,129 @@ export class MetaMaskSolanaProvider implements WalletProvider {
       throw new WalletError('Wallet not connected', 'NOT_CONNECTED', 'MetaMask');
     }
 
-    console.log('[MetaMaskSolanaProvider] 🔄 Signing transaction...');
+    const env = getMetaMaskEnvironment();
+    console.log('[MetaMaskSolanaProvider] 🔄 Signing transaction with strategy:', env.connectionStrategy);
 
     try {
-      // Method 1: Try direct Solana signing (if available)
-      if (this.provider?.solana) {
-        console.log('[MetaMaskSolanaProvider] 🟢 Using direct Solana signing');
+      // Route signing based on environment
+      switch (env.connectionStrategy) {
+        case 'DESKTOP_EXTENSION':
+          return await this.signWithSnaps(transaction);
+          
+        case 'METAMASK_BROWSER':
+          return await this.signWithWalletStandard(transaction);
+          
+        default:
+          throw new WalletSigningError('MetaMask', 'Unsupported environment for transaction signing');
+      }
+    } catch (error) {
+      console.error('[MetaMaskSolanaProvider] ❌ Transaction signing failed:', error);
+      throw error instanceof WalletError ? error : new WalletSigningError('MetaMask', error);
+    }
+  }
+
+  /**
+   * Sign transaction using Snaps (Desktop Extension)
+   */
+  private async signWithSnaps(transaction: Transaction): Promise<Transaction> {
+    console.log('[MetaMaskSolanaProvider] 🖥️ Signing with Snaps');
+
+    // Method 1: Try direct Solana signing (if available)
+    if (this.provider?.solana) {
+      console.log('[MetaMaskSolanaProvider] 🟢 Using direct Solana signing');
+      try {
         const signedTx = await this.provider.solana.signTransaction(transaction);
         console.log('[MetaMaskSolanaProvider] ✅ Transaction signed via direct method');
         return signedTx;
+      } catch (directError) {
+        console.warn('[MetaMaskSolanaProvider] Direct signing failed, trying Snap:', directError);
       }
+    }
 
-      // Method 2: Try Snap-based signing
-      if (this.provider?.request) {
-        console.log('[MetaMaskSolanaProvider] 🔄 Attempting Snap-based signing');
-        
-        const snapId = 'npm:@drift-labs/snap-solana';
-        
-        // First, ensure we have the necessary permissions
-        try {
-          console.log('[MetaMaskSolanaProvider] 🔄 Requesting Drift Labs Snap installation/permissions...');
-          const snapParams: Record<string, any> = {};
-          snapParams[snapId] = { version: '0.3.0' };
-          
-          await this.provider.request({
-            method: 'wallet_requestSnaps',
-            params: snapParams
-          });
-          
-          console.log('[MetaMaskSolanaProvider] ✅ Snap permissions granted');
-        } catch (permError) {
-          console.warn('[MetaMaskSolanaProvider] ⚠️ Permission request failed:', permError);
-          // Continue anyway - permissions might already be granted
-        }
-        
-        // Serialize transaction for MetaMask Snap
-        const serializedTx = transaction.serialize({
-          requireAllSignatures: false,
-          verifySignatures: false
-        });
-        
-        const signedTxData = await this.provider.request({
-          method: 'wallet_invokeSnap',
-          params: {
-            snapId,
-            request: {
-              method: 'signTransaction',
-              params: {
-                transaction: serializedTx,
-                isVersionedTransaction: false,
-                serializeConfig: {
-                  requireAllSignatures: false,
-                  verifySignatures: false
-                }
+    // Method 2: Use Drift Labs Snap for signing
+    if (!this.provider?.request) {
+      throw new WalletSigningError('MetaMask', 'MetaMask request method not available');
+    }
+
+    const snapId = 'npm:@drift-labs/snap-solana';
+    
+    try {
+      // Serialize transaction for MetaMask Snap
+      const serializedTx = transaction.serialize({
+        requireAllSignatures: false,
+        verifySignatures: false
+      });
+      
+      const signedTxData = await this.provider.request({
+        method: 'wallet_invokeSnap',
+        params: {
+          snapId,
+          request: {
+            method: 'signTransaction',
+            params: {
+              transaction: serializedTx,
+              isVersionedTransaction: false,
+              serializeConfig: {
+                requireAllSignatures: false,
+                verifySignatures: false
               }
             }
           }
-        });
+        }
+      });
 
-        // Reconstruct signed transaction (Drift Labs format)
-        const signedTransaction = Transaction.from(
-          Buffer.from(signedTxData.transaction.data)
+      // Reconstruct signed transaction
+      const signedTransaction = Transaction.from(
+        Buffer.from(signedTxData.transaction.data)
+      );
+      
+      console.log('[MetaMaskSolanaProvider] ✅ Transaction signed via Snap');
+      return signedTransaction;
+    } catch (snapError) {
+      console.error('[MetaMaskSolanaProvider] Snap signing failed:', snapError);
+      throw new WalletSigningError('MetaMask', 'Failed to sign transaction via Snap');
+    }
+  }
+
+  /**
+   * Sign transaction using Wallet Standard (Mobile Browser)
+   */
+  private async signWithWalletStandard(transaction: Transaction): Promise<Transaction> {
+    console.log('[MetaMaskSolanaProvider] 📱 Signing with Wallet Standard');
+
+    // Method 1: Try Wallet Standard signing
+    if (window.navigator && (window.navigator as any).wallets) {
+      try {
+        const wallets = (window.navigator as any).wallets.getWallets();
+        const metaMaskWallet = wallets.find((wallet: any) => 
+          wallet.name.toLowerCase().includes('metamask')
         );
         
-        console.log('[MetaMaskSolanaProvider] ✅ Transaction signed via Snap');
-        return signedTransaction;
+        if (metaMaskWallet && metaMaskWallet.signTransaction) {
+          console.log('[MetaMaskSolanaProvider] 🟢 Using Wallet Standard signing');
+          const signedTx = await metaMaskWallet.signTransaction(transaction);
+          console.log('[MetaMaskSolanaProvider] ✅ Transaction signed via Wallet Standard');
+          return signedTx;
+        }
+      } catch (walletStandardError) {
+        console.warn('[MetaMaskSolanaProvider] Wallet Standard signing failed:', walletStandardError);
       }
-
-      throw new WalletSigningError('MetaMask', 'No supported signing method available');
-    } catch (error) {
-      console.error('[MetaMaskSolanaProvider] ❌ Transaction signing failed:', error);
-      throw new WalletSigningError('MetaMask', error);
     }
+
+    // Method 2: Try direct provider signing
+    if (this.provider?.solana?.signTransaction) {
+      try {
+        console.log('[MetaMaskSolanaProvider] 🔄 Using direct provider signing');
+        const signedTx = await this.provider.solana.signTransaction(transaction);
+        console.log('[MetaMaskSolanaProvider] ✅ Transaction signed via direct provider');
+        return signedTx;
+      } catch (directError) {
+        console.warn('[MetaMaskSolanaProvider] Direct provider signing failed:', directError);
+      }
+    }
+
+    throw new WalletSigningError('MetaMask', 
+      'MetaMask mobile browser does not support transaction signing. Please use the MetaMask app instead.');
   }
 
   async disconnect(): Promise<void> {
@@ -607,7 +749,7 @@ export class MetaMaskSolanaProvider implements WalletProvider {
 export class WalletProviderFactory {
   private static providers: Map<string, () => WalletProvider> = new Map([
     ['phantom', () => WalletProviderFactory.createPhantomProvider()],
-    ['metamask', () => new MetaMaskSolanaProvider()],
+    ['metamask', () => WalletProviderFactory.createMetaMaskProvider()],
     // ['walletconnect', () => new WalletConnectProvider()], // Commented out to fix circular dependency
   ] as [string, () => WalletProvider][]);
 
@@ -641,6 +783,45 @@ export class WalletProviderFactory {
     return new PhantomWalletProvider();
   }
 
+  /**
+   * Enterprise-grade MetaMask provider creation with environment-aware routing
+   * This is the critical fix for MetaMask mobile browser issues
+   */
+  private static createMetaMaskProvider(): WalletProvider {
+    const env = getMetaMaskEnvironment();
+    
+    console.log("[WalletProviderFactory] 🦊 MetaMask Provider Creation:", {
+      strategy: env.connectionStrategy,
+      platform: env.platform,
+      isMetaMaskBrowser: env.isMetaMaskBrowser,
+      supportsSnaps: env.supportsSnaps,
+      requiresWalletStandard: env.requiresWalletStandard
+    });
+
+    // Always return the same provider instance, but it will route internally based on environment
+    const provider = new MetaMaskSolanaProvider();
+    
+    // Log the routing decision for debugging
+    switch (env.connectionStrategy) {
+      case 'DESKTOP_EXTENSION':
+        console.log("[WalletProviderFactory] 🖥️ Creating MetaMask Desktop Provider (with Snaps support)");
+        break;
+        
+      case 'METAMASK_BROWSER':  
+        console.log("[WalletProviderFactory] 📱 Creating MetaMask Mobile Browser Provider (Wallet Standard only - NO Snaps)");
+        break;
+        
+      case 'MOBILE_EXTERNAL':
+        console.log("[WalletProviderFactory] 🔗 MetaMask not available in external mobile browser - will redirect to app");
+        break;
+        
+      default:
+        console.warn("[WalletProviderFactory] ❓ Unknown MetaMask environment");
+    }
+
+    return provider;
+  }
+
   static createProvider(id: string): WalletProvider | null {
     const factory = this.providers.get(id);
     return factory ? factory() : null;
@@ -648,11 +829,13 @@ export class WalletProviderFactory {
 
   static getAvailableProviders(): WalletProvider[] {
     const deviceInfo = getDeviceInfo();
+    const metaMaskEnv = getMetaMaskEnvironment();
     const providers: WalletProvider[] = [];
     
-    // DEBUG: Log device info
+    // Enhanced DEBUG: Log comprehensive environment info
     console.log("[WalletProviderFactory] 🐛 DEBUG - getAvailableProviders called");
     console.log("[WalletProviderFactory] 🐛 DEBUG - Device Info:", deviceInfo);
+    console.log("[WalletProviderFactory] 🐛 DEBUG - MetaMask Environment:", metaMaskEnv);
     
     // DEBUG: Run comprehensive MetaMask debug
     if (typeof window !== 'undefined' && window.ethereum?.isMetaMask) {

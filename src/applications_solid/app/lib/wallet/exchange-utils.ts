@@ -40,6 +40,32 @@ export interface VaultInfo {
 
 export type DeviceType = 'mobile' | 'desktop';
 
+export type MetaMaskConnectionStrategy = 'DESKTOP_EXTENSION' | 'METAMASK_BROWSER' | 'MOBILE_EXTERNAL' | 'NO_METAMASK';
+
+export interface MetaMaskEnvironment {
+  // Core connection states
+  isDesktopExtension: boolean;
+  isMobileExternal: boolean; 
+  isMetaMaskBrowser: boolean;
+  
+  // Provider detection
+  hasProvider: boolean;
+  isMetaMaskProvider: boolean;
+  
+  // Platform details
+  userAgent: string;
+  isMobile: boolean;
+  platform: 'Desktop' | 'iOS' | 'Android';
+  
+  // Connection strategy
+  connectionStrategy: MetaMaskConnectionStrategy;
+  
+  // Additional context
+  browserEnvironment: string;
+  supportsSnaps: boolean;
+  requiresWalletStandard: boolean;
+}
+
 export interface ExchangeError {
   type: 'user_rejected' | 'insufficient_balance' | 'network_error' | 'backend_error' | 'validation_error';
   message: string;
@@ -158,6 +184,230 @@ export function getDeviceInfo() {
   logger.debug('Enhanced device info:', deviceInfo);
   
   return deviceInfo;
+}
+
+// ================================
+// METAMASK BROWSER DETECTION
+// ================================
+
+/**
+ * Enterprise-grade MetaMask environment detection
+ * Provides reliable detection of desktop extension vs mobile browser vs external mobile browser
+ * 
+ * CRITICAL FIX: This solves the MetaMask mobile browser connection failures by properly
+ * detecting when to use Snaps (desktop only) vs Wallet Standard API (mobile browser)
+ */
+export function getMetaMaskEnvironment(): MetaMaskEnvironment {
+  // Early return for SSR
+  if (typeof window === 'undefined') {
+    return {
+      isDesktopExtension: false,
+      isMobileExternal: true,
+      isMetaMaskBrowser: false,
+      hasProvider: false,
+      isMetaMaskProvider: false,
+      userAgent: '',
+      isMobile: false,
+      platform: 'Desktop',
+      connectionStrategy: 'NO_METAMASK',
+      browserEnvironment: 'ssr',
+      supportsSnaps: false,
+      requiresWalletStandard: false
+    };
+  }
+
+  // Get user agent and provider info
+  const userAgent = navigator.userAgent || '';
+  const userAgentLower = userAgent.toLowerCase();
+  
+  // Mobile detection - be very specific
+  const isMobile = /android|iphone|ipad|ipod|mobile/i.test(userAgent);
+  
+  // MetaMask User Agent detection - case insensitive for reliability
+  const isMetaMaskUA = /metamask/i.test(userAgent);
+  
+  // Provider detection
+  const hasProvider = typeof window.ethereum !== 'undefined';
+  const isMetaMaskProvider = hasProvider && (window.ethereum as any)?.isMetaMask === true;
+
+  // Platform detection
+  const platform: 'Desktop' | 'iOS' | 'Android' = 
+    isMobile ? (userAgent.includes('iPhone') || userAgent.includes('iPad') ? 'iOS' : 'Android') : 'Desktop';
+
+  // Browser environment detection
+  const browserEnvironment = getBrowserEnvironment(userAgentLower);
+
+  // Connection strategy determination
+  const connectionStrategy = getMetaMaskConnectionStrategy(isMobile, isMetaMaskUA, hasProvider, isMetaMaskProvider);
+
+  // Capabilities determination
+  const supportsSnaps = connectionStrategy === 'DESKTOP_EXTENSION';
+  const requiresWalletStandard = connectionStrategy === 'METAMASK_BROWSER';
+
+  const environment: MetaMaskEnvironment = {
+    // Core states
+    isDesktopExtension: connectionStrategy === 'DESKTOP_EXTENSION',
+    isMobileExternal: connectionStrategy === 'MOBILE_EXTERNAL',
+    isMetaMaskBrowser: connectionStrategy === 'METAMASK_BROWSER',
+    
+    // Provider detection  
+    hasProvider,
+    isMetaMaskProvider,
+    
+    // Platform details
+    userAgent: userAgentLower,
+    isMobile,
+    platform,
+    
+    // Connection strategy
+    connectionStrategy,
+    
+    // Additional context
+    browserEnvironment,
+    supportsSnaps,
+    requiresWalletStandard
+  };
+
+  logger.debug('🦊 MetaMask Environment Detection:', {
+    platform,
+    connectionStrategy,
+    isMetaMaskUA,
+    hasProvider: hasProvider,
+    isMetaMaskProvider,
+    userAgentSnippet: userAgent.substring(0, 100) + '...'
+  });
+
+  return environment;
+}
+
+/**
+ * Determine browser environment from user agent
+ */
+function getBrowserEnvironment(userAgent: string): string {
+  if (userAgent.includes('metamask')) return 'metamask-browser';
+  if (userAgent.includes('phantom')) return 'phantom-browser';
+  if (/instagram|facebook|whatsapp|line|wechat|tiktok/i.test(userAgent)) return 'social-app-browser';
+  if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) return 'safari';
+  if (/chrome/i.test(userAgent)) return 'chrome';
+  if (/firefox/i.test(userAgent)) return 'firefox';
+  return 'unknown';
+}
+
+/**
+ * Core strategy determination logic
+ * This is the enterprise-grade detection that fixes the mobile browser issues
+ */
+function getMetaMaskConnectionStrategy(
+  isMobile: boolean, 
+  isMetaMaskUA: boolean, 
+  hasProvider: boolean, 
+  isMetaMaskProvider: boolean
+): MetaMaskConnectionStrategy {
+  
+  // STATE 1: Desktop with MetaMask extension
+  // - Desktop environment + MetaMask provider = Extension with Snaps support
+  if (!isMobile && isMetaMaskProvider) {
+    return 'DESKTOP_EXTENSION'; // ✅ Use Snaps for Solana
+  }
+  
+  // STATE 3: MetaMask mobile browser (inside MetaMask app)  
+  // - Mobile + MetaMask in user agent + has provider = MetaMask mobile browser
+  // CRITICAL: This is where the fix happens - NO Snaps on mobile browser!
+  if (isMobile && isMetaMaskUA && hasProvider) {
+    return 'METAMASK_BROWSER'; // ✅ Use Wallet Standard API - NO Snaps!
+  }
+  
+  // STATE 2: Mobile external browser (regular mobile browser)
+  // - Mobile but not MetaMask browser = needs deeplink to MetaMask app
+  if (isMobile && !isMetaMaskUA) {
+    return 'MOBILE_EXTERNAL'; // ✅ Use deeplinks to open MetaMask app
+  }
+  
+  // STATE 4: No MetaMask detected
+  return 'NO_METAMASK';
+}
+
+/**
+ * Debug logging function for browser detection troubleshooting
+ * Call this during development to verify detection is working correctly
+ */
+export function logMetaMaskDetectionDebug() {
+  if (typeof window === 'undefined') return;
+  
+  const env = getMetaMaskEnvironment();
+  
+  console.group('🔍 MetaMask Browser Detection Debug');
+  console.log('User Agent:', navigator.userAgent);
+  console.log('Window.ethereum available:', typeof window.ethereum !== 'undefined');
+  console.log('Window.ethereum.isMetaMask:', (window.ethereum as any)?.isMetaMask);
+  console.log('Environment Detection Result:', env);
+  console.table({
+    'Desktop Extension (Snaps)': env.connectionStrategy === 'DESKTOP_EXTENSION',
+    'MetaMask Browser (Wallet Standard)': env.connectionStrategy === 'METAMASK_BROWSER', 
+    'Mobile External (Deeplinks)': env.connectionStrategy === 'MOBILE_EXTERNAL',
+    'No MetaMask': env.connectionStrategy === 'NO_METAMASK',
+    'Supports Snaps': env.supportsSnaps,
+    'Requires Wallet Standard': env.requiresWalletStandard,
+    'Platform': env.platform,
+    'Browser Environment': env.browserEnvironment
+  });
+  console.groupEnd();
+}
+
+/**
+ * Validation function for browser detection
+ * Returns test results for common scenarios
+ */
+export function validateMetaMaskDetection() {
+  const env = getMetaMaskEnvironment();
+  
+  const testCases = [
+    {
+      name: 'Desktop Chrome + Extension',
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      expected: 'DESKTOP_EXTENSION',
+      shouldUseSnaps: true
+    },
+    {
+      name: 'MetaMask Mobile Browser (iOS)',
+      userAgent: 'Mozilla/5.0 (iPhone...) WebView MetaMaskMobile',
+      expected: 'METAMASK_BROWSER',
+      shouldUseSnaps: false
+    },
+    {
+      name: 'iPhone Safari',
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS...) Safari',
+      expected: 'MOBILE_EXTERNAL',
+      shouldUseSnaps: false
+    }
+  ];
+  
+  const currentTest = testCases.find(test => {
+    const isCurrentEnvironment = 
+      (test.expected === 'DESKTOP_EXTENSION' && env.isDesktopExtension) ||
+      (test.expected === 'METAMASK_BROWSER' && env.isMetaMaskBrowser) ||
+      (test.expected === 'MOBILE_EXTERNAL' && env.isMobileExternal);
+    return isCurrentEnvironment;
+  });
+  
+  const isValid = env.connectionStrategy !== 'NO_METAMASK' && 
+    ((env.supportsSnaps && env.connectionStrategy === 'DESKTOP_EXTENSION') ||
+     (env.requiresWalletStandard && env.connectionStrategy === 'METAMASK_BROWSER') ||
+     (env.connectionStrategy === 'MOBILE_EXTERNAL'));
+  
+  console.log('🧪 MetaMask Detection Validation:', {
+    currentStrategy: env.connectionStrategy,
+    detectedCorrectly: isValid,
+    matchedTestCase: currentTest?.name || 'Unknown environment',
+    userAgent: navigator.userAgent.substring(0, 50) + '...',
+    recommendations: {
+      shouldUseSnaps: env.supportsSnaps,
+      shouldUseWalletStandard: env.requiresWalletStandard,
+      shouldUseDeeplinks: env.connectionStrategy === 'MOBILE_EXTERNAL'
+    }
+  });
+  
+  return { isValid, currentTest, environment: env };
 }
 
 // ================================
@@ -547,6 +797,11 @@ export const ExchangeUtils = {
   // Device detection
   detectDeviceType,
   getDeviceInfo,
+  
+  // MetaMask browser detection (NEW)
+  getMetaMaskEnvironment,
+  logMetaMaskDetectionDebug,
+  validateMetaMaskDetection,
   
   // Calculations
   calculateExchangeAmount,
