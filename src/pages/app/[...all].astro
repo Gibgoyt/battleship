@@ -188,6 +188,10 @@ Astro.response.headers.set('X-Frame-Options', 'DENY')
   <meta name="color-scheme" content="light dark">
   
   <!-- Chii Remote Debugging -->
+  <script>
+    // Override the WebSocket endpoint before loading target.js
+    window.ChiiServerUrl = 'https://devbackend.splitdo.app:2083/';
+  </script>
   <script src="https://devbackend.splitdo.app:2083/target.js"></script>
 </head>
 <body class="h-full overflow-x-hidden" style="background: var(--crypto-bg-primary); color: var(--crypto-text-primary);">
