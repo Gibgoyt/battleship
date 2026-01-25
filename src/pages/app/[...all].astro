@@ -187,44 +187,31 @@ Astro.response.headers.set('X-Frame-Options', 'DENY')
   <meta name="theme-color" content="#0A0E1A">
   <meta name="color-scheme" content="light dark">
   
-  <!-- Chii Remote Debugging -->
-  <script>
-    // Store original origin
-    window._originalOrigin = window.location.origin;
-    
-    // Override the WebSocket endpoint before loading target.js
-    // Try multiple variable names that Chii might use
-    window.ChiiServerUrl = 'https://devbackend.splitdo.app:2083/';
-    window.CHII_SERVER_URL = 'https://devbackend.splitdo.app:2083/';
-    window.chiiServerUrl = 'https://devbackend.splitdo.app:2083/';
-    
-    // Also try to override location.origin temporarily
-    Object.defineProperty(window.location, 'origin', {
-      get: function() {
-        return 'https://devbackend.splitdo.app:2083';
-      },
-      configurable: true
-    });
-    
-    // Debug: Log what we're setting
-    console.log('🔧 Chii server URL override set:', {
-      ChiiServerUrl: window.ChiiServerUrl,
-      CHII_SERVER_URL: window.CHII_SERVER_URL,
-      chiiServerUrl: window.chiiServerUrl,
-      locationOrigin: window.location.origin
-    });
-  </script>
-  <script src="https://devbackend.splitdo.app:2083/target.js"></script>
-  <script>
-    // Restore original location.origin after target.js loads
-    setTimeout(() => {
-      Object.defineProperty(window.location, 'origin', {
-        get: function() {
-          return window._originalOrigin;
-        },
-        configurable: true
+  <!-- Chii Remote Debugging - CLIENT SIDE ONLY -->
+  <script type="module">
+    // Only run on client-side, not in CloudFlare Workers
+    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+      // Set Chii server URL before loading target.js
+      window.ChiiServerUrl = 'https://devbackend.splitdo.app:2083/';
+      
+      // Debug log
+      console.log('🔧 Chii client-side setup:', {
+        ChiiServerUrl: window.ChiiServerUrl,
+        isClient: typeof window !== 'undefined'
       });
-    }, 1000);
+      
+      // Dynamically load the target.js script
+      const script = document.createElement('script');
+      script.src = 'https://devbackend.splitdo.app:2083/target.js';
+      script.async = true;
+      script.onload = () => {
+        console.log('🔍 Chii target.js loaded successfully');
+      };
+      script.onerror = (error) => {
+        console.warn('⚠️ Failed to load Chii target.js:', error);
+      };
+      document.head.appendChild(script);
+    }
   </script>
 </head>
 <body class="h-full overflow-x-hidden" style="background: var(--crypto-bg-primary); color: var(--crypto-text-primary);">
