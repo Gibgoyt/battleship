@@ -2,7 +2,7 @@ import type { Component } from 'solid-js';
 import { createSignal, onMount, createEffect, Show, createMemo } from 'solid-js';
 import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
 import { useCurrency, getCurrencySymbol, formatCurrency as formatCurrencyWithSymbol } from '../../stores/currency-store';
-import { fetchCryptoPrices } from '../../services/coingecko';
+import { fetchSolPricePyth } from '../../services/pyth-price';
 
 const DashboardPage: Component<{ isDark: boolean }> = (props) => {
   const [userEmail, setUserEmail] = createSignal<string>('');
@@ -24,17 +24,26 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
     }
   });
 
-  // Fetch crypto prices when currency changes
+  // Fetch SOL price from Pyth on mount and periodically
   createEffect(async () => {
-    const currency = currencyStore.currency();
-    console.log('[Dashboard] Fetching prices for currency:', currency);
+    console.log('[Dashboard] Fetching SOL price from Pyth');
 
     try {
-      const prices = await fetchCryptoPrices(['SOL', 'SPLITDO'], currency);
-      setCryptoPrices(prices);
-      console.log('[Dashboard] Fetched prices:', prices);
+      const pythResult = await fetchSolPricePyth();
+      if (pythResult) {
+        setCryptoPrices({
+          SOL: pythResult.price,
+          SPLITDO: 0.11, // Fixed presale price
+        });
+        console.log('[Dashboard] SOL price from Pyth:', pythResult.price);
+      } else {
+        // Fallback prices
+        setCryptoPrices({ SOL: 250, SPLITDO: 0.11 });
+        console.warn('[Dashboard] Pyth fetch failed, using fallback SOL price');
+      }
     } catch (error) {
-      console.error('[Dashboard] Failed to fetch prices:', error);
+      console.error('[Dashboard] Failed to fetch SOL price:', error);
+      setCryptoPrices({ SOL: 250, SPLITDO: 0.11 });
     }
   });
 
@@ -54,7 +63,7 @@ const DashboardPage: Component<{ isDark: boolean }> = (props) => {
     const splitdoBalance = splitdoBalanceTokens();
     const solBalance = wallet.solBalance()?.sol || 0;
 
-    // Get prices from CoinGecko, fallback to defaults if not available
+    // Get prices from Pyth, fallback to defaults if not available
     const solPrice = prices['SOL'] || 0;
     const splitdoPrice = prices['SPLITDO'] || 0.11; // Fallback to presale price
 

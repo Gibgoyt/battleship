@@ -1,4 +1,4 @@
-import { getWallets } from '@wallet-standard/core';
+import { getWallets } from '@wallet-standard/app';
 import type { Wallet } from '@wallet-standard/base';
 import { PublicKey } from '@solana/web3.js';
 

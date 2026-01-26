@@ -4,9 +4,10 @@ import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-
 import WalletModal from '../../components/WalletModal';
 import { CreateAccountModal } from '../../components/CreateAccountModal';
 import { ExchangeModal } from '../../components/ExchangeModal';
+import { fetchSolPricePyth } from '../../services/pyth-price';
 
-// SOL price refresh interval (5 minutes)
-const SOL_PRICE_REFRESH_INTERVAL = 5 * 60 * 1000;
+// SOL price refresh interval (30 seconds for Pyth - much more reliable than CoinGecko)
+const SOL_PRICE_REFRESH_INTERVAL = 30 * 1000;
 
 interface TokenTransaction {
   transaction_id: string;
@@ -34,21 +35,17 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
   const [liveSolPrice, setLiveSolPrice] = createSignal<number | null>(null);
   const [isPriceLoading, setIsPriceLoading] = createSignal(true);
 
-  // Function to fetch SOL price directly from CoinGecko (like ExchangeModal does)
+  // Function to fetch SOL price from Pyth
   const fetchSolPriceDirectly = async () => {
     try {
       setIsPriceLoading(true);
-      const { middlewareFetch } = await import('src/applications_solid/app/middleware/endpoints');
-      const response = await middlewareFetch.Endpoints.CoinGecko._Api.V3.Simple.Price.GET({
-        ids: 'solana',
-        vs_currencies: 'usd'
-      });
+      const result = await fetchSolPricePyth();
 
-      if (response.status === 200 && response.data.solana?.usd) {
-        setLiveSolPrice(response.data.solana.usd);
-        console.log('[Exchange] SOL price fetched:', response.data.solana.usd);
+      if (result) {
+        setLiveSolPrice(result.price);
+        console.log('[Exchange] SOL price fetched via Pyth:', result.price);
       } else {
-        console.warn('[Exchange] CoinGecko returned no price');
+        console.warn('[Exchange] Pyth returned no price');
       }
     } catch (error) {
       console.error('[Exchange] Error fetching SOL price:', error);
@@ -418,7 +415,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
                     <span class="text-sm font-medium text-white">SOL / USD</span>
                     <span class="text-[10px] px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded">LIVE</span>
                   </div>
-                  <div class="text-xs text-zinc-500">Live market price from CoinGecko</div>
+                  <div class="text-xs text-zinc-500">Live market price</div>
                 </div>
               </div>
               <Show

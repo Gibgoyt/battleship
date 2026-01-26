@@ -706,11 +706,14 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
             if (currentWallet?.address) {
               try {
-                // Import solanaService dynamically
-                const { solanaService } = await import('./solana-service');
-                const solBalance = await solanaService.getSolBalance(currentWallet.address);
-                solBalanceValue = solBalance.sol;
-                logger.debug('✅ Fetched SOL balance for user without SPLITDO account:', solBalanceValue, 'SOL');
+                // Call the unauthenticated balance endpoint directly (avoids health check that can fail)
+                const { GET: getWalletBalance } = await import('../../middleware/endpoints/devbackend_noauth/_api/solana/wallet/:pubkey/balance/GET');
+                const response = await getWalletBalance(currentWallet.address);
+                if (response.status === 200 && response.data.success) {
+                  const lamports = response.data.balance || 0;
+                  solBalanceValue = lamports / 1_000_000_000; // LAMPORTS_PER_SOL
+                  logger.debug('✅ Fetched SOL balance for user without SPLITDO account:', solBalanceValue, 'SOL');
+                }
               } catch (error) {
                 logger.warn('⚠️ Failed to fetch SOL balance, defaulting to 0:', error);
               }
@@ -736,9 +739,23 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
             throw new Error(`Balance API returned ${balanceResponse.status}: ${balanceResponse.data.message || 'Unknown error'}`);
           }
 
-          // Default SOL balance to 0 for now
+          // Fetch SOL balance from backend (unauthenticated endpoint, bypasses health check)
           let solBalanceValue = 0;
-          logger.debug('SOL balance defaulted to 0');
+          const currentWallet = wallet();
+
+          if (currentWallet?.address) {
+            try {
+              const { GET: getWalletBalance } = await import('../../middleware/endpoints/devbackend_noauth/_api/solana/wallet/:pubkey/balance/GET');
+              const solResponse = await getWalletBalance(currentWallet.address);
+              if (solResponse.status === 200 && solResponse.data.success) {
+                const lamports = solResponse.data.balance || 0;
+                solBalanceValue = lamports / 1_000_000_000; // LAMPORTS_PER_SOL
+                logger.debug('✅ Fetched SOL balance:', solBalanceValue, 'SOL');
+              }
+            } catch (error) {
+              logger.warn('⚠️ Failed to fetch SOL balance, defaulting to 0:', error);
+            }
+          }
 
           // Transform middleware response to expected format and add SOL balance
           const transformedData = transformBalanceResponse(balanceResponse.data);
@@ -820,25 +837,17 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
     
     try {
       setIsPersistentDataLoading(true);
-      logger.debug('[fetchSolPrice] Starting SOL price fetch', { force: options.force });
+      logger.debug('[fetchSolPrice] Starting SOL price fetch via Pyth', { force: options.force });
 
       const result = await smartFetch(
         async () => {
-          // Use middleware system for CoinGecko API
-          logger.debug('[fetchSolPrice] Calling CoinGecko API...');
-          const priceResponse = await middlewareFetch.Endpoints.CoinGecko._Api.V3.Simple.Price.GET({
-            ids: 'solana',
-            vs_currencies: 'usd'
-          });
+          // Use Pyth Hermes API for SOL/USD price
+          logger.debug('[fetchSolPrice] Calling Pyth Hermes API...');
+          const { fetchSolPricePyth } = await import('../../services/pyth-price');
+          const pythResult = await fetchSolPricePyth();
 
-          logger.debug('[fetchSolPrice] CoinGecko response:', { 
-            status: priceResponse.status,
-            data: priceResponse.data 
-          });
-
-          if (priceResponse.status === 429) {
-            // Rate limited - use fallback
-            logger.warn('[fetchSolPrice] Rate limited by CoinGecko, using fallback price');
+          if (!pythResult) {
+            logger.warn('[fetchSolPrice] Pyth returned no price, using fallback');
             return {
               price: FALLBACK_SOL_PRICE,
               currency: 'usd',
@@ -846,22 +855,13 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
             };
           }
 
-          if (priceResponse.status !== 200) {
-            throw new Error(`CoinGecko API returned ${priceResponse.status}: ${priceResponse.data.error || 'Unknown error'}`);
-          }
-
-          const price = priceResponse.data.solana?.usd;
-          if (!price || price === 0) {
-            logger.warn('[fetchSolPrice] CoinGecko returned no price, using fallback');
-            return {
-              price: FALLBACK_SOL_PRICE,
-              currency: 'usd',
-              lastUpdated: new Date().toISOString()
-            };
-          }
+          logger.debug('[fetchSolPrice] Pyth response:', { 
+            price: pythResult.price,
+            confidence: pythResult.confidence
+          });
 
           return {
-            price,
+            price: pythResult.price,
             currency: 'usd',
             lastUpdated: new Date().toISOString()
           };
@@ -874,7 +874,7 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
       );
 
       if (result.success && result.data) {
-        logger.info('[fetchSolPrice] SOL price updated:', result.data.price);
+        logger.info('[fetchSolPrice] SOL price updated via Pyth:', result.data.price);
         setSolPrice(result.data);
       } else {
         // If fetch failed entirely, set fallback price
