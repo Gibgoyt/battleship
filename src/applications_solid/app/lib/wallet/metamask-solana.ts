@@ -57,6 +57,12 @@ export const METAMASK_ERROR_CODES = {
   NO_SOLANA_SUPPORT: 'no_solana_support',
   OUTDATED_VERSION: 'outdated_version',
 
+  // Wallet Standard specific errors
+  NO_WALLET_STANDARD: 'no_wallet_standard_support',
+  NO_SOLANA_ACCOUNTS: 'no_solana_accounts',
+  SOLANA_FEATURES_MISSING: 'solana_features_missing',
+  WALLET_STANDARD_CONNECTION_FAILED: 'wallet_standard_connection_failed',
+
   // Transaction errors
   USER_REJECTED_TRANSACTION: 'user_rejected_transaction',
   TRANSACTION_TOO_LARGE: 'transaction_too_large',
@@ -73,6 +79,13 @@ export const METAMASK_ERROR_MESSAGES = {
   [METAMASK_ERROR_CODES.ALREADY_PENDING_CONNECTION]: 'Another connection request is already pending',
   [METAMASK_ERROR_CODES.NO_SOLANA_SUPPORT]: 'This version of MetaMask does not support Solana',
   [METAMASK_ERROR_CODES.OUTDATED_VERSION]: 'Please update MetaMask to the latest version for Solana support',
+  
+  // Wallet Standard specific messages
+  [METAMASK_ERROR_CODES.NO_WALLET_STANDARD]: 'Wallet Standard API not available. Please update MetaMask to the latest version.',
+  [METAMASK_ERROR_CODES.NO_SOLANA_ACCOUNTS]: 'Your MetaMask wallet needs a Solana account to use this application. Please create a Solana account in MetaMask and try again.',
+  [METAMASK_ERROR_CODES.SOLANA_FEATURES_MISSING]: 'MetaMask is missing required Solana features. Please update to the latest version.',
+  [METAMASK_ERROR_CODES.WALLET_STANDARD_CONNECTION_FAILED]: 'Unable to connect using Wallet Standard. Please try refreshing the page or updating MetaMask.',
+  
   [METAMASK_ERROR_CODES.USER_REJECTED_TRANSACTION]: 'User rejected the transaction',
   [METAMASK_ERROR_CODES.TRANSACTION_TOO_LARGE]: 'Transaction size exceeds MetaMask limits',
   [METAMASK_ERROR_CODES.INSUFFICIENT_FUNDS]: 'Insufficient funds to complete the transaction',

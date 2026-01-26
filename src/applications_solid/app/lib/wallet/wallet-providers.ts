@@ -12,6 +12,8 @@ import { getDeviceInfo, getMetaMaskEnvironment, logMetaMaskDetectionDebug } from
 // Import PhantomMobileProvider statically to avoid require() issues
 import { PhantomMobileProvider } from './phantom-mobile-provider';
 import { iOSPhantomAuthManager } from './ios-phantom-auth-manager';
+// Import Wallet Standard utilities for clean MetaMask mobile browser connection
+import { getMetaMaskWalletInfo, validateMetaMaskSolanaSupport, getBestSolanaAccount } from './wallet-standard-utils';
 
 // Core wallet provider interface
 export interface WalletProvider {
@@ -517,70 +519,47 @@ export class MetaMaskSolanaProvider implements WalletProvider {
   }
 
   /**
-   * MetaMask Mobile Browser Connection - Uses Wallet Standard API
-   * This method is for when user is inside MetaMask mobile browser
-   * CRITICAL: NO Snaps support in mobile browser!
+   * Connect using Wallet Standard API (MetaMask Mobile Browser)
+   * CLEAN 2-STAGE IMPLEMENTATION:
+   * STAGE 1: CONNECT - Establish connection via Wallet Standard API
+   * STAGE 2: VALIDATE SOLANA - Ensure Solana account exists and is functional
+   * NO ETHEREUM FALLBACKS! NO SNAPS! PURE WALLET STANDARD APPROACH!
    */
   private async connectWithWalletStandard(): Promise<{ publicKey: PublicKey }> {
-    console.log('[MetaMaskSolanaProvider] 📱 Using MetaMask Mobile Browser connection (Wallet Standard)');
+    console.log('[MetaMaskSolanaProvider] 📱 CLEAN MetaMask Mobile Browser Connection (2-Stage Wallet Standard)');
 
-    // Method 1: Try Wallet Standard API
-    if (window.navigator && (window.navigator as any).wallets) {
-      try {
-        console.log('[MetaMaskSolanaProvider] 🔄 Attempting Wallet Standard connection');
-        const wallets = (window.navigator as any).wallets.getWallets();
-        const metaMaskWallet = wallets.find((wallet: any) => 
-          wallet.name.toLowerCase().includes('metamask') && 
-          wallet.chains && wallet.chains.some((chain: any) => chain.includes('solana'))
-        );
-        
-        if (metaMaskWallet) {
-          console.log('[MetaMaskSolanaProvider] ✅ Found MetaMask via Wallet Standard');
-          
-          // Connect using Wallet Standard
-          const account = await metaMaskWallet.connect({ onlyIfTrusted: false });
-          if (account && account.publicKey) {
-            this.publicKey = new PublicKey(account.publicKey.toString());
-            console.log('[MetaMaskSolanaProvider] ✅ Connected via Wallet Standard');
-            return { publicKey: this.publicKey };
-          }
-        }
-      } catch (walletStandardError) {
-        console.warn('[MetaMaskSolanaProvider] Wallet Standard failed:', walletStandardError);
-      }
+    // STAGE 1: CONNECT - Get MetaMask wallet via Wallet Standard
+    console.log('[MetaMaskSolanaProvider] 🔄 STAGE 1: Connecting via Wallet Standard API');
+    
+    const walletInfo = await getMetaMaskWalletInfo();
+    
+    if (!walletInfo) {
+      throw new WalletConnectionError('MetaMask', 
+        'MetaMask wallet not found via Wallet Standard. Please ensure you\'re using the latest MetaMask mobile browser.');
     }
 
-    // Method 2: Try direct provider connection (basic fallback)
-    if (this.provider?.solana) {
-      try {
-        console.log('[MetaMaskSolanaProvider] 🔄 Trying direct provider connection');
-        const response = await this.provider.solana.connect();
-        this.publicKey = new PublicKey(response.publicKey.toString());
-        console.log('[MetaMaskSolanaProvider] ✅ Connected with direct provider');
-        return { publicKey: this.publicKey };
-      } catch (directError) {
-        console.warn('[MetaMaskSolanaProvider] Direct provider failed:', directError);
-      }
+    console.log('[MetaMaskSolanaProvider] ✅ STAGE 1 Complete: MetaMask wallet detected');
+
+    // STAGE 2: VALIDATE SOLANA - Ensure Solana support exists
+    console.log('[MetaMaskSolanaProvider] 🔍 STAGE 2: Validating Solana support');
+    
+    try {
+      validateMetaMaskSolanaSupport(walletInfo);
+      console.log('[MetaMaskSolanaProvider] ✅ STAGE 2 Complete: Solana support validated');
+    } catch (error) {
+      console.error('[MetaMaskSolanaProvider] ❌ STAGE 2 Failed: Solana validation failed');
+      throw error;
     }
 
-    // Method 3: Basic Ethereum connection as last resort (limited functionality)
-    if (this.provider?.request) {
-      try {
-        console.log('[MetaMaskSolanaProvider] ⚠️ Using Ethereum connection as fallback (limited functionality)');
-        const accounts = await this.provider.request({ method: 'eth_requestAccounts' });
-        if (accounts && accounts.length > 0) {
-          // This won't work for Solana transactions but at least establishes connection
-          console.warn('[MetaMaskSolanaProvider] ⚠️ Connected with Ethereum account (Solana functionality limited)');
-          throw new WalletConnectionError('MetaMask', 
-            'MetaMask mobile browser detected but Solana support is limited. Please use the MetaMask app instead.');
-        }
-      } catch (ethError) {
-        console.error('[MetaMaskSolanaProvider] Ethereum fallback failed:', ethError);
-      }
-    }
+    // Get the best Solana account to use
+    const solanaAccount = getBestSolanaAccount(walletInfo);
+    this.publicKey = solanaAccount.publicKey;
+    
+    console.log('[MetaMaskSolanaProvider] 🎉 CONNECTION SUCCESS: Clean Wallet Standard connection established');
+    console.log('[MetaMaskSolanaProvider] 🔑 Solana Address:', this.publicKey.toBase58());
+    console.log('[MetaMaskSolanaProvider] 🌐 Supported Chains:', solanaAccount.chains);
 
-    throw new WalletConnectionError('MetaMask', 
-      'MetaMask mobile browser detected but Wallet Standard API is not available. Please update MetaMask app to the latest version.');
+    return { publicKey: this.publicKey };
   }
 
   async signTransaction(transaction: Transaction): Promise<Transaction> {
@@ -673,44 +652,70 @@ export class MetaMaskSolanaProvider implements WalletProvider {
   }
 
   /**
-   * Sign transaction using Wallet Standard (Mobile Browser)
+   * Sign transaction using Wallet Standard API (MetaMask Mobile Browser)
+   * CLEAN WALLET STANDARD SIGNING - NO FALLBACKS TO ETHEREUM OR DIRECT PROVIDER
    */
   private async signWithWalletStandard(transaction: Transaction): Promise<Transaction> {
-    console.log('[MetaMaskSolanaProvider] 📱 Signing with Wallet Standard');
+    console.log('[MetaMaskSolanaProvider] 📱 CLEAN Wallet Standard Signing');
 
-    // Method 1: Try Wallet Standard signing
-    if (window.navigator && (window.navigator as any).wallets) {
-      try {
-        const wallets = (window.navigator as any).wallets.getWallets();
-        const metaMaskWallet = wallets.find((wallet: any) => 
-          wallet.name.toLowerCase().includes('metamask')
-        );
-        
-        if (metaMaskWallet && metaMaskWallet.signTransaction) {
-          console.log('[MetaMaskSolanaProvider] 🟢 Using Wallet Standard signing');
-          const signedTx = await metaMaskWallet.signTransaction(transaction);
-          console.log('[MetaMaskSolanaProvider] ✅ Transaction signed via Wallet Standard');
-          return signedTx;
-        }
-      } catch (walletStandardError) {
-        console.warn('[MetaMaskSolanaProvider] Wallet Standard signing failed:', walletStandardError);
-      }
+    // Get MetaMask wallet info using our utility
+    const walletInfo = await getMetaMaskWalletInfo();
+    
+    if (!walletInfo) {
+      throw new WalletSigningError('MetaMask', 'MetaMask wallet not found via Wallet Standard');
     }
 
-    // Method 2: Try direct provider signing
-    if (this.provider?.solana?.signTransaction) {
-      try {
-        console.log('[MetaMaskSolanaProvider] 🔄 Using direct provider signing');
-        const signedTx = await this.provider.solana.signTransaction(transaction);
-        console.log('[MetaMaskSolanaProvider] ✅ Transaction signed via direct provider');
-        return signedTx;
-      } catch (directError) {
-        console.warn('[MetaMaskSolanaProvider] Direct provider signing failed:', directError);
-      }
+    // Check for Solana signing feature
+    const signFeature = walletInfo.wallet.features['solana:signTransaction'];
+    
+    if (!signFeature) {
+      throw new WalletSigningError('MetaMask', 
+        'Solana transaction signing not supported in this MetaMask version. Please update MetaMask.');
     }
 
-    throw new WalletSigningError('MetaMask', 
-      'MetaMask mobile browser does not support transaction signing. Please use the MetaMask app instead.');
+    // Get the connected Solana account
+    const account = walletInfo.solanaAccounts.find(acc =>
+      acc.address === this.publicKey?.toBase58()
+    );
+    
+    if (!account) {
+      throw new WalletSigningError('MetaMask', 
+        'Connected Solana account not found. Please reconnect your wallet.');
+    }
+
+    console.log('[MetaMaskSolanaProvider] 🔄 Signing transaction with account:', account.address);
+
+    try {
+      // Serialize transaction for signing
+      const serializedTransaction = transaction.serialize({ 
+        requireAllSignatures: false,
+        verifySignatures: false 
+      });
+      
+      // Sign using Wallet Standard API
+      const { signedTransactions } = await (signFeature as any).signTransaction({
+        account: {
+          address: account.address,
+          chains: account.chains
+        },
+        transaction: serializedTransaction,
+      });
+      
+      if (!signedTransactions || signedTransactions.length === 0) {
+        throw new WalletSigningError('MetaMask', 'Transaction signing failed - no signed transaction returned');
+      }
+
+      // Deserialize the signed transaction
+      const signedTransaction = Transaction.from(signedTransactions[0]);
+      console.log('[MetaMaskSolanaProvider] ✅ Transaction signed successfully via Wallet Standard');
+      
+      return signedTransaction;
+      
+    } catch (error) {
+      console.error('[MetaMaskSolanaProvider] ❌ Wallet Standard signing failed:', error);
+      throw new WalletSigningError('MetaMask', 
+        `Transaction signing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   async disconnect(): Promise<void> {
