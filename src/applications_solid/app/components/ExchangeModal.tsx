@@ -1,10 +1,11 @@
 import type { Component } from 'solid-js';
-import { Show, createSignal, createMemo, createEffect } from 'solid-js';
+import { Show, createSignal, createMemo, createEffect, onCleanup } from 'solid-js';
 import { useUnifiedWallet } from 'src/applications_solid/app/lib/wallet/unified-wallet-context';
 import { MobileWalletInstallation } from './MobileWalletInstallation';
 import { detectMobilePlatform } from 'src/applications_solid/app/lib/wallet/mobile-detection';
 import { executeMobileWalletDeepLink, attemptMobileWalletConnection } from 'src/applications_solid/app/lib/wallet/mobile-wallet-connector';
 import { addMobileTransactionListener, setupMobileReturnListener } from 'src/applications_solid/app/lib/wallet/mobile-transaction-handler';
+import { fetchSolPricePyth } from '../services/pyth-price';
 
 export interface ExchangeModalProps {
   isDark: boolean;
@@ -18,28 +19,27 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
   const [isConnecting, setIsConnecting] = createSignal(false);
   const [showMobileInstallation, setShowMobileInstallation] = createSignal(false);
   const [mobileInstallationPlatform, setMobileInstallationPlatform] = createSignal<'ios' | 'android'>('ios');
-  const [solPriceUSD, setSolPriceUSD] = createSignal(135.98); // Default fallback price
+  const [solPriceUSD, setSolPriceUSD] = createSignal(0);
+  const [isPriceRefreshing, setIsPriceRefreshing] = createSignal(false);
 
   // Track whether we've already fetched program info for the current modal session
   const [hasFetchedForCurrentModal, setHasFetchedForCurrentModal] = createSignal(false);
 
-  // Function to fetch SOL price from CoinGecko
+  // Function to fetch SOL price from Pyth
   const fetchSolPrice = async () => {
     try {
-      const { middlewareFetch } = await import('src/applications_solid/app/middleware/endpoints');
-      const response = await middlewareFetch.Endpoints.CoinGecko._Api.V3.Simple.Price.GET({
-        ids: 'solana',
-        vs_currencies: 'usd'
-      });
-
-      if (response.status === 200 && response.data.solana?.usd) {
-        setSolPriceUSD(response.data.solana.usd);
-        console.log('[ExchangeModal] SOL price updated:', response.data.solana.usd);
+      setIsPriceRefreshing(true);
+      const result = await fetchSolPricePyth();
+      if (result) {
+        setSolPriceUSD(result.price);
+        console.log('[ExchangeModal] SOL price updated via Pyth:', result.price);
       } else {
-        console.warn('[ExchangeModal] Failed to fetch SOL price, using fallback');
+        console.warn('[ExchangeModal] Failed to fetch SOL price from Pyth');
       }
     } catch (error) {
       console.error('[ExchangeModal] Error fetching SOL price:', error);
+    } finally {
+      setIsPriceRefreshing(false);
     }
   };
 
@@ -123,6 +123,8 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
                 onBack={() => setStep('wallet')}
                 exchangeRate={wallet.exchangeRates()?.exchangeRate || 1}
                 solPriceUSD={solPriceUSD()}
+                isPriceRefreshing={isPriceRefreshing()}
+                onRefreshPrice={fetchSolPrice}
               />
             }
           >
@@ -437,11 +439,60 @@ interface ExchangeFormProps {
   onBack: () => void;
   exchangeRate: number;
   solPriceUSD: number;
+  isPriceRefreshing: boolean;
+  onRefreshPrice: () => Promise<void>;
 }
+
+// Countdown timer duration in seconds
+const PRICE_REFRESH_INTERVAL = 5;
 
 const ExchangeForm: Component<ExchangeFormProps> = (props) => {
   const MIN_SOL_AMOUNT = 0.01;
   const SPLITDO_PRICE_USD = 0.11;
+
+  // Countdown state for price refresh
+  const [countdown, setCountdown] = createSignal(PRICE_REFRESH_INTERVAL);
+  let countdownInterval: ReturnType<typeof setInterval> | null = null;
+
+  // Start/restart the countdown timer
+  const startCountdown = () => {
+    if (countdownInterval) clearInterval(countdownInterval);
+    setCountdown(PRICE_REFRESH_INTERVAL);
+
+    countdownInterval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          // Timer expired - refresh price
+          if (countdownInterval) clearInterval(countdownInterval);
+          props.onRefreshPrice().then(() => {
+            // Restart countdown after price refresh
+            startCountdown();
+          });
+          return PRICE_REFRESH_INTERVAL;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  // Start countdown when component mounts / price is available
+  createEffect(() => {
+    if (props.solPriceUSD > 0) {
+      startCountdown();
+    }
+  });
+
+  // Cleanup on unmount
+  onCleanup(() => {
+    if (countdownInterval) clearInterval(countdownInterval);
+  });
+
+  // SVG countdown ring calculations
+  const ringRadius = 12;
+  const ringCircumference = 2 * Math.PI * ringRadius;
+  const ringProgress = createMemo(() => {
+    return (countdown() / PRICE_REFRESH_INTERVAL) * ringCircumference;
+  });
 
   const solAmountNum = createMemo(() => {
     const num = parseFloat(props.solAmount);
@@ -465,7 +516,9 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
   });
 
   const handleExchange = async () => {
-    if (!isValidAmount() || props.exchangeStatus === 'loading') return;
+    if (!isValidAmount() || props.exchangeStatus === 'loading' || props.isPriceRefreshing) return;
+    // Stop countdown during exchange
+    if (countdownInterval) clearInterval(countdownInterval);
     await props.executeExchange(solAmountNum());
   };
 
@@ -546,16 +599,52 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
         </div>
       </div>
 
-      {/* Rate Info */}
+      {/* Rate Info with Countdown Ring */}
       <Show when={isValidAmount()}>
         <div class="p-3 rounded-xl bg-zinc-800/30 space-y-2">
-          <div class="flex justify-between text-sm">
+          <div class="flex justify-between items-center text-sm">
             <span class="text-zinc-500">Rate</span>
-            <span class="text-white">1 SOL = {splitdoPerSol().toLocaleString()} SPLITDO</span>
+            <div class="flex items-center gap-2">
+              <span class="text-white">1 SOL = {splitdoPerSol().toLocaleString()} SPLITDO</span>
+              {/* Countdown Ring */}
+              <div class="relative w-7 h-7 flex items-center justify-center">
+                <svg class="w-7 h-7 -rotate-90" viewBox="0 0 28 28">
+                  {/* Background circle */}
+                  <circle
+                    cx="14"
+                    cy="14"
+                    r={ringRadius}
+                    fill="none"
+                    stroke="rgb(63, 63, 70)"
+                    stroke-width="2"
+                  />
+                  {/* Progress circle */}
+                  <circle
+                    cx="14"
+                    cy="14"
+                    r={ringRadius}
+                    fill="none"
+                    stroke="rgb(6, 182, 212)"
+                    stroke-width="2"
+                    stroke-dasharray={String(ringCircumference)}
+                    stroke-dashoffset={String(ringCircumference - ringProgress())}
+                    stroke-linecap="round"
+                    class="transition-all duration-1000 ease-linear"
+                  />
+                </svg>
+                <span class="absolute text-[9px] font-bold text-cyan-400">{countdown()}</span>
+              </div>
+            </div>
           </div>
-          <div class="flex justify-between text-sm">
+          <div class="flex justify-between items-center text-sm">
             <span class="text-zinc-500">SOL Price</span>
-            <span class="text-white">${props.solPriceUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+            <div class="flex items-center gap-2">
+              <Show when={props.isPriceRefreshing}>
+                <div class="w-3 h-3 border border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+              </Show>
+              <span class="text-white">${props.solPriceUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+              <span class="text-[10px] text-zinc-600">via Pyth</span>
+            </div>
           </div>
         </div>
       </Show>
@@ -563,9 +652,9 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
       {/* Exchange Button */}
       <button
         onClick={handleExchange}
-        disabled={!isValidAmount() || props.exchangeStatus === 'loading'}
+        disabled={!isValidAmount() || props.exchangeStatus === 'loading' || props.isPriceRefreshing || props.solPriceUSD === 0}
         class={`w-full py-4 font-bold text-base rounded-xl transition-all ${
-          !isValidAmount() || props.exchangeStatus === 'loading'
+          !isValidAmount() || props.exchangeStatus === 'loading' || props.isPriceRefreshing || props.solPriceUSD === 0
             ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
             : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white'
         }`}
@@ -576,7 +665,14 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
             Processing...
           </span>
         }>
-          Exchange Tokens
+          <Show when={!props.isPriceRefreshing} fallback={
+            <span class="flex items-center justify-center gap-2">
+              <div class="w-4 h-4 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin"></div>
+              Refreshing price...
+            </span>
+          }>
+            Exchange Tokens
+          </Show>
         </Show>
       </button>
 
