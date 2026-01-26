@@ -723,28 +723,46 @@ export class MetaMaskSolanaProvider implements WalletProvider {
       
       console.log('[MetaMaskSolanaProvider] 📋 Calling MetaMask Wallet Standard signTransaction...');
       
-      // Sign using Wallet Standard API - FIXED FORMAT
+      // Sign using Wallet Standard API - ARRAY RESPONSE HANDLING
       const result = await (signFeature as any).signTransaction({
         account: {
           address: account.address,
           chains: account.chains
         },
-        transaction: serializedTransaction
+        transaction: serializedTransaction,
+        chain: 'solana:mainnet' // Add chain specification for MetaMask
       });
       
-      console.log('[MetaMaskSolanaProvider] 🔍 Sign result received:', typeof result, Object.keys(result || {}));
+      console.log('[MetaMaskSolanaProvider] 🔍 Sign result received:', typeof result, Array.isArray(result) ? `Array[${result.length}]` : Object.keys(result || {}));
+      console.log('[MetaMaskSolanaProvider] 🔍 Raw result structure:', result);
       
-      // Handle different possible result formats from MetaMask
+      // CRITICAL FIX: Handle MetaMask's array response format
       let signedTxData: Uint8Array;
       
-      if (result.signedTransactions && result.signedTransactions.length > 0) {
+      if (Array.isArray(result) && result.length > 0) {
+        // MetaMask Wallet Standard returns array format: [{ signedTransaction: Uint8Array }]
+        const signedData = result[0];
+        console.log('[MetaMaskSolanaProvider] 🔍 Processing array element:', typeof signedData, Object.keys(signedData || {}));
+        
+        if (signedData && signedData.signedTransaction) {
+          signedTxData = signedData.signedTransaction;
+          console.log('[MetaMaskSolanaProvider] ✅ Extracted signedTransaction from array format');
+        } else {
+          console.error('[MetaMaskSolanaProvider] ❌ Array element missing signedTransaction:', signedData);
+          throw new WalletSigningError('MetaMask', 'Array response missing signedTransaction property');
+        }
+      } else if (result.signedTransactions && result.signedTransactions.length > 0) {
         signedTxData = result.signedTransactions[0];
+        console.log('[MetaMaskSolanaProvider] ✅ Using signedTransactions[0] format');
       } else if (result.signedTransaction) {
         signedTxData = result.signedTransaction;
+        console.log('[MetaMaskSolanaProvider] ✅ Using signedTransaction format');
       } else if (result.transaction) {
         signedTxData = result.transaction;
+        console.log('[MetaMaskSolanaProvider] ✅ Using transaction format');
       } else {
         console.error('[MetaMaskSolanaProvider] ❌ Unexpected sign result format:', result);
+        console.error('[MetaMaskSolanaProvider] ❌ Result type:', typeof result, 'IsArray:', Array.isArray(result));
         throw new WalletSigningError('MetaMask', 'Transaction signing failed - unexpected response format');
       }
 
@@ -752,9 +770,21 @@ export class MetaMaskSolanaProvider implements WalletProvider {
         throw new WalletSigningError('MetaMask', 'Transaction signing failed - no signed transaction returned');
       }
 
+      console.log('[MetaMaskSolanaProvider] 🔍 Signed transaction data:', {
+        type: typeof signedTxData,
+        constructor: signedTxData.constructor.name,
+        length: signedTxData.length,
+        isUint8Array: signedTxData instanceof Uint8Array
+      });
+
+      // Convert to Base64 for exchange API compatibility (for debugging)
+      const base64Transaction = Buffer.from(signedTxData).toString('base64');
+      console.log('[MetaMaskSolanaProvider] 🔄 Base64 transaction for exchange API:', base64Transaction.substring(0, 100) + '...');
+
       // Deserialize the signed transaction
       const signedTransaction = Transaction.from(signedTxData);
       console.log('[MetaMaskSolanaProvider] ✅ Transaction signed successfully via Wallet Standard');
+      console.log('[MetaMaskSolanaProvider] 🎯 Signed transaction ready for exchange API');
       
       return signedTransaction;
       
