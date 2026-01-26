@@ -415,7 +415,7 @@ const WalletPage: Component<{ isDark: boolean }> = (props) => {
                     <span class="text-sm font-medium text-white">SOL / USD</span>
                     <span class="text-[10px] px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded">LIVE</span>
                   </div>
-                  <div class="text-xs text-zinc-500">Live market price from Pyth</div>
+                  <div class="text-xs text-zinc-500">Live market price</div>
                 </div>
               </div>
               <Show

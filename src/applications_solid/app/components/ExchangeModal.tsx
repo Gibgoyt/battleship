@@ -643,7 +643,7 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
                 <div class="w-3 h-3 border border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
               </Show>
               <span class="text-white">${props.solPriceUSD.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-              <span class="text-[10px] text-zinc-600">via Pyth</span>
+              <span class="text-[10px] text-zinc-600">live</span>
             </div>
           </div>
         </div>
