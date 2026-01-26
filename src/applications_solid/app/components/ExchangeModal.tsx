@@ -14,7 +14,10 @@ export interface ExchangeModalProps {
 export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
   const wallet = useUnifiedWallet();
 
-  const [step, setStep] = createSignal<'wallet' | 'exchange'>('wallet');
+  // Skip wallet selection if already connected — go straight to exchange
+  const [step, setStep] = createSignal<'wallet' | 'exchange'>(
+    wallet.connectionStatus() === 'connected' ? 'exchange' : 'wallet'
+  );
   const [solAmount, setSolAmount] = createSignal('');
   const [isConnecting, setIsConnecting] = createSignal(false);
   const [showMobileInstallation, setShowMobileInstallation] = createSignal(false);
@@ -50,6 +53,11 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
       wallet.fetchExchangeRates();
       fetchSolPrice();
 
+      // Skip wallet selection if already connected
+      if (wallet.connectionStatus() === 'connected') {
+        setStep('exchange');
+      }
+
       // Setup mobile wallet return listeners for iOS/Android deep links
       setupMobileReturnListener();
     } else if (!wallet.isExchangeModalOpen()) {
@@ -60,7 +68,8 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
 
   const handleClose = () => {
     wallet.closeExchangeModal();
-    setStep('wallet');
+    // Reset to exchange if connected, wallet selection otherwise
+    setStep(wallet.connectionStatus() === 'connected' ? 'exchange' : 'wallet');
     setSolAmount('');
     setShowMobileInstallation(false);
   };
@@ -121,6 +130,7 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
                 exchangeError={wallet.exchangeError()}
                 executeExchange={wallet.executeExchange}
                 onBack={() => setStep('wallet')}
+                showBack={wallet.connectionStatus() !== 'connected'}
                 exchangeRate={wallet.exchangeRates()?.exchangeRate || 1}
                 solPriceUSD={solPriceUSD()}
                 isPriceRefreshing={isPriceRefreshing()}
@@ -437,6 +447,7 @@ interface ExchangeFormProps {
   exchangeError: string | null;
   executeExchange: (amount: number) => Promise<any>;
   onBack: () => void;
+  showBack: boolean;
   exchangeRate: number;
   solPriceUSD: number;
   isPriceRefreshing: boolean;
@@ -524,16 +535,18 @@ const ExchangeForm: Component<ExchangeFormProps> = (props) => {
 
   return (
     <div class="space-y-5">
-      {/* Back Button */}
-      <button
-        onClick={props.onBack}
-        class="text-sm flex items-center gap-1.5 text-zinc-500 hover:text-white transition-colors"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-        Back
-      </button>
+      {/* Back Button - only show if wallet selection step is available */}
+      <Show when={props.showBack}>
+        <button
+          onClick={props.onBack}
+          class="text-sm flex items-center gap-1.5 text-zinc-500 hover:text-white transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
+        </button>
+      </Show>
 
       {/* You Pay */}
       <div>

@@ -706,11 +706,14 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
 
             if (currentWallet?.address) {
               try {
-                // Import solanaService dynamically
-                const { solanaService } = await import('./solana-service');
-                const solBalance = await solanaService.getSolBalance(currentWallet.address);
-                solBalanceValue = solBalance.sol;
-                logger.debug('✅ Fetched SOL balance for user without SPLITDO account:', solBalanceValue, 'SOL');
+                // Call the unauthenticated balance endpoint directly (avoids health check that can fail)
+                const { GET: getWalletBalance } = await import('../../middleware/endpoints/devbackend_noauth/_api/solana/wallet/:pubkey/balance/GET');
+                const response = await getWalletBalance(currentWallet.address);
+                if (response.status === 200 && response.data.success) {
+                  const lamports = response.data.balance || 0;
+                  solBalanceValue = lamports / 1_000_000_000; // LAMPORTS_PER_SOL
+                  logger.debug('✅ Fetched SOL balance for user without SPLITDO account:', solBalanceValue, 'SOL');
+                }
               } catch (error) {
                 logger.warn('⚠️ Failed to fetch SOL balance, defaulting to 0:', error);
               }
@@ -736,16 +739,19 @@ export const UnifiedWalletProvider: ParentComponent<UnifiedWalletProviderProps> 
             throw new Error(`Balance API returned ${balanceResponse.status}: ${balanceResponse.data.message || 'Unknown error'}`);
           }
 
-          // Fetch SOL balance from backend
+          // Fetch SOL balance from backend (unauthenticated endpoint, bypasses health check)
           let solBalanceValue = 0;
           const currentWallet = wallet();
 
           if (currentWallet?.address) {
             try {
-              const { solanaService } = await import('./solana-service');
-              const solBalance = await solanaService.getSolBalance(currentWallet.address);
-              solBalanceValue = solBalance.sol;
-              logger.debug('✅ Fetched SOL balance:', solBalanceValue, 'SOL');
+              const { GET: getWalletBalance } = await import('../../middleware/endpoints/devbackend_noauth/_api/solana/wallet/:pubkey/balance/GET');
+              const solResponse = await getWalletBalance(currentWallet.address);
+              if (solResponse.status === 200 && solResponse.data.success) {
+                const lamports = solResponse.data.balance || 0;
+                solBalanceValue = lamports / 1_000_000_000; // LAMPORTS_PER_SOL
+                logger.debug('✅ Fetched SOL balance:', solBalanceValue, 'SOL');
+              }
             } catch (error) {
               logger.warn('⚠️ Failed to fetch SOL balance, defaulting to 0:', error);
             }
