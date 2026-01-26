@@ -690,6 +690,10 @@ export class MetaMaskSolanaProvider implements WalletProvider {
       throw new WalletSigningError('MetaMask', 'MetaMask wallet not found via Wallet Standard');
     }
 
+    // CRITICAL FIX: Extract accounts again since they exist after connection
+    console.log('[MetaMaskSolanaProvider] 🔄 Extracting current Solana accounts for signing...');
+    await extractSolanaAccounts(walletInfo);
+
     // Check for Solana signing feature
     const signFeature = walletInfo.wallet.features['solana:signTransaction'];
     
@@ -705,7 +709,7 @@ export class MetaMaskSolanaProvider implements WalletProvider {
     
     if (!account) {
       throw new WalletSigningError('MetaMask', 
-        'Connected Solana account not found. Please reconnect your wallet.');
+        `Connected Solana account not found. Expected: ${this.publicKey?.toBase58()}, Available: ${walletInfo.solanaAccounts.map(a => a.address).join(', ')}`);
     }
 
     console.log('[MetaMaskSolanaProvider] 🔄 Signing transaction with account:', account.address);
@@ -717,27 +721,51 @@ export class MetaMaskSolanaProvider implements WalletProvider {
         verifySignatures: false 
       });
       
-      // Sign using Wallet Standard API
-      const { signedTransactions } = await (signFeature as any).signTransaction({
+      console.log('[MetaMaskSolanaProvider] 📋 Calling MetaMask Wallet Standard signTransaction...');
+      
+      // Sign using Wallet Standard API - FIXED FORMAT
+      const result = await (signFeature as any).signTransaction({
         account: {
           address: account.address,
           chains: account.chains
         },
-        transaction: serializedTransaction,
+        transaction: serializedTransaction
       });
       
-      if (!signedTransactions || signedTransactions.length === 0) {
+      console.log('[MetaMaskSolanaProvider] 🔍 Sign result received:', typeof result, Object.keys(result || {}));
+      
+      // Handle different possible result formats from MetaMask
+      let signedTxData: Uint8Array;
+      
+      if (result.signedTransactions && result.signedTransactions.length > 0) {
+        signedTxData = result.signedTransactions[0];
+      } else if (result.signedTransaction) {
+        signedTxData = result.signedTransaction;
+      } else if (result.transaction) {
+        signedTxData = result.transaction;
+      } else {
+        console.error('[MetaMaskSolanaProvider] ❌ Unexpected sign result format:', result);
+        throw new WalletSigningError('MetaMask', 'Transaction signing failed - unexpected response format');
+      }
+
+      if (!signedTxData) {
         throw new WalletSigningError('MetaMask', 'Transaction signing failed - no signed transaction returned');
       }
 
       // Deserialize the signed transaction
-      const signedTransaction = Transaction.from(signedTransactions[0]);
+      const signedTransaction = Transaction.from(signedTxData);
       console.log('[MetaMaskSolanaProvider] ✅ Transaction signed successfully via Wallet Standard');
       
       return signedTransaction;
       
     } catch (error) {
       console.error('[MetaMaskSolanaProvider] ❌ Wallet Standard signing failed:', error);
+      
+      // Enhanced error handling
+      if (error && (error as any).code === 4001) {
+        throw new WalletSigningError('MetaMask', 'User rejected the transaction signature request');
+      }
+      
       throw new WalletSigningError('MetaMask', 
         `Transaction signing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
