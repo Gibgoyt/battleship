@@ -36,6 +36,7 @@
     "@tailwindcss/vite": "^4.1.8",
     "@wallet-standard/app": "^1.0.3",
     "@wallet-standard/base": "^1.0.1",
+    "@wallet-standard/core": "^1.1.1",
     "@wallet-standard/features": "^1.0.3",
     "@wallet-standard/wallet": "^1.0.1",
     "@walletconnect/sign-client": "^2.17.2",
