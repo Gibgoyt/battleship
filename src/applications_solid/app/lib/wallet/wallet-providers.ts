@@ -13,7 +13,7 @@ import { getDeviceInfo, getMetaMaskEnvironment, logMetaMaskDetectionDebug } from
 import { PhantomMobileProvider } from './phantom-mobile-provider';
 import { iOSPhantomAuthManager } from './ios-phantom-auth-manager';
 // Import Wallet Standard utilities for clean MetaMask mobile browser connection
-import { getMetaMaskWalletInfo, validateMetaMaskSolanaSupport, getBestSolanaAccount } from './wallet-standard-utils';
+import { getMetaMaskWalletInfo, connectToMetaMaskWallet, extractSolanaAccounts, validateMetaMaskSolanaSupport, getBestSolanaAccount } from './wallet-standard-utils';
 
 // Core wallet provider interface
 export interface WalletProvider {
@@ -520,16 +520,19 @@ export class MetaMaskSolanaProvider implements WalletProvider {
 
   /**
    * Connect using Wallet Standard API (MetaMask Mobile Browser)
-   * CLEAN 2-STAGE IMPLEMENTATION:
-   * STAGE 1: CONNECT - Establish connection via Wallet Standard API
-   * STAGE 2: VALIDATE SOLANA - Ensure Solana account exists and is functional
+   * CLEAN 3-STAGE IMPLEMENTATION:
+   * STAGE 1: DETECT - Find MetaMask wallet via Wallet Standard
+   * STAGE 2: CONNECT - Establish connection (triggers MetaMask popup) 
+   * STAGE 3: VALIDATE SOLANA - Extract and validate Solana accounts
    * NO ETHEREUM FALLBACKS! NO SNAPS! PURE WALLET STANDARD APPROACH!
    */
   private async connectWithWalletStandard(): Promise<{ publicKey: PublicKey }> {
-    console.log('[MetaMaskSolanaProvider] 📱 CLEAN MetaMask Mobile Browser Connection (2-Stage Wallet Standard)');
+    console.log('[MetaMaskSolanaProvider] 📱 CLEAN MetaMask Mobile Browser Connection (3-Stage Wallet Standard)');
 
-    // STAGE 1: CONNECT - Get MetaMask wallet via Wallet Standard
-    console.log('[MetaMaskSolanaProvider] 🔄 STAGE 1: Connecting via Wallet Standard API');
+
+
+    // STAGE 1: DETECT - Find MetaMask wallet via Wallet Standard
+    console.log('[MetaMaskSolanaProvider] 🔍 STAGE 1: Detecting MetaMask wallet...');
     
     const walletInfo = await getMetaMaskWalletInfo();
     
@@ -540,14 +543,36 @@ export class MetaMaskSolanaProvider implements WalletProvider {
 
     console.log('[MetaMaskSolanaProvider] ✅ STAGE 1 Complete: MetaMask wallet detected');
 
-    // STAGE 2: VALIDATE SOLANA - Ensure Solana support exists
-    console.log('[MetaMaskSolanaProvider] 🔍 STAGE 2: Validating Solana support');
+    // STAGE 2: CONNECT - Establish connection (THIS IS WHAT WAS MISSING!)
+    console.log('[MetaMaskSolanaProvider] 🔌 STAGE 2: Connecting to MetaMask (will trigger popup)...');
+    
+    try {
+      await connectToMetaMaskWallet(walletInfo);
+      console.log('[MetaMaskSolanaProvider] ✅ STAGE 2 Complete: Connection established');
+    } catch (error) {
+      console.error('[MetaMaskSolanaProvider] ❌ STAGE 2 Failed: Connection failed');
+      throw new WalletConnectionError('MetaMask', 
+        error instanceof Error ? error.message : 'Failed to connect to MetaMask');
+    }
+
+    // STAGE 3: EXTRACT & VALIDATE SOLANA - Now accounts are available!
+    console.log('[MetaMaskSolanaProvider] 🔍 STAGE 3: Extracting Solana accounts...');
+    
+    try {
+      await extractSolanaAccounts(walletInfo);
+      console.log('[MetaMaskSolanaProvider] ✅ STAGE 3a Complete: Solana accounts extracted');
+    } catch (error) {
+      console.error('[MetaMaskSolanaProvider] ❌ STAGE 3a Failed: Account extraction failed');
+      throw error;
+    }
+
+    console.log('[MetaMaskSolanaProvider] 🔍 STAGE 3b: Validating Solana support...');
     
     try {
       validateMetaMaskSolanaSupport(walletInfo);
-      console.log('[MetaMaskSolanaProvider] ✅ STAGE 2 Complete: Solana support validated');
+      console.log('[MetaMaskSolanaProvider] ✅ STAGE 3b Complete: Solana support validated');
     } catch (error) {
-      console.error('[MetaMaskSolanaProvider] ❌ STAGE 2 Failed: Solana validation failed');
+      console.error('[MetaMaskSolanaProvider] ❌ STAGE 3b Failed: Solana validation failed');
       throw error;
     }
 
@@ -555,7 +580,7 @@ export class MetaMaskSolanaProvider implements WalletProvider {
     const solanaAccount = getBestSolanaAccount(walletInfo);
     this.publicKey = solanaAccount.publicKey;
     
-    console.log('[MetaMaskSolanaProvider] 🎉 CONNECTION SUCCESS: Clean Wallet Standard connection established');
+    console.log('[MetaMaskSolanaProvider] 🎉 CONNECTION SUCCESS: Clean 3-stage Wallet Standard connection established');
     console.log('[MetaMaskSolanaProvider] 🔑 Solana Address:', this.publicKey.toBase58());
     console.log('[MetaMaskSolanaProvider] 🌐 Supported Chains:', solanaAccount.chains);
 

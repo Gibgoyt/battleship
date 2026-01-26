@@ -6,7 +6,7 @@
  */
 
 import { getMetaMaskEnvironment } from './exchange-utils';
-import { getMetaMaskWalletInfo, validateMetaMaskSolanaSupport, getBestSolanaAccount, debugWalletStandardInfo } from './wallet-standard-utils';
+import { getMetaMaskWalletInfo, connectToMetaMaskWallet, extractSolanaAccounts, validateMetaMaskSolanaSupport, getBestSolanaAccount, debugWalletStandardInfo } from './wallet-standard-utils';
 import { MetaMaskSolanaProvider } from './wallet-providers';
 
 /**
@@ -79,10 +79,10 @@ export async function testWalletStandardDetection() {
 }
 
 /**
- * Test the complete 2-stage connection flow
+ * Test the complete 3-stage connection flow (FIXED WITH CONNECTION!)
  */
 export async function testMetaMaskMobileConnection() {
-  console.group('🚀 MetaMask Mobile Connection Test (2-Stage Flow)');
+  console.group('🚀 MetaMask Mobile Connection Test (3-Stage Flow)');
   
   try {
     // Stage 1: Environment check
@@ -95,7 +95,7 @@ export async function testMetaMaskMobileConnection() {
     
     console.log('✅ STAGE 1 Complete: Environment is MetaMask mobile browser');
     
-    // Stage 2: Wallet Standard detection
+    // Stage 2: Wallet Standard detection (no connection yet)
     console.log('\n📋 STAGE 2: Wallet Standard Detection');
     const walletInfo = await testWalletStandardDetection();
     
@@ -105,15 +105,37 @@ export async function testMetaMaskMobileConnection() {
     
     console.log('✅ STAGE 2 Complete: Wallet Standard API working');
     
-    // Stage 3: Solana validation
-    console.log('\n📋 STAGE 3: Solana Support Validation');
-    validateMetaMaskSolanaSupport(walletInfo);
-    console.log('✅ STAGE 3 Complete: Solana support validated');
+    // Stage 3: CONNECTION (THIS IS THE MISSING PIECE!)
+    console.log('\n📋 STAGE 3: Connecting to MetaMask (will trigger popup)');
     
-    // Stage 4: Account selection
-    console.log('\n📋 STAGE 4: Best Solana Account Selection');
+    try {
+      await connectToMetaMaskWallet(walletInfo);
+      console.log('✅ STAGE 3 Complete: Connection established');
+    } catch (error) {
+      console.error('❌ STAGE 3 Failed: Connection failed');
+      throw error;
+    }
+    
+    // Stage 4: Extract Solana accounts (AFTER connection)
+    console.log('\n📋 STAGE 4: Extracting Solana accounts after connection');
+    
+    try {
+      await extractSolanaAccounts(walletInfo);
+      console.log('✅ STAGE 4 Complete: Solana accounts extracted');
+    } catch (error) {
+      console.error('❌ STAGE 4 Failed: Account extraction failed');
+      throw error;
+    }
+    
+    // Stage 5: Solana validation
+    console.log('\n📋 STAGE 5: Solana Support Validation');
+    validateMetaMaskSolanaSupport(walletInfo);
+    console.log('✅ STAGE 5 Complete: Solana support validated');
+    
+    // Stage 6: Account selection
+    console.log('\n📋 STAGE 6: Best Solana Account Selection');
     const bestAccount = getBestSolanaAccount(walletInfo);
-    console.log('✅ STAGE 4 Complete: Best account selected');
+    console.log('✅ STAGE 6 Complete: Best account selected');
     console.log('Selected account:', bestAccount.address);
     console.log('Supported chains:', bestAccount.chains.join(', '));
     

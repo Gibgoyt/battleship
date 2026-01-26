@@ -21,10 +21,11 @@ export interface SolanaAccount {
 
 /**
  * Get MetaMask wallet information via Wallet Standard API
+ * STAGE 1: DETECT MetaMask wallet
  * This is the clean way to detect MetaMask in mobile browser environments
  */
 export async function getMetaMaskWalletInfo(): Promise<MetaMaskWalletInfo | null> {
-  console.log('[WalletStandardUtils] 🔍 Detecting MetaMask via Wallet Standard API');
+  console.log('[WalletStandardUtils] 🔍 STAGE 1: Detecting MetaMask via Wallet Standard API');
 
   const wallets = getWallets();
   
@@ -51,11 +52,64 @@ export async function getMetaMaskWalletInfo(): Promise<MetaMaskWalletInfo | null
   );
 
   console.log('[WalletStandardUtils] 🟣 Has Solana support:', hasSolanaSupport);
+  console.log('[WalletStandardUtils] 📊 Accounts BEFORE connection:', metaMaskWallet.accounts.length);
 
-  // Extract Solana accounts
+  return {
+    wallet: metaMaskWallet,
+    hasSolanaSupport,
+    solanaAccounts: [], // Will be populated after connection
+    supportedFeatures
+  };
+}
+
+/**
+ * STAGE 2: CONNECT to MetaMask wallet (triggers permission popup)
+ * This is the CRITICAL missing step that populates the accounts array
+ */
+export async function connectToMetaMaskWallet(walletInfo: MetaMaskWalletInfo): Promise<void> {
+  console.log('[WalletStandardUtils] 🔌 STAGE 2: Connecting to MetaMask wallet...');
+
+  // Check if wallet has connect feature
+  const connectFeature = walletInfo.wallet.features['standard:connect'];
+  if (!connectFeature) {
+    throw new Error('MetaMask does not support standard:connect feature. Please update MetaMask.');
+  }
+
+  try {
+    // THIS IS THE CRITICAL MISSING STEP!
+    // This triggers the MetaMask permission popup
+    console.log('[WalletStandardUtils] 🔄 Calling wallet.connect() - this will trigger MetaMask popup...');
+    await (connectFeature as any).connect();
+    
+    console.log('[WalletStandardUtils] ✅ Connection successful - MetaMask connected!');
+    console.log('[WalletStandardUtils] 📊 Accounts AFTER connection:', walletInfo.wallet.accounts.length);
+    
+  } catch (error) {
+    console.error('[WalletStandardUtils] ❌ Connection failed:', error);
+    
+    if (error && (error as any).code === 4001) {
+      throw new Error('User rejected the connection request. Please try again and approve the connection in MetaMask.');
+    }
+    
+    throw new Error(`Failed to connect to MetaMask: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * STAGE 3: EXTRACT Solana accounts (AFTER connection)
+ * Now that we're connected, the accounts array will be populated
+ */
+export async function extractSolanaAccounts(walletInfo: MetaMaskWalletInfo): Promise<void> {
+  console.log('[WalletStandardUtils] 🔍 STAGE 3: Extracting Solana accounts after connection...');
+
   const solanaAccounts: SolanaAccount[] = [];
   
-  for (const account of metaMaskWallet.accounts) {
+  console.log('[WalletStandardUtils] 🔄 Processing', walletInfo.wallet.accounts.length, 'total accounts...');
+  
+  for (const account of walletInfo.wallet.accounts) {
+    console.log('[WalletStandardUtils] 🔍 Checking account:', account.address);
+    console.log('[WalletStandardUtils] 📋 Account chains:', account.chains);
+    
     const solanaChains = account.chains.filter(chain => chain.startsWith('solana:'));
     
     if (solanaChains.length > 0) {
@@ -66,7 +120,8 @@ export async function getMetaMaskWalletInfo(): Promise<MetaMaskWalletInfo | null
           chains: solanaChains,
           publicKey
         });
-        console.log('[WalletStandardUtils] 🔑 Solana account found:', account.address);
+        console.log('[WalletStandardUtils] ✅ Solana account found:', account.address);
+        console.log('[WalletStandardUtils] 🌐 Supported chains:', solanaChains);
       } catch (error) {
         console.warn('[WalletStandardUtils] ⚠️ Invalid Solana address:', account.address, error);
       }
@@ -74,13 +129,9 @@ export async function getMetaMaskWalletInfo(): Promise<MetaMaskWalletInfo | null
   }
 
   console.log('[WalletStandardUtils] 📊 Total Solana accounts found:', solanaAccounts.length);
-
-  return {
-    wallet: metaMaskWallet,
-    hasSolanaSupport,
-    solanaAccounts,
-    supportedFeatures
-  };
+  
+  // Update the wallet info with extracted accounts
+  walletInfo.solanaAccounts = solanaAccounts;
 }
 
 /**
