@@ -1,0 +1,69 @@
+---
+import 'src/styles/global.css'
+import App from 'src/applications_solid/guide/App.tsx'
+
+/**
+ * GUIDE PAGE - NO AUTHENTICATION REQUIRED
+ *
+ * This file implements a catch-all route ([...all].astro) that:
+ * 1. Handles ALL guide routes under /guide/*
+ * 2. Loads a SolidJS single page application for guides
+ * 3. NO authentication - publicly accessible
+ *
+ * The SolidJS app handles its own routing internally using @solidjs/router
+ * All client-side navigation happens within the SPA without page reloads
+ */
+
+// Execute each GET /guide on CF Workers (i.e. CF Pages server)
+export const prerender = false;
+
+// ==== ROUTE VALIDATION LOGIC ====
+// Extract route from URL
+const pathSegments = Astro.url.pathname.split('/').filter(Boolean)
+const guideRoute = pathSegments[1] // The part after /guide/
+
+// Define valid routes
+const validRoutes = ['web', 'android', 'ios']
+
+// Handle route validation
+if (pathSegments[0] === 'guide') {
+  if (!guideRoute) {
+    // /guide/ with no subroute - let SolidJS handle default
+  } else if (!validRoutes.includes(guideRoute)) {
+    // Invalid: redirect to main guide page
+    return Astro.redirect('/guide', 302)
+  }
+}
+// ==== END ROUTE VALIDATION LOGIC ====
+
+// Set security headers
+Astro.response.headers.set('X-Frame-Options', 'DENY')
+---
+<!DOCTYPE html>
+<html lang="en" class="h-full dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary Meta Tags -->
+  <title>SPLITDO Guide - How to Sign Up & Exchange Tokens</title>
+  <meta name="title" content="SPLITDO Guide - How to Sign Up & Exchange Tokens" />
+  <meta name="description" content="Step-by-step guide for signing up to SPLITDO, connecting your wallet, and exchanging SOL for SPLITDO tokens. Guides for Web, Android, and iOS." />
+  
+  <!-- Allow indexing of guide pages -->
+  <meta name="robots" content="index, follow" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="SPLITDO Guide - How to Sign Up & Exchange Tokens" />
+  <meta property="og:description" content="Step-by-step guide for signing up to SPLITDO, connecting your wallet, and exchanging SOL for SPLITDO tokens." />
+  <meta property="og:site_name" content="SplitDo" />
+  
+  <meta name="theme-color" content="#0A0E1A">
+  <meta name="color-scheme" content="dark">
+</head>
+<body class="h-full overflow-x-hidden bg-zinc-950 text-white">
+<!-- Render SolidJS Guide App with Astro's integration -->
+<App client:only="solid-js" />
+</body>
+</html>

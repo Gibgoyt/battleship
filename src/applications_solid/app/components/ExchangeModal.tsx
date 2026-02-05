@@ -66,6 +66,15 @@ export const ExchangeModal: Component<ExchangeModalProps> = (props) => {
     }
   });
 
+  // Reactively switch to exchange step when wallet connects
+  // This handles async connections and mobile deep link returns
+  createEffect(() => {
+    if (wallet.connectionStatus() === 'connected' && step() === 'wallet') {
+      console.log('[ExchangeModal] Wallet connected - switching to exchange step');
+      setStep('exchange');
+    }
+  });
+
   const handleClose = () => {
     wallet.closeExchangeModal();
     // Reset to exchange if connected, wallet selection otherwise
