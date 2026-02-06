@@ -10,34 +10,22 @@ import App from 'src/applications_solid/guide/App.tsx'
  * 2. Loads a SolidJS single page application for guides
  * 3. NO authentication - publicly accessible
  *
- * The SolidJS app handles its own routing internally using @solidjs/router
+ * The SolidJS app handles its own routing internally
  * All client-side navigation happens within the SPA without page reloads
  */
 
-// Execute each GET /guide on CF Workers (i.e. CF Pages server)
+// Prerender static HTML pages for all guide routes
 export const prerender = true;
 
-// ==== ROUTE VALIDATION LOGIC ====
-// Extract route from URL
-const pathSegments = Astro.url.pathname.split('/').filter(Boolean)
-const guideRoute = pathSegments[1] // The part after /guide/
-
-// Define valid routes
-const validRoutes = ['web', 'android', 'ios']
-
-// Handle route validation
-if (pathSegments[0] === 'guide') {
-  if (!guideRoute) {
-    // /guide/ with no subroute - let SolidJS handle default
-  } else if (!validRoutes.includes(guideRoute)) {
-    // Invalid: redirect to main guide page
-    return Astro.redirect('/guide', 302)
-  }
+// Define static paths for all possible guide routes
+export async function getStaticPaths() {
+  return [
+    { params: { all: undefined } }, // /guide/
+    { params: { all: 'web' } },     // /guide/web
+    { params: { all: 'android' } }, // /guide/android
+    { params: { all: 'ios' } }      // /guide/ios
+  ];
 }
-// ==== END ROUTE VALIDATION LOGIC ====
-
-// Set security headers
-Astro.response.headers.set('X-Frame-Options', 'DENY')
 ---
 <!DOCTYPE html>
 <html lang="en" class="h-full dark">
