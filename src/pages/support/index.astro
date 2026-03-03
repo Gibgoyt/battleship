@@ -1,0 +1,109 @@
+---
+import Layout from 'src/layouts/Layout.astro';
+
+export const prerender = true;
+---
+
+<Layout
+  title="Support | SplitDo - Get Help with Bill Splitting"
+  description="Need help with SplitDo? Find answers to frequently asked questions about groups, expenses, settlements, and more. Contact our support team."
+  keywords="SplitDo support, help, FAQ, bill splitting help, crypto payments support"
+>
+  <main class="bg-zinc-950 text-white min-h-screen">
+
+    <!-- Hero -->
+    <section class="py-24 sm:py-32 px-6 border-b border-zinc-800">
+      <div class="max-w-3xl mx-auto">
+        <h1 class="text-5xl sm:text-6xl font-black mb-6">
+          SplitDo <span class="text-cyan-400">Support</span>
+        </h1>
+        <p class="text-xl text-zinc-400">
+          Need help with SplitDo? We're here for you.
+        </p>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="py-16 px-6 border-b border-zinc-800">
+      <div class="max-w-3xl mx-auto">
+        <h2 class="text-2xl font-black mb-6">Contact Us</h2>
+        <div class="p-6 bg-zinc-900 rounded-xl">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-cyan-500/10 flex items-center justify-center rounded-xl flex-shrink-0">
+              <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm text-zinc-500">Email</p>
+              <a href="mailto:support@splitdo.app" class="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors">support@splitdo.app</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-16 px-6">
+      <div class="max-w-3xl mx-auto">
+        <h2 class="text-3xl font-black mb-10">Frequently Asked Questions</h2>
+
+        <div class="space-y-6">
+
+          <div class="p-6 bg-zinc-900 rounded-xl">
+            <h3 class="text-lg font-bold text-white mb-3">How do I create a group?</h3>
+            <p class="text-zinc-400">
+              Tap the Groups tab, then tap "Create Group." Name your group, choose a category, and invite your friends.
+            </p>
+          </div>
+
+          <div class="p-6 bg-zinc-900 rounded-xl">
+            <h3 class="text-lg font-bold text-white mb-3">How do I add an expense?</h3>
+            <p class="text-zinc-400">
+              Open a group, tap "Add Expense," enter the amount and description, choose who's splitting it, and confirm.
+            </p>
+          </div>
+
+          <div class="p-6 bg-zinc-900 rounded-xl">
+            <h3 class="text-lg font-bold text-white mb-3">How do I settle a debt?</h3>
+            <p class="text-zinc-400">
+              Tap "Settle Up" in any group. Select the person you want to settle with, choose the amount, and mark it as paid.
+            </p>
+          </div>
+
+          <div class="p-6 bg-zinc-900 rounded-xl">
+            <h3 class="text-lg font-bold text-white mb-3">How do I edit my profile?</h3>
+            <p class="text-zinc-400">
+              Go to the More tab, tap Profile, then Edit Profile. You can change your display name, username, and bio.
+            </p>
+          </div>
+
+          <div class="p-6 bg-zinc-900 rounded-xl">
+            <h3 class="text-lg font-bold text-white mb-3">Is my data secure?</h3>
+            <p class="text-zinc-400">
+              Yes. All communication between the app and our servers uses HTTPS encryption. Your account is secured through Firebase Authentication.
+            </p>
+          </div>
+
+          <div class="p-6 bg-zinc-900 rounded-xl">
+            <h3 class="text-lg font-bold text-white mb-3">How do I delete my account?</h3>
+            <p class="text-zinc-400">
+              Contact us at <a href="mailto:support@splitdo.app" class="text-cyan-400 hover:text-cyan-300 transition-colors">support@splitdo.app</a> and we will process your account deletion request within 30 days.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-16 px-6 border-t border-zinc-800">
+      <div class="max-w-3xl mx-auto text-center">
+        <p class="text-zinc-500">
+          Still need help? Email us at <a href="mailto:support@splitdo.app" class="text-cyan-400 hover:text-cyan-300 transition-colors">support@splitdo.app</a>
+        </p>
+      </div>
+    </section>
+
+  </main>
+</Layout>
