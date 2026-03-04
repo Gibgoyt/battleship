@@ -38,6 +38,15 @@ function checkCertificates() {
   }
 }
 
+// CORS headers configuration
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, Accept, Origin',
+  'Access-Control-Allow-Credentials': 'true',
+  'Access-Control-Max-Age': '86400' // 24 hours
+};
+
 // Create proxy server
 function createProxy() {
   const proxy = httpProxy.createProxyServer({
@@ -48,14 +57,25 @@ function createProxy() {
     proxyTimeout: 30000
   });
 
+  // Add CORS headers to all proxied responses
+  proxy.on('proxyRes', (proxyRes, req, res) => {
+    Object.keys(CORS_HEADERS).forEach(key => {
+      proxyRes.headers[key.toLowerCase()] = CORS_HEADERS[key];
+    });
+  });
+
   // Error handling for proxy
   proxy.on('error', (err, req, res) => {
     log(`Proxy error: ${err.message}`, colors.error);
-
+    
     // Handle the case where Astro dev server isn't ready yet
     if (err.code === 'ECONNREFUSED') {
       log(`Cannot connect to Astro dev server on port ${ASTRO_PORT}. Make sure it's running.`, colors.error);
       if (res && !res.headersSent) {
+        // Add CORS headers even to error responses
+        Object.keys(CORS_HEADERS).forEach(key => {
+          res.setHeader(key, CORS_HEADERS[key]);
+        });
         res.writeHead(502, { 'Content-Type': 'text/html' });
         res.end(`
           <h1>Proxy Error</h1>
@@ -64,6 +84,10 @@ function createProxy() {
         `);
       }
     } else if (res && !res.headersSent) {
+      // Add CORS headers even to error responses
+      Object.keys(CORS_HEADERS).forEach(key => {
+        res.setHeader(key, CORS_HEADERS[key]);
+      });
       res.writeHead(500, { 'Content-Type': 'text/plain' });
       res.end('Proxy Error: ' + err.message);
     }
@@ -83,7 +107,7 @@ function createProxy() {
 // Main function
 function startProxy() {
   log('Starting HTTPS proxy server...');
-
+  
   // Check certificates first
   if (!checkCertificates()) {
     process.exit(1);
@@ -101,6 +125,17 @@ function startProxy() {
 
     // Create HTTPS server
     const server = https.createServer(sslOptions, (req, res) => {
+      // Handle OPTIONS preflight requests directly
+      if (req.method === 'OPTIONS') {
+        Object.keys(CORS_HEADERS).forEach(key => {
+          res.setHeader(key, CORS_HEADERS[key]);
+        });
+        res.writeHead(204); // No Content
+        res.end();
+        return;
+      }
+
+      // Proxy all other requests
       proxy.web(req, res);
     });
 
@@ -117,6 +152,7 @@ function startProxy() {
     server.listen(HTTPS_PORT, HOST, () => {
       log(`HTTPS proxy running on https://${HOST}:${HTTPS_PORT}`, colors.success);
       log(`Forwarding to http://localhost:${ASTRO_PORT}`, colors.success);
+      log('CORS enabled for all origins', colors.success);
       log('Ready to accept connections from CloudFlare!', colors.success);
     });
 

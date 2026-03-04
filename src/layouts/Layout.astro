@@ -23,6 +23,17 @@ const {
     noindex = false
 } = Astro.props;
 
+// Google Analytics - read at build time (prerendered pages)
+const gaMeasurementId = import.meta.env.PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID;
+
+// Build-time logging for Cloudflare Pages build logs
+if (gaMeasurementId) {
+    console.log(`[GA] Google Analytics measurement ID loaded successfully: ${gaMeasurementId.substring(0, 4)}****`);
+} else {
+    console.warn('[GA] WARNING: GOOGLE_ANALYTICS_MEASUREMENT_ID_PUBLIC_PAGES env var is not set. Google Analytics will NOT be included in prerendered pages.');
+    console.warn('[GA] Set GOOGLE_ANALYTICS_MEASUREMENT_ID_PUBLIC_PAGES in Cloudflare Pages environment variables.');
+}
+
 // Build full canonical URL
 const fullCanonicalUrl = canonicalUrl || `https://splitdo.app${Astro.url.pathname}`;
 // Build full OG image URL
@@ -76,6 +87,26 @@ const fullOgImage = ogImage.startsWith('http') ? ogImage : `https://splitdo.app$
       "sameAs": []
     }
     </script>
+
+    <!-- Google Analytics (gtag.js) - only included when measurement ID is set -->
+    {gaMeasurementId && (
+        <>
+            <script is:inline define:vars={{ gaMeasurementId }}>
+                // Load gtag.js dynamically to avoid CSP issues with direct script src in Astro
+                (function() {
+                    var s = document.createElement('script');
+                    s.async = true;
+                    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaMeasurementId;
+                    document.head.appendChild(s);
+                })();
+
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', gaMeasurementId);
+            </script>
+        </>
+    )}
 
     <script is:inline>
         // Prevent flash of light mode

@@ -61,6 +61,9 @@ export default defineConfig({
       "process.env.CLAUDE_MAX_TOKENS": JSON.stringify(process.env.CLAUDE_MAX_TOKENS),
       "process.env.ANTHROPIC_VERSION": JSON.stringify(process.env.ANTHROPIC_VERSION),
 
+      // Google Analytics (public pages - baked into prerendered HTML at build time)
+      "import.meta.env.PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID": JSON.stringify(process.env.GOOGLE_ANALYTICS_MEASUREMENT_ID_PUBLIC_PAGES),
+
       // Fix for Node.js polyfills in browser (AWS Cognito + Solana)
       global: 'globalThis',
     },

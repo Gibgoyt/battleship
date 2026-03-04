@@ -22,6 +22,9 @@ interface ImportMetaEnv {
   readonly CLAUDE_MAX_TOKENS?: string;
   readonly ANTHROPIC_VERSION?: string;
 
+  // Google Analytics (Public - baked into prerendered HTML at build time)
+  readonly PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID?: string;
+
   // Other environment variables as needed
   readonly NODE_ENV: string;
 }
