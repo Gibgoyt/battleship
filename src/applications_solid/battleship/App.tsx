@@ -19,12 +19,13 @@ const POLL_ACTIVE_MS = 1000;
 const POLL_IDLE_MS = 3000;
 
 function pickCellSize(): number {
-  if (typeof window === 'undefined') return 7;
+  if (typeof window === 'undefined') return 30;
   const w = window.innerWidth;
-  if (w >= 1700) return 8;
-  if (w >= 1400) return 7;
-  if (w >= 1100) return 6;
-  return 5;
+  if (w >= 1920) return 44;
+  if (w >= 1440) return 36;
+  if (w >= 1100) return 30;
+  if (w >= 768) return 22;
+  return 18;
 }
 
 const App: Component = () => {

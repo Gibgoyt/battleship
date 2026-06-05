@@ -25,7 +25,7 @@ export const FLEET: BoatSpec[] = [
   { type: '4x1', baseW: 4, baseH: 1 },
 ];
 
-export const BOARD_SIZE = 100;
+export const BOARD_SIZE = 16;
 
 /** Sum of all boat cells: must equal this many hits to win. */
 export const TOTAL_BOAT_CELLS = FLEET.reduce((s, b) => s + b.baseW * b.baseH, 0);

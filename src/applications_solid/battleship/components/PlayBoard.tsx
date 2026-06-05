@@ -1,6 +1,6 @@
 import { createMemo, Show, type Component } from 'solid-js';
 import BoardCanvas from './BoardCanvas';
-import type { ClientGameState, PlayerNum } from 'src/lib/battleship/types';
+import { BOARD_SIZE, type ClientGameState, type PlayerNum } from 'src/lib/battleship/types';
 
 interface Props {
   cellSize: number;
@@ -22,13 +22,13 @@ const PlayBoard: Component<Props> = (props) => {
 
   const shotSet = createMemo<Set<number>>(() => {
     const s = new Set<number>();
-    for (const sh of props.state.myShotsTaken) s.add(sh.y * 100 + sh.x);
+    for (const sh of props.state.myShotsTaken) s.add(sh.y * BOARD_SIZE + sh.x);
     return s;
   });
 
   const handleShoot = (x: number, y: number) => {
     if (!myTurn() || props.busy) return;
-    if (shotSet().has(y * 100 + x)) return;
+    if (shotSet().has(y * BOARD_SIZE + x)) return;
     props.onShoot(x, y);
   };
 
