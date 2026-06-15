@@ -213,11 +213,11 @@ export async function isBoatCell(
     .prepare(
       `SELECT 1 AS hit FROM boats
        WHERE player = ?
-         AND ? >= x AND ? < x + width
-         AND ? >= y AND ? < y + height
+         AND x <= ? AND ? < x + width
+         AND y <= ? AND ? < y + height
        LIMIT 1`,
     )
-    .bind(player, x, y, x, y)
+    .bind(player, x, x, y, y)
     .first<{ hit: number }>();
   return !!row;
 }
