@@ -105,7 +105,13 @@ const App: Component = () => {
     startPoll();
   };
 
-  const onLogout = () => {
+  const onLogout = async () => {
+    try {
+      await api.leave();
+    } catch {
+      // Best-effort: still log out locally even if the server call fails.
+      // The /battleship/reset page can clear a stuck seat later.
+    }
     clearAll();
     stopPoll();
     setAuthed(false);

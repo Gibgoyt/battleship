@@ -64,4 +64,9 @@ export const api = {
       '/api/battleship/reset',
       { method: 'POST', body: {} },
     ),
+  leave: () =>
+    request<{ status: 'left' }>('/api/battleship/leave', {
+      method: 'POST',
+      body: {},
+    }),
 };
