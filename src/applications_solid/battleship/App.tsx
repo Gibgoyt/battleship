@@ -15,8 +15,8 @@ import PlacementBoard from './components/PlacementBoard';
 import PlayBoard from './components/PlayBoard';
 import type { BoatPlacement, ClientGameState, PlayerNum } from 'src/lib/battleship/types';
 
-const POLL_ACTIVE_MS = 1000;
-const POLL_IDLE_MS = 3000;
+const POLL_ACTIVE_MS = 10000;
+const POLL_IDLE_MS = 10000;
 
 function pickCellSize(): number {
   if (typeof window === 'undefined') return 30;
@@ -188,53 +188,54 @@ const App: Component = () => {
         }
       >
         {(s) => {
-          const game = s();
-          const showPlacement = () =>
-            (game.phase === 'placing' && game.turn === game.you && game.myBoats.length === 0);
+          const showPlacement = () => {
+            const g = s();
+            return g.phase === 'placing' && g.turn === g.you && g.myBoats.length === 0;
+          };
           return (
             <div class="min-h-screen flex flex-col">
               <MenuBar
-                state={game}
+                state={s()}
                 busy={busy()}
                 onReset={onReset}
                 onLogout={onLogout}
               />
-              <StatusBanner state={game} />
+              <StatusBanner state={s()} />
               <Show when={showPlacement()}>
                 <PlacementBoard
                   cellSize={cellSize()}
-                  player={game.you}
+                  player={s().you}
                   busy={busy()}
                   errorMsg={placeError()}
                   onSubmit={onSubmitFleet}
                 />
               </Show>
-              <Show when={!showPlacement() && (game.phase === 'placing' || game.phase === 'waiting')}>
+              <Show when={!showPlacement() && (s().phase === 'placing' || s().phase === 'waiting')}>
                 <div class="p-6 text-zinc-300">
-                  <Show when={game.phase === 'waiting'}>
+                  <Show when={s().phase === 'waiting'}>
                     <p>Share the password with your friend so they can join.</p>
                   </Show>
-                  <Show when={game.phase === 'placing' && game.myBoats.length > 0}>
+                  <Show when={s().phase === 'placing' && s().myBoats.length > 0}>
                     <div class="space-y-3">
                       <p>Your fleet is placed. Waiting for opponent…</p>
                       <PlayBoard
                         cellSize={cellSize()}
-                        state={game}
+                        state={s()}
                         busy={true}
                         errorMsg={null}
                         onShoot={() => { /* noop */ }}
                       />
                     </div>
                   </Show>
-                  <Show when={game.phase === 'placing' && game.turn !== game.you && game.myBoats.length === 0}>
-                    <p>Player {game.turn} is placing their fleet. Your turn next.</p>
+                  <Show when={s().phase === 'placing' && s().turn !== s().you && s().myBoats.length === 0}>
+                    <p>Player {s().turn} is placing their fleet. Your turn next.</p>
                   </Show>
                 </div>
               </Show>
-              <Show when={game.phase === 'playing' || game.phase === 'finished'}>
+              <Show when={s().phase === 'playing' || s().phase === 'finished'}>
                 <PlayBoard
                   cellSize={cellSize()}
-                  state={game}
+                  state={s()}
                   busy={busy()}
                   errorMsg={shootError()}
                   onShoot={onShoot}
