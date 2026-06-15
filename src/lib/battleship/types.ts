@@ -57,6 +57,8 @@ export interface ClientGameState {
   shotsAgainstMe: Shot[];
   /** Only populated when phase === 'finished' */
   opponentBoats: BoatPlacement[] | null;
+  /** Opponent boats the player has fully sunk (always populated; [] when none). */
+  opponentSunkBoats: BoatPlacement[];
 }
 
 /** Validate that a candidate fleet matches the required FLEET composition (after rotation). */

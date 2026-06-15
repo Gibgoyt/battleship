@@ -35,6 +35,7 @@ const App: Component = () => {
   const [placeError, setPlaceError] = createSignal<string | null>(null);
   const [shootError, setShootError] = createSignal<string | null>(null);
   const [cellSize, setCellSize] = createSignal(pickCellSize());
+  const [kickToast, setKickToast] = createSignal<string | null>(null);
 
   let pollTimer: number | undefined;
 
@@ -51,10 +52,20 @@ const App: Component = () => {
       setState(s);
     } catch (e) {
       if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
+        // Seat token no longer matches DB - almost always means someone hit
+        // /battleship/reset and nuked both seats. Flag it for the next page
+        // load and force a hard reload so we start clean and surface the toast.
+        stopPoll();
         clearAll();
+        try {
+          sessionStorage.setItem('bs_kicked', '1');
+        } catch { /* private mode etc. */ }
+        if (typeof window !== 'undefined') {
+          window.location.href = '/battleship';
+          return;
+        }
         setAuthed(false);
         setState(null);
-        stopPoll();
       }
     }
   };
@@ -83,6 +94,14 @@ const App: Component = () => {
     const onResize = () => setCellSize(pickCellSize());
     window.addEventListener('resize', onResize);
     onCleanup(() => window.removeEventListener('resize', onResize));
+
+    try {
+      if (sessionStorage.getItem('bs_kicked') === '1') {
+        sessionStorage.removeItem('bs_kicked');
+        setKickToast('Some blouk reset the game. Log back in to keep playing.');
+        window.setTimeout(() => setKickToast(null), 5000);
+      }
+    } catch { /* private mode etc. */ }
 
     if (getPassHash() && getSeatToken()) {
       try {
@@ -175,6 +194,16 @@ const App: Component = () => {
   });
 
   return (
+    <>
+      <Show when={kickToast()}>
+        <div
+          role="status"
+          aria-live="polite"
+          class="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-lg bg-amber-500 text-amber-950 font-semibold shadow-xl border border-amber-600 max-w-[90vw] text-center"
+        >
+          {kickToast()}
+        </div>
+      </Show>
     <Show
       when={authed()}
       fallback={<Login onAuthed={onAuthed} />}
@@ -246,6 +275,7 @@ const App: Component = () => {
         }}
       </Show>
     </Show>
+    </>
   );
 };
 

@@ -60,7 +60,11 @@ const PlayBoard: Component<Props> = (props) => {
             cellSize={props.cellSize}
             tint={tintFor(opp())}
             shipColor={shipColorFor(opp())}
-            boats={props.state.opponentBoats ?? []}
+            boats={
+              props.state.phase === 'finished'
+                ? (props.state.opponentBoats ?? [])
+                : props.state.opponentSunkBoats
+            }
             shots={props.state.myShotsTaken}
             onCellClick={myTurn() ? handleShoot : undefined}
             label="Enemy waters"

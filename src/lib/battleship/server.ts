@@ -161,6 +161,31 @@ export async function buildClientState(
     }));
   }
 
+  // Opponent boats the player has fully sunk: every cell in the boat's bounding
+  // box has a matching hit shot from this player.
+  const sunkRes = await db
+    .prepare(
+      `SELECT b.boat_type, b.x, b.y, b.width, b.height
+         FROM boats b
+        WHERE b.player = ?
+          AND (
+            SELECT COUNT(*) FROM shots s
+             WHERE s.shooter = ?
+               AND s.hit = 1
+               AND s.x >= b.x AND s.x < b.x + b.width
+               AND s.y >= b.y AND s.y < b.y + b.height
+          ) = b.width * b.height`,
+    )
+    .bind(opponent, player)
+    .all<BoatRow>();
+  const opponentSunkBoats: BoatPlacement[] = (sunkRes.results || []).map((r) => ({
+    type: r.boat_type as BoatPlacement['type'],
+    x: r.x,
+    y: r.y,
+    width: r.width,
+    height: r.height,
+  }));
+
   return {
     you: player,
     phase: game.phase,
@@ -173,6 +198,7 @@ export async function buildClientState(
     myShotsTaken,
     shotsAgainstMe,
     opponentBoats,
+    opponentSunkBoats,
   };
 }
 
