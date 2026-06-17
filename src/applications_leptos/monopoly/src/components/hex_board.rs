@@ -9,10 +9,40 @@ use crate::tiles::{tile_at, TileKind, N_TILES};
 pub fn HexBoard() -> impl IntoView {
     let ctx = use_context::<AppCtx>().expect("app ctx");
 
+    // Effect to focus on current player
+    create_effect(move |_| {
+        let snapshot = ctx.snapshot.get();
+        let my_seat = ctx.my_seat.get();
+        if let (Some(s), Some(my_s)) = (snapshot, my_seat) {
+            if my_s == s.turn.current_seat {
+                let player = s.players.iter().find(|p| p.seat == my_s);
+                if let Some(p) = player {
+                    let (pos, _, _) = crate::board::tile_position(p.position);
+                    ctx.view_center.set(pos);
+                    // ctx.zoom_level.set(2.0); // Optional: automatically zoom when it's player's turn?
+                }
+            }
+        }
+    });
+
+    let vb = move || {
+        let zoom = ctx.zoom_level.get();
+        let (cx, cy) = ctx.view_center.get();
+        let view_size = SIZE / zoom;
+        let min_x = cx - view_size / 2.0;
+        let min_y = cy - view_size / 2.0;
+        format!("{min_x:.1} {min_y:.1} {view_size:.1} {view_size:.1}")
+    };
+
     view! {
-        <div class="w-full max-w-[min(96vh,1100px)] aspect-square">
+        <div class="relative w-full max-w-[min(96vh,1100px)] aspect-square">
+            <div class="absolute top-4 left-4 z-10 flex gap-2">
+                <button on:click=move |_| ctx.zoom_level.set((ctx.zoom_level.get() * 1.2).min(5.0)) class="px-3 py-1 bg-zinc-800 text-white rounded">"+"</button>
+                <button on:click=move |_| ctx.zoom_level.set((ctx.zoom_level.get() / 1.2).max(1.0)) class="px-3 py-1 bg-zinc-800 text-white rounded">"-"</button>
+                <button on:click=move |_| { ctx.zoom_level.set(1.0); ctx.view_center.set((SIZE/2.0, SIZE/2.0)) } class="px-3 py-1 bg-zinc-800 text-white rounded">"Reset"</button>
+            </div>
             <svg
-                viewBox=format!("0 0 {SIZE} {SIZE}")
+                viewBox=vb
                 class="w-full h-full select-none"
                 xmlns="http://www.w3.org/2000/svg"
             >

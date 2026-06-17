@@ -21,7 +21,7 @@ pub enum ClientMsg {
     Join  { #[serde(rename = "displayName")] display_name: String },
     Leave,
     Ready { value: bool },
-    Roll,
+    Roll { #[serde(skip_serializing_if = "Option::is_none")] dice: Option<[u8; 2]> },
     Buy,
     Skip,
     EndTurn,

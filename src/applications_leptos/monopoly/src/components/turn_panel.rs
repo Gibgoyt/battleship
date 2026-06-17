@@ -3,6 +3,7 @@ use leptos::*;
 use crate::components::app::{AppCtx, ConnHandle};
 use crate::tiles::{tile_at, TileKind};
 use crate::ws::ClientMsg;
+use js_sys::Math;
 
 #[component]
 pub fn TurnPanel() -> impl IntoView {
@@ -45,7 +46,14 @@ pub fn TurnPanel() -> impl IntoView {
         })
     });
 
-    let send_roll    = { let s = send.clone(); move |_| s(ClientMsg::Roll) };
+    let send_roll    = {
+        let s = send.clone();
+        move |_| {
+            let d1 = (Math::random() * 6.0).floor() as u8 + 1;
+            let d2 = (Math::random() * 6.0).floor() as u8 + 1;
+            s(ClientMsg::Roll { dice: Some([d1, d2]) })
+        }
+    };
     let send_buy     = { let s = send.clone(); move |_| s(ClientMsg::Buy) };
     let send_skip    = { let s = send.clone(); move |_| s(ClientMsg::Skip) };
     let send_endturn = { let s = send.clone(); move |_| s(ClientMsg::EndTurn) };

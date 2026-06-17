@@ -21,6 +21,8 @@ pub struct AppCtx {
     pub my_seat:  RwSignal<Option<u32>>,
     pub conn_status: RwSignal<ConnStatus>,
     pub toast: RwSignal<Option<Toast>>,
+    pub zoom_level: RwSignal<f32>,
+    pub view_center: RwSignal<(f32, f32)>,
 }
 
 #[derive(Clone)]
@@ -32,7 +34,9 @@ pub fn AppShell() -> impl IntoView {
     let my_seat = create_rw_signal::<Option<u32>>(None);
     let conn_status = create_rw_signal(ConnStatus::Closed);
     let toast = create_rw_signal::<Option<Toast>>(None);
-    provide_context(AppCtx { snapshot, my_seat, conn_status, toast });
+    let zoom_level = create_rw_signal(1.0f32);
+    let view_center = create_rw_signal((500.0f32, 500.0f32)); // Assuming SIZE=1000 from board.rs?
+    provide_context(AppCtx { snapshot, my_seat, conn_status, toast, zoom_level, view_center });
 
     let conn_holder: RwSignal<Option<ConnHandle>> = create_rw_signal(None);
     provide_context(conn_holder);

@@ -253,7 +253,7 @@ export class MonopolyGameDO extends DurableObject {
         case 'join':        return this._handleJoin(ws, msg);
         case 'leave':       return this._handleLeave(ws, me);
         case 'ready':       return this._handleReady(ws, me, !!msg.value);
-        case 'roll':        return this._handleRoll(ws, me);
+        case 'roll':        return this._handleRoll(ws, me, msg);
         case 'buy':         return this._handleBuy(ws, me);
         case 'skip':        return this._handleSkip(ws, me);
         case 'endTurn':     return this._handleEndTurn(ws, me);
@@ -354,13 +354,13 @@ export class MonopolyGameDO extends DurableObject {
     this._broadcastState();
   }
 
-  _handleRoll(ws, me) {
+  _handleRoll(ws, me, msg) {
     const g = this._game;
     if (g.phase !== PHASE_PLAYING) return;
     if (g.turn.currentSeat !== me?.seat) return ws.send(JSON.stringify({ t: 'error', message: "Not your turn" }));
     if (g.turn.awaiting !== 'roll') return ws.send(JSON.stringify({ t: 'error', message: 'Already rolled — resolve current action' }));
 
-    const dice = roll2d6();
+    const dice = msg.dice || roll2d6();
     const isDouble = dice[0] === dice[1];
     const sum = dice[0] + dice[1];
 
