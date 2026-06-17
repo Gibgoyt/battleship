@@ -24,8 +24,6 @@ pub struct AppCtx {
     pub my_seat:  RwSignal<Option<u32>>,
     pub conn_status: RwSignal<ConnStatus>,
     pub toast: RwSignal<Option<Toast>>,
-    pub zoom_level: RwSignal<f32>,
-    pub view_center: RwSignal<(f32, f32)>,
     pub view_mode: RwSignal<ViewMode>,
 }
 
@@ -38,10 +36,8 @@ pub fn AppShell() -> impl IntoView {
     let my_seat = create_rw_signal::<Option<u32>>(None);
     let conn_status = create_rw_signal(ConnStatus::Closed);
     let toast = create_rw_signal::<Option<Toast>>(None);
-    let zoom_level = create_rw_signal(1.0f32);
-    let view_center = create_rw_signal((500.0f32, 500.0f32));
     let view_mode = create_rw_signal(ViewMode::Full);
-    provide_context(AppCtx { snapshot, my_seat, conn_status, toast, zoom_level, view_center, view_mode });
+    provide_context(AppCtx { snapshot, my_seat, conn_status, toast, view_mode });
 
     let conn_holder: RwSignal<Option<ConnHandle>> = create_rw_signal(None);
     provide_context(conn_holder);
@@ -167,14 +163,14 @@ fn PhaseRouter() -> impl IntoView {
     });
 
     view! {
-        <main class="flex-1 flex flex-col lg:flex-row gap-4 p-4">
+        <main class="flex-1 flex flex-col lg:flex-row gap-2 p-2">
             {move || match phase.get().as_str() {
                 "lobby"    => view! { <LobbyView/> }.into_view(),
                 "playing"  => view! {
-                    <div class="flex-1 min-w-0">
+                    <div class="flex-1 min-w-0 h-[calc(100vh-3.25rem)]">
                         <BoardContainer/>
                     </div>
-                    <aside class="lg:w-96 flex flex-col gap-4">
+                    <aside class="lg:w-80 flex flex-col gap-3">
                         <Sidebar/>
                         <TurnPanel/>
                     </aside>
