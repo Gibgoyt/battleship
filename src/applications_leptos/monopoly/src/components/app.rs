@@ -170,7 +170,7 @@ fn PhaseRouter() -> impl IntoView {
                     <div class="flex-1 min-w-0 h-[calc(100vh-3.25rem)]">
                         <BoardContainer/>
                     </div>
-                    <aside class="lg:w-80 flex flex-col gap-3">
+                    <aside class="lg:w-[clamp(18rem,22vw,22rem)] flex flex-col gap-3 lg:max-h-[calc(100vh-3.25rem)] lg:overflow-y-auto">
                         <Sidebar/>
                         <TurnPanel/>
                     </aside>

@@ -73,3 +73,26 @@ pub fn corner_tile_size() -> (f32, f32) {
     let s = CORNER_HALF * 2.0;
     (s, s)
 }
+
+/// Bisector angle (deg) of the two hex sides meeting at vertex `side`.
+/// Used to orient a trapezoidal corner block so it visually separates the
+/// two adjacent sides.
+pub fn corner_rotation(side: usize) -> f32 {
+    let vs = hex_vertices();
+    let v_a = vs[side];
+    let v_b_prev = vs[(side + 5) % 6];           // previous vertex
+    let v_b_next = vs[(side + 1) % 6];           // next vertex
+    let angle_into = (v_a.1 - v_b_prev.1).atan2(v_a.0 - v_b_prev.0).to_degrees();
+    let angle_out  = (v_b_next.1 - v_a.1).atan2(v_b_next.0 - v_a.0).to_degrees();
+    // Average, taking shortest arc.
+    let mut diff = angle_out - angle_into;
+    if diff > 180.0  { diff -= 360.0; }
+    if diff < -180.0 { diff += 360.0; }
+    angle_into + diff / 2.0
+}
+
+/// Larger corner block used as a side-separator trapezoid. The bounding box
+/// is rotated to the bisector angle; clip-path turns it into a trapezoid.
+pub fn corner_large_size() -> (f32, f32) {
+    (130.0, 130.0)
+}
