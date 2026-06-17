@@ -14,7 +14,8 @@ const httpsBase = isConfigured() ? `https://${MONOPOLY_WORKER_HOST}` : '';
   <title>Monopoly — Reset</title>
   <style>
     html, body { background: #0b0f17; color: #e5e7eb; font-family: ui-sans-serif, system-ui, sans-serif; }
-    body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    body { margin: 0; }
+    .reset-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
     .card { width: 100%; max-width: 28rem; background: #18181b; border: 1px solid #3f3f46; border-radius: 12px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
     h1 { margin: 0 0 8px; font-size: 1.5rem; color: #fafafa; }
     .warn { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.4); color: #fcd34d; padding: 12px; border-radius: 8px; font-size: 0.9rem; margin: 16px 0; line-height: 1.4; }
@@ -32,6 +33,7 @@ const httpsBase = isConfigured() ? `https://${MONOPOLY_WORKER_HOST}` : '';
   </style>
 </head>
 <body>
+  <div class="reset-page">
   <div class="card">
     <h1>Reset Monopoly</h1>
     <p style="color:#a1a1aa;font-size:0.9rem;margin:0;">
@@ -56,6 +58,7 @@ const httpsBase = isConfigured() ? `https://${MONOPOLY_WORKER_HOST}` : '';
       <div id="msg"></div>
     </form>
     <a class="back" href="/monopoly">&larr; Back to game</a>
+  </div>
   </div>
 
   <script is:inline define:vars={{ httpsBase }}>
