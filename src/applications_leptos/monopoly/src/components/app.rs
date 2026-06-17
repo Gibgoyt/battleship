@@ -2,7 +2,7 @@ use leptos::*;
 use std::rc::Rc;
 use wasm_bindgen::JsCast;
 
-use crate::components::hex_board::HexBoard;
+use crate::components::hex_board::BoardContainer;
 use crate::components::lobby::LobbyView;
 use crate::components::login::Login;
 use crate::components::sidebar::Sidebar;
@@ -15,6 +15,9 @@ const SEAT_TOKEN_KEY: &str = "mp_seat_token";
 
 /// Top-level signals we share with every sub-component. Wrapped in a context
 /// for ergonomic access — same pattern as the CUDA app's NavOpen.
+#[derive(Clone, Copy, PartialEq)]
+pub enum ViewMode { Full, Row }
+
 #[derive(Clone, Copy)]
 pub struct AppCtx {
     pub snapshot: RwSignal<Option<GameSnapshot>>,
@@ -23,6 +26,7 @@ pub struct AppCtx {
     pub toast: RwSignal<Option<Toast>>,
     pub zoom_level: RwSignal<f32>,
     pub view_center: RwSignal<(f32, f32)>,
+    pub view_mode: RwSignal<ViewMode>,
 }
 
 #[derive(Clone)]
@@ -35,8 +39,9 @@ pub fn AppShell() -> impl IntoView {
     let conn_status = create_rw_signal(ConnStatus::Closed);
     let toast = create_rw_signal::<Option<Toast>>(None);
     let zoom_level = create_rw_signal(1.0f32);
-    let view_center = create_rw_signal((500.0f32, 500.0f32)); // Assuming SIZE=1000 from board.rs?
-    provide_context(AppCtx { snapshot, my_seat, conn_status, toast, zoom_level, view_center });
+    let view_center = create_rw_signal((500.0f32, 500.0f32));
+    let view_mode = create_rw_signal(ViewMode::Full);
+    provide_context(AppCtx { snapshot, my_seat, conn_status, toast, zoom_level, view_center, view_mode });
 
     let conn_holder: RwSignal<Option<ConnHandle>> = create_rw_signal(None);
     provide_context(conn_holder);
@@ -166,8 +171,8 @@ fn PhaseRouter() -> impl IntoView {
             {move || match phase.get().as_str() {
                 "lobby"    => view! { <LobbyView/> }.into_view(),
                 "playing"  => view! {
-                    <div class="flex-1 min-w-0 grid place-items-center">
-                        <HexBoard/>
+                    <div class="flex-1 min-w-0">
+                        <BoardContainer/>
                     </div>
                     <aside class="lg:w-96 flex flex-col gap-4">
                         <Sidebar/>

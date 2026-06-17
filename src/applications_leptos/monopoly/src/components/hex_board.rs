@@ -1,12 +1,29 @@
 use leptos::*;
 
 use crate::board::{corner_tile_size, side_tile_size, tile_position, SIZE};
-use crate::components::app::AppCtx;
+use crate::components::app::{AppCtx, ViewMode};
 use crate::state::Player;
 use crate::tiles::{tile_at, TileKind, N_TILES};
 
 #[component]
-pub fn HexBoard() -> impl IntoView {
+pub fn BoardContainer() -> impl IntoView {
+    let ctx = use_context::<AppCtx>().expect("app ctx");
+    view! {
+        <div class="relative w-full h-full">
+             <div class="absolute top-4 left-4 z-10 flex gap-2">
+                <button on:click=move |_| ctx.view_mode.set(ViewMode::Full) class="px-3 py-1 bg-zinc-800 text-white rounded">"Full View"</button>
+                <button on:click=move |_| ctx.view_mode.set(ViewMode::Row) class="px-3 py-1 bg-zinc-800 text-white rounded">"Row View"</button>
+            </div>
+            {move || match ctx.view_mode.get() {
+                ViewMode::Full => view! { <FullBoard/> }.into_view(),
+                ViewMode::Row  => view! { <RowBoard/> }.into_view(),
+            }}
+        </div>
+    }
+}
+
+#[component]
+fn FullBoard() -> impl IntoView {
     let ctx = use_context::<AppCtx>().expect("app ctx");
 
     // Effect to focus on current player
@@ -19,7 +36,6 @@ pub fn HexBoard() -> impl IntoView {
                 if let Some(p) = player {
                     let (pos, _, _) = crate::board::tile_position(p.position);
                     ctx.view_center.set(pos);
-                    // ctx.zoom_level.set(2.0); // Optional: automatically zoom when it's player's turn?
                 }
             }
         }
@@ -35,35 +51,57 @@ pub fn HexBoard() -> impl IntoView {
     };
 
     view! {
-        <div class="relative w-full max-w-[min(96vh,1100px)] aspect-square">
-            <div class="absolute top-4 left-4 z-10 flex gap-2">
-                <button on:click=move |_| ctx.zoom_level.set((ctx.zoom_level.get() * 1.2).min(5.0)) class="px-3 py-1 bg-zinc-800 text-white rounded">"+"</button>
-                <button on:click=move |_| ctx.zoom_level.set((ctx.zoom_level.get() / 1.2).max(1.0)) class="px-3 py-1 bg-zinc-800 text-white rounded">"-"</button>
-                <button on:click=move |_| { ctx.zoom_level.set(1.0); ctx.view_center.set((SIZE/2.0, SIZE/2.0)) } class="px-3 py-1 bg-zinc-800 text-white rounded">"Reset"</button>
+        <div class="w-full h-full grid place-items-center">
+            <div class="relative w-full max-w-[min(96vh,1100px)] aspect-square">
+                <div class="absolute top-4 right-4 z-10 flex gap-2">
+                    <button on:click=move |_| ctx.zoom_level.set((ctx.zoom_level.get() * 1.2).min(5.0)) class="px-3 py-1 bg-zinc-800 text-white rounded">"+"</button>
+                    <button on:click=move |_| ctx.zoom_level.set((ctx.zoom_level.get() / 1.2).max(1.0)) class="px-3 py-1 bg-zinc-800 text-white rounded">"-"</button>
+                    <button on:click=move |_| { ctx.zoom_level.set(1.0); ctx.view_center.set((SIZE/2.0, SIZE/2.0)) } class="px-3 py-1 bg-zinc-800 text-white rounded">"Reset"</button>
+                </div>
+                <svg
+                    viewBox=vb
+                    class="w-full h-full select-none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <defs>
+                        <filter id="tile-shadow" x="-10%" y="-10%" width="120%" height="120%">
+                            <feDropShadow dx="0" dy="1" stdDeviation="0.8" flood-color="black" flood-opacity="0.35"/>
+                        </filter>
+                    </defs>
+
+                    <BoardBackground/>
+
+                    {(0..N_TILES).map(|i| view! { <TileShape index=i/> }).collect_view()}
+
+                    {move || {
+                        let snap = ctx.snapshot.get();
+                        let players = snap.map(|s| s.players).unwrap_or_default();
+                        players.into_iter().enumerate().map(|(i, p)| view! { <PlayerToken player=p stack_index=i as u32/> }).collect_view()
+                    }}
+                </svg>
             </div>
-            <svg
-                viewBox=vb
-                class="w-full h-full select-none"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <defs>
-                    // Outer hex outline, decorative.
-                    <filter id="tile-shadow" x="-10%" y="-10%" width="120%" height="120%">
-                        <feDropShadow dx="0" dy="1" stdDeviation="0.8" flood-color="black" flood-opacity="0.35"/>
-                    </filter>
-                </defs>
+        </div>
+    }
+}
 
-                <BoardBackground/>
-
-                {(0..N_TILES).map(|i| view! { <TileShape index=i/> }).collect_view()}
-
-                // Player tokens are rendered after tiles so they sit on top.
-                {move || {
-                    let snap = ctx.snapshot.get();
-                    let players = snap.map(|s| s.players).unwrap_or_default();
-                    players.into_iter().enumerate().map(|(i, p)| view! { <PlayerToken player=p stack_index=i as u32/> }).collect_view()
-                }}
-            </svg>
+#[component]
+fn RowBoard() -> impl IntoView {
+    let ctx = use_context::<AppCtx>().expect("app ctx");
+    
+    // Simple horizontal layout: 72 tiles side by side
+    view! {
+        <div class="w-full h-full overflow-x-auto flex items-center p-4 bg-zinc-900">
+            <div class="flex gap-2">
+                {(0..N_TILES).map(|i| {
+                    let t = tile_at(i);
+                    view! {
+                        <div class="w-32 h-48 border border-zinc-700 rounded p-2 flex flex-col justify-between bg-zinc-800">
+                            <div class="text-xs font-bold text-zinc-300">{t.name}</div>
+                            <div class="text-amber-300 font-mono text-sm">{format!("${}", t.price)}</div>
+                        </div>
+                    }
+                }).collect_view()}
+            </div>
         </div>
     }
 }
