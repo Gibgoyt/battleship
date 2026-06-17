@@ -6,7 +6,7 @@
 //
 // Until you set it, the WASM app shows a friendly "worker not configured"
 // banner instead of trying to connect.
-export const MONOPOLY_WORKER_HOST = 'PLACEHOLDER.workers.dev';
+export const MONOPOLY_WORKER_HOST = 'battleship.ahmedmoti767.workers.dev';
 
 export function workerHttpsBase(): string {
   return `https://${MONOPOLY_WORKER_HOST}`;
