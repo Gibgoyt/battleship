@@ -388,7 +388,7 @@ class MonopolyGameDO extends DurableObject {
     const owns = this.sql.exec('SELECT tile_index, owner_seat FROM ownership').toArray();
     for (const r of owns) game.ownership[r.tile_index] = r.owner_seat;
 
-    const events = this.sql.exec('SELECT ts, kind, payload_json FROM events ORDER BY id DESC LIMIT ?').bind(EVENT_LOG_CAP).toArray();
+    const events = this.sql.exec('SELECT ts, kind, payload_json FROM events ORDER BY id DESC LIMIT ?', EVENT_LOG_CAP).toArray();
     game.log = events.reverse().map((e) => ({
       ts: e.ts,
       kind: e.kind,
