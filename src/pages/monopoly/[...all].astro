@@ -1,0 +1,67 @@
+---
+import 'src/styles/global.css'
+import { MONOPOLY_WORKER_HOST, isConfigured } from 'src/lib/monopoly/config'
+
+/**
+ * MONOPOLY — HEXAGONAL 72-TILE BOARD
+ *
+ * Single-page Leptos (Rust/WASM) application. All live game state lives in
+ * a Cloudflare Durable Object hosted by the `monopoly-game` worker (see
+ * workers/monopoly/monopoly-game/). The browser opens one WebSocket
+ * directly to that worker.
+ *
+ * - /monopoly         lobby + game (same WASM, internal routing)
+ * - /monopoly/reset   password-gated admin reset (see ./reset/index.astro)
+ *
+ * No server-side rendering: the page only ships the WASM loader plus a
+ * window-injected pointer to the worker's WSS URL.
+ */
+
+export const prerender = false;
+
+const wssBase = isConfigured() ? `wss://${MONOPOLY_WORKER_HOST}` : '';
+---
+<!DOCTYPE html>
+<html lang="en" class="h-full dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Monopoly — Hexagonal (72 tiles)</title>
+  <style>
+    html, body { background: #09090b; color: #e5e7eb; }
+    body { margin: 0; min-height: 100vh; font-family: ui-sans-serif, system-ui, sans-serif; }
+  </style>
+</head>
+<body class="h-full">
+  <div id="wasm-root" class="contents"></div>
+
+  <script type="module" define:vars={{ wssBase }}>
+    // Make the worker URL available to the Rust WASM app.
+    window.__MONOPOLY_WS_URL = wssBase;
+
+    try {
+      const mod = await import('/wasm/monopoly/monopoly_wasm_app.js');
+      await mod.default('/wasm/monopoly/monopoly_wasm_app_bg.wasm');
+      mod.mount_monopoly_app();
+    } catch (err) {
+      console.error('Failed to load Monopoly WASM app:', err);
+      const root = document.getElementById('wasm-root');
+      if (root) {
+        root.innerHTML = `
+          <div style="min-height:100vh;display:grid;place-items:center;padding:2rem;">
+            <div style="max-width:36rem;text-align:center;">
+              <h1 style="color:#f87171;font-size:1.8rem;font-weight:700;margin-bottom:1rem;">Failed to load Monopoly WASM app</h1>
+              <p style="color:#a1a1aa;margin-bottom:1rem;">Build the Leptos sub-app from the repo root:</p>
+              <code style="background:#27272a;color:#34d399;padding:0.6rem 1rem;border-radius:0.5rem;font-family:ui-monospace,monospace;">
+                ./build.sh ./src/applications_leptos/monopoly/
+              </code>
+              <p style="color:#71717a;margin-top:1rem;font-size:0.85rem;">${err.message}</p>
+            </div>
+          </div>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>

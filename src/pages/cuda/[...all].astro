@@ -1,0 +1,116 @@
+---
+import 'src/styles/global.css'
+import { allCudaPaths } from 'src/applications_leptos/cuda/chapters_for_astro'
+
+/**
+ * CUDA WALKTHROUGH + LEETGPU - NO AUTHENTICATION REQUIRED
+ *
+ * Catch-all route ([...all].astro) that:
+ * 1. Handles ALL routes under /cuda/*
+ *    - /cuda                                 first walkthrough chapter
+ *    - /cuda/<chapter-slug>                  walkthrough chapter
+ *    - /cuda/leetgpu                         LeetGPU tile browser
+ *    - /cuda/leetgpu/<problem-slug>          individual LeetGPU solution
+ * 2. Loads a Leptos (Rust/WASM) single-page application
+ * 3. NO authentication - publicly accessible & indexable
+ *
+ * The Leptos app handles its own routing internally via leptos_router (CSR /
+ * BrowserIntegration). Unknown sub-paths fall back to the first chapter,
+ * matching the behavior of the sibling guides.
+ *
+ * Syntax highlighting:
+ *   highlight.js is loaded from CDN below and applied to every <pre><code>
+ *   block on initial mount. The Leptos app also pokes window.__rehighlight
+ *   after every client-side navigation so newly-rendered code blocks get
+ *   tokenized too.
+ */
+
+export const prerender = true
+
+export async function getStaticPaths() {
+  return [
+    { params: { all: undefined } },
+    ...allCudaPaths.map((slug) => ({ params: { all: slug } })),
+  ]
+}
+---
+<!DOCTYPE html>
+<html lang="en" class="h-full dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>CUDA — A Practical Walkthrough + LeetGPU Solutions</title>
+  <meta name="title" content="CUDA — A Practical Walkthrough + LeetGPU Solutions" />
+  <meta
+    name="description"
+    content="A practical CUDA guide: dim3/int3 thread indexing, memory spaces (__shared__, local, __global__, __constant__), kernel launch async semantics and stream synchronization, host-side cudaMalloc/cudaMemcpy/cudaFree — plus a growing collection of fully-annotated LeetGPU solutions starting with FlashAttention-2 multi-head self-attention."
+  />
+
+  <meta name="robots" content="index, follow" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="CUDA — A Practical Walkthrough + LeetGPU Solutions" />
+  <meta
+    property="og:description"
+    content="Conceptual CUDA chapters in the sidebar; thoroughly-annotated LeetGPU .cu solutions under a separate tile browser."
+  />
+
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="color-scheme" content="dark" />
+
+  <!-- highlight.js — dark theme + core + C++ language pack. -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css"
+  />
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js" is:inline></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/cpp.min.js" is:inline></script>
+</head>
+<body class="h-full overflow-x-hidden bg-zinc-950 text-white">
+  <div id="wasm-root" class="contents"></div>
+
+  <script type="module">
+    import init, { mount_cuda_app } from '/wasm/cuda/cuda_wasm_app.js'
+
+    // Re-tokenize every <pre><code> on the page. The Leptos app exposes
+    // this on window so it can call us after client-side navigation.
+    function rehighlight() {
+      if (typeof window === 'undefined' || !window.hljs) return
+      document.querySelectorAll('pre code').forEach((el) => {
+        // remove the "highlighted" marker so hljs re-processes after
+        // route changes that swapped the code text.
+        el.removeAttribute('data-highlighted')
+        try {
+          window.hljs.highlightElement(el)
+        } catch (e) { /* idempotent */ }
+      })
+    }
+    window.__rehighlight = rehighlight
+
+    try {
+      await init('/wasm/cuda/cuda_wasm_app_bg.wasm')
+      mount_cuda_app()
+      // First-paint highlight after mount.
+      requestAnimationFrame(rehighlight)
+    } catch (err) {
+      console.error('Failed to load CUDA WASM app:', err)
+      const root = document.getElementById('wasm-root')
+      if (root) {
+        root.innerHTML = `
+          <div class="min-h-screen flex items-center justify-center p-8">
+            <div class="max-w-xl text-center">
+              <h1 class="text-3xl font-bold text-red-400 mb-4">Failed to load WASM app</h1>
+              <p class="text-zinc-400 mb-4">Build the Leptos sub-app from the repo root:</p>
+              <code class="bg-zinc-800 px-4 py-2 rounded text-emerald-300 font-mono text-sm">
+                ./build.sh ./src/applications_leptos/cuda/
+              </code>
+              <p class="text-zinc-500 mt-4 text-sm">${err.message}</p>
+            </div>
+          </div>
+        `
+      }
+    }
+  </script>
+</body>
+</html>

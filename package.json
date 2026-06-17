@@ -20,7 +20,10 @@
     "test:coverage": "vitest run --coverage",
     "wrangler-dev": "npx wrangler pages dev ./dist --ip 0.0.0.0 --port 3001",
     "deploy": "npm run build && wrangler pages deploy dist",
-    "deploy:preview": "npm run build && wrangler pages deploy dist --branch preview"
+    "deploy:preview": "npm run build && wrangler pages deploy dist --branch preview",
+
+    "build:monopoly-worker": "cd workers/monopoly/monopoly-game && npm install",
+    "deploy:monopoly-worker": "cd workers/monopoly/monopoly-game && npx wrangler deploy"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",

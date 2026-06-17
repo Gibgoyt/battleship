@@ -1,0 +1,45 @@
+[package]
+name = "monopoly-wasm-app"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+leptos = { version = "0.6", features = ["csr"] }
+leptos_router = { version = "0.6", features = ["csr"] }
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+console_error_panic_hook = "0.1"
+js-sys = "0.3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde-wasm-bindgen = "0.6"
+gloo-timers = { version = "0.3", features = ["futures"] }
+
+[dependencies.web-sys]
+version = "0.3"
+features = [
+  "Window",
+  "Document",
+  "Element",
+  "HtmlElement",
+  "HtmlInputElement",
+  "Storage",
+  "WebSocket",
+  "MessageEvent",
+  "CloseEvent",
+  "BinaryType",
+  "Event",
+  "EventTarget",
+  "Location",
+  "SubtleCrypto",
+  "Crypto",
+  "DomTokenList",
+]
+
+[profile.release]
+opt-level = 'z'
+lto = true
+codegen-units = 1
