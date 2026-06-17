@@ -27,3 +27,5 @@ new_sqlite_classes = ["MonopolyGameDO"]
 binding = "MONOPOLY_DB"
 database_name = "battleship"
 database_id = "bd19ac29-e91b-478f-b69c-5f3d2d017fbc"
+[observability]
+enabled = true
