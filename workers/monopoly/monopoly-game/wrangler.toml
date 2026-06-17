@@ -1,0 +1,29 @@
+name = "monopoly-game"
+main = "src/index.js"
+compatibility_date = "2025-07-20"
+
+# Allow the Astro Pages frontend (and the /monopoly/reset admin page) to reach
+# this worker from a browser. The worker still validates X-BS-Pass on every
+# request, so CORS only affects which origins the browser will let JS read.
+[vars]
+# Comma-separated list of origins permitted to call this worker.
+# Adjust as needed for staging/preview URLs.
+ALLOWED_ORIGINS = "https://ai-docs.pages.dev,http://localhost:2084,http://localhost:4321"
+
+# The Durable Object that holds the single live monopoly game's state.
+[[durable_objects.bindings]]
+name = "MONOPOLY_GAME"
+class_name = "MonopolyGameDO"
+
+# SQLite-backed DO (new class — uses the modern storage backend).
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["MonopolyGameDO"]
+
+# Shared D1 with the rest of this repo (battleship etc.). We only touch
+# tables prefixed `monopoly_` — D1/SQLite has no schemas, so prefix is the
+# isolation strategy. database_id matches the root wrangler.toml.
+[[d1_databases]]
+binding = "MONOPOLY_DB"
+database_name = "battleship"
+database_id = "bd19ac29-e91b-478f-b69c-5f3d2d017fbc"
